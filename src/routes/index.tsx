@@ -71,7 +71,32 @@ function Index() {
         </header>
 
         <div className="mb-6 inline-flex rounded-md border bg-muted p-1">
-          {[4, 5].map((n) => (
+          {[4, 5, 6].map((n) => (
+            <button
+              key={n}
+              onClick={() => switchLength(n as WordLength)}
+              className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                length === n
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {n} letters
+            </button>
+          ))}
+        </div>
+
+        <div className="mb-4 flex flex-wrap gap-3 text-sm">
+          {length === 4 ? (
+            <>
+              <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Weaver</a>
+              <a href="https://flipple.clevergoat.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Flipple</a>
+              <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Poople</a>
+            </>
+          ) : length === 5 ? (
+            <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Weaver</a>
+          ) : null}
+        </div>
             <button
               key={n}
               onClick={() => switchLength(n as WordLength)}
