@@ -1,19 +1,31 @@
-import graph from "@/data/wordLadder4.json";
+import graph4 from "@/data/wordLadder4.json";
+import graph5 from "@/data/wordLadder5.json";
 
 type Graph = Record<string, string[]>;
-const G = graph as Graph;
 
-export function isValidWord(w: string): boolean {
+const GRAPHS: Record<number, Graph> = {
+  4: graph4 as Graph,
+  5: graph5 as Graph,
+};
+
+export type WordLength = 4 | 5;
+
+export function isValidWord(w: string, length: WordLength): boolean {
+  const G = GRAPHS[length];
   return Object.prototype.hasOwnProperty.call(G, w.toUpperCase());
 }
 
-export function findAllShortestPaths(start: string, goal: string): string[][] {
+export function findAllShortestPaths(
+  start: string,
+  goal: string,
+  length: WordLength,
+): string[][] {
+  const G = GRAPHS[length];
   const s = start.toUpperCase();
   const g = goal.toUpperCase();
-  if (!isValidWord(s) || !isValidWord(g)) return [];
+  if (!isValidWord(s, length) || !isValidWord(g, length)) return [];
   if (s === g) return [[s]];
 
-  // BFS level-by-level tracking parents for all shortest paths
   const dist = new Map<string, number>();
   const parents = new Map<string, string[]>();
   dist.set(s, 0);
@@ -47,7 +59,6 @@ export function findAllShortestPaths(start: string, goal: string): string[][] {
 
   if (!found) return [];
 
-  // Reconstruct all paths from g back to s
   const paths: string[][] = [];
   const build = (node: string, path: string[]) => {
     if (node === s) {
