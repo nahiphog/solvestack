@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { findAllShortestPaths, isValidWord } from "@/lib/wordLadder";
+import { findAllShortestPaths, isValidWord, type WordLength } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -8,56 +8,88 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Word Ladder Solver" },
-      { name: "description", content: "Find all shortest word ladders between two 4-letter words." },
+      { name: "description", content: "Find all shortest word ladders between two words." },
     ],
   }),
   component: Index,
 });
 
 function Index() {
+  const [length, setLength] = useState<WordLength>(4);
   const [start, setStart] = useState("DARK");
   const [goal, setGoal] = useState("POOP");
   const [paths, setPaths] = useState<string[][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
 
+  const switchLength = (n: WordLength) => {
+    setLength(n);
+    setPaths(null);
+    setError(null);
+    if (n === 4) {
+      setStart("DARK");
+      setGoal("POOP");
+    } else {
+      setStart("FLOWN");
+      setGoal("BRAID");
+    }
+  };
+
   const solve = () => {
     setError(null);
     setPaths(null);
     const s = start.trim().toUpperCase();
     const g = goal.trim().toUpperCase();
-    if (s.length !== 4 || g.length !== 4) {
-      setError("Both words must be exactly 4 letters.");
+    if (s.length !== length || g.length !== length) {
+      setError(`Both words must be exactly ${length} letters.`);
       return;
     }
-    if (!isValidWord(s)) return setError(`"${s}" is not in the dictionary.`);
-    if (!isValidWord(g)) return setError(`"${g}" is not in the dictionary.`);
+    if (!isValidWord(s, length)) return setError(`"${s}" is not in the dictionary.`);
+    if (!isValidWord(g, length)) return setError(`"${g}" is not in the dictionary.`);
     setSolving(true);
     setTimeout(() => {
-      const result = findAllShortestPaths(s, g);
+      const result = findAllShortestPaths(s, g, length);
       if (result.length === 0) setError("No path exists between these words.");
       else setPaths(result);
       setSolving(false);
     }, 0);
   };
 
+  const clamp = (v: string) => v.toUpperCase().replace(/[^A-Z]/g, "").slice(0, length);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-3xl px-6 py-16">
-        <header className="mb-10">
+        <header className="mb-8">
           <h1 className="text-4xl font-bold tracking-tight">Word Ladder Solver</h1>
           <p className="mt-2 text-muted-foreground">
-            Enter two 4-letter words. Get every shortest ladder between them — one letter change at a time.
+            Enter two words of the same length. Get every shortest ladder — one letter change at a time.
           </p>
         </header>
+
+        <div className="mb-6 inline-flex rounded-md border bg-muted p-1">
+          {[4, 5].map((n) => (
+            <button
+              key={n}
+              onClick={() => switchLength(n as WordLength)}
+              className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                length === n
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {n} letters
+            </button>
+          ))}
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
           <div>
             <label className="mb-1 block text-sm font-medium">Start</label>
             <Input
               value={start}
-              onChange={(e) => setStart(e.target.value.toUpperCase().slice(0, 4))}
-              maxLength={4}
+              onChange={(e) => setStart(clamp(e.target.value))}
+              maxLength={length}
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
@@ -65,8 +97,8 @@ function Index() {
             <label className="mb-1 block text-sm font-medium">Goal</label>
             <Input
               value={goal}
-              onChange={(e) => setGoal(e.target.value.toUpperCase().slice(0, 4))}
-              maxLength={4}
+              onChange={(e) => setGoal(clamp(e.target.value))}
+              maxLength={length}
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
