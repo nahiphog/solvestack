@@ -1,14 +1,16 @@
 import graph4 from "@/data/wordLadder4.json";
 import graph5 from "@/data/wordLadder5.json";
+import graph6 from "@/data/wordLadder6.json";
 
 type Graph = Record<string, string[]>;
 
 const GRAPHS: Record<number, Graph> = {
   4: graph4 as Graph,
   5: graph5 as Graph,
+  6: graph6 as Graph,
 };
 
-export type WordLength = 4 | 5;
+export type WordLength = 4 | 5 | 6;
 
 export function isValidWord(w: string, length: WordLength): boolean {
   const G = GRAPHS[length];
