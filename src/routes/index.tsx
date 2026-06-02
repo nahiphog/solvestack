@@ -29,9 +29,12 @@ function Index() {
     if (n === 4) {
       setStart("DARK");
       setGoal("POOP");
-    } else {
+    } else if (n === 5) {
       setStart("FLOWN");
       setGoal("BRAID");
+    } else {
+      setStart("CRAWLS");
+      setGoal("BLAZED");
     }
   };
 
@@ -68,7 +71,7 @@ function Index() {
         </header>
 
         <div className="mb-6 inline-flex rounded-md border bg-muted p-1">
-          {[4, 5].map((n) => (
+          {[4, 5, 6].map((n) => (
             <button
               key={n}
               onClick={() => switchLength(n as WordLength)}
@@ -90,9 +93,9 @@ function Index() {
               <a href="https://flipple.clevergoat.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Flipple</a>
               <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Poople</a>
             </>
-          ) : (
+          ) : length === 5 ? (
             <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Weaver</a>
-          )}
+          ) : null}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
