@@ -83,6 +83,18 @@ function Index() {
           ))}
         </div>
 
+        <div className="mb-4 flex flex-wrap gap-3 text-sm">
+          {length === 4 ? (
+            <>
+              <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Weaver</a>
+              <a href="https://flipple.clevergoat.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Flipple</a>
+              <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Poople</a>
+            </>
+          ) : (
+            <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Weaver</a>
+          )}
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
           <div>
             <label className="mb-1 block text-sm font-medium">Start</label>
