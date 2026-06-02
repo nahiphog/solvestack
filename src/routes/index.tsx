@@ -29,9 +29,12 @@ function Index() {
     if (n === 4) {
       setStart("DARK");
       setGoal("POOP");
-    } else {
+    } else if (n === 5) {
       setStart("FLOWN");
       setGoal("BRAID");
+    } else {
+      setStart("CRAWLS");
+      setGoal("BLAZED");
     }
   };
 
