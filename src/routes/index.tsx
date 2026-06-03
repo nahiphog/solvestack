@@ -26,6 +26,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   "5": { start: "FLOWN", goal: "BRAID" },
   "6": { start: "CRAWLS", goal: "BLAZED" },
   splice: { start: "BAGEL", goal: "TOWER" },
+  weaverx: { start: "BREAK", goal: "EVEN" },
 };
 
 function Index() {
