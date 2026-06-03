@@ -1,31 +1,41 @@
 import graph4 from "@/data/wordLadder4.json";
 import graph5 from "@/data/wordLadder5.json";
 import graph6 from "@/data/wordLadder6.json";
+import graphSplice from "@/data/wordSplice.json";
 
 type Graph = Record<string, string[]>;
 
-const GRAPHS: Record<number, Graph> = {
-  4: graph4 as Graph,
-  5: graph5 as Graph,
-  6: graph6 as Graph,
+export type Mode = 4 | 5 | 6 | "splice";
+export type WordLength = Mode;
+
+const GRAPHS: Record<string, Graph> = {
+  "4": graph4 as Graph,
+  "5": graph5 as Graph,
+  "6": graph6 as Graph,
+  splice: graphSplice as Graph,
 };
 
-export type WordLength = 4 | 5 | 6;
+export const MODE_WORD_LENGTH: Record<string, number> = {
+  "4": 4,
+  "5": 5,
+  "6": 6,
+  splice: 5,
+};
 
-export function isValidWord(w: string, length: WordLength): boolean {
-  const G = GRAPHS[length];
+export function isValidWord(w: string, mode: Mode): boolean {
+  const G = GRAPHS[String(mode)];
   return Object.prototype.hasOwnProperty.call(G, w.toUpperCase());
 }
 
 export function findAllShortestPaths(
   start: string,
   goal: string,
-  length: WordLength,
+  mode: Mode,
 ): string[][] {
-  const G = GRAPHS[length];
+  const G = GRAPHS[String(mode)];
   const s = start.toUpperCase();
   const g = goal.toUpperCase();
-  if (!isValidWord(s, length) || !isValidWord(g, length)) return [];
+  if (!isValidWord(s, mode) || !isValidWord(g, mode)) return [];
   if (s === g) return [[s]];
 
   const dist = new Map<string, number>();
