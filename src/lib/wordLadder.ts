@@ -27,6 +27,19 @@ export function isValidWord(w: string, mode: Mode): boolean {
   return Object.prototype.hasOwnProperty.call(G, w.toUpperCase());
 }
 
+export function getRandomWords(mode: Mode, count = 2): string[] {
+  const G = GRAPHS[String(mode)];
+  const keys = Object.keys(G);
+  if (keys.length < count) return keys;
+  const pool = keys.slice();
+  // Fisher-Yates shuffle
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, count);
+}
+
 export function findAllShortestPaths(
   start: string,
   goal: string,
