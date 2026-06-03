@@ -181,7 +181,7 @@ function Index() {
             <Input
               value={start}
               onChange={(e) => setStart(clamp(e.target.value))}
-              maxLength={wordLength}
+              maxLength={wordLength || 12}
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
@@ -190,7 +190,7 @@ function Index() {
             <Input
               value={goal}
               onChange={(e) => setGoal(clamp(e.target.value))}
-              maxLength={wordLength}
+              maxLength={wordLength || 12}
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
