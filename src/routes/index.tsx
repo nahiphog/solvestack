@@ -26,6 +26,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   "5": { start: "FLOWN", goal: "BRAID" },
   "6": { start: "CRAWLS", goal: "BLAZED" },
   splice: { start: "BAGEL", goal: "TOWER" },
+  weaverx: { start: "BREAK", goal: "EVEN" },
 };
 
 function Index() {
@@ -52,8 +53,12 @@ function Index() {
     setPaths(null);
     const s = start.trim().toUpperCase();
     const g = goal.trim().toUpperCase();
-    if (s.length !== wordLength || g.length !== wordLength) {
+    if (wordLength > 0 && (s.length !== wordLength || g.length !== wordLength)) {
       setError(`Both words must be exactly ${wordLength} letters.`);
+      return;
+    }
+    if (wordLength === 0 && (s.length < 2 || g.length < 2)) {
+      setError(`Please enter valid words.`);
       return;
     }
     if (!isValidWord(s, mode)) return setError(`"${s}" is not in the dictionary.`);
@@ -75,7 +80,10 @@ function Index() {
     setGoal(w2);
   };
 
-  const clamp = (v: string) => v.toUpperCase().replace(/[^A-Z]/g, "").slice(0, wordLength);
+  const clamp = (v: string) => {
+    const cleaned = v.toUpperCase().replace(/[^A-Z]/g, "");
+    return wordLength > 0 ? cleaned.slice(0, wordLength) : cleaned.slice(0, 12);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -88,20 +96,50 @@ function Index() {
         </header>
 
         <div className="mb-6 inline-flex rounded-md border bg-muted p-1">
-          {MODES.map((m) => (
+          {MODES.map((m) => {
+            const isActive =
+              mode === m.id ||
+              (m.id === "splice" && mode === "weaverx");
+            return (
+              <button
+                key={String(m.id)}
+                onClick={() => switchMode(m.id)}
+                className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {(mode === "splice" || mode === "weaverx") && (
+          <div className="mb-4 inline-flex rounded-md border bg-muted p-1">
             <button
-              key={String(m.id)}
-              onClick={() => switchMode(m.id)}
-              className={`rounded px-4 py-1.5 text-sm font-medium transition ${
-                mode === m.id
+              onClick={() => switchMode("splice")}
+              className={`rounded px-3 py-1 text-xs font-medium transition ${
+                mode === "splice"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {m.label}
+              Word Splice
             </button>
-          ))}
-        </div>
+            <button
+              onClick={() => switchMode("weaverx")}
+              className={`rounded px-3 py-1 text-xs font-medium transition ${
+                mode === "weaverx"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Weaver X
+            </button>
+          </div>
+        )}
 
         <div className="mb-4 flex flex-wrap gap-3 text-sm">
           {mode === 4 && (
@@ -120,11 +158,20 @@ function Index() {
           {mode === "splice" && (
             <a href="https://wordsplice.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Splice</a>
           )}
+          {mode === "weaverx" && (
+            <a href="https://wordwormdormdork.com/weaver-x/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver X</a>
+          )}
         </div>
 
         {mode === "splice" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Chain 5-letter words where each next word begins with the last 2 or 3 letters of the previous word.
+          </p>
+        )}
+
+        {mode === "weaverx" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Each move: change one letter, add one letter, or remove one letter. Word lengths may vary.
           </p>
         )}
 
@@ -134,7 +181,7 @@ function Index() {
             <Input
               value={start}
               onChange={(e) => setStart(clamp(e.target.value))}
-              maxLength={wordLength}
+              maxLength={wordLength || 12}
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
@@ -143,7 +190,7 @@ function Index() {
             <Input
               value={goal}
               onChange={(e) => setGoal(clamp(e.target.value))}
-              maxLength={wordLength}
+              maxLength={wordLength || 12}
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
