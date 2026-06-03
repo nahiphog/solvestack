@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { findAllShortestPaths, isValidWord, MODE_WORD_LENGTH, type Mode } from "@/lib/wordLadder";
+import { findAllShortestPaths, getRandomWords, isValidWord, MODE_WORD_LENGTH, type Mode } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
