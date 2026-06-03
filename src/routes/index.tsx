@@ -53,8 +53,12 @@ function Index() {
     setPaths(null);
     const s = start.trim().toUpperCase();
     const g = goal.trim().toUpperCase();
-    if (s.length !== wordLength || g.length !== wordLength) {
+    if (wordLength > 0 && (s.length !== wordLength || g.length !== wordLength)) {
       setError(`Both words must be exactly ${wordLength} letters.`);
+      return;
+    }
+    if (wordLength === 0 && (s.length < 2 || g.length < 2)) {
+      setError(`Please enter valid words.`);
       return;
     }
     if (!isValidWord(s, mode)) return setError(`"${s}" is not in the dictionary.`);
