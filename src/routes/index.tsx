@@ -80,7 +80,10 @@ function Index() {
     setGoal(w2);
   };
 
-  const clamp = (v: string) => v.toUpperCase().replace(/[^A-Z]/g, "").slice(0, wordLength);
+  const clamp = (v: string) => {
+    const cleaned = v.toUpperCase().replace(/[^A-Z]/g, "");
+    return wordLength > 0 ? cleaned.slice(0, wordLength) : cleaned.slice(0, 12);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
