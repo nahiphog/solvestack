@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { findAllShortestPaths, isValidWord, MODE_WORD_LENGTH, type Mode } from "@/lib/wordLadder";
+import { findAllShortestPaths, getRandomWords, isValidWord, MODE_WORD_LENGTH, type Mode } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -67,6 +67,14 @@ function Index() {
     }, 0);
   };
 
+  const randomize = () => {
+    setError(null);
+    setPaths(null);
+    const [w1, w2] = getRandomWords(mode);
+    setStart(w1);
+    setGoal(w2);
+  };
+
   const clamp = (v: string) => v.toUpperCase().replace(/[^A-Z]/g, "").slice(0, wordLength);
 
   return (
@@ -120,7 +128,7 @@ function Index() {
           </p>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
           <div>
             <label className="mb-1 block text-sm font-medium">Start</label>
             <Input
@@ -139,6 +147,9 @@ function Index() {
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
+          <Button onClick={randomize} variant="outline" size="lg">
+            Randomize
+          </Button>
           <Button onClick={solve} disabled={solving} size="lg">
             {solving ? "Solving..." : "Solve"}
           </Button>
