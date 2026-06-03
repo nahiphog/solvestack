@@ -96,20 +96,50 @@ function Index() {
         </header>
 
         <div className="mb-6 inline-flex rounded-md border bg-muted p-1">
-          {MODES.map((m) => (
+          {MODES.map((m) => {
+            const isActive =
+              mode === m.id ||
+              (m.id === "splice" && mode === "weaverx");
+            return (
+              <button
+                key={String(m.id)}
+                onClick={() => switchMode(m.id)}
+                className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {(mode === "splice" || mode === "weaverx") && (
+          <div className="mb-4 inline-flex rounded-md border bg-muted p-1">
             <button
-              key={String(m.id)}
-              onClick={() => switchMode(m.id)}
-              className={`rounded px-4 py-1.5 text-sm font-medium transition ${
-                mode === m.id
+              onClick={() => switchMode("splice")}
+              className={`rounded px-3 py-1 text-xs font-medium transition ${
+                mode === "splice"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {m.label}
+              Word Splice
             </button>
-          ))}
-        </div>
+            <button
+              onClick={() => switchMode("weaverx")}
+              className={`rounded px-3 py-1 text-xs font-medium transition ${
+                mode === "weaverx"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Weaver X
+            </button>
+          </div>
+        )}
 
         <div className="mb-4 flex flex-wrap gap-3 text-sm">
           {mode === 4 && (
@@ -128,11 +158,20 @@ function Index() {
           {mode === "splice" && (
             <a href="https://wordsplice.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Splice</a>
           )}
+          {mode === "weaverx" && (
+            <a href="https://wordwormdormdork.com/weaver-x/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver X</a>
+          )}
         </div>
 
         {mode === "splice" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Chain 5-letter words where each next word begins with the last 2 or 3 letters of the previous word.
+          </p>
+        )}
+
+        {mode === "weaverx" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Each move: change one letter, add one letter, or remove one letter. Word lengths may vary.
           </p>
         )}
 
