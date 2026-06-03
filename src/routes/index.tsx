@@ -128,7 +128,7 @@ function Index() {
           </p>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
           <div>
             <label className="mb-1 block text-sm font-medium">Start</label>
             <Input
@@ -147,6 +147,9 @@ function Index() {
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
+          <Button onClick={randomize} variant="outline" size="lg">
+            Randomize
+          </Button>
           <Button onClick={solve} disabled={solving} size="lg">
             {solving ? "Solving..." : "Solve"}
           </Button>
