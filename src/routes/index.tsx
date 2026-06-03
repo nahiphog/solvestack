@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { findAllShortestPaths, isValidWord, type WordLength } from "@/lib/wordLadder";
+import { findAllShortestPaths, isValidWord, MODE_WORD_LENGTH, type Mode } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -14,28 +14,37 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+const MODES: { id: Mode; label: string }[] = [
+  { id: 4, label: "4 letters" },
+  { id: 5, label: "5 letters" },
+  { id: 6, label: "6 letters" },
+  { id: "splice", label: "Misc" },
+];
+
+const DEFAULTS: Record<string, { start: string; goal: string }> = {
+  "4": { start: "DARK", goal: "POOP" },
+  "5": { start: "FLOWN", goal: "BRAID" },
+  "6": { start: "CRAWLS", goal: "BLAZED" },
+  splice: { start: "BAGEL", goal: "TOWER" },
+};
+
 function Index() {
-  const [length, setLength] = useState<WordLength>(4);
+  const [mode, setMode] = useState<Mode>(4);
   const [start, setStart] = useState("DARK");
   const [goal, setGoal] = useState("POOP");
   const [paths, setPaths] = useState<string[][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
 
-  const switchLength = (n: WordLength) => {
-    setLength(n);
+  const wordLength = MODE_WORD_LENGTH[String(mode)];
+
+  const switchMode = (m: Mode) => {
+    setMode(m);
     setPaths(null);
     setError(null);
-    if (n === 4) {
-      setStart("DARK");
-      setGoal("POOP");
-    } else if (n === 5) {
-      setStart("FLOWN");
-      setGoal("BRAID");
-    } else {
-      setStart("CRAWLS");
-      setGoal("BLAZED");
-    }
+    const d = DEFAULTS[String(m)];
+    setStart(d.start);
+    setGoal(d.goal);
   };
 
   const solve = () => {
@@ -43,22 +52,22 @@ function Index() {
     setPaths(null);
     const s = start.trim().toUpperCase();
     const g = goal.trim().toUpperCase();
-    if (s.length !== length || g.length !== length) {
-      setError(`Both words must be exactly ${length} letters.`);
+    if (s.length !== wordLength || g.length !== wordLength) {
+      setError(`Both words must be exactly ${wordLength} letters.`);
       return;
     }
-    if (!isValidWord(s, length)) return setError(`"${s}" is not in the dictionary.`);
-    if (!isValidWord(g, length)) return setError(`"${g}" is not in the dictionary.`);
+    if (!isValidWord(s, mode)) return setError(`"${s}" is not in the dictionary.`);
+    if (!isValidWord(g, mode)) return setError(`"${g}" is not in the dictionary.`);
     setSolving(true);
     setTimeout(() => {
-      const result = findAllShortestPaths(s, g, length);
+      const result = findAllShortestPaths(s, g, mode);
       if (result.length === 0) setError("No path exists between these words.");
       else setPaths(result);
       setSolving(false);
     }, 0);
   };
 
-  const clamp = (v: string) => v.toUpperCase().replace(/[^A-Z]/g, "").slice(0, length);
+  const clamp = (v: string) => v.toUpperCase().replace(/[^A-Z]/g, "").slice(0, wordLength);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -66,39 +75,50 @@ function Index() {
         <header className="mb-8">
           <h1 className="text-4xl font-bold tracking-tight">Word Ladder Solver</h1>
           <p className="mt-2 text-muted-foreground">
-            Enter two words of the same length. Get every shortest ladder — one letter change at a time.
+            Enter two words. Get every shortest ladder between them.
           </p>
         </header>
 
         <div className="mb-6 inline-flex rounded-md border bg-muted p-1">
-          {[4, 5, 6].map((n) => (
+          {MODES.map((m) => (
             <button
-              key={n}
-              onClick={() => switchLength(n as WordLength)}
+              key={String(m.id)}
+              onClick={() => switchMode(m.id)}
               className={`rounded px-4 py-1.5 text-sm font-medium transition ${
-                length === n
+                mode === m.id
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {n} letters
+              {m.label}
             </button>
           ))}
         </div>
 
         <div className="mb-4 flex flex-wrap gap-3 text-sm">
-          {length === 4 ? (
+          {mode === 4 && (
             <>
               <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver</a>
               <a href="https://flipple.clevergoat.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Flipple</a>
               <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Poople</a>
             </>
-          ) : length === 5 ? (
+          )}
+          {mode === 5 && (
             <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver</a>
-          ) : (
+          )}
+          {mode === 6 && (
             <a href="https://onelook.com/pandergram/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Pandergram</a>
           )}
+          {mode === "splice" && (
+            <a href="https://wordsplice.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Splice</a>
+          )}
         </div>
+
+        {mode === "splice" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Chain 5-letter words where each next word begins with the last 2 or 3 letters of the previous word.
+          </p>
+        )}
 
         <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
           <div>
@@ -106,7 +126,7 @@ function Index() {
             <Input
               value={start}
               onChange={(e) => setStart(clamp(e.target.value))}
-              maxLength={length}
+              maxLength={wordLength}
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
@@ -115,7 +135,7 @@ function Index() {
             <Input
               value={goal}
               onChange={(e) => setGoal(clamp(e.target.value))}
-              maxLength={length}
+              maxLength={wordLength}
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
