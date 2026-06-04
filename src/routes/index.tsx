@@ -202,6 +202,12 @@ function Index() {
           </p>
         )}
 
+        {mode === "pivots" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter a permutation of "123456". Each move reverses 4 consecutive digits. Goal is "123456".
+          </p>
+        )}
+
         <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
           <div>
             <label className="mb-1 block text-sm font-medium">Start</label>
