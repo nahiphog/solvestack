@@ -3,10 +3,11 @@ import graph5 from "@/data/wordLadder5.json";
 import graph6 from "@/data/wordLadder6.json";
 import graphSplice from "@/data/wordSplice.json";
 import graphWeaverX from "@/data/wordWeaverX.json";
+import graphPivots from "@/data/wordPivots.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -15,6 +16,7 @@ const GRAPHS: Record<string, Graph> = {
   "6": graph6 as Graph,
   splice: graphSplice as Graph,
   weaverx: graphWeaverX as Graph,
+  pivots: graphPivots as Graph,
 };
 
 // 0 means variable length (no length validation)
@@ -24,6 +26,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   "6": 6,
   splice: 5,
   weaverx: 0,
+  pivots: 6,
 };
 
 export function isValidWord(w: string, mode: Mode): boolean {
