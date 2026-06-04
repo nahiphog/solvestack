@@ -89,9 +89,14 @@ function Index() {
   const randomize = () => {
     setError(null);
     setPaths(null);
-    const [w1, w2] = getRandomWords(mode);
-    setStart(w1);
-    setGoal(w2);
+    if (mode === "pivots") {
+      const [w1] = getRandomWords(mode);
+      setStart(w1);
+    } else {
+      const [w1, w2] = getRandomWords(mode);
+      setStart(w1);
+      setGoal(w2);
+    }
   };
 
   const clamp = (v: string) => {
