@@ -89,9 +89,14 @@ function Index() {
   const randomize = () => {
     setError(null);
     setPaths(null);
-    const [w1, w2] = getRandomWords(mode);
-    setStart(w1);
-    setGoal(w2);
+    if (mode === "pivots") {
+      const [w1] = getRandomWords(mode);
+      setStart(w1);
+    } else {
+      const [w1, w2] = getRandomWords(mode);
+      setStart(w1);
+      setGoal(w2);
+    }
   };
 
   const clamp = (v: string) => {
@@ -220,11 +225,14 @@ function Index() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Goal</label>
+            <label className="mb-1 block text-sm font-medium">
+              Goal{mode === "pivots" ? " (fixed)" : ""}
+            </label>
             <Input
               value={goal}
               onChange={(e) => setGoal(clamp(e.target.value))}
               maxLength={wordLength || 12}
+              disabled={mode === "pivots"}
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
