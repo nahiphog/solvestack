@@ -130,7 +130,7 @@ function Index() {
           })}
         </div>
 
-        {(mode === "splice" || mode === "weaverx") && (
+        {(mode === "splice" || mode === "weaverx" || mode === "pivots") && (
           <div className="mb-4 inline-flex rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("splice")}
@@ -151,6 +151,16 @@ function Index() {
               }`}
             >
               Weaver X
+            </button>
+            <button
+              onClick={() => switchMode("pivots")}
+              className={`rounded px-3 py-1 text-xs font-medium transition ${
+                mode === "pivots"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              PlayPivots
             </button>
           </div>
         )}
