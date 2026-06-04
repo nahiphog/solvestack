@@ -95,6 +95,7 @@ function Index() {
   };
 
   const clamp = (v: string) => {
+    if (mode === "pivots") return v.replace(/[^1-6]/g, "").slice(0, 6);
     const cleaned = v.toUpperCase().replace(/[^A-Z]/g, "");
     return wordLength > 0 ? cleaned.slice(0, wordLength) : cleaned.slice(0, 12);
   };
