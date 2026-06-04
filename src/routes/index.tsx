@@ -3,6 +3,7 @@ import { useState } from "react";
 import { findAllShortestPaths, getRandomWords, isValidWord, MODE_WORD_LENGTH, type Mode } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Copy, Check } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -36,8 +37,20 @@ function Index() {
   const [paths, setPaths] = useState<string[][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
+
+  const copyPath = async (path: string[], index: number) => {
+    const text = path.join(" > ");
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch {
+      // clipboard unavailable
+    }
+  };
 
   const switchMode = (m: Mode) => {
     setMode(m);
@@ -217,17 +230,38 @@ function Index() {
               {paths.map((path, i) => (
                 <li
                   key={i}
-                  className="rounded-lg border bg-card p-4 font-mono text-card-foreground"
+                  className="group flex cursor-pointer items-center justify-between rounded-lg border bg-card p-4 font-mono text-card-foreground hover:bg-accent/40"
+                  onClick={() => copyPath(path, i)}
                 >
-                  <span className="mr-3 text-xs text-muted-foreground">#{i + 1}</span>
-                  {path.map((w, j) => (
-                    <span key={j}>
-                      <span className="font-semibold tracking-widest">{w}</span>
-                      {j < path.length - 1 && (
-                        <span className="mx-2 text-muted-foreground">→</span>
-                      )}
-                    </span>
-                  ))}
+                  <div className="flex-1">
+                    <span className="mr-3 text-xs text-muted-foreground">#{i + 1}</span>
+                    {path.map((w, j) => (
+                      <span key={j}>
+                        <span className="font-semibold tracking-widest">{w}</span>
+                        {j < path.length - 1 && (
+                          <span className="mx-2 text-muted-foreground">→</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyPath(path, i);
+                    }}
+                    className="ml-3 flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium text-muted-foreground opacity-0 transition hover:bg-background hover:text-foreground group-hover:opacity-100"
+                    aria-label="Copy path"
+                  >
+                    {copiedIndex === i ? (
+                      <>
+                        <Check size={14} /> Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} /> Copy
+                      </>
+                    )}
+                  </button>
                 </li>
               ))}
             </ol>
