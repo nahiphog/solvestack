@@ -28,6 +28,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   "6": { start: "CRAWLS", goal: "BLAZED" },
   splice: { start: "BAGEL", goal: "TOWER" },
   weaverx: { start: "BREAK", goal: "EVEN" },
+  pivots: { start: "143652", goal: "123456" },
 };
 
 function Index() {
@@ -94,6 +95,7 @@ function Index() {
   };
 
   const clamp = (v: string) => {
+    if (mode === "pivots") return v.replace(/[^1-6]/g, "").slice(0, 6);
     const cleaned = v.toUpperCase().replace(/[^A-Z]/g, "");
     return wordLength > 0 ? cleaned.slice(0, wordLength) : cleaned.slice(0, 12);
   };
@@ -112,7 +114,7 @@ function Index() {
           {MODES.map((m) => {
             const isActive =
               mode === m.id ||
-              (m.id === "splice" && mode === "weaverx");
+              (m.id === "splice" && (mode === "weaverx" || mode === "pivots"));
             return (
               <button
                 key={String(m.id)}
@@ -129,7 +131,7 @@ function Index() {
           })}
         </div>
 
-        {(mode === "splice" || mode === "weaverx") && (
+        {(mode === "splice" || mode === "weaverx" || mode === "pivots") && (
           <div className="mb-4 inline-flex rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("splice")}
@@ -150,6 +152,16 @@ function Index() {
               }`}
             >
               Weaver X
+            </button>
+            <button
+              onClick={() => switchMode("pivots")}
+              className={`rounded px-3 py-1 text-xs font-medium transition ${
+                mode === "pivots"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              PlayPivots
             </button>
           </div>
         )}
@@ -174,6 +186,9 @@ function Index() {
           {mode === "weaverx" && (
             <a href="https://wordwormdormdork.com/weaver-x/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver X</a>
           )}
+          {mode === "pivots" && (
+            <a href="https://playpivots.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">PlayPivots</a>
+          )}
         </div>
 
         {mode === "splice" && (
@@ -185,6 +200,12 @@ function Index() {
         {mode === "weaverx" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Each move: change one letter, add one letter, or remove one letter. Word lengths may vary.
+          </p>
+        )}
+
+        {mode === "pivots" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter a permutation of "123456". Each move reverses 4 consecutive digits. Goal is "123456".
           </p>
         )}
 
