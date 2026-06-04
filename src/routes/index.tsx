@@ -230,17 +230,38 @@ function Index() {
               {paths.map((path, i) => (
                 <li
                   key={i}
-                  className="rounded-lg border bg-card p-4 font-mono text-card-foreground"
+                  className="group flex cursor-pointer items-center justify-between rounded-lg border bg-card p-4 font-mono text-card-foreground hover:bg-accent/40"
+                  onClick={() => copyPath(path, i)}
                 >
-                  <span className="mr-3 text-xs text-muted-foreground">#{i + 1}</span>
-                  {path.map((w, j) => (
-                    <span key={j}>
-                      <span className="font-semibold tracking-widest">{w}</span>
-                      {j < path.length - 1 && (
-                        <span className="mx-2 text-muted-foreground">→</span>
-                      )}
-                    </span>
-                  ))}
+                  <div className="flex-1">
+                    <span className="mr-3 text-xs text-muted-foreground">#{i + 1}</span>
+                    {path.map((w, j) => (
+                      <span key={j}>
+                        <span className="font-semibold tracking-widest">{w}</span>
+                        {j < path.length - 1 && (
+                          <span className="mx-2 text-muted-foreground">→</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyPath(path, i);
+                    }}
+                    className="ml-3 flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium text-muted-foreground opacity-0 transition hover:bg-background hover:text-foreground group-hover:opacity-100"
+                    aria-label="Copy path"
+                  >
+                    {copiedIndex === i ? (
+                      <>
+                        <Check size={14} /> Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} /> Copy
+                      </>
+                    )}
+                  </button>
                 </li>
               ))}
             </ol>
