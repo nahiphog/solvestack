@@ -225,11 +225,14 @@ function Index() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Goal</label>
+            <label className="mb-1 block text-sm font-medium">
+              Goal{mode === "pivots" ? " (fixed)" : ""}
+            </label>
             <Input
               value={goal}
               onChange={(e) => setGoal(clamp(e.target.value))}
               maxLength={wordLength || 12}
+              disabled={mode === "pivots"}
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
