@@ -3,6 +3,7 @@ import { useState } from "react";
 import { findAllShortestPaths, getRandomWords, isValidWord, MODE_WORD_LENGTH, type Mode } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Copy, Check } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
