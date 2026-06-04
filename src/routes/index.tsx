@@ -37,8 +37,20 @@ function Index() {
   const [paths, setPaths] = useState<string[][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
+
+  const copyPath = async (path: string[], index: number) => {
+    const text = path.join(" > ");
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch {
+      // clipboard unavailable
+    }
+  };
 
   const switchMode = (m: Mode) => {
     setMode(m);
