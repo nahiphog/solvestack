@@ -251,9 +251,23 @@ function Index() {
           </p>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
+        {mode === "wordiply" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter a substring. Find all English words containing it, grouped by the number of extra letters.
+          </p>
+        )}
+
+        <div
+          className={`grid gap-4 sm:items-end ${
+            mode === "wordiply"
+              ? "sm:grid-cols-[1fr_auto_auto]"
+              : "sm:grid-cols-[1fr_1fr_auto_auto]"
+          }`}
+        >
           <div>
-            <label className="mb-1 block text-sm font-medium">Start</label>
+            <label className="mb-1 block text-sm font-medium">
+              {mode === "wordiply" ? "Substring" : "Start"}
+            </label>
             <Input
               value={start}
               onChange={(e) => setStart(clamp(e.target.value))}
@@ -261,18 +275,20 @@ function Index() {
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Goal{mode === "pivots" ? " (fixed)" : ""}
-            </label>
-            <Input
-              value={goal}
-              onChange={(e) => setGoal(clamp(e.target.value))}
-              maxLength={wordLength || 12}
-              disabled={mode === "pivots"}
-              className="font-mono text-lg uppercase tracking-widest"
-            />
-          </div>
+          {mode !== "wordiply" && (
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Goal{mode === "pivots" ? " (fixed)" : ""}
+              </label>
+              <Input
+                value={goal}
+                onChange={(e) => setGoal(clamp(e.target.value))}
+                maxLength={wordLength || 12}
+                disabled={mode === "pivots"}
+                className="font-mono text-lg uppercase tracking-widest"
+              />
+            </div>
+          )}
           <Button onClick={randomize} variant="outline" size="lg">
             Randomize
           </Button>
