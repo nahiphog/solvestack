@@ -143,7 +143,7 @@ function Index() {
           {MODES.map((m) => {
             const isActive =
               mode === m.id ||
-              (m.id === "splice" && (mode === "weaverx" || mode === "pivots"));
+              (m.id === "splice" && (mode === "weaverx" || mode === "pivots" || mode === "wordiply"));
             return (
               <button
                 key={String(m.id)}
