@@ -137,10 +137,10 @@ function Index() {
         </div>
 
         {(mode === "splice" || mode === "weaverx" || mode === "pivots") && (
-          <div className="mb-4 inline-flex rounded-md border bg-muted p-1">
+          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("splice")}
-              className={`rounded px-3 py-1 text-xs font-medium transition ${
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "splice"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -150,7 +150,7 @@ function Index() {
             </button>
             <button
               onClick={() => switchMode("weaverx")}
-              className={`rounded px-3 py-1 text-xs font-medium transition ${
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "weaverx"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -160,7 +160,7 @@ function Index() {
             </button>
             <button
               onClick={() => switchMode("pivots")}
-              className={`rounded px-3 py-1 text-xs font-medium transition ${
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "pivots"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -183,7 +183,7 @@ function Index() {
             <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver</a>
           )}
           {mode === 6 && (
-            <a href="https://onelook.com/pandergram/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Pandergram</a>
+            <a href="https://onelook.com/pandergram" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Pandergram</a>
           )}
           {mode === "splice" && (
             <a href="https://wordsplice.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Splice</a>
