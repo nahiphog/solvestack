@@ -160,7 +160,7 @@ function Index() {
           })}
         </div>
 
-        {(mode === "splice" || mode === "weaverx" || mode === "pivots") && (
+        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("splice")}
@@ -191,6 +191,16 @@ function Index() {
               }`}
             >
               PlayPivots
+            </button>
+            <button
+              onClick={() => switchMode("wordiply")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordiply"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Wordiply
             </button>
           </div>
         )}
