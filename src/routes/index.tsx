@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { findAllShortestPaths, getRandomWords, isValidWord, MODE_WORD_LENGTH, type Mode } from "@/lib/wordLadder";
+import { findAllShortestPaths, getRandomWords, isValidWord, MODE_WORD_LENGTH, wordiplySearch, type Mode } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check } from "lucide-react";
@@ -29,6 +29,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   splice: { start: "BAGEL", goal: "TOWER" },
   weaverx: { start: "BREAK", goal: "EVEN" },
   pivots: { start: "143652", goal: "123456" },
+  wordiply: { start: "TOWER", goal: "" },
 };
 
 function Index() {
@@ -36,6 +37,7 @@ function Index() {
   const [start, setStart] = useState("DARK");
   const [goal, setGoal] = useState("POOP");
   const [paths, setPaths] = useState<string[][] | null>(null);
+  const [wordiplyResults, setWordiplyResults] = useState<[number, string[]][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -56,6 +58,7 @@ function Index() {
   const switchMode = (m: Mode) => {
     setMode(m);
     setPaths(null);
+    setWordiplyResults(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
@@ -65,7 +68,24 @@ function Index() {
   const solve = () => {
     setError(null);
     setPaths(null);
+    setWordiplyResults(null);
     const s = start.trim().toUpperCase();
+
+    if (mode === "wordiply") {
+      if (s.length < 1) {
+        setError("Please enter a substring.");
+        return;
+      }
+      setSolving(true);
+      setTimeout(() => {
+        const result = wordiplySearch(s);
+        if (result.length === 0) setError(`No English words contain "${s}".`);
+        else setWordiplyResults(result);
+        setSolving(false);
+      }, 0);
+      return;
+    }
+
     const g = goal.trim().toUpperCase();
     if (wordLength > 0 && (s.length !== wordLength || g.length !== wordLength)) {
       setError(`Both words must be exactly ${wordLength} letters.`);
@@ -89,8 +109,12 @@ function Index() {
   const randomize = () => {
     setError(null);
     setPaths(null);
+    setWordiplyResults(null);
     if (mode === "pivots") {
       const [w1] = getRandomWords(mode);
+      setStart(w1);
+    } else if (mode === "wordiply") {
+      const [w1] = getRandomWords(5);
       setStart(w1);
     } else {
       const [w1, w2] = getRandomWords(mode);
@@ -119,7 +143,7 @@ function Index() {
           {MODES.map((m) => {
             const isActive =
               mode === m.id ||
-              (m.id === "splice" && (mode === "weaverx" || mode === "pivots"));
+              (m.id === "splice" && (mode === "weaverx" || mode === "pivots" || mode === "wordiply"));
             return (
               <button
                 key={String(m.id)}
@@ -136,7 +160,7 @@ function Index() {
           })}
         </div>
 
-        {(mode === "splice" || mode === "weaverx" || mode === "pivots") && (
+        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("splice")}
@@ -168,6 +192,16 @@ function Index() {
             >
               PlayPivots
             </button>
+            <button
+              onClick={() => switchMode("wordiply")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordiply"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Wordiply
+            </button>
           </div>
         )}
 
@@ -194,6 +228,9 @@ function Index() {
           {mode === "pivots" && (
             <a href="https://playpivots.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">PlayPivots</a>
           )}
+          {mode === "wordiply" && (
+            <a href="https://www.wordiply.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordiply</a>
+          )}
         </div>
 
         {mode === "splice" && (
@@ -214,9 +251,23 @@ function Index() {
           </p>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
+        {mode === "wordiply" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter a substring. Find all English words containing it, grouped by the number of extra letters.
+          </p>
+        )}
+
+        <div
+          className={`grid gap-4 sm:items-end ${
+            mode === "wordiply"
+              ? "sm:grid-cols-[1fr_auto_auto]"
+              : "sm:grid-cols-[1fr_1fr_auto_auto]"
+          }`}
+        >
           <div>
-            <label className="mb-1 block text-sm font-medium">Start</label>
+            <label className="mb-1 block text-sm font-medium">
+              {mode === "wordiply" ? "Substring" : "Start"}
+            </label>
             <Input
               value={start}
               onChange={(e) => setStart(clamp(e.target.value))}
@@ -224,18 +275,20 @@ function Index() {
               className="font-mono text-lg uppercase tracking-widest"
             />
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Goal{mode === "pivots" ? " (fixed)" : ""}
-            </label>
-            <Input
-              value={goal}
-              onChange={(e) => setGoal(clamp(e.target.value))}
-              maxLength={wordLength || 12}
-              disabled={mode === "pivots"}
-              className="font-mono text-lg uppercase tracking-widest"
-            />
-          </div>
+          {mode !== "wordiply" && (
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Goal{mode === "pivots" ? " (fixed)" : ""}
+              </label>
+              <Input
+                value={goal}
+                onChange={(e) => setGoal(clamp(e.target.value))}
+                maxLength={wordLength || 12}
+                disabled={mode === "pivots"}
+                className="font-mono text-lg uppercase tracking-widest"
+              />
+            </div>
+          )}
           <Button onClick={randomize} variant="outline" size="lg">
             Randomize
           </Button>
@@ -294,6 +347,30 @@ function Index() {
                 </li>
               ))}
             </ol>
+          </section>
+        )}
+
+        {wordiplyResults && (
+          <section className="mt-10">
+            <h2 className="mb-4 text-lg font-semibold">
+              {wordiplyResults.reduce((n, [, ws]) => n + ws.length, 0)} words containing "{start.toUpperCase()}"
+            </h2>
+            <div className="space-y-4">
+              {wordiplyResults.map(([extra, words]) => (
+                <div key={extra} className="rounded-lg border bg-card p-4">
+                  <div className="mb-2 text-sm font-semibold text-muted-foreground">
+                    +{extra} extra {extra === 1 ? "letter" : "letters"} · {words.length} {words.length === 1 ? "word" : "words"}
+                  </div>
+                  <div className="flex flex-wrap gap-2 font-mono text-sm">
+                    {words.map((w) => (
+                      <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">
+                        {w}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </section>
         )}
       </div>

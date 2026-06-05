@@ -4,10 +4,11 @@ import graph6 from "@/data/wordLadder6.json";
 import graphSplice from "@/data/wordSplice.json";
 import graphWeaverX from "@/data/wordWeaverX.json";
 import graphPivots from "@/data/wordPivots.json";
+import allEnglishWords from "@/data/allEnglishWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -27,7 +28,24 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   splice: 5,
   weaverx: 0,
   pivots: 6,
+  wordiply: 0,
 };
+
+const ALL_ENGLISH_WORDS = allEnglishWords as string[];
+
+export function wordiplySearch(substring: string): [number, string[]][] {
+  const sub = substring.toUpperCase();
+  if (!sub) return [];
+  const groups = new Map<number, string[]>();
+  for (const w of ALL_ENGLISH_WORDS) {
+    if (w.includes(sub)) {
+      const extra = w.length - sub.length;
+      if (!groups.has(extra)) groups.set(extra, []);
+      groups.get(extra)!.push(w);
+    }
+  }
+  return Array.from(groups.entries()).sort((a, b) => a[0] - b[0]);
+}
 
 export function isValidWord(w: string, mode: Mode): boolean {
   const G = GRAPHS[String(mode)];
