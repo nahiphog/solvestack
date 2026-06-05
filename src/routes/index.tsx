@@ -228,6 +228,9 @@ function Index() {
           {mode === "pivots" && (
             <a href="https://playpivots.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">PlayPivots</a>
           )}
+          {mode === "wordiply" && (
+            <a href="https://www.wordiply.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordiply</a>
+          )}
         </div>
 
         {mode === "splice" && (
