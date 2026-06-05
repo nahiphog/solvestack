@@ -37,6 +37,7 @@ function Index() {
   const [start, setStart] = useState("DARK");
   const [goal, setGoal] = useState("POOP");
   const [paths, setPaths] = useState<string[][] | null>(null);
+  const [wordiplyResults, setWordiplyResults] = useState<[number, string[]][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
