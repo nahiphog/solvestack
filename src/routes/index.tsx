@@ -58,6 +58,7 @@ function Index() {
   const switchMode = (m: Mode) => {
     setMode(m);
     setPaths(null);
+    setWordiplyResults(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
@@ -67,7 +68,24 @@ function Index() {
   const solve = () => {
     setError(null);
     setPaths(null);
+    setWordiplyResults(null);
     const s = start.trim().toUpperCase();
+
+    if (mode === "wordiply") {
+      if (s.length < 1) {
+        setError("Please enter a substring.");
+        return;
+      }
+      setSolving(true);
+      setTimeout(() => {
+        const result = wordiplySearch(s);
+        if (result.length === 0) setError(`No English words contain "${s}".`);
+        else setWordiplyResults(result);
+        setSolving(false);
+      }, 0);
+      return;
+    }
+
     const g = goal.trim().toUpperCase();
     if (wordLength > 0 && (s.length !== wordLength || g.length !== wordLength)) {
       setError(`Both words must be exactly ${wordLength} letters.`);
@@ -91,8 +109,12 @@ function Index() {
   const randomize = () => {
     setError(null);
     setPaths(null);
+    setWordiplyResults(null);
     if (mode === "pivots") {
       const [w1] = getRandomWords(mode);
+      setStart(w1);
+    } else if (mode === "wordiply") {
+      const [w1] = getRandomWords(5);
       setStart(w1);
     } else {
       const [w1, w2] = getRandomWords(mode);
