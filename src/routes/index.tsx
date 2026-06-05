@@ -29,6 +29,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   splice: { start: "BAGEL", goal: "TOWER" },
   weaverx: { start: "BREAK", goal: "EVEN" },
   pivots: { start: "143652", goal: "123456" },
+  wordiply: { start: "TOWER", goal: "" },
 };
 
 function Index() {
