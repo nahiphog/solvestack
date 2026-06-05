@@ -349,6 +349,30 @@ function Index() {
             </ol>
           </section>
         )}
+
+        {wordiplyResults && (
+          <section className="mt-10">
+            <h2 className="mb-4 text-lg font-semibold">
+              {wordiplyResults.reduce((n, [, ws]) => n + ws.length, 0)} words containing "{start.toUpperCase()}"
+            </h2>
+            <div className="space-y-4">
+              {wordiplyResults.map(([extra, words]) => (
+                <div key={extra} className="rounded-lg border bg-card p-4">
+                  <div className="mb-2 text-sm font-semibold text-muted-foreground">
+                    +{extra} extra {extra === 1 ? "letter" : "letters"} · {words.length} {words.length === 1 ? "word" : "words"}
+                  </div>
+                  <div className="flex flex-wrap gap-2 font-mono text-sm">
+                    {words.map((w) => (
+                      <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">
+                        {w}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
