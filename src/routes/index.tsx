@@ -42,6 +42,11 @@ function Index() {
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
