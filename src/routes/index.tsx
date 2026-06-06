@@ -326,7 +326,10 @@ function Index() {
                 {paths.length} optimal {paths.length === 1 ? "path" : "paths"} · {paths[0].length - 1} steps
               </h2>
               <button
-                onClick={() => copyText(paths.map((p) => p.join(" > ")).join("\n"))}
+                onClick={() => {
+                  const items = paths.map((p, i) => `${i + 1}. ${p.join(" > ")}`).join("\n");
+                  copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 aria-label="Copy all paths"
               >
@@ -363,13 +366,12 @@ function Index() {
                 {wordiplyResults.reduce((n, [, ws]) => n + ws.length, 0)} words containing "{start.toUpperCase()}"
               </h2>
               <button
-                onClick={() =>
-                  copyText(
-                    wordiplyResults
-                      .map(([extra, words]) => `+${extra}: ${words.join(", ")}`)
-                      .join("\n")
-                  )
-                }
+                onClick={() => {
+                  const items = wordiplyResults
+                    .map(([extra, words], i) => `${i + 1}. +${extra} extra ${extra === 1 ? "letter" : "letters"}: ${words.join(", ")}`)
+                    .join("\n");
+                  copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 aria-label="Copy all words"
               >
