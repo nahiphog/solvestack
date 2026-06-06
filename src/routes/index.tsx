@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useState } from "react";
 import { findAllShortestPaths, getRandomWords, isValidWord, MODE_WORD_LENGTH, wordiplySearch, type Mode } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Sun, Moon } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,6 +42,11 @@ function Index() {
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
@@ -132,11 +138,21 @@ function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-3xl px-6 py-16">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight">Word Ladder Solver</h1>
-          <p className="mt-2 text-muted-foreground">
-            Enter two words. Get every shortest ladder between them.
-          </p>
+        <header className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight">Word Ladder Solver</h1>
+            <p className="mt-2 text-muted-foreground">
+              Enter two words. Get every shortest ladder between them.
+            </p>
+          </div>
+          <button
+            onClick={() => setDark((d) => !d)}
+            className="shrink-0 rounded-md border bg-muted p-2 text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+            aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+            title={dark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {dark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
         </header>
 
         <div className="mb-6 inline-flex rounded-md border bg-muted p-1">
