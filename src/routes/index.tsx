@@ -41,7 +41,7 @@ function Index() {
   const [wordiplyResults, setWordiplyResults] = useState<[number, string[]][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
@@ -50,16 +50,16 @@ function Index() {
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
-  const copyPath = async (path: string[], index: number) => {
-    const text = path.join(" > ");
+  const copyText = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedIndex(index);
-      setTimeout(() => setCopiedIndex(null), 2000);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch {
       // clipboard unavailable
     }
   };
+
 
   const switchMode = (m: Mode) => {
     setMode(m);
@@ -321,15 +321,23 @@ function Index() {
 
         {paths && (
           <section className="mt-10">
-            <h2 className="mb-4 text-lg font-semibold">
-              {paths.length} optimal {paths.length === 1 ? "path" : "paths"} · {paths[0].length - 1} steps
-            </h2>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {paths.length} optimal {paths.length === 1 ? "path" : "paths"} · {paths[0].length - 1} steps
+              </h2>
+              <button
+                onClick={() => copyText(paths.map((p) => p.join(" > ")).join("\n"))}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all paths"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
             <ol className="space-y-3">
               {paths.map((path, i) => (
                 <li
                   key={i}
-                  className="group flex cursor-pointer items-center justify-between rounded-lg border bg-card p-4 font-mono text-card-foreground hover:bg-accent/40"
-                  onClick={() => copyPath(path, i)}
+                  className="flex items-center rounded-lg border bg-card p-4 font-mono text-card-foreground"
                 >
                   <div className="flex-1">
                     <span className="mr-3 text-xs text-muted-foreground">#{i + 1}</span>
@@ -342,24 +350,6 @@ function Index() {
                       </span>
                     ))}
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      copyPath(path, i);
-                    }}
-                    className="ml-3 flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium text-muted-foreground opacity-0 transition hover:bg-background hover:text-foreground group-hover:opacity-100"
-                    aria-label="Copy path"
-                  >
-                    {copiedIndex === i ? (
-                      <>
-                        <Check size={14} /> Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={14} /> Copy
-                      </>
-                    )}
-                  </button>
                 </li>
               ))}
             </ol>
@@ -368,9 +358,24 @@ function Index() {
 
         {wordiplyResults && (
           <section className="mt-10">
-            <h2 className="mb-4 text-lg font-semibold">
-              {wordiplyResults.reduce((n, [, ws]) => n + ws.length, 0)} words containing "{start.toUpperCase()}"
-            </h2>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {wordiplyResults.reduce((n, [, ws]) => n + ws.length, 0)} words containing "{start.toUpperCase()}"
+              </h2>
+              <button
+                onClick={() =>
+                  copyText(
+                    wordiplyResults
+                      .map(([extra, words]) => `+${extra}: ${words.join(", ")}`)
+                      .join("\n")
+                  )
+                }
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all words"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
             <div className="space-y-4">
               {wordiplyResults.map(([extra, words]) => (
                 <div key={extra} className="rounded-lg border bg-card p-4">
@@ -389,6 +394,7 @@ function Index() {
             </div>
           </section>
         )}
+
       </div>
     </div>
   );
