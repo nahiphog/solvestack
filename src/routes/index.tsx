@@ -41,7 +41,7 @@ function Index() {
   const [wordiplyResults, setWordiplyResults] = useState<[number, string[]][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
@@ -50,16 +50,16 @@ function Index() {
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
-  const copyPath = async (path: string[], index: number) => {
-    const text = path.join(" > ");
+  const copyText = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedIndex(index);
-      setTimeout(() => setCopiedIndex(null), 2000);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch {
       // clipboard unavailable
     }
   };
+
 
   const switchMode = (m: Mode) => {
     setMode(m);
