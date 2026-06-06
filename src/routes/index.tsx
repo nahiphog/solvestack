@@ -138,11 +138,21 @@ function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-3xl px-6 py-16">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight">Word Ladder Solver</h1>
-          <p className="mt-2 text-muted-foreground">
-            Enter two words. Get every shortest ladder between them.
-          </p>
+        <header className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight">Word Ladder Solver</h1>
+            <p className="mt-2 text-muted-foreground">
+              Enter two words. Get every shortest ladder between them.
+            </p>
+          </div>
+          <button
+            onClick={() => setDark((d) => !d)}
+            className="shrink-0 rounded-md border bg-muted p-2 text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+            aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+            title={dark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {dark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
         </header>
 
         <div className="mb-6 inline-flex rounded-md border bg-muted p-1">
