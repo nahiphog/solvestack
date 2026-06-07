@@ -358,7 +358,7 @@ function Index() {
                         ? formatPivotsWord(w, pivotsBracketRange(path[j - 1], w))
                         : w;
                       return (
-                        <span key={j}>
+                        <span key={j} className="inline-block whitespace-nowrap">
                           <span className="font-semibold tracking-widest">{display}</span>
                           {j < path.length - 1 && (
                             <span className="mx-2 text-muted-foreground">→</span>
