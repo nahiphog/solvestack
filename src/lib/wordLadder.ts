@@ -33,6 +33,23 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
 
 const ALL_ENGLISH_WORDS = allEnglishWords as string[];
 
+export function pivotsBracketRange(prev: string, curr: string): [number, number] | null {
+  for (let i = 0; i <= 2; i++) {
+    const p = prev.slice(i, i + 4);
+    const c = curr.slice(i, i + 4);
+    if (p.split("").reverse().join("") === c) {
+      return [i, i + 3];
+    }
+  }
+  return null;
+}
+
+export function formatPivotsWord(curr: string, bracket: [number, number] | null): string {
+  if (!bracket) return curr;
+  const [start, end] = bracket;
+  return curr.slice(0, start) + "(" + curr.slice(start, end + 1) + ")" + curr.slice(end + 1);
+}
+
 export function wordiplySearch(substring: string): [number, string[]][] {
   const sub = substring.toUpperCase();
   if (!sub) return [];
