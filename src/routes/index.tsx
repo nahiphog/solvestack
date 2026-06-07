@@ -359,18 +359,32 @@ function Index() {
           </section>
         )}
 
-        {wordiplyResults && (
+        {wordiplyResults && (() => {
+          const reversed = [...wordiplyResults].reverse();
+          const flat: string[] = [];
+          for (const [, ws] of reversed) {
+            for (const w of ws) {
+              flat.push(w);
+              if (flat.length >= 5) break;
+            }
+            if (flat.length >= 5) break;
+          }
+          const M = flat.reduce((n, w) => n + w.length, 0);
+          return (
           <section className="mt-10">
+            <div className="mb-2 text-base font-semibold">
+              Total letter score obtainable is {M}.
+            </div>
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
                 {wordiplyResults.reduce((n, [, ws]) => n + ws.length, 0)} words containing "{start.toUpperCase()}"
               </h2>
               <button
                 onClick={() => {
-                  const items = wordiplyResults
+                  const items = reversed
                     .map(([extra, words], i) => `${i + 1}. +${extra} extra ${extra === 1 ? "letter" : "letters"}: ${words.join(", ")}`)
                     .join("\n");
-                  copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                  copyText(`Total letter score obtainable is ${M}.\n\n${items}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 aria-label="Copy all words"
@@ -379,23 +393,31 @@ function Index() {
               </button>
             </div>
             <div className="space-y-4">
-              {wordiplyResults.map(([extra, words]) => (
+              {reversed.map(([extra, words]) => (
                 <div key={extra} className="rounded-lg border bg-card p-4">
                   <div className="mb-2 text-sm font-semibold text-muted-foreground">
                     +{extra} extra {extra === 1 ? "letter" : "letters"} · {words.length} {words.length === 1 ? "word" : "words"}
                   </div>
                   <div className="flex flex-wrap gap-2 font-mono text-sm">
                     {words.map((w) => (
-                      <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">
+                      <a
+                        key={w}
+                        href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                      >
                         {w}
-                      </span>
+                      </a>
                     ))}
                   </div>
                 </div>
               ))}
             </div>
           </section>
-        )}
+          );
+        })()}
+
 
       </div>
     </div>
