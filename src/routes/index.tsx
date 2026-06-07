@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { findAllShortestPaths, getRandomWords, isValidWord, MODE_WORD_LENGTH, wordiplySearch, type Mode } from "@/lib/wordLadder";
+import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValidWord, MODE_WORD_LENGTH, pivotsBracketRange, wordiplySearch, type Mode } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon } from "lucide-react";
@@ -327,7 +327,16 @@ function Index() {
               </h2>
               <button
                 onClick={() => {
-                  const items = paths.map((p, i) => `${i + 1}. ${p.join(" > ")}`).join("\n");
+                  const items = paths.map((p, i) => {
+                    if (mode === "pivots") {
+                      const formatted = p.map((w, j) => {
+                        if (j === 0) return w;
+                        return formatPivotsWord(w, pivotsBracketRange(p[j - 1], w));
+                      });
+                      return `${i + 1}. ${formatted.join(" > ")}`;
+                    }
+                    return `${i + 1}. ${p.join(" > ")}`;
+                  }).join("\n");
                   copyText(`${items}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
@@ -344,14 +353,19 @@ function Index() {
                 >
                   <div className="flex-1">
                     <span className="mr-3 text-xs text-muted-foreground">#{i + 1}</span>
-                    {path.map((w, j) => (
-                      <span key={j}>
-                        <span className="font-semibold tracking-widest">{w}</span>
-                        {j < path.length - 1 && (
-                          <span className="mx-2 text-muted-foreground">→</span>
-                        )}
-                      </span>
-                    ))}
+                    {path.map((w, j) => {
+                      const display = mode === "pivots" && j > 0
+                        ? formatPivotsWord(w, pivotsBracketRange(path[j - 1], w))
+                        : w;
+                      return (
+                        <span key={j}>
+                          <span className="font-semibold tracking-widest">{display}</span>
+                          {j < path.length - 1 && (
+                            <span className="mx-2 text-muted-foreground">→</span>
+                          )}
+                        </span>
+                      );
+                    })}
                   </div>
                 </li>
               ))}
