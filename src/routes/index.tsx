@@ -269,7 +269,7 @@ function Index() {
           {mode === "splice" && (
             <a href="https://wordsplice.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Splice</a>
           )}
-          <a href="https://onelook.com/pandergram" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Pandergram</a>
+          
           {mode === "weaverx" && (
             <a href="https://wordwormdormdork.com/weaver-x/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver X</a>
           )}
