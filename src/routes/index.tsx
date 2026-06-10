@@ -389,34 +389,61 @@ function Index() {
               <div key={gi} className="flex items-center gap-3">
                 <div className="flex gap-1.5">
                   {Array.from({ length: 5 }).map((_, ti) => {
-                    const letter = g.word[ti] || "";
+                    const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
                     const color = g.pattern[ti];
                     const colorClass =
                       color === "GREEN"
-                        ? "bg-green-600 text-white border-green-600"
+                        ? "bg-green-600 text-white border-green-600 caret-white"
                         : color === "YELLOW"
-                          ? "bg-yellow-500 text-white border-yellow-500"
-                          : "bg-muted text-foreground border-border";
+                          ? "bg-yellow-500 text-white border-yellow-500 caret-white"
+                          : "bg-muted text-foreground border-border caret-foreground";
                     return (
-                      <button
+                      <input
                         key={ti}
-                        type="button"
-                        onClick={() => cycleTile(gi, ti)}
-                        className={`flex h-12 w-12 items-center justify-center rounded border-2 font-mono text-xl font-bold uppercase transition ${colorClass}`}
-                        aria-label={`Tile ${ti + 1}: ${color}`}
-                      >
-                        {letter}
-                      </button>
+                        id={`wordle-tile-${gi}-${ti}`}
+                        type="text"
+                        inputMode="text"
+                        autoComplete="off"
+                        value={letter}
+                        aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${color}`}
+                        onMouseDown={(e) => {
+                          if (document.activeElement === e.currentTarget) {
+                            e.preventDefault();
+                            cycleTile(gi, ti);
+                          }
+                        }}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onChange={(e) => {
+                          const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                          if (!v) {
+                            setGuessLetter(gi, ti, "");
+                            return;
+                          }
+                          setGuessLetter(gi, ti, v.slice(-1));
+                          if (ti < 4) focusTile(gi, ti + 1);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Backspace") {
+                            if (!letter && ti > 0) {
+                              e.preventDefault();
+                              focusTile(gi, ti - 1);
+                            }
+                          } else if (e.key === "ArrowLeft") {
+                            e.preventDefault();
+                            focusTile(gi, ti - 1);
+                          } else if (e.key === "ArrowRight") {
+                            e.preventDefault();
+                            focusTile(gi, ti + 1);
+                          } else if (e.key === " " || e.key === "Enter") {
+                            e.preventDefault();
+                            cycleTile(gi, ti);
+                          }
+                        }}
+                        className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                      />
                     );
                   })}
                 </div>
-                <Input
-                  value={g.word}
-                  onChange={(e) => setGuessWord(gi, e.target.value)}
-                  maxLength={5}
-                  placeholder="Guess"
-                  className="w-32 font-mono uppercase tracking-widest"
-                />
                 {wordleGuesses.length > 1 && (
                   <Button onClick={() => removeGuessRow(gi)} variant="outline" size="sm">
                     Remove
