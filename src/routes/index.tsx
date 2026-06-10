@@ -154,14 +154,15 @@ function Index() {
         </header>
 
         <div className="mb-6 inline-flex rounded-md border bg-muted p-1">
-          {MODES.map((m) => {
+          {TOP_MODES.map((m) => {
             const isActive =
-              mode === m.id ||
-              (m.id === "splice" && (mode === "weaverx" || mode === "pivots" || mode === "wordiply"));
+              m.id === "classic"
+                ? mode === 4 || mode === 5 || mode === 6
+                : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply";
             return (
               <button
-                key={String(m.id)}
-                onClick={() => switchMode(m.id)}
+                key={m.id}
+                onClick={() => m.id === "classic" ? switchMode(4) : switchMode("splice")}
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
                     ? "bg-background text-foreground shadow-sm"
