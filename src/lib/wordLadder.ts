@@ -42,8 +42,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
 };
 
 
-const ALL_ENGLISH_WORDS = allEnglishWords as string[];
-const FIVE_LETTER_WORDS = ALL_ENGLISH_WORDS.filter((w) => w.length === 5);
+const FIVE_LETTER_WORDS = wordle5 as string[];
 
 export type WordleColor = "GREY" | "GREEN" | "YELLOW";
 
