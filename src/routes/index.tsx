@@ -25,11 +25,15 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   "4": { start: "DARK", goal: "POOP" },
   "5": { start: "FLOWN", goal: "BRAID" },
   "6": { start: "CRAWLS", goal: "BLAZED" },
+  "7": { start: "ABASING", goal: "ABUSING" },
+  "8": { start: "ABETTERS", goal: "ABETTORS" },
+  "9": { start: "ABANDONED", goal: "ABANDONER" },
   splice: { start: "BAGEL", goal: "TOWER" },
   weaverx: { start: "BREAK", goal: "EVEN" },
   pivots: { start: "143652", goal: "123456" },
   wordiply: { start: "TOWER", goal: "" },
 };
+
 
 function Index() {
   const [mode, setMode] = useState<Mode>(4);
