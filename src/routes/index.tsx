@@ -43,7 +43,8 @@ function Index() {
   const [paths, setPaths] = useState<string[][] | null>(null);
   const [wordiplyResults, setWordiplyResults] = useState<[number, string[]][] | null>(null);
   const [wordleGuesses, setWordleGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
-    { word: "TOWER", pattern: ["GREY", "GREEN", "GREEN", "GREEN", "GREEN"] },
+    { word: "WATER", pattern: ["GREEN", "GREEN", "YELLOW", "GREY", "GREY"] },
+    { word: "ZESTY", pattern: ["YELLOW", "GREY", "GREY", "GREEN", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -115,9 +116,23 @@ function Index() {
     );
   };
 
-  const setGuessWord = (gi: number, word: string) => {
-    const cleaned = word.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 5);
-    setWordleGuesses((prev) => prev.map((g, i) => (i === gi ? { ...g, word: cleaned } : g)));
+  const setGuessLetter = (gi: number, ti: number, ch: string) => {
+    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    setWordleGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const padded = g.word.padEnd(5, " ").slice(0, 5).split("");
+        padded[ti] = c || " ";
+        return { ...g, word: padded.join("").replace(/ +$/, "") };
+      }),
+    );
+  };
+
+  const focusTile = (gi: number, ti: number) => {
+    if (ti < 0 || ti > 4) return;
+    const el = document.getElementById(`wordle-tile-${gi}-${ti}`) as HTMLInputElement | null;
+    el?.focus();
+    el?.select();
   };
 
   const addGuessRow = () => {
@@ -374,34 +389,61 @@ function Index() {
               <div key={gi} className="flex items-center gap-3">
                 <div className="flex gap-1.5">
                   {Array.from({ length: 5 }).map((_, ti) => {
-                    const letter = g.word[ti] || "";
+                    const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
                     const color = g.pattern[ti];
                     const colorClass =
                       color === "GREEN"
-                        ? "bg-green-600 text-white border-green-600"
+                        ? "bg-green-600 text-white border-green-600 caret-white"
                         : color === "YELLOW"
-                          ? "bg-yellow-500 text-white border-yellow-500"
-                          : "bg-muted text-foreground border-border";
+                          ? "bg-yellow-500 text-white border-yellow-500 caret-white"
+                          : "bg-muted text-foreground border-border caret-foreground";
                     return (
-                      <button
+                      <input
                         key={ti}
-                        type="button"
-                        onClick={() => cycleTile(gi, ti)}
-                        className={`flex h-12 w-12 items-center justify-center rounded border-2 font-mono text-xl font-bold uppercase transition ${colorClass}`}
-                        aria-label={`Tile ${ti + 1}: ${color}`}
-                      >
-                        {letter}
-                      </button>
+                        id={`wordle-tile-${gi}-${ti}`}
+                        type="text"
+                        inputMode="text"
+                        autoComplete="off"
+                        value={letter}
+                        aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${color}`}
+                        onMouseDown={(e) => {
+                          if (document.activeElement === e.currentTarget) {
+                            e.preventDefault();
+                            cycleTile(gi, ti);
+                          }
+                        }}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onChange={(e) => {
+                          const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                          if (!v) {
+                            setGuessLetter(gi, ti, "");
+                            return;
+                          }
+                          setGuessLetter(gi, ti, v.slice(-1));
+                          if (ti < 4) focusTile(gi, ti + 1);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Backspace") {
+                            if (!letter && ti > 0) {
+                              e.preventDefault();
+                              focusTile(gi, ti - 1);
+                            }
+                          } else if (e.key === "ArrowLeft") {
+                            e.preventDefault();
+                            focusTile(gi, ti - 1);
+                          } else if (e.key === "ArrowRight") {
+                            e.preventDefault();
+                            focusTile(gi, ti + 1);
+                          } else if (e.key === " " || e.key === "Enter") {
+                            e.preventDefault();
+                            cycleTile(gi, ti);
+                          }
+                        }}
+                        className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                      />
                     );
                   })}
                 </div>
-                <Input
-                  value={g.word}
-                  onChange={(e) => setGuessWord(gi, e.target.value)}
-                  maxLength={5}
-                  placeholder="Guess"
-                  className="w-32 font-mono uppercase tracking-widest"
-                />
                 {wordleGuesses.length > 1 && (
                   <Button onClick={() => removeGuessRow(gi)} variant="outline" size="sm">
                     Remove
