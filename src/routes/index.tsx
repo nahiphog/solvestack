@@ -180,40 +180,24 @@ function Index() {
           })}
         </div>
 
-        {(mode === 4 || mode === 5 || mode === 6) && (
+        {(mode === 4 || mode === 5 || mode === 6 || mode === 7 || mode === 8 || mode === 9) && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode(4)}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === 4
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              4 letters
-            </button>
-            <button
-              onClick={() => switchMode(5)}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === 5
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              5 letters
-            </button>
-            <button
-              onClick={() => switchMode(6)}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === 6
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              6 letters
-            </button>
+            {([4, 5, 6, 7, 8, 9] as const).map((n) => (
+              <button
+                key={n}
+                onClick={() => switchMode(n)}
+                className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                  mode === n
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {n} letters
+              </button>
+            ))}
           </div>
         )}
+
 
         {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
