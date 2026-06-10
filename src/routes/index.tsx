@@ -116,9 +116,23 @@ function Index() {
     );
   };
 
-  const setGuessWord = (gi: number, word: string) => {
-    const cleaned = word.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 5);
-    setWordleGuesses((prev) => prev.map((g, i) => (i === gi ? { ...g, word: cleaned } : g)));
+  const setGuessLetter = (gi: number, ti: number, ch: string) => {
+    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    setWordleGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const padded = g.word.padEnd(5, " ").slice(0, 5).split("");
+        padded[ti] = c || " ";
+        return { ...g, word: padded.join("").replace(/ +$/, "") };
+      }),
+    );
+  };
+
+  const focusTile = (gi: number, ti: number) => {
+    if (ti < 0 || ti > 4) return;
+    const el = document.getElementById(`wordle-tile-${gi}-${ti}`) as HTMLInputElement | null;
+    el?.focus();
+    el?.select();
   };
 
   const addGuessRow = () => {
