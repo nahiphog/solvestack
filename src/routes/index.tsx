@@ -40,7 +40,7 @@ function Index() {
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -266,12 +266,10 @@ function Index() {
           {mode === 5 && (
             <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver</a>
           )}
-          {mode === 6 && (
-            <a href="https://onelook.com/pandergram" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Pandergram</a>
-          )}
           {mode === "splice" && (
             <a href="https://wordsplice.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Splice</a>
           )}
+          <a href="https://onelook.com/pandergram" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Pandergram</a>
           {mode === "weaverx" && (
             <a href="https://wordwormdormdork.com/weaver-x/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver X</a>
           )}
