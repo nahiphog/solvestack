@@ -333,6 +333,9 @@ function Index() {
           {mode === "wordiply" && (
             <a href="https://www.wordiply.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordiply</a>
           )}
+          {mode === "wordle" && (
+            <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordle</a>
+          )}
         </div>
 
         {mode === "splice" && (
