@@ -362,45 +362,103 @@ function Index() {
           </p>
         )}
 
-        <div
-          className={`grid gap-4 sm:items-end ${
-            mode === "wordiply"
-              ? "sm:grid-cols-[1fr_auto_auto]"
-              : "sm:grid-cols-[1fr_1fr_auto_auto]"
-          }`}
-        >
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              {mode === "wordiply" ? "Substring" : "Start"}
-            </label>
-            <Input
-              value={start}
-              onChange={(e) => setStart(clamp(e.target.value))}
-              maxLength={wordLength || 12}
-              className="font-mono text-lg uppercase tracking-widest"
-            />
+        {mode === "wordle" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter your guesses and click each tile to cycle GREY → YELLOW → GREEN. Get all 5-letter words consistent with the feedback.
+          </p>
+        )}
+
+        {mode === "wordle" ? (
+          <div className="space-y-4">
+            {wordleGuesses.map((g, gi) => (
+              <div key={gi} className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  {Array.from({ length: 5 }).map((_, ti) => {
+                    const letter = g.word[ti] || "";
+                    const color = g.pattern[ti];
+                    const colorClass =
+                      color === "GREEN"
+                        ? "bg-green-600 text-white border-green-600"
+                        : color === "YELLOW"
+                          ? "bg-yellow-500 text-white border-yellow-500"
+                          : "bg-muted text-foreground border-border";
+                    return (
+                      <button
+                        key={ti}
+                        type="button"
+                        onClick={() => cycleTile(gi, ti)}
+                        className={`flex h-12 w-12 items-center justify-center rounded border-2 font-mono text-xl font-bold uppercase transition ${colorClass}`}
+                        aria-label={`Tile ${ti + 1}: ${color}`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+                <Input
+                  value={g.word}
+                  onChange={(e) => setGuessWord(gi, e.target.value)}
+                  maxLength={5}
+                  placeholder="Guess"
+                  className="w-32 font-mono uppercase tracking-widest"
+                />
+                {wordleGuesses.length > 1 && (
+                  <Button onClick={() => removeGuessRow(gi)} variant="outline" size="sm">
+                    Remove
+                  </Button>
+                )}
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={addGuessRow} variant="outline" size="lg">
+                Add guess
+              </Button>
+              <Button onClick={solveWordle} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
           </div>
-          {mode !== "wordiply" && (
+        ) : (
+          <div
+            className={`grid gap-4 sm:items-end ${
+              mode === "wordiply"
+                ? "sm:grid-cols-[1fr_auto_auto]"
+                : "sm:grid-cols-[1fr_1fr_auto_auto]"
+            }`}
+          >
             <div>
               <label className="mb-1 block text-sm font-medium">
-                Goal{mode === "pivots" ? " (fixed)" : ""}
+                {mode === "wordiply" ? "Substring" : "Start"}
               </label>
               <Input
-                value={goal}
-                onChange={(e) => setGoal(clamp(e.target.value))}
+                value={start}
+                onChange={(e) => setStart(clamp(e.target.value))}
                 maxLength={wordLength || 12}
-                disabled={mode === "pivots"}
                 className="font-mono text-lg uppercase tracking-widest"
               />
             </div>
-          )}
-          <Button onClick={randomize} variant="outline" size="lg">
-            Randomize
-          </Button>
-          <Button onClick={solve} disabled={solving} size="lg">
-            {solving ? "Solving..." : "Solve"}
-          </Button>
-        </div>
+            {mode !== "wordiply" && (
+              <div>
+                <label className="mb-1 block text-sm font-medium">
+                  Goal{mode === "pivots" ? " (fixed)" : ""}
+                </label>
+                <Input
+                  value={goal}
+                  onChange={(e) => setGoal(clamp(e.target.value))}
+                  maxLength={wordLength || 12}
+                  disabled={mode === "pivots"}
+                  className="font-mono text-lg uppercase tracking-widest"
+                />
+              </div>
+            )}
+            <Button onClick={randomize} variant="outline" size="lg">
+              Randomize
+            </Button>
+            <Button onClick={solve} disabled={solving} size="lg">
+              {solving ? "Solving..." : "Solve"}
+            </Button>
+          </div>
+        )}
 
         {error && (
           <div className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
