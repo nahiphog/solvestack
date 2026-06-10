@@ -161,8 +161,9 @@ function Index() {
           {TOP_MODES.map((m) => {
             const isActive =
               m.id === "classic"
-                ? mode === 4 || mode === 5 || mode === 6
+                ? mode === 4 || mode === 5 || mode === 6 || mode === 7 || mode === 8 || mode === 9
                 : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply";
+
             return (
               <button
                 key={m.id}
