@@ -72,10 +72,60 @@ function Index() {
     setMode(m);
     setPaths(null);
     setWordiplyResults(null);
+    setWordleResults(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
     setGoal(d.goal);
+  };
+
+  const solveWordle = () => {
+    setError(null);
+    setWordleResults(null);
+    for (const g of wordleGuesses) {
+      const w = g.word.trim().toUpperCase();
+      if (w.length !== 5) {
+        setError("Each guess must be exactly 5 letters.");
+        return;
+      }
+      if (!isValid5LetterWord(w)) {
+        setError(`"${w}" is not a valid 5-letter English word.`);
+        return;
+      }
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
+      const result = wordleSolve(normalized);
+      if (result.length === 0) setError("No words match these constraints.");
+      else setWordleResults(result);
+      setSolving(false);
+    }, 0);
+  };
+
+  const cycleTile = (gi: number, ti: number) => {
+    setWordleGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const order: WordleColor[] = ["GREY", "YELLOW", "GREEN"];
+        const next = [...g.pattern];
+        next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % 3];
+        return { ...g, pattern: next };
+      }),
+    );
+  };
+
+  const setGuessWord = (gi: number, word: string) => {
+    const cleaned = word.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 5);
+    setWordleGuesses((prev) => prev.map((g, i) => (i === gi ? { ...g, word: cleaned } : g)));
+  };
+
+  const addGuessRow = () => {
+    setWordleGuesses((prev) => [...prev, { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+  };
+
+  const removeGuessRow = (gi: number) => {
+    setWordleGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
   };
 
   const solve = () => {
