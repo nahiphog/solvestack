@@ -25,9 +25,6 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   "4": { start: "DARK", goal: "POOP" },
   "5": { start: "FLOWN", goal: "BRAID" },
   "6": { start: "CRAWLS", goal: "BLAZED" },
-  "7": { start: "BLAZING", goal: "FLAMING" },
-  "8": { start: "QUIVERED", goal: "QUAVERED" },
-  "9": { start: "JUSTIFIES", goal: "JUSTIFIED" },
   splice: { start: "BAGEL", goal: "TOWER" },
   weaverx: { start: "BREAK", goal: "EVEN" },
   pivots: { start: "143652", goal: "123456" },
@@ -228,7 +225,7 @@ function Index() {
           {TOP_MODES.map((m) => {
             const isActive =
               m.id === "classic"
-                ? mode === 4 || mode === 5 || mode === 6 || mode === 7 || mode === 8 || mode === 9
+                ? mode === 4 || mode === 5 || mode === 6
                 : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply" || mode === "wordle";
 
             return (
@@ -247,9 +244,9 @@ function Index() {
           })}
         </div>
 
-        {(mode === 4 || mode === 5 || mode === 6 || mode === 7 || mode === 8 || mode === 9) && (
+        {(mode === 4 || mode === 5 || mode === 6) && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
-            {([4, 5, 6, 7, 8, 9] as const).map((n) => (
+            {([4, 5, 6] as const).map((n) => (
               <button
                 key={n}
                 onClick={() => switchMode(n)}
