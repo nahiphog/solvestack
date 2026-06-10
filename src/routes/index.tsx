@@ -155,12 +155,11 @@ function Index() {
         return;
       }
       setSolving(true);
-      setTimeout(() => {
-        const result = wordiplySearch(s);
+      wordiplySearch(s).then((result) => {
         if (result.length === 0) setError(`No English words contain "${s}".`);
         else setWordiplyResults(result);
         setSolving(false);
-      }, 0);
+      });
       return;
     }
 
