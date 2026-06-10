@@ -16,11 +16,9 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const MODES: { id: Mode; label: string }[] = [
-  { id: 4, label: "4 letters" },
-  { id: 5, label: "5 letters" },
-  { id: 6, label: "6 letters" },
-  { id: "splice", label: "Misc" },
+const TOP_MODES: { id: string; label: string }[] = [
+  { id: "classic", label: "Classic" },
+  { id: "miscellaneous", label: "Miscellaneous" },
 ];
 
 const DEFAULTS: Record<string, { start: string; goal: string }> = {
