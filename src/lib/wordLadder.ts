@@ -7,7 +7,7 @@ import graph9 from "@/data/wordLadder9.json";
 import graphSplice from "@/data/wordSplice.json";
 import graphWeaverX from "@/data/wordWeaverX.json";
 import graphPivots from "@/data/wordPivots.json";
-import wordle5 from "@/data/wordle5.json";
+
 
 type Graph = Record<string, string[]>;
 
@@ -42,8 +42,6 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
 };
 
 
-const FIVE_LETTER_WORDS = wordle5 as string[];
-
 export type WordleColor = "GREY" | "GREEN" | "YELLOW";
 
 export function wordleOutput(guess: string, answer: string): WordleColor[] {
@@ -69,12 +67,16 @@ export function wordleOutput(guess: string, answer: string): WordleColor[] {
   return result;
 }
 
-export function isValid5LetterWord(w: string): boolean {
-  return FIVE_LETTER_WORDS.includes(w.toUpperCase());
+export async function isValid5LetterWord(w: string): Promise<boolean> {
+  const words = await getFiveLetterWords();
+  return words.includes(w.toUpperCase());
 }
 
-export function wordleSolve(guesses: { word: string; pattern: WordleColor[] }[]): string[] {
-  return FIVE_LETTER_WORDS.filter((answer) =>
+export async function wordleSolve(
+  guesses: { word: string; pattern: WordleColor[] }[],
+): Promise<string[]> {
+  const words = await getFiveLetterWords();
+  return words.filter((answer) =>
     guesses.every((g) => {
       const out = wordleOutput(g.word, answer);
       for (let i = 0; i < out.length; i++) if (out[i] !== g.pattern[i]) return false;
@@ -101,11 +103,18 @@ export function formatPivotsWord(curr: string, bracket: [number, number] | null)
 }
 
 let _allEnglishWordsCache: string[] | null = null;
+let _fiveLetterWordsCache: string[] | null = null;
 async function getAllEnglishWords(): Promise<string[]> {
   if (_allEnglishWordsCache) return _allEnglishWordsCache;
   const mod = await import("@/data/allEnglishWords.json");
   _allEnglishWordsCache = mod.default as string[];
   return _allEnglishWordsCache;
+}
+async function getFiveLetterWords(): Promise<string[]> {
+  if (_fiveLetterWordsCache) return _fiveLetterWordsCache;
+  const all = await getAllEnglishWords();
+  _fiveLetterWordsCache = all.filter((w) => w.length === 5);
+  return _fiveLetterWordsCache;
 }
 
 export async function wordiplySearch(substring: string): Promise<[number, string[]][]> {
