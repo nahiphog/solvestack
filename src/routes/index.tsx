@@ -32,6 +32,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   weaverx: { start: "BREAK", goal: "EVEN" },
   pivots: { start: "143652", goal: "123456" },
   wordiply: { start: "TOWER", goal: "" },
+  wordle: { start: "TOWER", goal: "" },
 };
 
 
