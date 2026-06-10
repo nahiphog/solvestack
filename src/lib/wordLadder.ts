@@ -42,8 +42,6 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
 };
 
 
-const FIVE_LETTER_WORDS = wordle5 as string[];
-
 export type WordleColor = "GREY" | "GREEN" | "YELLOW";
 
 export function wordleOutput(guess: string, answer: string): WordleColor[] {
@@ -69,12 +67,16 @@ export function wordleOutput(guess: string, answer: string): WordleColor[] {
   return result;
 }
 
-export function isValid5LetterWord(w: string): boolean {
-  return FIVE_LETTER_WORDS.includes(w.toUpperCase());
+export async function isValid5LetterWord(w: string): Promise<boolean> {
+  const words = await getFiveLetterWords();
+  return words.includes(w.toUpperCase());
 }
 
-export function wordleSolve(guesses: { word: string; pattern: WordleColor[] }[]): string[] {
-  return FIVE_LETTER_WORDS.filter((answer) =>
+export async function wordleSolve(
+  guesses: { word: string; pattern: WordleColor[] }[],
+): Promise<string[]> {
+  const words = await getFiveLetterWords();
+  return words.filter((answer) =>
     guesses.every((g) => {
       const out = wordleOutput(g.word, answer);
       for (let i = 0; i < out.length; i++) if (out[i] !== g.pattern[i]) return false;
