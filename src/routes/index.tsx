@@ -43,7 +43,8 @@ function Index() {
   const [paths, setPaths] = useState<string[][] | null>(null);
   const [wordiplyResults, setWordiplyResults] = useState<[number, string[]][] | null>(null);
   const [wordleGuesses, setWordleGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
-    { word: "TOWER", pattern: ["GREY", "GREEN", "GREEN", "GREEN", "GREEN"] },
+    { word: "WATER", pattern: ["GREEN", "GREEN", "YELLOW", "GREY", "GREY"] },
+    { word: "ZESTY", pattern: ["YELLOW", "GREY", "GREY", "GREEN", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
