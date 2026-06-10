@@ -80,7 +80,7 @@ function Index() {
     setGoal(d.goal);
   };
 
-  const solveWordle = () => {
+  const solveWordle = async () => {
     setError(null);
     setWordleResults(null);
     for (const g of wordleGuesses) {
@@ -89,19 +89,17 @@ function Index() {
         setError("Each guess must be exactly 5 letters.");
         return;
       }
-      if (!isValid5LetterWord(w)) {
+      if (!(await isValid5LetterWord(w))) {
         setError(`"${w}" is not a valid 5-letter English word.`);
         return;
       }
     }
     setSolving(true);
-    setTimeout(() => {
-      const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
-      const result = wordleSolve(normalized);
-      if (result.length === 0) setError("No words match these constraints.");
-      else setWordleResults(result);
-      setSolving(false);
-    }, 0);
+    const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
+    const result = await wordleSolve(normalized);
+    if (result.length === 0) setError("No words match these constraints.");
+    else setWordleResults(result);
+    setSolving(false);
   };
 
   const cycleTile = (gi: number, ti: number) => {
