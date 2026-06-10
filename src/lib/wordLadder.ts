@@ -7,7 +7,7 @@ import graph9 from "@/data/wordLadder9.json";
 import graphSplice from "@/data/wordSplice.json";
 import graphWeaverX from "@/data/wordWeaverX.json";
 import graphPivots from "@/data/wordPivots.json";
-import allEnglishWords from "@/data/allEnglishWords.json";
+import wordle5 from "@/data/wordle5.json";
 
 type Graph = Record<string, string[]>;
 
@@ -42,8 +42,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
 };
 
 
-const ALL_ENGLISH_WORDS = allEnglishWords as string[];
-const FIVE_LETTER_WORDS = ALL_ENGLISH_WORDS.filter((w) => w.length === 5);
+const FIVE_LETTER_WORDS = wordle5 as string[];
 
 export type WordleColor = "GREY" | "GREEN" | "YELLOW";
 
@@ -101,11 +100,20 @@ export function formatPivotsWord(curr: string, bracket: [number, number] | null)
   return curr.slice(0, start) + "(" + curr.slice(start, end + 1) + ")" + curr.slice(end + 1);
 }
 
-export function wordiplySearch(substring: string): [number, string[]][] {
+let _allEnglishWordsCache: string[] | null = null;
+async function getAllEnglishWords(): Promise<string[]> {
+  if (_allEnglishWordsCache) return _allEnglishWordsCache;
+  const mod = await import("@/data/allEnglishWords.json");
+  _allEnglishWordsCache = mod.default as string[];
+  return _allEnglishWordsCache;
+}
+
+export async function wordiplySearch(substring: string): Promise<[number, string[]][]> {
   const sub = substring.toUpperCase();
   if (!sub) return [];
+  const words = await getAllEnglishWords();
   const groups = new Map<number, string[]>();
-  for (const w of ALL_ENGLISH_WORDS) {
+  for (const w of words) {
     if (w.includes(sub)) {
       const extra = w.length - sub.length;
       if (!groups.has(extra)) groups.set(extra, []);
