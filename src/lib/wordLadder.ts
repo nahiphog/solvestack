@@ -11,7 +11,7 @@ import allEnglishWords from "@/data/allEnglishWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | 7 | 8 | 9 | "splice" | "weaverx" | "pivots" | "wordiply";
+export type Mode = 4 | 5 | 6 | 7 | 8 | 9 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -38,10 +38,51 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   weaverx: 0,
   pivots: 6,
   wordiply: 0,
+  wordle: 5,
 };
 
 
 const ALL_ENGLISH_WORDS = allEnglishWords as string[];
+const FIVE_LETTER_WORDS = ALL_ENGLISH_WORDS.filter((w) => w.length === 5);
+
+export type WordleColor = "GREY" | "GREEN" | "YELLOW";
+
+export function wordleOutput(guess: string, answer: string): WordleColor[] {
+  const g = guess.toUpperCase();
+  const a = answer.toUpperCase();
+  const n = a.length;
+  const result: WordleColor[] = Array(n).fill("GREY");
+  const remaining: (string | null)[] = a.split("");
+  for (let i = 0; i < n; i++) {
+    if (g[i] === a[i]) {
+      result[i] = "GREEN";
+      remaining[i] = null;
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    if (result[i] === "GREEN") continue;
+    const idx = remaining.indexOf(g[i]);
+    if (idx !== -1) {
+      result[i] = "YELLOW";
+      remaining[idx] = null;
+    }
+  }
+  return result;
+}
+
+export function isValid5LetterWord(w: string): boolean {
+  return FIVE_LETTER_WORDS.includes(w.toUpperCase());
+}
+
+export function wordleSolve(guesses: { word: string; pattern: WordleColor[] }[]): string[] {
+  return FIVE_LETTER_WORDS.filter((answer) =>
+    guesses.every((g) => {
+      const out = wordleOutput(g.word, answer);
+      for (let i = 0; i < out.length; i++) if (out[i] !== g.pattern[i]) return false;
+      return true;
+    }),
+  );
+}
 
 export function pivotsBracketRange(prev: string, curr: string): [number, number] | null {
   for (let i = 0; i <= 2; i++) {

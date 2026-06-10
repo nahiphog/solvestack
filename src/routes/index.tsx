@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValidWord, MODE_WORD_LENGTH, pivotsBracketRange, wordiplySearch, type Mode } from "@/lib/wordLadder";
+import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, MODE_WORD_LENGTH, pivotsBracketRange, wordiplySearch, wordleSolve, type Mode, type WordleColor } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon } from "lucide-react";
@@ -32,6 +32,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   weaverx: { start: "BREAK", goal: "EVEN" },
   pivots: { start: "143652", goal: "123456" },
   wordiply: { start: "TOWER", goal: "" },
+  wordle: { start: "TOWER", goal: "" },
 };
 
 
@@ -41,6 +42,10 @@ function Index() {
   const [goal, setGoal] = useState("POOP");
   const [paths, setPaths] = useState<string[][] | null>(null);
   const [wordiplyResults, setWordiplyResults] = useState<[number, string[]][] | null>(null);
+  const [wordleGuesses, setWordleGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
+    { word: "TOWER", pattern: ["GREY", "GREEN", "GREEN", "GREEN", "GREEN"] },
+  ]);
+  const [wordleResults, setWordleResults] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -67,10 +72,60 @@ function Index() {
     setMode(m);
     setPaths(null);
     setWordiplyResults(null);
+    setWordleResults(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
     setGoal(d.goal);
+  };
+
+  const solveWordle = () => {
+    setError(null);
+    setWordleResults(null);
+    for (const g of wordleGuesses) {
+      const w = g.word.trim().toUpperCase();
+      if (w.length !== 5) {
+        setError("Each guess must be exactly 5 letters.");
+        return;
+      }
+      if (!isValid5LetterWord(w)) {
+        setError(`"${w}" is not a valid 5-letter English word.`);
+        return;
+      }
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
+      const result = wordleSolve(normalized);
+      if (result.length === 0) setError("No words match these constraints.");
+      else setWordleResults(result);
+      setSolving(false);
+    }, 0);
+  };
+
+  const cycleTile = (gi: number, ti: number) => {
+    setWordleGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const order: WordleColor[] = ["GREY", "YELLOW", "GREEN"];
+        const next = [...g.pattern];
+        next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % 3];
+        return { ...g, pattern: next };
+      }),
+    );
+  };
+
+  const setGuessWord = (gi: number, word: string) => {
+    const cleaned = word.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 5);
+    setWordleGuesses((prev) => prev.map((g, i) => (i === gi ? { ...g, word: cleaned } : g)));
+  };
+
+  const addGuessRow = () => {
+    setWordleGuesses((prev) => [...prev, { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+  };
+
+  const removeGuessRow = (gi: number) => {
+    setWordleGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
   };
 
   const solve = () => {
@@ -162,7 +217,7 @@ function Index() {
             const isActive =
               m.id === "classic"
                 ? mode === 4 || mode === 5 || mode === 6 || mode === 7 || mode === 8 || mode === 9
-                : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply";
+                : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply" || mode === "wordle";
 
             return (
               <button
@@ -199,7 +254,7 @@ function Index() {
         )}
 
 
-        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply") && (
+        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply" || mode === "wordle") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("splice")}
@@ -241,6 +296,16 @@ function Index() {
             >
               Wordiply
             </button>
+            <button
+              onClick={() => switchMode("wordle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Wordle
+            </button>
           </div>
         )}
 
@@ -268,6 +333,9 @@ function Index() {
           {mode === "wordiply" && (
             <a href="https://www.wordiply.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordiply</a>
           )}
+          {mode === "wordle" && (
+            <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordle</a>
+          )}
         </div>
 
         {mode === "splice" && (
@@ -294,45 +362,103 @@ function Index() {
           </p>
         )}
 
-        <div
-          className={`grid gap-4 sm:items-end ${
-            mode === "wordiply"
-              ? "sm:grid-cols-[1fr_auto_auto]"
-              : "sm:grid-cols-[1fr_1fr_auto_auto]"
-          }`}
-        >
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              {mode === "wordiply" ? "Substring" : "Start"}
-            </label>
-            <Input
-              value={start}
-              onChange={(e) => setStart(clamp(e.target.value))}
-              maxLength={wordLength || 12}
-              className="font-mono text-lg uppercase tracking-widest"
-            />
+        {mode === "wordle" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter your guesses and click each tile to cycle GREY → YELLOW → GREEN. Get all 5-letter words consistent with the feedback.
+          </p>
+        )}
+
+        {mode === "wordle" ? (
+          <div className="space-y-4">
+            {wordleGuesses.map((g, gi) => (
+              <div key={gi} className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  {Array.from({ length: 5 }).map((_, ti) => {
+                    const letter = g.word[ti] || "";
+                    const color = g.pattern[ti];
+                    const colorClass =
+                      color === "GREEN"
+                        ? "bg-green-600 text-white border-green-600"
+                        : color === "YELLOW"
+                          ? "bg-yellow-500 text-white border-yellow-500"
+                          : "bg-muted text-foreground border-border";
+                    return (
+                      <button
+                        key={ti}
+                        type="button"
+                        onClick={() => cycleTile(gi, ti)}
+                        className={`flex h-12 w-12 items-center justify-center rounded border-2 font-mono text-xl font-bold uppercase transition ${colorClass}`}
+                        aria-label={`Tile ${ti + 1}: ${color}`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+                <Input
+                  value={g.word}
+                  onChange={(e) => setGuessWord(gi, e.target.value)}
+                  maxLength={5}
+                  placeholder="Guess"
+                  className="w-32 font-mono uppercase tracking-widest"
+                />
+                {wordleGuesses.length > 1 && (
+                  <Button onClick={() => removeGuessRow(gi)} variant="outline" size="sm">
+                    Remove
+                  </Button>
+                )}
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={addGuessRow} variant="outline" size="lg">
+                Add guess
+              </Button>
+              <Button onClick={solveWordle} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
           </div>
-          {mode !== "wordiply" && (
+        ) : (
+          <div
+            className={`grid gap-4 sm:items-end ${
+              mode === "wordiply"
+                ? "sm:grid-cols-[1fr_auto_auto]"
+                : "sm:grid-cols-[1fr_1fr_auto_auto]"
+            }`}
+          >
             <div>
               <label className="mb-1 block text-sm font-medium">
-                Goal{mode === "pivots" ? " (fixed)" : ""}
+                {mode === "wordiply" ? "Substring" : "Start"}
               </label>
               <Input
-                value={goal}
-                onChange={(e) => setGoal(clamp(e.target.value))}
+                value={start}
+                onChange={(e) => setStart(clamp(e.target.value))}
                 maxLength={wordLength || 12}
-                disabled={mode === "pivots"}
                 className="font-mono text-lg uppercase tracking-widest"
               />
             </div>
-          )}
-          <Button onClick={randomize} variant="outline" size="lg">
-            Randomize
-          </Button>
-          <Button onClick={solve} disabled={solving} size="lg">
-            {solving ? "Solving..." : "Solve"}
-          </Button>
-        </div>
+            {mode !== "wordiply" && (
+              <div>
+                <label className="mb-1 block text-sm font-medium">
+                  Goal{mode === "pivots" ? " (fixed)" : ""}
+                </label>
+                <Input
+                  value={goal}
+                  onChange={(e) => setGoal(clamp(e.target.value))}
+                  maxLength={wordLength || 12}
+                  disabled={mode === "pivots"}
+                  className="font-mono text-lg uppercase tracking-widest"
+                />
+              </div>
+            )}
+            <Button onClick={randomize} variant="outline" size="lg">
+              Randomize
+            </Button>
+            <Button onClick={solve} disabled={solving} size="lg">
+              {solving ? "Solving..." : "Solve"}
+            </Button>
+          </div>
+        )}
 
         {error && (
           <div className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -452,6 +578,40 @@ function Index() {
           </section>
           );
         })()}
+
+        {wordleResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {wordleResults.length} possible {wordleResults.length === 1 ? "answer" : "answers"}
+              </h2>
+              <button
+                onClick={() => {
+                  copyText(`${wordleResults.length} possible ${wordleResults.length === 1 ? "answer" : "answers"}:\n${wordleResults.join(", ")}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all answers"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex flex-wrap gap-2 font-mono text-sm">
+                {wordleResults.map((w) => (
+                  <a
+                    key={w}
+                    href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                  >
+                    {w}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
 
       </div>
