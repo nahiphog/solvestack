@@ -247,9 +247,9 @@ function Index() {
           })}
         </div>
 
-        {(mode === 4 || mode === 5 || mode === 6 || mode === 7 || mode === 8 || mode === 9) && (
+        {(mode === 4 || mode === 5 || mode === 6) && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
-            {([4, 5, 6, 7, 8, 9] as const).map((n) => (
+            {([4, 5, 6] as const).map((n) => (
               <button
                 key={n}
                 onClick={() => switchMode(n)}
