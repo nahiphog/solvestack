@@ -16,11 +16,9 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const MODES: { id: Mode; label: string }[] = [
-  { id: 4, label: "4 letters" },
-  { id: 5, label: "5 letters" },
-  { id: 6, label: "6 letters" },
-  { id: "splice", label: "Misc" },
+const TOP_MODES: { id: string; label: string }[] = [
+  { id: "classic", label: "Classic" },
+  { id: "miscellaneous", label: "Miscellaneous" },
 ];
 
 const DEFAULTS: Record<string, { start: string; goal: string }> = {
@@ -156,14 +154,15 @@ function Index() {
         </header>
 
         <div className="mb-6 inline-flex rounded-md border bg-muted p-1">
-          {MODES.map((m) => {
+          {TOP_MODES.map((m) => {
             const isActive =
-              mode === m.id ||
-              (m.id === "splice" && (mode === "weaverx" || mode === "pivots" || mode === "wordiply"));
+              m.id === "classic"
+                ? mode === 4 || mode === 5 || mode === 6
+                : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply";
             return (
               <button
-                key={String(m.id)}
-                onClick={() => switchMode(m.id)}
+                key={m.id}
+                onClick={() => m.id === "classic" ? switchMode(4) : switchMode("splice")}
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
                     ? "bg-background text-foreground shadow-sm"
@@ -175,6 +174,41 @@ function Index() {
             );
           })}
         </div>
+
+        {(mode === 4 || mode === 5 || mode === 6) && (
+          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
+            <button
+              onClick={() => switchMode(4)}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === 4
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              4 letters
+            </button>
+            <button
+              onClick={() => switchMode(5)}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === 5
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              5 letters
+            </button>
+            <button
+              onClick={() => switchMode(6)}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === 6
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              6 letters
+            </button>
+          </div>
+        )}
 
         {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
