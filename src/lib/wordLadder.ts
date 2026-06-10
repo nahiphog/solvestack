@@ -1,9 +1,6 @@
 import graph4 from "@/data/wordLadder4.json";
 import graph5 from "@/data/wordLadder5.json";
 import graph6 from "@/data/wordLadder6.json";
-import graph7 from "@/data/wordLadder7.json";
-import graph8 from "@/data/wordLadder8.json";
-import graph9 from "@/data/wordLadder9.json";
 import graphSplice from "@/data/wordSplice.json";
 import graphWeaverX from "@/data/wordWeaverX.json";
 import graphPivots from "@/data/wordPivots.json";
@@ -11,16 +8,13 @@ import graphPivots from "@/data/wordPivots.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | 7 | 8 | 9 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
   "4": graph4 as Graph,
   "5": graph5 as Graph,
   "6": graph6 as Graph,
-  "7": graph7 as Graph,
-  "8": graph8 as Graph,
-  "9": graph9 as Graph,
   splice: graphSplice as Graph,
   weaverx: graphWeaverX as Graph,
   pivots: graphPivots as Graph,
@@ -31,9 +25,6 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   "4": 4,
   "5": 5,
   "6": 6,
-  "7": 7,
-  "8": 8,
-  "9": 9,
   splice: 5,
   weaverx: 0,
   pivots: 6,
