@@ -200,7 +200,7 @@ function Index() {
         )}
 
 
-        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply") && (
+        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply" || mode === "wordle") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("splice")}
