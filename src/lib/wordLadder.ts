@@ -11,7 +11,7 @@ import allEnglishWords from "@/data/allEnglishWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | 7 | 8 | 9 | "splice" | "weaverx" | "pivots" | "wordiply";
+export type Mode = 4 | 5 | 6 | 7 | 8 | 9 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
