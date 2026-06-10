@@ -103,11 +103,18 @@ export function formatPivotsWord(curr: string, bracket: [number, number] | null)
 }
 
 let _allEnglishWordsCache: string[] | null = null;
+let _fiveLetterWordsCache: string[] | null = null;
 async function getAllEnglishWords(): Promise<string[]> {
   if (_allEnglishWordsCache) return _allEnglishWordsCache;
   const mod = await import("@/data/allEnglishWords.json");
   _allEnglishWordsCache = mod.default as string[];
   return _allEnglishWordsCache;
+}
+async function getFiveLetterWords(): Promise<string[]> {
+  if (_fiveLetterWordsCache) return _fiveLetterWordsCache;
+  const all = await getAllEnglishWords();
+  _fiveLetterWordsCache = all.filter((w) => w.length === 5);
+  return _fiveLetterWordsCache;
 }
 
 export async function wordiplySearch(substring: string): Promise<[number, string[]][]> {
