@@ -7,7 +7,7 @@ import graph9 from "@/data/wordLadder9.json";
 import graphSplice from "@/data/wordSplice.json";
 import graphWeaverX from "@/data/wordWeaverX.json";
 import graphPivots from "@/data/wordPivots.json";
-import wordle5 from "@/data/wordle5.json";
+
 
 type Graph = Record<string, string[]>;
 
