@@ -50,6 +50,9 @@ function Index() {
     { word: "ZESTY", pattern: ["YELLOW", "GREY", "GREY", "GREEN", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
+  const [spellingBeeMiddle, setSpellingBeeMiddle] = useState("T");
+  const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
+  const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
