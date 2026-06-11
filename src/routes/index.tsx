@@ -760,6 +760,58 @@ function Index() {
           </section>
         )}
 
+        {spellingBeeResults && (() => {
+          const totalWords = spellingBeeResults.reduce((n, [, ws]) => n + ws.length, 0);
+          const totalScore = spellingBeeResults.reduce((n, [score, ws]) => n + score * ws.length, 0);
+          return (
+            <section className="mt-10">
+              <div className="mb-2 text-base font-semibold">
+                Total score obtainable is {totalScore}.
+              </div>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">
+                  {totalWords} {totalWords === 1 ? "word" : "words"}
+                </h2>
+                <button
+                  onClick={() => {
+                    const items = spellingBeeResults
+                      .map(([score, words], i) => `${i + 1}. ${score} ${score === 1 ? "point" : "points"}: ${words.join(", ")}`)
+                      .join("\n");
+                    copyText(`Total score obtainable is ${totalScore}.\n\n${items}\n\nSolved via ${window.location.href}.`);
+                  }}
+                  className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                  aria-label="Copy all words"
+                >
+                  {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                </button>
+              </div>
+              <div className="space-y-4">
+                {spellingBeeResults.map(([score, words]) => (
+                  <div key={score} className="rounded-lg border bg-card p-4">
+                    <div className="mb-2 text-sm font-semibold text-muted-foreground">
+                      {score} {score === 1 ? "point" : "points"} · {words.length} {words.length === 1 ? "word" : "words"}
+                    </div>
+                    <div className="flex flex-wrap gap-2 font-mono text-sm">
+                      {words.map((w) => (
+                        <a
+                          key={w}
+                          href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                        >
+                          {w}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
+
 
       </div>
     </div>
