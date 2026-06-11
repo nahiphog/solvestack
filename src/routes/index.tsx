@@ -458,6 +458,12 @@ function Index() {
           </p>
         )}
 
+        {mode === "spellingbee" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter the middle letter and the 6 outer letters. Find all valid 4+ letter words using only these 7 letters that include the middle letter, grouped by score.
+          </p>
+        )}
+
         {mode === "wordle" ? (
           <div className="space-y-4">
             {wordleGuesses.map((g, gi) => (
