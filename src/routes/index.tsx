@@ -541,6 +541,30 @@ function Index() {
               </Button>
             </div>
           </div>
+        ) : mode === "spellingbee" ? (
+          <div className="grid gap-4 sm:items-end sm:grid-cols-[auto_1fr_auto]">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Middle letter</label>
+              <Input
+                value={spellingBeeMiddle}
+                onChange={(e) => setSpellingBeeMiddle(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 1))}
+                maxLength={1}
+                className="w-16 font-mono text-lg uppercase tracking-widest"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Other 6 letters</label>
+              <Input
+                value={spellingBeeOthers}
+                onChange={(e) => setSpellingBeeOthers(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6))}
+                maxLength={6}
+                className="font-mono text-lg uppercase tracking-widest"
+              />
+            </div>
+            <Button onClick={solveSpellingBee} disabled={solving} size="lg">
+              {solving ? "Solving..." : "Solve"}
+            </Button>
+          </div>
         ) : (
           <div
             className={`grid gap-4 sm:items-end ${
