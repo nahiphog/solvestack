@@ -257,10 +257,8 @@ function Index() {
 
         <div className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
-            const isActive =
-              s.id === "ladder"
-                ? mode !== "wordle"
-                : mode === "wordle";
+            const inSearch = mode === "wordle" || mode === "spellingbee";
+            const isActive = s.id === "search" ? inSearch : !inSearch;
             return (
               <button
                 key={s.id}
@@ -277,7 +275,7 @@ function Index() {
           })}
         </div>
 
-        {mode !== "wordle" && (
+        {mode !== "wordle" && mode !== "spellingbee" && (
           <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
             {LADDER_MODES.map((m) => {
               const isActive =
@@ -299,6 +297,31 @@ function Index() {
                 </button>
               );
             })}
+          </div>
+        )}
+
+        {(mode === "wordle" || mode === "spellingbee") && (
+          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
+            <button
+              onClick={() => switchMode("wordle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Wordle
+            </button>
+            <button
+              onClick={() => switchMode("spellingbee")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "spellingbee"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Spelling Bee
+            </button>
           </div>
         )}
 
