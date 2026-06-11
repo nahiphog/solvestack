@@ -123,6 +123,31 @@ export async function wordiplySearch(substring: string): Promise<[number, string
   return Array.from(groups.entries()).sort((a, b) => a[0] - b[0]);
 }
 
+export async function spellingBeeSolve(
+  middleLetter: string,
+  otherLetters: string,
+): Promise<[number, string[]][]> {
+  const middle = middleLetter.toUpperCase();
+  const others = otherLetters.toUpperCase();
+  const allowed = new Set((middle + others).split(""));
+  const words = await getAllEnglishWords();
+  const groups = new Map<number, string[]>();
+  const score = (w: string) => (w.length - 3) + (new Set(w).size === 7 ? 7 : 0);
+  for (const w of words) {
+    if (w.length < 4) continue;
+    if (!w.includes(middle)) continue;
+    let ok = true;
+    for (let i = 0; i < w.length; i++) {
+      if (!allowed.has(w[i])) { ok = false; break; }
+    }
+    if (!ok) continue;
+    const s = score(w);
+    if (!groups.has(s)) groups.set(s, []);
+    groups.get(s)!.push(w);
+  }
+  return Array.from(groups.entries()).sort((a, b) => b[0] - a[0]);
+}
+
 export function isValidWord(w: string, mode: Mode): boolean {
   const G = GRAPHS[String(mode)];
   return Object.prototype.hasOwnProperty.call(G, w.toUpperCase());
