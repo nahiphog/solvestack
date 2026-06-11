@@ -335,16 +335,6 @@ function Index() {
             >
               Wordiply
             </button>
-            <button
-              onClick={() => switchMode("wordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Wordle
-            </button>
           </div>
         )}
 
