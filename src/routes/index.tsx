@@ -423,6 +423,9 @@ function Index() {
               <a href="https://wordall.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word all</a>
             </>
           )}
+          {mode === "spellingbee" && (
+            <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
+          )}
         </div>
 
         {mode === "splice" && (
