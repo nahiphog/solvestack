@@ -16,7 +16,12 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const TOP_MODES: { id: string; label: string }[] = [
+const SECTIONS: { id: "ladder" | "search"; label: string }[] = [
+  { id: "ladder", label: "Word ladder" },
+  { id: "search", label: "Word search" },
+];
+
+const LADDER_MODES: { id: string; label: string }[] = [
   { id: "classic", label: "Classic" },
   { id: "miscellaneous", label: "Miscellaneous" },
 ];
@@ -221,28 +226,53 @@ function Index() {
           </button>
         </header>
 
-        <div className="mb-6 inline-flex rounded-md border bg-muted p-1">
-          {TOP_MODES.map((m) => {
+        <div className="mb-3 inline-flex rounded-md border bg-muted p-1">
+          {SECTIONS.map((s) => {
             const isActive =
-              m.id === "classic"
-                ? mode === 4 || mode === 5 || mode === 6
-                : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply" || mode === "wordle";
-
+              s.id === "ladder"
+                ? mode !== "wordle"
+                : mode === "wordle";
             return (
               <button
-                key={m.id}
-                onClick={() => m.id === "classic" ? switchMode(4) : switchMode("splice")}
+                key={s.id}
+                onClick={() => s.id === "ladder" ? switchMode(4) : switchMode("wordle")}
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {m.label}
+                {s.label}
               </button>
             );
           })}
         </div>
+
+        {mode !== "wordle" && (
+          <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
+            {LADDER_MODES.map((m) => {
+              const isActive =
+                m.id === "classic"
+                  ? mode === 4 || mode === 5 || mode === 6
+                  : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply";
+
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => m.id === "classic" ? switchMode(4) : switchMode("splice")}
+                  className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                    isActive
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {m.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
 
         {(mode === 4 || mode === 5 || mode === 6) && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
@@ -263,7 +293,7 @@ function Index() {
         )}
 
 
-        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply" || mode === "wordle") && (
+        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("splice")}
@@ -304,16 +334,6 @@ function Index() {
               }`}
             >
               Wordiply
-            </button>
-            <button
-              onClick={() => switchMode("wordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Wordle
             </button>
           </div>
         )}
