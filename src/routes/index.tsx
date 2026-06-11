@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, MODE_WORD_LENGTH, pivotsBracketRange, wordiplySearch, wordleSolve, type Mode, type WordleColor } from "@/lib/wordLadder";
+import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type Mode, type WordleColor } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon } from "lucide-react";
@@ -35,6 +35,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   pivots: { start: "421356", goal: "123456" },
   wordiply: { start: "TOWER", goal: "" },
   wordle: { start: "TOWER", goal: "" },
+  spellingbee: { start: "T", goal: "OWERAB" },
 };
 
 
@@ -49,6 +50,9 @@ function Index() {
     { word: "ZESTY", pattern: ["YELLOW", "GREY", "GREY", "GREEN", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
+  const [spellingBeeMiddle, setSpellingBeeMiddle] = useState("T");
+  const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
+  const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -76,10 +80,35 @@ function Index() {
     setPaths(null);
     setWordiplyResults(null);
     setWordleResults(null);
+    setSpellingBeeResults(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
     setGoal(d.goal);
+  };
+
+  const solveSpellingBee = async () => {
+    setError(null);
+    setSpellingBeeResults(null);
+    const m = spellingBeeMiddle.toUpperCase().replace(/[^A-Z]/g, "");
+    const o = spellingBeeOthers.toUpperCase().replace(/[^A-Z]/g, "");
+    if (m.length !== 1) {
+      setError("Middle letter must be exactly 1 letter.");
+      return;
+    }
+    if (o.length !== 6) {
+      setError("Other letters must be exactly 6 letters.");
+      return;
+    }
+    if (new Set((m + o).split("")).size !== 7) {
+      setError("All 7 letters must be distinct.");
+      return;
+    }
+    setSolving(true);
+    const result = await spellingBeeSolve(m, o);
+    if (result.length === 0) setError("No words match these letters.");
+    else setSpellingBeeResults(result);
+    setSolving(false);
   };
 
   const solveWordle = async () => {
@@ -228,10 +257,8 @@ function Index() {
 
         <div className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
-            const isActive =
-              s.id === "ladder"
-                ? mode !== "wordle"
-                : mode === "wordle";
+            const inSearch = mode === "wordle" || mode === "spellingbee";
+            const isActive = s.id === "search" ? inSearch : !inSearch;
             return (
               <button
                 key={s.id}
@@ -248,7 +275,7 @@ function Index() {
           })}
         </div>
 
-        {mode !== "wordle" && (
+        {mode !== "wordle" && mode !== "spellingbee" && (
           <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
             {LADDER_MODES.map((m) => {
               const isActive =
@@ -270,6 +297,31 @@ function Index() {
                 </button>
               );
             })}
+          </div>
+        )}
+
+        {(mode === "wordle" || mode === "spellingbee") && (
+          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
+            <button
+              onClick={() => switchMode("wordle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Wordle
+            </button>
+            <button
+              onClick={() => switchMode("spellingbee")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "spellingbee"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Spelling Bee
+            </button>
           </div>
         )}
 
@@ -371,6 +423,9 @@ function Index() {
               <a href="https://wordall.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word all</a>
             </>
           )}
+          {mode === "spellingbee" && (
+            <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
+          )}
         </div>
 
         {mode === "splice" && (
@@ -400,6 +455,12 @@ function Index() {
         {mode === "wordle" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Enter your guesses and click each tile to cycle GREY → YELLOW → GREEN. Get all 5-letter words consistent with the feedback.
+          </p>
+        )}
+
+        {mode === "spellingbee" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter the middle letter and the 6 outer letters. Find all valid 4+ letter words using only these 7 letters that include the middle letter, grouped by score.
           </p>
         )}
 
@@ -479,6 +540,30 @@ function Index() {
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
+          </div>
+        ) : mode === "spellingbee" ? (
+          <div className="grid gap-4 sm:items-end sm:grid-cols-[auto_1fr_auto]">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Middle letter</label>
+              <Input
+                value={spellingBeeMiddle}
+                onChange={(e) => setSpellingBeeMiddle(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 1))}
+                maxLength={1}
+                className="w-16 font-mono text-lg uppercase tracking-widest"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Other 6 letters</label>
+              <Input
+                value={spellingBeeOthers}
+                onChange={(e) => setSpellingBeeOthers(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6))}
+                maxLength={6}
+                className="font-mono text-lg uppercase tracking-widest"
+              />
+            </div>
+            <Button onClick={solveSpellingBee} disabled={solving} size="lg">
+              {solving ? "Solving..." : "Solve"}
+            </Button>
           </div>
         ) : (
           <div
@@ -674,6 +759,58 @@ function Index() {
             </div>
           </section>
         )}
+
+        {spellingBeeResults && (() => {
+          const totalWords = spellingBeeResults.reduce((n, [, ws]) => n + ws.length, 0);
+          const totalScore = spellingBeeResults.reduce((n, [score, ws]) => n + score * ws.length, 0);
+          return (
+            <section className="mt-10">
+              <div className="mb-2 text-base font-semibold">
+                Total score obtainable is {totalScore}.
+              </div>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">
+                  {totalWords} {totalWords === 1 ? "word" : "words"}
+                </h2>
+                <button
+                  onClick={() => {
+                    const items = spellingBeeResults
+                      .map(([score, words], i) => `${i + 1}. ${score} ${score === 1 ? "point" : "points"}: ${words.join(", ")}`)
+                      .join("\n");
+                    copyText(`Total score obtainable is ${totalScore}.\n\n${items}\n\nSolved via ${window.location.href}.`);
+                  }}
+                  className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                  aria-label="Copy all words"
+                >
+                  {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                </button>
+              </div>
+              <div className="space-y-4">
+                {spellingBeeResults.map(([score, words]) => (
+                  <div key={score} className="rounded-lg border bg-card p-4">
+                    <div className="mb-2 text-sm font-semibold text-muted-foreground">
+                      {score} {score === 1 ? "point" : "points"} · {words.length} {words.length === 1 ? "word" : "words"}
+                    </div>
+                    <div className="flex flex-wrap gap-2 font-mono text-sm">
+                      {words.map((w) => (
+                        <a
+                          key={w}
+                          href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                        >
+                          {w}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
 
 
       </div>
