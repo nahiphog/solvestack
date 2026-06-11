@@ -8,7 +8,7 @@ import graphPivots from "@/data/wordPivots.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
