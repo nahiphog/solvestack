@@ -80,10 +80,35 @@ function Index() {
     setPaths(null);
     setWordiplyResults(null);
     setWordleResults(null);
+    setSpellingBeeResults(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
     setGoal(d.goal);
+  };
+
+  const solveSpellingBee = async () => {
+    setError(null);
+    setSpellingBeeResults(null);
+    const m = spellingBeeMiddle.toUpperCase().replace(/[^A-Z]/g, "");
+    const o = spellingBeeOthers.toUpperCase().replace(/[^A-Z]/g, "");
+    if (m.length !== 1) {
+      setError("Middle letter must be exactly 1 letter.");
+      return;
+    }
+    if (o.length !== 6) {
+      setError("Other letters must be exactly 6 letters.");
+      return;
+    }
+    if (new Set((m + o).split("")).size !== 7) {
+      setError("All 7 letters must be distinct.");
+      return;
+    }
+    setSolving(true);
+    const result = await spellingBeeSolve(m, o);
+    if (result.length === 0) setError("No words match these letters.");
+    else setSpellingBeeResults(result);
+    setSolving(false);
   };
 
   const solveWordle = async () => {
