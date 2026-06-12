@@ -584,6 +584,9 @@ function Index() {
               <a href="https://play.woodle.today/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Woodle</a>
             </>
           )}
+          {mode === "marbless" && (
+            <a href="https://marbless.co/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Marbless</a>
+          )}
         </div>
 
         {mode === "craftwords" && (
