@@ -55,9 +55,9 @@ function Index() {
   const [spellingBeeMiddle, setSpellingBeeMiddle] = useState("T");
   const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
-  const [mastermindGuess, setMastermindGuess] = useState("WATER");
-  const [mastermindGreens, setMastermindGreens] = useState(4);
-  const [mastermindYellows, setMastermindYellows] = useState(0);
+  const [mastermindRows, setMastermindRows] = useState<{ word: string; greens: number; yellows: number }[]>([
+    { word: "WATER", greens: 4, yellows: 0 },
+  ]);
   const [mastermindResults, setMastermindResults] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
@@ -121,25 +121,61 @@ function Index() {
   const solveMastermind = async () => {
     setError(null);
     setMastermindResults(null);
-    const w = mastermindGuess.trim().toUpperCase();
-    if (w.length !== 5) {
-      setError("Guess must be exactly 5 letters.");
-      return;
-    }
-    if (!(await isValid5LetterWord(w))) {
-      setError(`"${w}" is not a valid 5-letter English word.`);
-      return;
-    }
-    const greys = 5 - mastermindGreens - mastermindYellows;
-    if (mastermindGreens < 0 || mastermindYellows < 0 || greys < 0) {
-      setError("Counts must be non-negative and sum to at most 5.");
-      return;
+    for (let i = 0; i < mastermindRows.length; i++) {
+      const row = mastermindRows[i];
+      const w = row.word.trim().toUpperCase();
+      if (w.length !== 5) {
+        setError(`Row ${i + 1}: guess must be exactly 5 letters.`);
+        return;
+      }
+      if (!(await isValid5LetterWord(w))) {
+        setError(`Row ${i + 1}: "${w}" is not a valid 5-letter English word.`);
+        return;
+      }
+      if (row.greens + row.yellows > 5) {
+        setError(`Row ${i + 1}: GREEN + YELLOW cannot exceed 5.`);
+        return;
+      }
     }
     setSolving(true);
-    const result = await mastermindSolve(w, mastermindGreens, mastermindYellows);
-    if (result.length === 0) setError("No words match these counts.");
-    else setMastermindResults(result);
+    const perRow = await Promise.all(
+      mastermindRows.map((r) => mastermindSolve(r.word.toUpperCase(), r.greens, r.yellows)),
+    );
+    const intersection = perRow.reduce<string[]>((acc, list, idx) => {
+      if (idx === 0) return list;
+      const s = new Set(list);
+      return acc.filter((w) => s.has(w));
+    }, []);
+    if (intersection.length === 0) setError("No words match these constraints.");
+    else setMastermindResults(intersection);
     setSolving(false);
+  };
+
+  const setMastermindLetter = (ri: number, ti: number, ch: string) => {
+    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    setMastermindRows((prev) =>
+      prev.map((r, i) => {
+        if (i !== ri) return r;
+        const padded = r.word.padEnd(5, " ").slice(0, 5).split("");
+        padded[ti] = c || " ";
+        return { ...r, word: padded.join("").replace(/ +$/, "") };
+      }),
+    );
+  };
+
+  const focusMastermindTile = (ri: number, ti: number) => {
+    if (ti < 0 || ti > 4) return;
+    const el = document.getElementById(`mastermind-tile-${ri}-${ti}`) as HTMLInputElement | null;
+    el?.focus();
+    el?.select();
+  };
+
+  const addMastermindRow = () => {
+    setMastermindRows((prev) => [...prev, { word: "", greens: 0, yellows: 0 }]);
+  };
+
+  const removeMastermindRow = (ri: number) => {
+    setMastermindRows((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== ri) : prev));
   };
 
 
@@ -636,41 +672,104 @@ function Index() {
             </Button>
           </div>
         ) : mode === "mastermind" ? (
-          <div className="grid gap-4 sm:items-end sm:grid-cols-[1fr_auto_auto_auto]">
-            <div>
-              <label className="mb-1 block text-sm font-medium">Guess</label>
-              <Input
-                value={mastermindGuess}
-                onChange={(e) => setMastermindGuess(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 5))}
-                maxLength={5}
-                className="font-mono text-lg uppercase tracking-widest"
-              />
+          <div className="space-y-4">
+            {mastermindRows.map((row, ri) => (
+              <div key={ri} className="flex flex-wrap items-end gap-3">
+                <div>
+                  {ri === 0 && <label className="mb-1 block text-sm font-medium">Guess</label>}
+                  <div className="flex gap-1.5">
+                    {Array.from({ length: 5 }).map((_, ti) => {
+                      const letter = row.word[ti] && row.word[ti] !== " " ? row.word[ti] : "";
+                      return (
+                        <input
+                          key={ti}
+                          id={`mastermind-tile-${ri}-${ti}`}
+                          type="text"
+                          inputMode="text"
+                          autoComplete="off"
+                          value={letter}
+                          aria-label={`Row ${ri + 1} tile ${ti + 1}`}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onChange={(e) => {
+                            const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                            if (!v) {
+                              setMastermindLetter(ri, ti, "");
+                              return;
+                            }
+                            setMastermindLetter(ri, ti, v.slice(-1));
+                            if (ti < 4) focusMastermindTile(ri, ti + 1);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Backspace") {
+                              if (!letter && ti > 0) {
+                                e.preventDefault();
+                                focusMastermindTile(ri, ti - 1);
+                              }
+                            } else if (e.key === "ArrowLeft") {
+                              e.preventDefault();
+                              focusMastermindTile(ri, ti - 1);
+                            } else if (e.key === "ArrowRight") {
+                              e.preventDefault();
+                              focusMastermindTile(ri, ti + 1);
+                            }
+                          }}
+                          className="flex h-12 w-12 items-center justify-center rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold uppercase text-foreground outline-none transition focus:ring-2 focus:ring-ring"
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  {ri === 0 && <label className="mb-1 block text-sm font-medium">GREEN</label>}
+                  <select
+                    value={row.greens}
+                    onChange={(e) =>
+                      setMastermindRows((prev) =>
+                        prev.map((r, i) => (i === ri ? { ...r, greens: Number(e.target.value) } : r)),
+                      )
+                    }
+                    className="h-12 w-20 rounded border-2 border-green-600 bg-green-600 px-2 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    {[0, 1, 2, 3, 4, 5].map((n) => (
+                      <option key={n} value={n} className="bg-background text-foreground">
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  {ri === 0 && <label className="mb-1 block text-sm font-medium">YELLOW</label>}
+                  <select
+                    value={row.yellows}
+                    onChange={(e) =>
+                      setMastermindRows((prev) =>
+                        prev.map((r, i) => (i === ri ? { ...r, yellows: Number(e.target.value) } : r)),
+                      )
+                    }
+                    className="h-12 w-20 rounded border-2 border-yellow-500 bg-yellow-500 px-2 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    {[0, 1, 2, 3, 4, 5].map((n) => (
+                      <option key={n} value={n} className="bg-background text-foreground">
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {mastermindRows.length > 1 && (
+                  <Button onClick={() => removeMastermindRow(ri)} variant="outline" size="sm">
+                    Remove
+                  </Button>
+                )}
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={addMastermindRow} variant="outline" size="lg">
+                Add guess
+              </Button>
+              <Button onClick={solveMastermind} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">GREEN</label>
-              <Input
-                type="number"
-                min={0}
-                max={5}
-                value={mastermindGreens}
-                onChange={(e) => setMastermindGreens(Math.max(0, Math.min(5, Number(e.target.value) || 0)))}
-                className="w-20 font-mono text-lg"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">YELLOW</label>
-              <Input
-                type="number"
-                min={0}
-                max={5}
-                value={mastermindYellows}
-                onChange={(e) => setMastermindYellows(Math.max(0, Math.min(5, Number(e.target.value) || 0)))}
-                className="w-20 font-mono text-lg"
-              />
-            </div>
-            <Button onClick={solveMastermind} disabled={solving} size="lg">
-              {solving ? "Solving..." : "Solve"}
-            </Button>
           </div>
         ) : (
           <div
