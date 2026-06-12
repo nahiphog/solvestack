@@ -9,7 +9,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords" | "mastermind";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords" | "mastermind" | "marbless";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -34,6 +34,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   wordle: 5,
   craftwords: 0,
   mastermind: 5,
+  marbless: 0,
 };
 
 
@@ -109,6 +110,63 @@ export async function mastermindSolve(
     return gc === greens && yc === yellows;
   });
 }
+
+export type MarblessSolution = { words: string[]; moves: number[] };
+
+export async function marblessSolve(columns: string[][]): Promise<MarblessSolution[]> {
+  const numCols = columns.length;
+  if (numCols < 2 || numCols > 4) return [];
+  const lettersPerCol = 5;
+  for (const c of columns) if (c.length !== lettersPerCol) return [];
+  const cols = columns.map((c) => c.map((x) => x.toUpperCase()));
+  const words = await getFiveLetterWords();
+  const wordSet = new Set(words);
+  const prefixes = new Set<string>();
+  prefixes.add("");
+  for (const w of words) for (let i = 1; i <= 5; i++) prefixes.add(w.slice(0, i));
+
+  const total = numCols * lettersPerCol;
+  const results: MarblessSolution[] = [];
+  const positions = new Array(numCols).fill(0);
+  const letters: string[] = [];
+  const moves: number[] = [];
+
+  const backtrack = () => {
+    const n = letters.length;
+    const completed = Math.floor(n / 5);
+    // Validate last completed word if just completed
+    if (n > 0 && n % 5 === 0) {
+      const w = letters.slice(5 * (completed - 1), 5 * completed).join("");
+      if (!wordSet.has(w)) return;
+    } else if (n > 0) {
+      const partialLen = n % 5;
+      const partial = letters.slice(n - partialLen).join("");
+      if (!prefixes.has(partial)) return;
+    }
+    if (n === total) {
+      const ws: string[] = [];
+      for (let i = 0; i < total / 5; i++) ws.push(letters.slice(5 * i, 5 * i + 5).join(""));
+      results.push({ words: ws, moves: moves.slice() });
+      return;
+    }
+    for (let col = 0; col < numCols; col++) {
+      if (positions[col] < lettersPerCol) {
+        const ch = cols[col][positions[col]];
+        positions[col]++;
+        letters.push(ch);
+        moves.push(col + 1);
+        backtrack();
+        letters.pop();
+        moves.pop();
+        positions[col]--;
+      }
+    }
+  };
+  backtrack();
+  return results;
+}
+
+
 
 export function formatPivotsWord(curr: string, bracket: [number, number] | null): string {
   if (!bracket) return curr;

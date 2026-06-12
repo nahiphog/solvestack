@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type Mode, type WordleColor } from "@/lib/wordLadder";
+import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type MarblessSolution, type Mode, type WordleColor } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon } from "lucide-react";
@@ -38,6 +38,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   spellingbee: { start: "T", goal: "OWERAB" },
   craftwords: { start: "BREAK", goal: "EVEN" },
   mastermind: { start: "WATER", goal: "" },
+  marbless: { start: "", goal: "" },
 };
 
 
@@ -59,6 +60,11 @@ function Index() {
     { word: "WATER", greens: 4, yellows: 0 },
   ]);
   const [mastermindResults, setMastermindResults] = useState<string[] | null>(null);
+  const [marblessColumns, setMarblessColumns] = useState<string[][]>([
+    ["I", "G", "H", "Y", "R"],
+    ["B", "R", "N", "D", "O"],
+  ]);
+  const [marblessResults, setMarblessResults] = useState<MarblessSolution[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -88,6 +94,7 @@ function Index() {
     setWordleResults(null);
     setSpellingBeeResults(null);
     setMastermindResults(null);
+    setMarblessResults(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
@@ -177,6 +184,50 @@ function Index() {
   const removeMastermindRow = (ri: number) => {
     setMastermindRows((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== ri) : prev));
   };
+
+  const setMarblessLetter = (col: number, row: number, ch: string) => {
+    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    setMarblessColumns((prev) =>
+      prev.map((column, ci) =>
+        ci === col ? column.map((x, ri) => (ri === row ? c : x)) : column,
+      ),
+    );
+  };
+
+  const focusMarblessTile = (col: number, row: number) => {
+    if (col < 0 || col >= marblessColumns.length || row < 0 || row > 4) return;
+    const el = document.getElementById(`marbless-tile-${col}-${row}`) as HTMLInputElement | null;
+    el?.focus();
+    el?.select();
+  };
+
+  const addMarblessColumn = () => {
+    setMarblessColumns((prev) => (prev.length < 4 ? [...prev, ["", "", "", "", ""]] : prev));
+  };
+
+  const removeMarblessColumn = () => {
+    setMarblessColumns((prev) => (prev.length > 2 ? prev.slice(0, -1) : prev));
+  };
+
+  const solveMarbless = async () => {
+    setError(null);
+    setMarblessResults(null);
+    for (let c = 0; c < marblessColumns.length; c++) {
+      for (let r = 0; r < 5; r++) {
+        if (!marblessColumns[c][r] || !/^[A-Z]$/.test(marblessColumns[c][r])) {
+          setError(`Column ${c + 1}, row ${r + 1}: please enter a letter.`);
+          return;
+        }
+      }
+    }
+    setSolving(true);
+    const result = await marblessSolve(marblessColumns);
+    if (result.length === 0) setError("No valid word sequences found.");
+    else setMarblessResults(result);
+    setSolving(false);
+  };
+
+
 
 
   const solveWordle = async () => {
@@ -325,7 +376,7 @@ function Index() {
 
         <div className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
-            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind";
+            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless";
             const isActive = s.id === "search" ? inSearch : !inSearch;
             return (
               <button
@@ -343,7 +394,7 @@ function Index() {
           })}
         </div>
 
-        {mode !== "wordle" && mode !== "spellingbee" && mode !== "mastermind" && (
+        {mode !== "wordle" && mode !== "spellingbee" && mode !== "mastermind" && mode !== "marbless" && (
           <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
             {LADDER_MODES.map((m) => {
               const isActive =
@@ -368,7 +419,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "spellingbee" || mode === "mastermind") && (
+        {(mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("wordle")}
@@ -399,6 +450,16 @@ function Index() {
               }`}
             >
               Mastermind
+            </button>
+            <button
+              onClick={() => switchMode("marbless")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "marbless"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Marbless
             </button>
           </div>
         )}
@@ -523,6 +584,9 @@ function Index() {
               <a href="https://play.woodle.today/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Woodle</a>
             </>
           )}
+          {mode === "marbless" && (
+            <a href="https://marbless.co/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Marbless</a>
+          )}
         </div>
 
         {mode === "craftwords" && (
@@ -570,6 +634,12 @@ function Index() {
         {mode === "mastermind" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Enter a 5-letter guess and the totals of GREEN (correct placements) and YELLOW (wrong placements). Find all 5-letter words consistent with those totals.
+          </p>
+        )}
+
+        {mode === "marbless" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Set up 2 to 4 columns of 5 letters each. Each move removes the top (leftmost) letter from any column. Find all orderings that spell valid 5-letter English words.
           </p>
         )}
 
@@ -790,6 +860,81 @@ function Index() {
                 Reset
               </Button>
               <Button onClick={solveMastermind} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
+        ) : mode === "marbless" ? (
+          <div className="space-y-4">
+            <div className="flex gap-3">
+              {marblessColumns.map((col, ci) => (
+                <div key={ci} className="flex flex-col gap-1.5">
+                  <div className="mb-1 text-center text-xs font-medium text-muted-foreground">
+                    Col {ci + 1}
+                  </div>
+                  {col.map((letter, ri) => (
+                    <input
+                      key={ri}
+                      id={`marbless-tile-${ci}-${ri}`}
+                      type="text"
+                      inputMode="text"
+                      autoComplete="off"
+                      value={letter}
+                      aria-label={`Column ${ci + 1} row ${ri + 1}`}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                        if (!v) {
+                          setMarblessLetter(ci, ri, "");
+                          return;
+                        }
+                        setMarblessLetter(ci, ri, v.slice(-1));
+                        if (ri < 4) focusMarblessTile(ci, ri + 1);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Backspace") {
+                          if (!letter && ri > 0) {
+                            e.preventDefault();
+                            focusMarblessTile(ci, ri - 1);
+                          }
+                        } else if (e.key === "ArrowUp") {
+                          e.preventDefault();
+                          focusMarblessTile(ci, ri - 1);
+                        } else if (e.key === "ArrowDown") {
+                          e.preventDefault();
+                          focusMarblessTile(ci, ri + 1);
+                        } else if (e.key === "ArrowLeft") {
+                          e.preventDefault();
+                          focusMarblessTile(ci - 1, ri);
+                        } else if (e.key === "ArrowRight") {
+                          e.preventDefault();
+                          focusMarblessTile(ci + 1, ri);
+                        }
+                      }}
+                      className="flex h-12 w-12 items-center justify-center rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold uppercase text-foreground outline-none transition focus:ring-2 focus:ring-ring"
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={addMarblessColumn}
+                variant="outline"
+                size="lg"
+                disabled={marblessColumns.length >= 4}
+              >
+                Add column
+              </Button>
+              <Button
+                onClick={removeMarblessColumn}
+                variant="outline"
+                size="lg"
+                disabled={marblessColumns.length <= 2}
+              >
+                Remove column
+              </Button>
+              <Button onClick={solveMarbless} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
@@ -1074,10 +1219,41 @@ function Index() {
           </section>
         )}
 
-
-
+        {marblessResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {marblessResults.length} {marblessResults.length === 1 ? "solution" : "solutions"}
+              </h2>
+              <button
+                onClick={() => {
+                  const items = marblessResults
+                    .map((s, i) => `${i + 1}. ${s.words.join(" ")} · moves: ${s.moves.join(",")}`)
+                    .join("\n");
+                  copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all solutions"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <ol className="space-y-3">
+              {marblessResults.map((sol, i) => (
+                <li key={i} className="rounded-lg border bg-card p-4 font-mono text-card-foreground">
+                  <span className="mr-3 text-xs text-muted-foreground">#{i + 1}</span>
+                  <span className="font-semibold tracking-widest">{sol.words.join(" ")}</span>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    moves: {sol.moves.join(", ")}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
       </div>
+
     </div>
   );
 }
