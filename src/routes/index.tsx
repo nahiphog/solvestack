@@ -36,6 +36,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   wordiply: { start: "TOWER", goal: "" },
   wordle: { start: "TOWER", goal: "" },
   spellingbee: { start: "T", goal: "OWERAB" },
+  craftwords: { start: "BREAK", goal: "EVEN" },
 };
 
 
