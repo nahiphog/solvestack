@@ -185,6 +185,50 @@ function Index() {
     setMastermindRows((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== ri) : prev));
   };
 
+  const setMarblessLetter = (col: number, row: number, ch: string) => {
+    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    setMarblessColumns((prev) =>
+      prev.map((column, ci) =>
+        ci === col ? column.map((x, ri) => (ri === row ? c : x)) : column,
+      ),
+    );
+  };
+
+  const focusMarblessTile = (col: number, row: number) => {
+    if (col < 0 || col >= marblessColumns.length || row < 0 || row > 4) return;
+    const el = document.getElementById(`marbless-tile-${col}-${row}`) as HTMLInputElement | null;
+    el?.focus();
+    el?.select();
+  };
+
+  const addMarblessColumn = () => {
+    setMarblessColumns((prev) => (prev.length < 4 ? [...prev, ["", "", "", "", ""]] : prev));
+  };
+
+  const removeMarblessColumn = () => {
+    setMarblessColumns((prev) => (prev.length > 2 ? prev.slice(0, -1) : prev));
+  };
+
+  const solveMarbless = async () => {
+    setError(null);
+    setMarblessResults(null);
+    for (let c = 0; c < marblessColumns.length; c++) {
+      for (let r = 0; r < 5; r++) {
+        if (!marblessColumns[c][r] || !/^[A-Z]$/.test(marblessColumns[c][r])) {
+          setError(`Column ${c + 1}, row ${r + 1}: please enter a letter.`);
+          return;
+        }
+      }
+    }
+    setSolving(true);
+    const result = await marblessSolve(marblessColumns);
+    if (result.length === 0) setError("No valid word sequences found.");
+    else setMarblessResults(result);
+    setSolving(false);
+  };
+
+
+
 
   const solveWordle = async () => {
     setError(null);
