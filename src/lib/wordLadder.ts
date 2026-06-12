@@ -85,7 +85,25 @@ export function pivotsBracketRange(prev: string, curr: string): [number, number]
     const c = curr.slice(i, i + 4);
     if (p.split("").reverse().join("") === c) {
       return [i, i + 3];
+}
+
+export async function mastermindSolve(
+  guess: string,
+  greens: number,
+  yellows: number,
+): Promise<string[]> {
+  const g = guess.toUpperCase();
+  if (g.length !== 5) return [];
+  const words = await getFiveLetterWords();
+  return words.filter((answer) => {
+    const out = wordleOutput(g, answer);
+    let gc = 0, yc = 0;
+    for (const c of out) {
+      if (c === "GREEN") gc++;
+      else if (c === "YELLOW") yc++;
     }
+    return gc === greens && yc === yellows;
+  });
   }
   return null;
 }
