@@ -4,11 +4,12 @@ import graph6 from "@/data/wordLadder6.json";
 import graphSplice from "@/data/wordSplice.json";
 import graphWeaverX from "@/data/wordWeaverX.json";
 import graphPivots from "@/data/wordPivots.json";
+import graphCraftWords from "@/data/wordCraftWords.json";
 
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -18,6 +19,7 @@ const GRAPHS: Record<string, Graph> = {
   splice: graphSplice as Graph,
   weaverx: graphWeaverX as Graph,
   pivots: graphPivots as Graph,
+  craftwords: graphCraftWords as Graph,
 };
 
 // 0 means variable length (no length validation)
@@ -30,6 +32,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   pivots: 6,
   wordiply: 0,
   wordle: 5,
+  craftwords: 0,
 };
 
 
