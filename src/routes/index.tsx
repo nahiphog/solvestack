@@ -121,25 +121,61 @@ function Index() {
   const solveMastermind = async () => {
     setError(null);
     setMastermindResults(null);
-    const w = mastermindGuess.trim().toUpperCase();
-    if (w.length !== 5) {
-      setError("Guess must be exactly 5 letters.");
-      return;
-    }
-    if (!(await isValid5LetterWord(w))) {
-      setError(`"${w}" is not a valid 5-letter English word.`);
-      return;
-    }
-    const greys = 5 - mastermindGreens - mastermindYellows;
-    if (mastermindGreens < 0 || mastermindYellows < 0 || greys < 0) {
-      setError("Counts must be non-negative and sum to at most 5.");
-      return;
+    for (let i = 0; i < mastermindRows.length; i++) {
+      const row = mastermindRows[i];
+      const w = row.word.trim().toUpperCase();
+      if (w.length !== 5) {
+        setError(`Row ${i + 1}: guess must be exactly 5 letters.`);
+        return;
+      }
+      if (!(await isValid5LetterWord(w))) {
+        setError(`Row ${i + 1}: "${w}" is not a valid 5-letter English word.`);
+        return;
+      }
+      if (row.greens + row.yellows > 5) {
+        setError(`Row ${i + 1}: GREEN + YELLOW cannot exceed 5.`);
+        return;
+      }
     }
     setSolving(true);
-    const result = await mastermindSolve(w, mastermindGreens, mastermindYellows);
-    if (result.length === 0) setError("No words match these counts.");
-    else setMastermindResults(result);
+    const perRow = await Promise.all(
+      mastermindRows.map((r) => mastermindSolve(r.word.toUpperCase(), r.greens, r.yellows)),
+    );
+    const intersection = perRow.reduce<string[]>((acc, list, idx) => {
+      if (idx === 0) return list;
+      const s = new Set(list);
+      return acc.filter((w) => s.has(w));
+    }, []);
+    if (intersection.length === 0) setError("No words match these constraints.");
+    else setMastermindResults(intersection);
     setSolving(false);
+  };
+
+  const setMastermindLetter = (ri: number, ti: number, ch: string) => {
+    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    setMastermindRows((prev) =>
+      prev.map((r, i) => {
+        if (i !== ri) return r;
+        const padded = r.word.padEnd(5, " ").slice(0, 5).split("");
+        padded[ti] = c || " ";
+        return { ...r, word: padded.join("").replace(/ +$/, "") };
+      }),
+    );
+  };
+
+  const focusMastermindTile = (ri: number, ti: number) => {
+    if (ti < 0 || ti > 4) return;
+    const el = document.getElementById(`mastermind-tile-${ri}-${ti}`) as HTMLInputElement | null;
+    el?.focus();
+    el?.select();
+  };
+
+  const addMastermindRow = () => {
+    setMastermindRows((prev) => [...prev, { word: "", greens: 0, yellows: 0 }]);
+  };
+
+  const removeMastermindRow = (ri: number) => {
+    setMastermindRows((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== ri) : prev));
   };
 
 
