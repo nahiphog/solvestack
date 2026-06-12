@@ -307,7 +307,7 @@ function Index() {
           })}
         </div>
 
-        {mode !== "wordle" && mode !== "spellingbee" && (
+        {mode !== "wordle" && mode !== "spellingbee" && mode !== "mastermind" && (
           <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
             {LADDER_MODES.map((m) => {
               const isActive =
