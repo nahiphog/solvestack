@@ -94,6 +94,7 @@ function Index() {
     setWordleResults(null);
     setSpellingBeeResults(null);
     setMastermindResults(null);
+    setMarblessResults(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
