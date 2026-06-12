@@ -201,13 +201,6 @@ function Index() {
     el?.select();
   };
 
-  const addMarblessColumn = () => {
-    setMarblessColumns((prev) => (prev.length < 4 ? [...prev, ["", "", "", "", ""]] : prev));
-  };
-
-  const removeMarblessColumn = () => {
-    setMarblessColumns((prev) => (prev.length > 2 ? prev.slice(0, -1) : prev));
-  };
 
   const solveMarbless = async () => {
     setError(null);
