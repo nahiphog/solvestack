@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type Mode, type WordleColor } from "@/lib/wordLadder";
+import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type Mode, type WordleColor } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon } from "lucide-react";
