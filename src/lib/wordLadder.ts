@@ -164,6 +164,9 @@ export async function marblessSolve(columns: string[][]): Promise<MarblessSoluti
   };
   backtrack();
   return results;
+}
+
+
 
 export function formatPivotsWord(curr: string, bracket: [number, number] | null): string {
   if (!bracket) return curr;
