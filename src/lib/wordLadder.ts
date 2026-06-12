@@ -33,6 +33,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   wordiply: 0,
   wordle: 5,
   craftwords: 0,
+  mastermind: 5,
 };
 
 
