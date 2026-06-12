@@ -518,7 +518,10 @@ function Index() {
             <a href="https://craftword.game/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Craft Words</a>
           )}
           {mode === "mastermind" && (
-            <a href="https://word500.com/game?mode=daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word500</a>
+            <>
+              <a href="https://word500.com/game?mode=daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word500</a>
+              <a href="https://play.woodle.today/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Woodle</a>
+            </>
           )}
         </div>
 
@@ -641,6 +644,16 @@ function Index() {
             <div className="flex flex-wrap gap-3">
               <Button onClick={addGuessRow} variant="outline" size="lg">
                 Add guess
+              </Button>
+              <Button
+                onClick={() => {
+                  setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                  setWordleResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
               </Button>
               <Button onClick={solveWordle} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
@@ -765,6 +778,16 @@ function Index() {
             <div className="flex flex-wrap gap-3">
               <Button onClick={addMastermindRow} variant="outline" size="lg">
                 Add guess
+              </Button>
+              <Button
+                onClick={() => {
+                  setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
+                  setMastermindResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
               </Button>
               <Button onClick={solveMastermind} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
