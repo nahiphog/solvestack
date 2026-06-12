@@ -419,7 +419,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "spellingbee" || mode === "mastermind") && (
+        {(mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("wordle")}
@@ -450,6 +450,16 @@ function Index() {
               }`}
             >
               Mastermind
+            </button>
+            <button
+              onClick={() => switchMode("marbless")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "marbless"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Marbless
             </button>
           </div>
         )}
