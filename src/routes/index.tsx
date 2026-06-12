@@ -864,6 +864,81 @@ function Index() {
               </Button>
             </div>
           </div>
+        ) : mode === "marbless" ? (
+          <div className="space-y-4">
+            <div className="flex gap-3">
+              {marblessColumns.map((col, ci) => (
+                <div key={ci} className="flex flex-col gap-1.5">
+                  <div className="mb-1 text-center text-xs font-medium text-muted-foreground">
+                    Col {ci + 1}
+                  </div>
+                  {col.map((letter, ri) => (
+                    <input
+                      key={ri}
+                      id={`marbless-tile-${ci}-${ri}`}
+                      type="text"
+                      inputMode="text"
+                      autoComplete="off"
+                      value={letter}
+                      aria-label={`Column ${ci + 1} row ${ri + 1}`}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                        if (!v) {
+                          setMarblessLetter(ci, ri, "");
+                          return;
+                        }
+                        setMarblessLetter(ci, ri, v.slice(-1));
+                        if (ri < 4) focusMarblessTile(ci, ri + 1);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Backspace") {
+                          if (!letter && ri > 0) {
+                            e.preventDefault();
+                            focusMarblessTile(ci, ri - 1);
+                          }
+                        } else if (e.key === "ArrowUp") {
+                          e.preventDefault();
+                          focusMarblessTile(ci, ri - 1);
+                        } else if (e.key === "ArrowDown") {
+                          e.preventDefault();
+                          focusMarblessTile(ci, ri + 1);
+                        } else if (e.key === "ArrowLeft") {
+                          e.preventDefault();
+                          focusMarblessTile(ci - 1, ri);
+                        } else if (e.key === "ArrowRight") {
+                          e.preventDefault();
+                          focusMarblessTile(ci + 1, ri);
+                        }
+                      }}
+                      className="flex h-12 w-12 items-center justify-center rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold uppercase text-foreground outline-none transition focus:ring-2 focus:ring-ring"
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={addMarblessColumn}
+                variant="outline"
+                size="lg"
+                disabled={marblessColumns.length >= 4}
+              >
+                Add column
+              </Button>
+              <Button
+                onClick={removeMarblessColumn}
+                variant="outline"
+                size="lg"
+                disabled={marblessColumns.length <= 2}
+              >
+                Remove column
+              </Button>
+              <Button onClick={solveMarbless} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
         ) : (
           <div
             className={`grid gap-4 sm:items-end ${
