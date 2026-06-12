@@ -55,9 +55,9 @@ function Index() {
   const [spellingBeeMiddle, setSpellingBeeMiddle] = useState("T");
   const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
-  const [mastermindGuess, setMastermindGuess] = useState("WATER");
-  const [mastermindGreens, setMastermindGreens] = useState(4);
-  const [mastermindYellows, setMastermindYellows] = useState(0);
+  const [mastermindRows, setMastermindRows] = useState<{ word: string; greens: number; yellows: number }[]>([
+    { word: "WATER", greens: 4, yellows: 0 },
+  ]);
   const [mastermindResults, setMastermindResults] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
