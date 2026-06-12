@@ -85,6 +85,9 @@ export function pivotsBracketRange(prev: string, curr: string): [number, number]
     const c = curr.slice(i, i + 4);
     if (p.split("").reverse().join("") === c) {
       return [i, i + 3];
+    }
+  }
+  return null;
 }
 
 export async function mastermindSolve(
@@ -104,8 +107,6 @@ export async function mastermindSolve(
     }
     return gc === greens && yc === yellows;
   });
-  }
-  return null;
 }
 
 export function formatPivotsWord(curr: string, bracket: [number, number] | null): string {
