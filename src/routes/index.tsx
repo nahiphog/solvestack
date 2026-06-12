@@ -1219,10 +1219,41 @@ function Index() {
           </section>
         )}
 
-
-
+        {marblessResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {marblessResults.length} {marblessResults.length === 1 ? "solution" : "solutions"}
+              </h2>
+              <button
+                onClick={() => {
+                  const items = marblessResults
+                    .map((s, i) => `${i + 1}. ${s.words.join(" ")} · moves: ${s.moves.join(",")}`)
+                    .join("\n");
+                  copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all solutions"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <ol className="space-y-3">
+              {marblessResults.map((sol, i) => (
+                <li key={i} className="rounded-lg border bg-card p-4 font-mono text-card-foreground">
+                  <span className="mr-3 text-xs text-muted-foreground">#{i + 1}</span>
+                  <span className="font-semibold tracking-widest">{sol.words.join(" ")}</span>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    moves: {sol.moves.join(", ")}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
       </div>
+
     </div>
   );
 }
