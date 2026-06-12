@@ -866,13 +866,37 @@ function Index() {
           </div>
         ) : mode === "marbless" ? (
           <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium">Number of columns:</label>
+              <select
+                value={marblessColumns.length}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  setMarblessColumns((prev) => {
+                    if (n === prev.length) return prev;
+                    if (n > prev.length) {
+                      const add = Array.from({ length: n - prev.length }, () => ["", "", "", "", ""]);
+                      return [...prev, ...add];
+                    }
+                    return prev.slice(0, n);
+                  });
+                }}
+                className="h-9 rounded border border-input bg-background px-2 text-sm"
+              >
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+              </select>
+            </div>
             <div className="flex gap-3">
               {marblessColumns.map((col, ci) => (
                 <div key={ci} className="flex flex-col gap-1.5">
                   <div className="mb-1 text-center text-xs font-medium text-muted-foreground">
                     Col {ci + 1}
                   </div>
-                  {col.map((letter, ri) => (
+                  {[4, 3, 2, 1, 0].map((ri) => {
+                    const letter = col[ri];
+                    return (
                     <input
                       key={ri}
                       id={`marbless-tile-${ci}-${ri}`}
@@ -880,7 +904,7 @@ function Index() {
                       inputMode="text"
                       autoComplete="off"
                       value={letter}
-                      aria-label={`Column ${ci + 1} row ${ri + 1}`}
+                      aria-label={`Column ${ci + 1} position ${ri + 1} from bottom`}
                       onFocus={(e) => e.currentTarget.select()}
                       onChange={(e) => {
                         const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
@@ -893,16 +917,16 @@ function Index() {
                       }}
                       onKeyDown={(e) => {
                         if (e.key === "Backspace") {
-                          if (!letter && ri > 0) {
+                          if (!letter && ri < 4) {
                             e.preventDefault();
-                            focusMarblessTile(ci, ri - 1);
+                            focusMarblessTile(ci, ri + 1);
                           }
                         } else if (e.key === "ArrowUp") {
                           e.preventDefault();
-                          focusMarblessTile(ci, ri - 1);
+                          focusMarblessTile(ci, ri + 1);
                         } else if (e.key === "ArrowDown") {
                           e.preventDefault();
-                          focusMarblessTile(ci, ri + 1);
+                          focusMarblessTile(ci, ri - 1);
                         } else if (e.key === "ArrowLeft") {
                           e.preventDefault();
                           focusMarblessTile(ci - 1, ri);
@@ -913,32 +937,18 @@ function Index() {
                       }}
                       className="flex h-12 w-12 items-center justify-center rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold uppercase text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                     />
-                  ))}
+                    );
+                  })}
                 </div>
               ))}
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button
-                onClick={addMarblessColumn}
-                variant="outline"
-                size="lg"
-                disabled={marblessColumns.length >= 4}
-              >
-                Add column
-              </Button>
-              <Button
-                onClick={removeMarblessColumn}
-                variant="outline"
-                size="lg"
-                disabled={marblessColumns.length <= 2}
-              >
-                Remove column
-              </Button>
               <Button onClick={solveMarbless} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
           </div>
+
         ) : (
           <div
             className={`grid gap-4 sm:items-end ${
