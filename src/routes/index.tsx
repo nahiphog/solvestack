@@ -37,6 +37,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   wordle: { start: "TOWER", goal: "" },
   spellingbee: { start: "T", goal: "OWERAB" },
   craftwords: { start: "BREAK", goal: "EVEN" },
+  mastermind: { start: "WATER", goal: "" },
 };
 
 
