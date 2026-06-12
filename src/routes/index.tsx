@@ -376,7 +376,7 @@ function Index() {
 
         <div className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
-            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind";
+            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless";
             const isActive = s.id === "search" ? inSearch : !inSearch;
             return (
               <button
