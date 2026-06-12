@@ -481,6 +481,9 @@ function Index() {
           {mode === "craftwords" && (
             <a href="https://craftword.game/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Craft Words</a>
           )}
+          {mode === "mastermind" && (
+            <a href="https://word500.com/game?mode=daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word500</a>
+          )}
         </div>
 
         {mode === "craftwords" && (
