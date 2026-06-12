@@ -635,6 +635,43 @@ function Index() {
               {solving ? "Solving..." : "Solve"}
             </Button>
           </div>
+        ) : mode === "mastermind" ? (
+          <div className="grid gap-4 sm:items-end sm:grid-cols-[1fr_auto_auto_auto]">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Guess</label>
+              <Input
+                value={mastermindGuess}
+                onChange={(e) => setMastermindGuess(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 5))}
+                maxLength={5}
+                className="font-mono text-lg uppercase tracking-widest"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">GREEN</label>
+              <Input
+                type="number"
+                min={0}
+                max={5}
+                value={mastermindGreens}
+                onChange={(e) => setMastermindGreens(Math.max(0, Math.min(5, Number(e.target.value) || 0)))}
+                className="w-20 font-mono text-lg"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">YELLOW</label>
+              <Input
+                type="number"
+                min={0}
+                max={5}
+                value={mastermindYellows}
+                onChange={(e) => setMastermindYellows(Math.max(0, Math.min(5, Number(e.target.value) || 0)))}
+                className="w-20 font-mono text-lg"
+              />
+            </div>
+            <Button onClick={solveMastermind} disabled={solving} size="lg">
+              {solving ? "Solving..." : "Solve"}
+            </Button>
+          </div>
         ) : (
           <div
             className={`grid gap-4 sm:items-end ${
