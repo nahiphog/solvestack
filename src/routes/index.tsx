@@ -642,6 +642,16 @@ function Index() {
               <Button onClick={addGuessRow} variant="outline" size="lg">
                 Add guess
               </Button>
+              <Button
+                onClick={() => {
+                  setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                  setWordleResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
               <Button onClick={solveWordle} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
               </Button>
