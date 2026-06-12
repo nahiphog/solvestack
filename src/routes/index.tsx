@@ -369,6 +369,16 @@ function Index() {
               Weaver X
             </button>
             <button
+              onClick={() => switchMode("craftwords")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "craftwords"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Craft Words
+            </button>
+            <button
               onClick={() => switchMode("pivots")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "pivots"
@@ -387,16 +397,6 @@ function Index() {
               }`}
             >
               Wordiply
-            </button>
-            <button
-              onClick={() => switchMode("craftwords")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "craftwords"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Craft Words
             </button>
           </div>
         )}
@@ -438,7 +438,7 @@ function Index() {
             <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
           )}
           {mode === "craftwords" && (
-            <a href="https://craftwords.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Craft Words</a>
+            <a href="https://craftword.game/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Craft Words</a>
           )}
         </div>
 
