@@ -282,7 +282,7 @@ function Index() {
               const isActive =
                 m.id === "classic"
                   ? mode === 4 || mode === 5 || mode === 6
-                  : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply";
+                  : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply" || mode === "craftwords";
 
               return (
                 <button
@@ -346,7 +346,7 @@ function Index() {
         )}
 
 
-        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply") && (
+        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply" || mode === "craftwords") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("splice")}
@@ -388,6 +388,16 @@ function Index() {
             >
               Wordiply
             </button>
+            <button
+              onClick={() => switchMode("craftwords")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "craftwords"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Craft Words
+            </button>
           </div>
         )}
 
@@ -427,7 +437,16 @@ function Index() {
           {mode === "spellingbee" && (
             <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
           )}
+          {mode === "craftwords" && (
+            <a href="https://craftwords.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Craft Words</a>
+          )}
         </div>
+
+        {mode === "craftwords" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Each move: replace one letter, add one letter, remove one letter, or permute the letters. Word lengths may vary.
+          </p>
+        )}
 
         {mode === "splice" && (
           <p className="mb-4 text-sm text-muted-foreground">
