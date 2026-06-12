@@ -118,6 +118,31 @@ function Index() {
     setSolving(false);
   };
 
+  const solveMastermind = async () => {
+    setError(null);
+    setMastermindResults(null);
+    const w = mastermindGuess.trim().toUpperCase();
+    if (w.length !== 5) {
+      setError("Guess must be exactly 5 letters.");
+      return;
+    }
+    if (!(await isValid5LetterWord(w))) {
+      setError(`"${w}" is not a valid 5-letter English word.`);
+      return;
+    }
+    const greys = 5 - mastermindGreens - mastermindYellows;
+    if (mastermindGreens < 0 || mastermindYellows < 0 || greys < 0) {
+      setError("Counts must be non-negative and sum to at most 5.");
+      return;
+    }
+    setSolving(true);
+    const result = await mastermindSolve(w, mastermindGreens, mastermindYellows);
+    if (result.length === 0) setError("No words match these counts.");
+    else setMastermindResults(result);
+    setSolving(false);
+  };
+
+
   const solveWordle = async () => {
     setError(null);
     setWordleResults(null);
