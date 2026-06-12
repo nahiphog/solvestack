@@ -776,6 +776,16 @@ function Index() {
               <Button onClick={addMastermindRow} variant="outline" size="lg">
                 Add guess
               </Button>
+              <Button
+                onClick={() => {
+                  setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
+                  setMastermindResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
               <Button onClick={solveMastermind} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
               </Button>
