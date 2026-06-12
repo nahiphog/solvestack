@@ -60,6 +60,11 @@ function Index() {
     { word: "WATER", greens: 4, yellows: 0 },
   ]);
   const [mastermindResults, setMastermindResults] = useState<string[] | null>(null);
+  const [marblessColumns, setMarblessColumns] = useState<string[][]>([
+    ["I", "G", "H", "Y", "R"],
+    ["B", "R", "N", "D", "O"],
+  ]);
+  const [marblessResults, setMarblessResults] = useState<MarblessSolution[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
