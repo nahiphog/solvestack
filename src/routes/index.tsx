@@ -637,6 +637,12 @@ function Index() {
           </p>
         )}
 
+        {mode === "marbless" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Set up 2 to 4 columns of 5 letters each. Each move removes the top (leftmost) letter from any column. Find all orderings that spell valid 5-letter English words.
+          </p>
+        )}
+
         {mode === "wordle" ? (
           <div className="space-y-4">
             {wordleGuesses.map((g, gi) => (
