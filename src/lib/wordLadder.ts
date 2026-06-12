@@ -9,7 +9,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords" | "mastermind";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -33,6 +33,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   wordiply: 0,
   wordle: 5,
   craftwords: 0,
+  mastermind: 5,
 };
 
 
@@ -88,6 +89,25 @@ export function pivotsBracketRange(prev: string, curr: string): [number, number]
     }
   }
   return null;
+}
+
+export async function mastermindSolve(
+  guess: string,
+  greens: number,
+  yellows: number,
+): Promise<string[]> {
+  const g = guess.toUpperCase();
+  if (g.length !== 5) return [];
+  const words = await getFiveLetterWords();
+  return words.filter((answer) => {
+    const out = wordleOutput(g, answer);
+    let gc = 0, yc = 0;
+    for (const c of out) {
+      if (c === "GREEN") gc++;
+      else if (c === "YELLOW") yc++;
+    }
+    return gc === greens && yc === yellows;
+  });
 }
 
 export function formatPivotsWord(curr: string, bracket: [number, number] | null): string {

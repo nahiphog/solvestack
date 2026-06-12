@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type Mode, type WordleColor } from "@/lib/wordLadder";
+import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type Mode, type WordleColor } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon } from "lucide-react";
@@ -37,6 +37,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   wordle: { start: "TOWER", goal: "" },
   spellingbee: { start: "T", goal: "OWERAB" },
   craftwords: { start: "BREAK", goal: "EVEN" },
+  mastermind: { start: "WATER", goal: "" },
 };
 
 
@@ -54,6 +55,10 @@ function Index() {
   const [spellingBeeMiddle, setSpellingBeeMiddle] = useState("T");
   const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
+  const [mastermindGuess, setMastermindGuess] = useState("WATER");
+  const [mastermindGreens, setMastermindGreens] = useState(4);
+  const [mastermindYellows, setMastermindYellows] = useState(0);
+  const [mastermindResults, setMastermindResults] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -82,6 +87,7 @@ function Index() {
     setWordiplyResults(null);
     setWordleResults(null);
     setSpellingBeeResults(null);
+    setMastermindResults(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
@@ -111,6 +117,31 @@ function Index() {
     else setSpellingBeeResults(result);
     setSolving(false);
   };
+
+  const solveMastermind = async () => {
+    setError(null);
+    setMastermindResults(null);
+    const w = mastermindGuess.trim().toUpperCase();
+    if (w.length !== 5) {
+      setError("Guess must be exactly 5 letters.");
+      return;
+    }
+    if (!(await isValid5LetterWord(w))) {
+      setError(`"${w}" is not a valid 5-letter English word.`);
+      return;
+    }
+    const greys = 5 - mastermindGreens - mastermindYellows;
+    if (mastermindGreens < 0 || mastermindYellows < 0 || greys < 0) {
+      setError("Counts must be non-negative and sum to at most 5.");
+      return;
+    }
+    setSolving(true);
+    const result = await mastermindSolve(w, mastermindGreens, mastermindYellows);
+    if (result.length === 0) setError("No words match these counts.");
+    else setMastermindResults(result);
+    setSolving(false);
+  };
+
 
   const solveWordle = async () => {
     setError(null);
@@ -258,7 +289,7 @@ function Index() {
 
         <div className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
-            const inSearch = mode === "wordle" || mode === "spellingbee";
+            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind";
             const isActive = s.id === "search" ? inSearch : !inSearch;
             return (
               <button
@@ -276,7 +307,7 @@ function Index() {
           })}
         </div>
 
-        {mode !== "wordle" && mode !== "spellingbee" && (
+        {mode !== "wordle" && mode !== "spellingbee" && mode !== "mastermind" && (
           <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
             {LADDER_MODES.map((m) => {
               const isActive =
@@ -301,7 +332,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "spellingbee") && (
+        {(mode === "wordle" || mode === "spellingbee" || mode === "mastermind") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("wordle")}
@@ -322,6 +353,16 @@ function Index() {
               }`}
             >
               Spelling Bee
+            </button>
+            <button
+              onClick={() => switchMode("mastermind")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "mastermind"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Mastermind
             </button>
           </div>
         )}
@@ -440,6 +481,9 @@ function Index() {
           {mode === "craftwords" && (
             <a href="https://craftword.game/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Craft Words</a>
           )}
+          {mode === "mastermind" && (
+            <a href="https://word500.com/game?mode=daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word500</a>
+          )}
         </div>
 
         {mode === "craftwords" && (
@@ -481,6 +525,12 @@ function Index() {
         {mode === "spellingbee" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Enter the middle letter and the 6 outer letters. Find all valid 4+ letter words using only these 7 letters that include the middle letter, grouped by score.
+          </p>
+        )}
+
+        {mode === "mastermind" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter a 5-letter guess and the totals of GREEN (correct placements) and YELLOW (wrong placements). Find all 5-letter words consistent with those totals.
           </p>
         )}
 
@@ -582,6 +632,43 @@ function Index() {
               />
             </div>
             <Button onClick={solveSpellingBee} disabled={solving} size="lg">
+              {solving ? "Solving..." : "Solve"}
+            </Button>
+          </div>
+        ) : mode === "mastermind" ? (
+          <div className="grid gap-4 sm:items-end sm:grid-cols-[1fr_auto_auto_auto]">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Guess</label>
+              <Input
+                value={mastermindGuess}
+                onChange={(e) => setMastermindGuess(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 5))}
+                maxLength={5}
+                className="font-mono text-lg uppercase tracking-widest"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">GREEN</label>
+              <Input
+                type="number"
+                min={0}
+                max={5}
+                value={mastermindGreens}
+                onChange={(e) => setMastermindGreens(Math.max(0, Math.min(5, Number(e.target.value) || 0)))}
+                className="w-20 font-mono text-lg"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">YELLOW</label>
+              <Input
+                type="number"
+                min={0}
+                max={5}
+                value={mastermindYellows}
+                onChange={(e) => setMastermindYellows(Math.max(0, Math.min(5, Number(e.target.value) || 0)))}
+                className="w-20 font-mono text-lg"
+              />
+            </div>
+            <Button onClick={solveMastermind} disabled={solving} size="lg">
               {solving ? "Solving..." : "Solve"}
             </Button>
           </div>
@@ -830,6 +917,41 @@ function Index() {
             </section>
           );
         })()}
+
+        {mastermindResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {mastermindResults.length} possible {mastermindResults.length === 1 ? "answer" : "answers"}
+              </h2>
+              <button
+                onClick={() => {
+                  copyText(`${mastermindResults.length} possible ${mastermindResults.length === 1 ? "answer" : "answers"}:\n${mastermindResults.join(", ")}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all answers"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex flex-wrap gap-2 font-mono text-sm">
+                {mastermindResults.map((w) => (
+                  <a
+                    key={w}
+                    href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                  >
+                    {w}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
 
 
 
