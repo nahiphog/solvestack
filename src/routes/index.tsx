@@ -1248,17 +1248,30 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
-            <ol className="space-y-3">
+            <ol className="space-y-4">
               {marblessResults.map((sol, i) => (
-                <li key={i} className="rounded-lg border bg-card p-4 font-mono text-card-foreground">
-                  <span className="mr-3 text-xs text-muted-foreground">#{i + 1}</span>
-                  <span className="font-semibold tracking-widest">{sol.words.join(" ")}</span>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    moves: {sol.moves.join(", ")}
-                  </div>
+                <li key={i} className="rounded-lg border bg-card p-4 text-card-foreground">
+                  <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
+                  <table className="w-full border-collapse font-mono text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="border-r px-3 py-2 text-left font-semibold">Word</th>
+                        <th className="px-3 py-2 text-left font-semibold">Moves</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sol.words.map((w, wi) => (
+                        <tr key={wi} className="border-b last:border-b-0">
+                          <td className="border-r px-3 py-2 font-semibold tracking-widest">{w}</td>
+                          <td className="px-3 py-2">{sol.moves.slice(wi * 5, wi * 5 + 5).join(", ")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </li>
               ))}
             </ol>
+
           </section>
         )}
 
