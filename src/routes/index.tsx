@@ -942,8 +942,9 @@ function Index() {
           </div>
         ) : mode === "spellingbee" ? (
           <div className="flex flex-col items-start gap-4">
-            <div className="flex items-center gap-2">
-              {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+            {(() => {
+              const FLAT_HEX = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
+              const renderTile = (i: number) => {
                 const isMiddle = i === 3;
                 const value = isMiddle
                   ? spellingBeeMiddle
@@ -969,9 +970,9 @@ function Index() {
                     key={i}
                     className="relative flex items-center justify-center"
                     style={{
-                      width: "64px",
-                      height: "72px",
-                      clipPath: HEX_CLIP,
+                      width: "72px",
+                      height: "64px",
+                      clipPath: FLAT_HEX,
                       backgroundColor: isMiddle ? "#eab308" : "#d4d4d8",
                     }}
                   >
@@ -986,8 +987,27 @@ function Index() {
                     />
                   </div>
                 );
-              })}
-            </div>
+              };
+              // Input order: 0=upper-left, 1=top, 2=upper-right, 3=middle, 4=lower-left, 5=bottom, 6=lower-right
+              return (
+                <div className="flex items-center" style={{ gap: 0 }}>
+                  <div className="flex flex-col" style={{ marginTop: "32px", gap: "4px" }}>
+                    {renderTile(0)}
+                    {renderTile(4)}
+                  </div>
+                  <div className="flex flex-col" style={{ marginLeft: "-18px", marginRight: "-18px", gap: "4px" }}>
+                    {renderTile(1)}
+                    {renderTile(3)}
+                    {renderTile(5)}
+                  </div>
+                  <div className="flex flex-col" style={{ marginTop: "32px", gap: "4px" }}>
+                    {renderTile(2)}
+                    {renderTile(6)}
+                  </div>
+                </div>
+              );
+            })()}
+
             <div className="flex flex-wrap gap-3">
               <Button
                 onClick={() => {
