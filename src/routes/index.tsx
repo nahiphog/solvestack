@@ -1204,15 +1204,33 @@ function Index() {
                     next?.select();
                   }
                 };
+                const TILE_W = 72;
+                const TILE_H = 64;
+                const R = 10;
+                // i: 0=top (0°), 1=upper-right (60°), 2=lower-right (120°),
+                // 3=middle, 4=bottom (180°), 5=lower-left (240°), 6=upper-left (300°)
+                const bearingByIndex: Record<number, number | null> = {
+                  0: 0, 1: 60, 2: 120, 3: null, 4: 180, 5: 240, 6: 300,
+                };
+                const bearing = bearingByIndex[i];
+                let dx = 0, dy = 0;
+                if (bearing !== null) {
+                  const rad = (bearing * Math.PI) / 180;
+                  dx = Math.sin(rad) * R;
+                  dy = -Math.cos(rad) * R;
+                }
                 return (
                   <div
                     key={i}
-                    className="relative flex items-center justify-center"
+                    className="absolute flex items-center justify-center"
                     style={{
-                      width: "72px",
-                      height: "64px",
+                      width: `${TILE_W}px`,
+                      height: `${TILE_H}px`,
+                      left: `calc(50% + ${dx}px - ${TILE_W / 2}px)`,
+                      top: `calc(50% + ${dy}px - ${TILE_H / 2}px)`,
                       clipPath: FLAT_HEX,
                       backgroundColor: isMiddle ? "#eab308" : "#d4d4d8",
+                      zIndex: isMiddle ? 1 : 0,
                     }}
                   >
                     <input
@@ -1227,22 +1245,9 @@ function Index() {
                   </div>
                 );
               };
-              // Input order: 0=upper-left, 1=top, 2=upper-right, 3=middle, 4=lower-left, 5=bottom, 6=lower-right
               return (
-                <div className="flex items-center" style={{ gap: 0 }}>
-                  <div className="flex flex-col" style={{ marginTop: "28px", gap: "4px" }}>
-                    {renderTile(0)}
-                    {renderTile(4)}
-                  </div>
-                  <div className="flex flex-col" style={{ marginLeft: "-18px", marginRight: "-18px", gap: "4px" }}>
-                    {renderTile(1)}
-                    {renderTile(3)}
-                    {renderTile(5)}
-                  </div>
-                  <div className="flex flex-col" style={{ marginTop: "28px", gap: "4px" }}>
-                    {renderTile(2)}
-                    {renderTile(6)}
-                  </div>
+                <div className="relative" style={{ width: "92px", height: "84px" }}>
+                  {[0, 1, 2, 3, 4, 5, 6].map((i) => renderTile(i))}
                 </div>
               );
             })()}
