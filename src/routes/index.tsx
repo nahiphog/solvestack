@@ -17,8 +17,8 @@ export const Route = createFileRoute("/")({
 });
 
 const SECTIONS: { id: "ladder" | "search" | "math"; label: string }[] = [
-  { id: "ladder", label: "Word ladder" },
   { id: "search", label: "Word search" },
+  { id: "ladder", label: "Word ladder" },
   { id: "math", label: "Mathematics" },
 ];
 
