@@ -407,6 +407,12 @@ function Index() {
         return;
       }
     }
+    for (const g of wordPeaksGuesses) {
+      if (g.pattern.some((p) => p === "NONE")) {
+        setError("Please set a shape for every tile (hollow yellow squares are not allowed).");
+        return;
+      }
+    }
     setSolving(true);
     const normalized = wordPeaksGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
     const result = await wordPeaksSolve(normalized);
@@ -419,9 +425,9 @@ function Index() {
     setWordPeaksGuesses((prev) =>
       prev.map((g, i) => {
         if (i !== gi) return g;
-        const order: WordPeaksDirection[] = ["CORRECT", "BEFORE", "AFTER"];
+        const order: WordPeaksDirection[] = ["NONE", "CORRECT", "BEFORE", "AFTER"];
         const next = [...g.pattern];
-        next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % 3];
+        next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % order.length];
         return { ...g, pattern: next };
       }),
     );
