@@ -1246,7 +1246,7 @@ function Index() {
                 );
               };
               return (
-                <div className="relative" style={{ width: "92px", height: "84px" }}>
+                <div className="relative" style={{ width: "260px", height: "280px" }}>
                   {[0, 1, 2, 3, 4, 5, 6].map((i) => renderTile(i))}
                 </div>
               );
