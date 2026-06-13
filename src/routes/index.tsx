@@ -1025,7 +1025,7 @@ function Index() {
               </Button>
               <Button
                 onClick={() => {
-                  setWordPeaksGuesses((prev) => prev.map((g) => ({ ...g, pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] as WordPeaksDirection[] })));
+                  setWordPeaksGuesses((prev) => prev.map((g) => ({ ...g, pattern: ["NONE", "NONE", "NONE", "NONE", "NONE"] as WordPeaksDirection[] })));
                   setWordPeaksResults(null);
                 }}
                 variant="outline"
