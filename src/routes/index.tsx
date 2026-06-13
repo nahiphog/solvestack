@@ -633,7 +633,7 @@ function Index() {
         <div className="mb-3 flex w-fit rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku";
-            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks";
+            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters";
             const inLadder = !isMath && !inSearch;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : inLadder;
             return (
