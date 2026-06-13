@@ -54,6 +54,10 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
 
 };
 
+const FL_FLIP_MAP: Record<string, string> = {
+  B: "Q", Q: "B", D: "P", P: "D", N: "U", U: "N", M: "W", W: "M",
+};
+
 
 function Paginator({ page, setPage, total, perPage = 50 }: { page: number; setPage: (n: number) => void; total: number; perPage?: number }) {
   const pages = Math.ceil(total / perPage);
