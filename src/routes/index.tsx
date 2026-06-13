@@ -437,7 +437,7 @@ function Index() {
         </div>
 
         {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
-          <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
+          <div className="mb-6 flex w-fit rounded-md border bg-muted p-1">
             {LADDER_MODES.map((m) => {
               const isActive =
                 m.id === "classic"
