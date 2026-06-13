@@ -9,7 +9,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -21,6 +21,24 @@ const GRAPHS: Record<string, Graph> = {
   pivots: graphPivots as Graph,
   craftwords: graphCraftWords as Graph,
 };
+
+// 0 means variable length (no length validation)
+export const MODE_WORD_LENGTH: Record<string, number> = {
+  "4": 4,
+  "5": 5,
+  "6": 6,
+  splice: 5,
+  weaverx: 0,
+  pivots: 6,
+  wordiply: 0,
+  wordle: 5,
+  craftwords: 0,
+  mastermind: 5,
+  marbless: 0,
+  dodeku: 0,
+  wordpeaks: 5,
+};
+
 
 // 0 means variable length (no length validation)
 export const MODE_WORD_LENGTH: Record<string, number> = {
