@@ -141,6 +141,8 @@ function Index() {
   useEffect(() => { setPagePaths(0); }, [paths]);
   useEffect(() => { setPageWordle(0); }, [wordleResults]);
   useEffect(() => { setPageMM(0); }, [mastermindResults]);
+  useEffect(() => { setPageWP(0); }, [wordPeaksResults]);
+
   useEffect(() => { setPageMarbless(0); }, [marblessResults]);
   useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
