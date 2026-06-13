@@ -104,6 +104,16 @@ function Index() {
     ["B", "R", "N", "D", "O"],
   ]);
   const [marblessResults, setMarblessResults] = useState<MarblessSolution[] | null>(null);
+  const [dodekuGrid, setDodekuGrid] = useState<string[][]>([
+    ["X", "X", "X", "1"],
+    ["X", "", "", ""],
+    ["", "", "", "11"],
+    ["", "4", "1", ""],
+  ]);
+  const [dodekuRowSums, setDodekuRowSums] = useState<string[]>(["5", "20", "35", ""]);
+  const [dodekuColSums, setDodekuColSums] = useState<string[]>(["8", "", "21", "32"]);
+  const [dodekuTiles, setDodekuTiles] = useState<string>("2,3,5,6,7,8,9,10,12");
+  const [dodekuResult, setDodekuResult] = useState<DodekuCell[][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -146,10 +156,44 @@ function Index() {
     setSpellingBeeResults(null);
     setMastermindResults(null);
     setMarblessResults(null);
+    setDodekuResult(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
     setGoal(d.goal);
+  };
+
+  const solveDodeku = () => {
+    setError(null);
+    setDodekuResult(null);
+    const initial: DodekuCell[][] = dodekuGrid.map((row) =>
+      row.map<DodekuCell>((v) => {
+        const s = v.trim();
+        if (s === "X" || s === "x") return "X";
+        if (s === "" || s === "0") return 0;
+        const n = parseInt(s, 10);
+        return Number.isFinite(n) ? n : 0;
+      }),
+    );
+    const rs = dodekuRowSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
+    const cs = dodekuColSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
+    const tiles = dodekuTiles
+      .split(/[\s,]+/)
+      .filter(Boolean)
+      .map((t) => parseInt(t, 10))
+      .filter((n) => Number.isFinite(n));
+    const emptyCount = initial.flat().filter((v) => v === 0).length;
+    if (tiles.length !== emptyCount) {
+      setError(`Number of tiles (${tiles.length}) must equal number of empty cells (${emptyCount}).`);
+      return;
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const res = dodekuSolve(initial, rs, cs, tiles);
+      if (!res) setError("No solution found.");
+      else setDodekuResult(res);
+      setSolving(false);
+    }, 0);
   };
 
   const solveSpellingBee = async () => {
