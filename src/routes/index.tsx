@@ -26,6 +26,11 @@ const LADDER_MODES: { id: string; label: string }[] = [
   { id: "miscellaneous", label: "Miscellaneous" },
 ];
 
+const SEARCH_MODES: { id: string; label: string }[] = [
+  { id: "wordle", label: "Wordle" },
+  { id: "miscellaneous", label: "Miscellaneous" },
+];
+
 const DEFAULTS: Record<string, { start: string; goal: string }> = {
   "4": { start: "DARK", goal: "POOP" },
   "5": { start: "FLOWN", goal: "BRAID" },
