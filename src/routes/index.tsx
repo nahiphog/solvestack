@@ -914,7 +914,126 @@ function Index() {
         )}
 
 
-        {mode === "wordle" ? (
+        {mode === "wordpeaks" ? (
+          <div className="space-y-4">
+            {wordPeaksGuesses.map((g, gi) => (
+              <div key={gi} className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  {Array.from({ length: 5 }).map((_, ti) => {
+                    const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
+                    const dir = g.pattern[ti];
+                    const bg =
+                      dir === "CORRECT"
+                        ? "#16a34a"
+                        : dir === "BEFORE"
+                          ? "#f97316"
+                          : "#7dd3fc";
+                    const clip =
+                      dir === "CORRECT"
+                        ? "none"
+                        : dir === "BEFORE"
+                          ? "polygon(50% 0%, 100% 100%, 0% 100%)"
+                          : "polygon(0% 0%, 100% 0%, 50% 100%)";
+                    return (
+                      <div
+                        key={ti}
+                        className="relative flex h-14 w-14 items-center justify-center"
+                        style={{ backgroundColor: bg, clipPath: clip === "none" ? undefined : clip, borderRadius: clip === "none" ? "0.25rem" : 0 }}
+                        onMouseDown={(e) => {
+                          const tgt = e.target as HTMLElement;
+                          if (tgt.tagName !== "INPUT") {
+                            e.preventDefault();
+                            cycleWPTile(gi, ti);
+                          }
+                        }}
+                      >
+                        <input
+                          id={`wp-tile-${gi}-${ti}`}
+                          type="text"
+                          inputMode="text"
+                          autoComplete="off"
+                          value={letter}
+                          aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${dir}`}
+                          onMouseDown={(e) => {
+                            if (document.activeElement === e.currentTarget) {
+                              e.preventDefault();
+                              cycleWPTile(gi, ti);
+                            }
+                          }}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onChange={(e) => {
+                            const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                            if (!v) {
+                              setWPLetter(gi, ti, "");
+                              return;
+                            }
+                            setWPLetter(gi, ti, v.slice(-1));
+                            if (ti < 4) focusWPTile(gi, ti + 1);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Backspace") {
+                              if (!letter && ti > 0) {
+                                e.preventDefault();
+                                focusWPTile(gi, ti - 1);
+                              }
+                            } else if (e.key === "ArrowLeft") {
+                              e.preventDefault();
+                              focusWPTile(gi, ti - 1);
+                            } else if (e.key === "ArrowRight") {
+                              e.preventDefault();
+                              focusWPTile(gi, ti + 1);
+                            } else if (e.key === " " || e.key === "Enter") {
+                              e.preventDefault();
+                              cycleWPTile(gi, ti);
+                            }
+                          }}
+                          style={{
+                            paddingTop: dir === "BEFORE" ? "16px" : dir === "AFTER" ? "0px" : "0px",
+                          }}
+                          className="h-full w-full bg-transparent text-center font-mono text-xl font-bold uppercase text-white caret-white outline-none"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                {wordPeaksGuesses.length > 1 && (
+                  <Button onClick={() => removeWPRow(gi)} variant="outline" size="sm">
+                    Remove
+                  </Button>
+                )}
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={addWPRow} variant="outline" size="lg">
+                Add guess
+              </Button>
+              <Button
+                onClick={() => {
+                  setWordPeaksGuesses([{ word: "", pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] }]);
+                  setWordPeaksResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button
+                onClick={() => {
+                  setWordPeaksGuesses((prev) => prev.map((g) => ({ ...g, pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] as WordPeaksDirection[] })));
+                  setWordPeaksResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset shapes only
+              </Button>
+              <Button onClick={solveWordPeaks} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
+        ) : mode === "wordle" ? (
+
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
               <span>Optional: Input</span>
