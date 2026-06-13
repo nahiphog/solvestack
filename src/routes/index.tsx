@@ -1289,7 +1289,7 @@ function Index() {
             </div>
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {mastermindResults.map((w) => (
+                {mastermindResults.slice(pageMM * 50, pageMM * 50 + 50).map((w) => (
                   <a
                     key={w}
                     href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
@@ -1302,6 +1302,7 @@ function Index() {
                 ))}
               </div>
             </div>
+            <Paginator page={pageMM} setPage={setPageMM} total={mastermindResults.length} />
           </section>
         )}
 
