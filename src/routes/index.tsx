@@ -103,7 +103,7 @@ function Index() {
   ]);
   const [mastermindResults, setMastermindResults] = useState<string[] | null>(null);
   const [wordPeaksGuesses, setWordPeaksGuesses] = useState<{ word: string; pattern: WordPeaksDirection[] }[]>([
-    { word: "PEDAL", pattern: ["AFTER", "CORRECT", "AFTER", "AFTER", "AFTER"] },
+    { word: "ONION", pattern: ["NONE", "NONE", "NONE", "NONE", "NONE"] },
   ]);
   const [wordPeaksResults, setWordPeaksResults] = useState<string[] | null>(null);
 
