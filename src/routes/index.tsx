@@ -930,11 +930,11 @@ function Index() {
                     const dir = g.pattern[ti];
                     const bg =
                       dir === "CORRECT"
-                        ? "#16a34a"
+                        ? "#32CD32"
                         : dir === "BEFORE"
-                          ? "#f97316"
+                          ? "#F4A460"
                           : dir === "AFTER"
-                            ? "#7dd3fc"
+                            ? "#4682B4"
                             : "transparent";
                     const clip =
                       dir === "BEFORE"
