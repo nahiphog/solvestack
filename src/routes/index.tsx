@@ -1111,6 +1111,16 @@ function Index() {
               >
                 Reset
               </Button>
+              <Button
+                onClick={() => {
+                  setMastermindRows((prev) => prev.map((r) => ({ ...r, greens: 0, yellows: 0 })));
+                  setMastermindResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset colors only
+              </Button>
               <Button onClick={solveMastermind} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
               </Button>
