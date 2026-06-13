@@ -108,7 +108,7 @@ function Index() {
   const [wordPeaksResults, setWordPeaksResults] = useState<string[] | null>(null);
 
   const [flLetters, setFlLetters] = useState<string[]>(["C","I","K","T","S","L","N","A","H","V"]);
-  const [flFlips, setFlFlips] = useState<string[]>(["","","","","","","U","E","",""]);
+  const [flRevealed, setFlRevealed] = useState<boolean[]>(Array(10).fill(false));
   const [flGuesses, setFlGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
     { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
