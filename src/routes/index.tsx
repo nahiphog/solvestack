@@ -842,7 +842,11 @@ function Index() {
           {mode === "dodeku" && (
             <a href="https://dodeku.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Dodeku</a>
           )}
+          {mode === "wordpeaks" && (
+            <a href="https://vegeta897.github.io/word-peaks/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Peaks</a>
+          )}
         </div>
+
 
         {mode === "craftwords" && (
           <p className="mb-4 text-sm text-muted-foreground">
