@@ -1090,7 +1090,7 @@ function Index() {
                         type="text"
                         inputMode="text"
                         autoComplete="off"
-                        value={letter}
+                        value={letter.toLowerCase()}
                         aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${color}`}
                         onMouseDown={(e) => {
                           if (document.activeElement === e.currentTarget) {
