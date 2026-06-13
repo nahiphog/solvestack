@@ -470,6 +470,82 @@ function Index() {
     setWordPeaksGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
   };
 
+  const cycleFlTile = (gi: number, ti: number) => {
+    setFlGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const order: WordleColor[] = ["GREY", "YELLOW", "GREEN"];
+        const next = [...g.pattern];
+        next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % 3];
+        return { ...g, pattern: next };
+      }),
+    );
+  };
+  const setFlLetter = (gi: number, ti: number, ch: string) => {
+    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    setFlGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const padded = g.word.padEnd(5, " ").slice(0, 5).split("");
+        padded[ti] = c || " ";
+        return { ...g, word: padded.join("").replace(/ +$/, "") };
+      }),
+    );
+  };
+  const focusFlTile = (gi: number, ti: number) => {
+    if (ti < 0 || ti > 4) return;
+    const el = document.getElementById(`fl-tile-${gi}-${ti}`) as HTMLInputElement | null;
+    el?.focus();
+    el?.select();
+  };
+  const addFlRow = () => {
+    setFlGuesses((prev) => [...prev, { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+  };
+  const removeFlRow = (gi: number) => {
+    setFlGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
+  };
+
+  const solveFlippingLetters = async () => {
+    setError(null);
+    setFlResults(null);
+    const letters = flLetters.map((l) => l.trim().toUpperCase()).filter(Boolean);
+    if (letters.length !== 10) {
+      setError("Please enter all 10 letters.");
+      return;
+    }
+    if (new Set(letters).size !== 10) {
+      setError("The 10 letters must be distinct.");
+      return;
+    }
+    const flips = flFlips.map((l) => l.trim().toUpperCase());
+    for (let i = 0; i < 10; i++) {
+      if (flips[i] && !/^[A-Z]$/.test(flips[i])) {
+        setError(`Flipped letter for "${letters[i]}" must be a single letter.`);
+        return;
+      }
+    }
+    const allowed = [...letters, ...flips.filter(Boolean)];
+    for (const g of flGuesses) {
+      const w = g.word.trim().toUpperCase();
+      if (w.length !== 5) {
+        setError("Each guess must be exactly 5 letters.");
+        return;
+      }
+      if (!(await isValid5LetterWord(w))) {
+        setError(`"${w}" is not a valid 5-letter English word.`);
+        return;
+      }
+    }
+    setSolving(true);
+    const normalized = flGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
+    const result = await flippingLettersSolve(allowed, normalized);
+    if (result.answers.length === 0) setError("No words match these constraints.");
+    setFlResults(result);
+    setSolving(false);
+  };
+
+
+
 
   const solve = () => {
     setError(null);
