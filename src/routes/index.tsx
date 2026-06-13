@@ -27,9 +27,11 @@ const LADDER_MODES: { id: string; label: string }[] = [
 ];
 
 const SEARCH_MODES: { id: string; label: string }[] = [
-  { id: "wordle", label: "Wordle" },
+  { id: "wordle", label: "Classic" },
   { id: "miscellaneous", label: "Miscellaneous" },
 ];
+
+const HEX_CLIP = "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
 
 const DEFAULTS: Record<string, { start: string; goal: string }> = {
   "4": { start: "DARK", goal: "POOP" },
@@ -399,9 +401,9 @@ function Index() {
       <div className="mx-auto max-w-3xl px-6 py-16">
         <header className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Word Ladder Solver</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Solve Stack</h1>
             <p className="mt-2 text-muted-foreground">
-              Enter two words. Get every shortest ladder between them.
+              Building solvers, one puzzle at a time.
             </p>
           </div>
           <button
@@ -414,7 +416,7 @@ function Index() {
           </button>
         </header>
 
-        <div className="mb-3 inline-flex rounded-md border bg-muted p-1">
+        <div className="mb-3 flex w-fit rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply";
             const isActive = s.id === "search" ? inSearch : !inSearch;
@@ -435,7 +437,7 @@ function Index() {
         </div>
 
         {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
-          <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
+          <div className="mb-6 flex w-fit rounded-md border bg-muted p-1">
             {LADDER_MODES.map((m) => {
               const isActive =
                 m.id === "classic"
@@ -459,7 +461,7 @@ function Index() {
         )}
 
         {(mode === "wordle" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply") && (
-          <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
+          <div className="mb-6 flex w-fit rounded-md border bg-muted p-1">
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
@@ -800,24 +802,45 @@ function Index() {
             </div>
           </div>
         ) : mode === "spellingbee" ? (
-          <div className="grid gap-4 sm:items-end sm:grid-cols-[auto_1fr_auto]">
-            <div>
-              <label className="mb-1 block text-sm font-medium">Middle letter</label>
-              <Input
-                value={spellingBeeMiddle}
-                onChange={(e) => setSpellingBeeMiddle(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 1))}
-                maxLength={1}
-                className="w-16 font-mono text-lg uppercase tracking-widest"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">Other 6 letters</label>
-              <Input
-                value={spellingBeeOthers}
-                onChange={(e) => setSpellingBeeOthers(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6))}
-                maxLength={6}
-                className="font-mono text-lg uppercase tracking-widest"
-              />
+          <div className="flex flex-col items-start gap-4">
+            <div className="flex items-center gap-2">
+              {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+                const isMiddle = i === 3;
+                const value = isMiddle
+                  ? spellingBeeMiddle
+                  : (spellingBeeOthers[i < 3 ? i : i - 1] || "");
+                const onChange = (v: string) => {
+                  const c = v.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+                  if (isMiddle) {
+                    setSpellingBeeMiddle(c);
+                  } else {
+                    const idx = i < 3 ? i : i - 1;
+                    const padded = spellingBeeOthers.padEnd(6, " ").split("");
+                    padded[idx] = c || " ";
+                    setSpellingBeeOthers(padded.join("").replace(/ +$/, ""));
+                  }
+                };
+                return (
+                  <div
+                    key={i}
+                    className="relative flex items-center justify-center"
+                    style={{
+                      width: "64px",
+                      height: "72px",
+                      clipPath: HEX_CLIP,
+                      backgroundColor: isMiddle ? "#eab308" : "#d4d4d8",
+                    }}
+                  >
+                    <input
+                      value={value}
+                      onChange={(e) => onChange(e.target.value)}
+                      maxLength={1}
+                      className="h-full w-full bg-transparent text-center font-mono text-2xl font-bold uppercase text-black outline-none"
+                      aria-label={isMiddle ? "Middle letter" : `Outer letter ${i < 3 ? i + 1 : i}`}
+                    />
+                  </div>
+                );
+              })}
             </div>
             <Button onClick={solveSpellingBee} disabled={solving} size="lg">
               {solving ? "Solving..." : "Solve"}
