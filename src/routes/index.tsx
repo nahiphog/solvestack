@@ -10,7 +10,7 @@ import { Copy, Check, Sun, Moon } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Word Ladder Solver" },
+      { title: "Solve Stack" },
       { name: "description", content: "Find all shortest word ladders between two words." },
     ],
   }),
