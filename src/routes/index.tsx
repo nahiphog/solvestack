@@ -26,6 +26,11 @@ const LADDER_MODES: { id: string; label: string }[] = [
   { id: "miscellaneous", label: "Miscellaneous" },
 ];
 
+const SEARCH_MODES: { id: string; label: string }[] = [
+  { id: "wordle", label: "Wordle" },
+  { id: "miscellaneous", label: "Miscellaneous" },
+];
+
 const DEFAULTS: Record<string, { start: string; goal: string }> = {
   "4": { start: "DARK", goal: "POOP" },
   "5": { start: "FLOWN", goal: "BRAID" },
@@ -42,10 +47,40 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
 };
 
 
+function Paginator({ page, setPage, total, perPage = 50 }: { page: number; setPage: (n: number) => void; total: number; perPage?: number }) {
+  const pages = Math.ceil(total / perPage);
+  if (pages <= 1) return null;
+  return (
+    <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+      <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(Math.max(0, page - 1))}>Prev</Button>
+      <span>Page {page + 1} of {pages}</span>
+      <Button size="sm" variant="outline" disabled={page >= pages - 1} onClick={() => setPage(Math.min(pages - 1, page + 1))}>Next</Button>
+    </div>
+  );
+}
+
+function sliceGroups(groups: [number, string[]][], page: number, perPage = 50): [number, string[]][] {
+  const start = page * perPage;
+  const end = start + perPage;
+  const out: [number, string[]][] = [];
+  let idx = 0;
+  for (const [k, words] of groups) {
+    const gStart = idx;
+    const gEnd = idx + words.length;
+    if (gEnd > start && gStart < end) {
+      const s = Math.max(start, gStart) - gStart;
+      const e = Math.min(end, gEnd) - gStart;
+      out.push([k, words.slice(s, e)]);
+    }
+    idx = gEnd;
+  }
+  return out;
+}
+
 function Index() {
-  const [mode, setMode] = useState<Mode>(4);
-  const [start, setStart] = useState("DARK");
-  const [goal, setGoal] = useState("POOP");
+  const [mode, setMode] = useState<Mode>("wordle");
+  const [start, setStart] = useState("TOWER");
+  const [goal, setGoal] = useState("");
   const [paths, setPaths] = useState<string[][] | null>(null);
   const [wordiplyResults, setWordiplyResults] = useState<[number, string[]][] | null>(null);
   const [wordleGuesses, setWordleGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
@@ -69,10 +104,22 @@ function Index() {
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [dark, setDark] = useState(true);
+  const [pagePaths, setPagePaths] = useState(0);
+  const [pageWordle, setPageWordle] = useState(0);
+  const [pageMM, setPageMM] = useState(0);
+  const [pageMarbless, setPageMarbless] = useState(0);
+  const [pageWordiply, setPageWordiply] = useState(0);
+  const [pageBee, setPageBee] = useState(0);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
+  useEffect(() => { setPagePaths(0); }, [paths]);
+  useEffect(() => { setPageWordle(0); }, [wordleResults]);
+  useEffect(() => { setPageMM(0); }, [mastermindResults]);
+  useEffect(() => { setPageMarbless(0); }, [marblessResults]);
+  useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
+  useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
@@ -369,7 +416,7 @@ function Index() {
 
         <div className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
-            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless";
+            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply";
             const isActive = s.id === "search" ? inSearch : !inSearch;
             return (
               <button
@@ -387,14 +434,13 @@ function Index() {
           })}
         </div>
 
-        {mode !== "wordle" && mode !== "spellingbee" && mode !== "mastermind" && mode !== "marbless" && (
+        {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
           <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
             {LADDER_MODES.map((m) => {
               const isActive =
                 m.id === "classic"
                   ? mode === 4 || mode === 5 || mode === 6
-                  : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply" || mode === "craftwords";
-
+                  : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords";
               return (
                 <button
                   key={m.id}
@@ -412,7 +458,31 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless") && (
+        {(mode === "wordle" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply") && (
+          <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
+            {SEARCH_MODES.map((m) => {
+              const isActive =
+                m.id === "wordle"
+                  ? mode === "wordle" || mode === "mastermind"
+                  : mode === "spellingbee" || mode === "marbless" || mode === "wordiply";
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => m.id === "wordle" ? switchMode("wordle") : switchMode("spellingbee")}
+                  className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                    isActive
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {m.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {(mode === "wordle" || mode === "mastermind") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("wordle")}
@@ -425,6 +495,21 @@ function Index() {
               Wordle
             </button>
             <button
+              onClick={() => switchMode("mastermind")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "mastermind"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Mastermind
+            </button>
+          </div>
+        )}
+
+        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply") && (
+          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
+            <button
               onClick={() => switchMode("spellingbee")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "spellingbee"
@@ -435,16 +520,6 @@ function Index() {
               Spelling Bee
             </button>
             <button
-              onClick={() => switchMode("mastermind")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "mastermind"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Mastermind
-            </button>
-            <button
               onClick={() => switchMode("marbless")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "marbless"
@@ -453,6 +528,16 @@ function Index() {
               }`}
             >
               Marbless
+            </button>
+            <button
+              onClick={() => switchMode("wordiply")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordiply"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Wordiply
             </button>
           </div>
         )}
@@ -477,7 +562,7 @@ function Index() {
         )}
 
 
-        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "wordiply" || mode === "craftwords") && (
+        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("splice")}
@@ -519,16 +604,6 @@ function Index() {
             >
               PlayPivots
             </button>
-            <button
-              onClick={() => switchMode("wordiply")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wordiply"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Wordiply
-            </button>
           </div>
         )}
 
@@ -538,6 +613,7 @@ function Index() {
               <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver</a>
               <a href="https://flipple.clevergoat.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Flipple</a>
               <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Poople</a>
+              <a href="https://wordchains.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Chains</a>
             </>
           )}
           {mode === 5 && (
@@ -632,7 +708,7 @@ function Index() {
 
         {mode === "marbless" && (
           <p className="mb-4 text-sm text-muted-foreground">
-            Set up 2 to 4 columns of 5 letters each. Each move removes the top (leftmost) letter from any column. Find all orderings that spell valid 5-letter English words.
+            Set up 2 to 4 columns of 5 letters each. Each move removes the bottom letter from any column. Find all orderings that spell valid 5-letter English words.
           </p>
         )}
 
@@ -928,7 +1004,7 @@ function Index() {
                           focusMarblessTile(ci + 1, ri);
                         }
                       }}
-                      className="flex h-12 w-12 items-center justify-center rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold uppercase text-foreground outline-none transition focus:ring-2 focus:ring-ring"
+                      className={`flex h-12 w-12 items-center justify-center rounded-full border-2 text-center font-mono text-xl font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${ri === 0 ? "bg-yellow-500 text-white border-yellow-500 caret-white" : "border-border bg-muted text-foreground"}`}
                     />
                     );
                   })}
@@ -1017,7 +1093,9 @@ function Index() {
               </button>
             </div>
             <ol className="space-y-3">
-              {paths.map((path, i) => (
+              {paths.slice(pagePaths * 50, pagePaths * 50 + 50).map((path, idx) => {
+                const i = pagePaths * 50 + idx;
+                return (
                 <li
                   key={i}
                   className="flex items-center rounded-lg border bg-card p-4 font-mono text-card-foreground"
@@ -1039,8 +1117,10 @@ function Index() {
                     })}
                   </div>
                 </li>
-              ))}
+                );
+              })}
             </ol>
+            <Paginator page={pagePaths} setPage={setPagePaths} total={paths.length} />
           </section>
         )}
 
@@ -1078,7 +1158,7 @@ function Index() {
               </button>
             </div>
             <div className="space-y-4">
-              {reversed.map(([extra, words]) => (
+              {sliceGroups(reversed, pageWordiply).map(([extra, words]) => (
                 <div key={extra} className="rounded-lg border bg-card p-4">
                   <div className="mb-2 text-sm font-semibold text-muted-foreground">
                     +{extra} extra {extra === 1 ? "letter" : "letters"} · {words.length} {words.length === 1 ? "word" : "words"}
@@ -1099,6 +1179,7 @@ function Index() {
                 </div>
               ))}
             </div>
+            <Paginator page={pageWordiply} setPage={setPageWordiply} total={wordiplyResults.reduce((n, [, ws]) => n + ws.length, 0)} />
           </section>
           );
         })()}
@@ -1121,7 +1202,7 @@ function Index() {
             </div>
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {wordleResults.map((w) => (
+                {wordleResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
                   <a
                     key={w}
                     href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
@@ -1134,6 +1215,7 @@ function Index() {
                 ))}
               </div>
             </div>
+            <Paginator page={pageWordle} setPage={setPageWordle} total={wordleResults.length} />
           </section>
         )}
 
@@ -1163,7 +1245,7 @@ function Index() {
                 </button>
               </div>
               <div className="space-y-4">
-                {spellingBeeResults.map(([score, words]) => (
+                {sliceGroups(spellingBeeResults, pageBee).map(([score, words]) => (
                   <div key={score} className="rounded-lg border bg-card p-4">
                     <div className="mb-2 text-sm font-semibold text-muted-foreground">
                       {score} {score === 1 ? "point" : "points"} · {words.length} {words.length === 1 ? "word" : "words"}
@@ -1184,6 +1266,7 @@ function Index() {
                   </div>
                 ))}
               </div>
+              <Paginator page={pageBee} setPage={setPageBee} total={spellingBeeResults.reduce((n, [, ws]) => n + ws.length, 0)} />
             </section>
           );
         })()}
@@ -1206,7 +1289,7 @@ function Index() {
             </div>
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {mastermindResults.map((w) => (
+                {mastermindResults.slice(pageMM * 50, pageMM * 50 + 50).map((w) => (
                   <a
                     key={w}
                     href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
@@ -1219,6 +1302,7 @@ function Index() {
                 ))}
               </div>
             </div>
+            <Paginator page={pageMM} setPage={setPageMM} total={mastermindResults.length} />
           </section>
         )}
 
@@ -1242,7 +1326,9 @@ function Index() {
               </button>
             </div>
             <ol className="space-y-4">
-              {marblessResults.map((sol, i) => (
+              {marblessResults.slice(pageMarbless * 50, pageMarbless * 50 + 50).map((sol, idx) => {
+                const i = pageMarbless * 50 + idx;
+                return (
                 <li key={i} className="rounded-lg border bg-card p-4 text-card-foreground">
                   <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
                   <table className="w-full border-collapse font-mono text-sm">
@@ -1262,8 +1348,10 @@ function Index() {
                     </tbody>
                   </table>
                 </li>
-              ))}
+                );
+              })}
             </ol>
+            <Paginator page={pageMarbless} setPage={setPageMarbless} total={marblessResults.length} />
 
           </section>
         )}
