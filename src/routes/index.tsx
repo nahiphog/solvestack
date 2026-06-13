@@ -1027,7 +1027,7 @@ function Index() {
         )}
         {mode === "flippingletters" && (
           <p className="mb-4 text-sm text-muted-foreground">
-            Enter the 10 distinct letters in your bank. For each letter that can be flipped 180°, type the letter it becomes in the small box below. Then enter Wordle-style guesses (GREY → YELLOW → GREEN) to filter the flippable 5-letter words.
+            Enter the 10 distinct letters in your bank. Click a letter to check whether it's flippable (b↔q, d↔p, n↔u, m↔w). Then enter Wordle-style guesses (grey → yellow → green) to filter the flippable 5-letter words.
           </p>
         )}
 
@@ -1036,37 +1036,40 @@ function Index() {
         {mode === "flippingletters" ? (
           <div className="space-y-6">
             <div>
-              <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; flipped letter optional)</div>
+              <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; click a tile to see if it flips)</div>
               <div className="flex flex-wrap gap-2">
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1">
-                    <input
-                      type="text"
-                      value={flLetters[i] || ""}
-                      onFocus={(e) => e.currentTarget.select()}
-                      onChange={(e) => {
-                        const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
-                        setFlLetters((prev) => { const n = [...prev]; n[i] = c; return n; });
-                      }}
-                      className="h-12 w-12 rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold uppercase outline-none focus:ring-2 focus:ring-ring"
-                      aria-label={`Letter ${i + 1}`}
-                    />
-                    <input
-                      type="text"
-                      value={flFlips[i] || ""}
-                      placeholder="↻"
-                      onFocus={(e) => e.currentTarget.select()}
-                      onChange={(e) => {
-                        const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
-                        setFlFlips((prev) => { const n = [...prev]; n[i] = c; return n; });
-                      }}
-                      className="h-8 w-12 rounded border border-dashed border-border bg-background text-center font-mono text-sm font-semibold uppercase text-muted-foreground outline-none focus:ring-2 focus:ring-ring"
-                      aria-label={`Flipped letter for ${flLetters[i] || `slot ${i + 1}`}`}
-                    />
-                  </div>
-                ))}
+                {Array.from({ length: 10 }).map((_, i) => {
+                  const upper = (flLetters[i] || "").toUpperCase();
+                  const flip = FL_FLIP_MAP[upper] || "";
+                  const revealed = flRevealed[i];
+                  return (
+                    <div key={i} className="flex flex-col items-center gap-1">
+                      <input
+                        type="text"
+                        value={(flLetters[i] || "").toLowerCase()}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onChange={(e) => {
+                          const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+                          setFlLetters((prev) => { const n = [...prev]; n[i] = c; return n; });
+                          setFlRevealed((prev) => { const n = [...prev]; n[i] = false; return n; });
+                        }}
+                        onClick={() => {
+                          setFlRevealed((prev) => { const n = [...prev]; n[i] = !n[i]; return n; });
+                        }}
+                        className="h-12 w-12 rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold lowercase outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+                        aria-label={`Letter ${i + 1}`}
+                      />
+                      <div className="h-5 text-xs font-mono text-muted-foreground">
+                        {revealed && upper
+                          ? (flip ? `↻ ${flip.toLowerCase()}` : "—")
+                          : ""}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
+
 
             {flGuesses.map((g, gi) => (
               <div key={gi} className="flex items-center gap-3">
