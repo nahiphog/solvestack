@@ -154,6 +154,7 @@ function Index() {
   useEffect(() => { setPageMarbless(0); }, [marblessResults]);
   useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
+  useEffect(() => { setPageFl(0); }, [flResults]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
