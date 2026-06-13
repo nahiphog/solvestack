@@ -882,6 +882,11 @@ function Index() {
                     padded[idx] = c || " ";
                     setSpellingBeeOthers(padded.join("").replace(/ +$/, ""));
                   }
+                  if (c && i < 6) {
+                    const next = document.getElementById(`bee-tile-${i + 1}`) as HTMLInputElement | null;
+                    next?.focus();
+                    next?.select();
+                  }
                 };
                 return (
                   <div
@@ -895,8 +900,10 @@ function Index() {
                     }}
                   >
                     <input
+                      id={`bee-tile-${i}`}
                       value={value}
                       onChange={(e) => onChange(e.target.value)}
+                      onFocus={(e) => e.currentTarget.select()}
                       maxLength={1}
                       className="h-full w-full bg-transparent text-center font-mono text-2xl font-bold uppercase text-black outline-none"
                       aria-label={isMiddle ? "Middle letter" : `Outer letter ${i < 3 ? i + 1 : i}`}
@@ -905,10 +912,24 @@ function Index() {
                 );
               })}
             </div>
-            <Button onClick={solveSpellingBee} disabled={solving} size="lg">
-              {solving ? "Solving..." : "Solve"}
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={() => {
+                  setSpellingBeeMiddle("");
+                  setSpellingBeeOthers("");
+                  setSpellingBeeResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Clear all
+              </Button>
+              <Button onClick={solveSpellingBee} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
           </div>
+
         ) : mode === "mastermind" ? (
           <div className="space-y-4">
             {mastermindRows.map((row, ri) => (
