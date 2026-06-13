@@ -167,6 +167,8 @@ function Index() {
     setWordleResults(null);
     setSpellingBeeResults(null);
     setMastermindResults(null);
+    setWordPeaksResults(null);
+
     setMarblessResults(null);
     setDodekuResult(null);
     setError(null);
