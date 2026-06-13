@@ -461,7 +461,7 @@ function Index() {
         )}
 
         {(mode === "wordle" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply") && (
-          <div className="mb-6 inline-flex rounded-md border bg-muted p-1 sm:ml-2">
+          <div className="mb-6 flex w-fit rounded-md border bg-muted p-1">
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
