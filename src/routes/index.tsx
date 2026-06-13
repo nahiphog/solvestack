@@ -49,6 +49,8 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   mastermind: { start: "WATER", goal: "" },
   marbless: { start: "", goal: "" },
   dodeku: { start: "", goal: "" },
+  wordpeaks: { start: "PEDAL", goal: "" },
+
 };
 
 
