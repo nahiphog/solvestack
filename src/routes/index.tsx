@@ -1206,7 +1206,7 @@ function Index() {
                 };
                 const TILE_W = 72;
                 const TILE_H = 64;
-                const R = 10;
+                const R = 100;
                 // i: 0=top (0°), 1=upper-right (60°), 2=lower-right (120°),
                 // 3=middle, 4=bottom (180°), 5=lower-left (240°), 6=upper-left (300°)
                 const bearingByIndex: Record<number, number | null> = {
@@ -1246,7 +1246,7 @@ function Index() {
                 );
               };
               return (
-                <div className="relative" style={{ width: "92px", height: "84px" }}>
+                <div className="relative" style={{ width: "260px", height: "280px" }}>
                   {[0, 1, 2, 3, 4, 5, 6].map((i) => renderTile(i))}
                 </div>
               );
