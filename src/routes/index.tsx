@@ -103,7 +103,7 @@ function Index() {
   ]);
   const [mastermindResults, setMastermindResults] = useState<string[] | null>(null);
   const [wordPeaksGuesses, setWordPeaksGuesses] = useState<{ word: string; pattern: WordPeaksDirection[] }[]>([
-    { word: "PEDAL", pattern: ["AFTER", "CORRECT", "AFTER", "AFTER", "AFTER"] },
+    { word: "ONION", pattern: ["NONE", "NONE", "NONE", "NONE", "NONE"] },
   ]);
   const [wordPeaksResults, setWordPeaksResults] = useState<string[] | null>(null);
 
@@ -407,6 +407,12 @@ function Index() {
         return;
       }
     }
+    for (const g of wordPeaksGuesses) {
+      if (g.pattern.some((p) => p === "NONE")) {
+        setError("Please set a shape for every tile (hollow yellow squares are not allowed).");
+        return;
+      }
+    }
     setSolving(true);
     const normalized = wordPeaksGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
     const result = await wordPeaksSolve(normalized);
@@ -419,9 +425,9 @@ function Index() {
     setWordPeaksGuesses((prev) =>
       prev.map((g, i) => {
         if (i !== gi) return g;
-        const order: WordPeaksDirection[] = ["CORRECT", "BEFORE", "AFTER"];
+        const order: WordPeaksDirection[] = ["NONE", "CORRECT", "BEFORE", "AFTER"];
         const next = [...g.pattern];
-        next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % 3];
+        next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % order.length];
         return { ...g, pattern: next };
       }),
     );
@@ -447,7 +453,7 @@ function Index() {
   };
 
   const addWPRow = () => {
-    setWordPeaksGuesses((prev) => [...prev, { word: "", pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] }]);
+    setWordPeaksGuesses((prev) => [...prev, { word: "", pattern: ["NONE", "NONE", "NONE", "NONE", "NONE"] }]);
   };
 
   const removeWPRow = (gi: number) => {
@@ -927,18 +933,26 @@ function Index() {
                         ? "#16a34a"
                         : dir === "BEFORE"
                           ? "#f97316"
-                          : "#7dd3fc";
+                          : dir === "AFTER"
+                            ? "#7dd3fc"
+                            : "transparent";
                     const clip =
-                      dir === "CORRECT"
-                        ? "none"
-                        : dir === "BEFORE"
-                          ? "polygon(50% 0%, 100% 100%, 0% 100%)"
-                          : "polygon(0% 0%, 100% 0%, 50% 100%)";
+                      dir === "BEFORE"
+                        ? "polygon(50% 0%, 100% 100%, 0% 100%)"
+                        : dir === "AFTER"
+                          ? "polygon(0% 0%, 100% 0%, 50% 100%)"
+                          : "none";
+                    const isNone = dir === "NONE";
                     return (
                       <div
                         key={ti}
                         className="relative flex h-14 w-14 items-center justify-center"
-                        style={{ backgroundColor: bg, clipPath: clip === "none" ? undefined : clip, borderRadius: clip === "none" ? "0.25rem" : 0 }}
+                        style={{
+                          backgroundColor: bg,
+                          clipPath: clip === "none" ? undefined : clip,
+                          borderRadius: clip === "none" ? "0.25rem" : 0,
+                          border: isNone ? "2px solid #eab308" : undefined,
+                        }}
                         onMouseDown={(e) => {
                           const tgt = e.target as HTMLElement;
                           if (tgt.tagName !== "INPUT") {
@@ -990,7 +1004,7 @@ function Index() {
                           style={{
                             paddingTop: dir === "BEFORE" ? "16px" : dir === "AFTER" ? "0px" : "0px",
                           }}
-                          className="h-full w-full bg-transparent text-center font-mono text-xl font-bold uppercase text-white caret-white outline-none"
+                          className={`h-full w-full bg-transparent text-center font-mono text-xl font-bold uppercase outline-none ${isNone ? "text-foreground caret-current" : "text-white caret-white"}`}
                         />
                       </div>
                     );
@@ -1009,7 +1023,7 @@ function Index() {
               </Button>
               <Button
                 onClick={() => {
-                  setWordPeaksGuesses([{ word: "", pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] }]);
+                  setWordPeaksGuesses([{ word: "", pattern: ["NONE", "NONE", "NONE", "NONE", "NONE"] }]);
                   setWordPeaksResults(null);
                 }}
                 variant="outline"
@@ -1019,7 +1033,7 @@ function Index() {
               </Button>
               <Button
                 onClick={() => {
-                  setWordPeaksGuesses((prev) => prev.map((g) => ({ ...g, pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] as WordPeaksDirection[] })));
+                  setWordPeaksGuesses((prev) => prev.map((g) => ({ ...g, pattern: ["NONE", "NONE", "NONE", "NONE", "NONE"] as WordPeaksDirection[] })));
                   setWordPeaksResults(null);
                 }}
                 variant="outline"
