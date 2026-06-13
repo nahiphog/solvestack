@@ -1027,6 +1027,12 @@ function Index() {
             Enter your guesses and click each tile to cycle GREEN SQUARE (correctly placed) → ORANGE TRIANGLE UP (the answer letter comes before this letter alphabetically) → LIGHT-BLUE TRIANGLE DOWN (the answer letter comes after this letter alphabetically). Get all 5-letter words consistent with the feedback.
           </p>
         )}
+        {mode === "flippingletters" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter the 10 distinct letters in your bank. For each letter that can be flipped 180°, type the letter it becomes in the small box below. Then enter Wordle-style guesses (GREY → YELLOW → GREEN) to filter the flippable 5-letter words.
+          </p>
+        )}
+
 
 
         {mode === "wordpeaks" ? (
