@@ -2157,7 +2157,7 @@ function Index() {
                     rel="noopener noreferrer"
                     className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
                   >
-                    {w}
+                    {w.toLowerCase()}
                   </a>
                 ))}
               </div>
