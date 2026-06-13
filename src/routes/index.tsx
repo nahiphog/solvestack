@@ -464,12 +464,20 @@ function Index() {
 
         <div className="mb-3 flex w-fit rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
+            const isMath = mode === "dodeku";
             const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply";
-            const isActive = s.id === "search" ? inSearch : !inSearch;
+            const inLadder = !isMath && !inSearch;
+            const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : inLadder;
             return (
               <button
                 key={s.id}
-                onClick={() => s.id === "ladder" ? switchMode(4) : switchMode("wordle")}
+                onClick={() =>
+                  s.id === "ladder"
+                    ? switchMode(4)
+                    : s.id === "search"
+                      ? switchMode("wordle")
+                      : switchMode("dodeku")
+                }
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
                     ? "bg-background text-foreground shadow-sm"
