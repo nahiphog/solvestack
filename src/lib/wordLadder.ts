@@ -40,7 +40,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
 };
 
 
-export type WordPeaksDirection = "CORRECT" | "BEFORE" | "AFTER";
+export type WordPeaksDirection = "NONE" | "CORRECT" | "BEFORE" | "AFTER";
 
 export async function wordPeaksSolve(
   guesses: { word: string; pattern: WordPeaksDirection[] }[],
