@@ -106,7 +106,7 @@ function Index() {
   ]);
   const [marblessResults, setMarblessResults] = useState<MarblessSolution[] | null>(null);
   const [dodekuGrid, setDodekuGrid] = useState<string[][]>([
-    ["X", "X", "X", "1"],
+    ["X", "X", "X", ""],
     ["X", "", "", ""],
     ["", "", "", "11"],
     ["", "4", "1", ""],
@@ -789,7 +789,7 @@ function Index() {
 
         {mode === "wordle" && (
           <p className="mb-4 text-sm text-muted-foreground">
-            Enter your guesses and click each tile to cycle GREY → YELLOW → GREEN. Get all 5-letter words consistent with the feedback.
+            Enter your guesses and click each tile to cycle GREY (Absent) → YELLOW (Wrongly placed) → GREEN (correctly placed). Get all 5-letter words consistent with the feedback.
           </p>
         )}
 
