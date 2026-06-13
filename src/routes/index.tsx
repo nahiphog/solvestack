@@ -27,9 +27,11 @@ const LADDER_MODES: { id: string; label: string }[] = [
 ];
 
 const SEARCH_MODES: { id: string; label: string }[] = [
-  { id: "wordle", label: "Wordle" },
+  { id: "wordle", label: "Classic" },
   { id: "miscellaneous", label: "Miscellaneous" },
 ];
+
+const HEX_CLIP = "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
 
 const DEFAULTS: Record<string, { start: string; goal: string }> = {
   "4": { start: "DARK", goal: "POOP" },
