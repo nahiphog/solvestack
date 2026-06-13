@@ -1112,7 +1112,7 @@ function Index() {
                           else if (e.key === "ArrowRight") { e.preventDefault(); focusFlTile(gi, ti + 1); }
                           else if (e.key === " " || e.key === "Enter") { e.preventDefault(); cycleFlTile(gi, ti); }
                         }}
-                        className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                        className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold lowercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
                       />
                     );
                   })}
