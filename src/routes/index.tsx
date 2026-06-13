@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { dodekuSolve, findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type DodekuCell, type MarblessSolution, type Mode, type WordleColor } from "@/lib/wordLadder";
+import { dodekuSolve, findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, type DodekuCell, type MarblessSolution, type Mode, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +49,8 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   mastermind: { start: "WATER", goal: "" },
   marbless: { start: "", goal: "" },
   dodeku: { start: "", goal: "" },
+  wordpeaks: { start: "PEDAL", goal: "" },
+
 };
 
 
@@ -100,6 +102,11 @@ function Index() {
     { word: "WATER", greens: 4, yellows: 0 },
   ]);
   const [mastermindResults, setMastermindResults] = useState<string[] | null>(null);
+  const [wordPeaksGuesses, setWordPeaksGuesses] = useState<{ word: string; pattern: WordPeaksDirection[] }[]>([
+    { word: "PEDAL", pattern: ["AFTER", "CORRECT", "AFTER", "AFTER", "AFTER"] },
+  ]);
+  const [wordPeaksResults, setWordPeaksResults] = useState<string[] | null>(null);
+
   const [marblessColumns, setMarblessColumns] = useState<string[][]>([
     ["I", "G", "H", "Y", "R"],
     ["B", "R", "N", "D", "O"],
@@ -122,6 +129,8 @@ function Index() {
   const [pagePaths, setPagePaths] = useState(0);
   const [pageWordle, setPageWordle] = useState(0);
   const [pageMM, setPageMM] = useState(0);
+  const [pageWP, setPageWP] = useState(0);
+
   const [pageMarbless, setPageMarbless] = useState(0);
   const [pageWordiply, setPageWordiply] = useState(0);
   const [pageBee, setPageBee] = useState(0);
@@ -132,6 +141,8 @@ function Index() {
   useEffect(() => { setPagePaths(0); }, [paths]);
   useEffect(() => { setPageWordle(0); }, [wordleResults]);
   useEffect(() => { setPageMM(0); }, [mastermindResults]);
+  useEffect(() => { setPageWP(0); }, [wordPeaksResults]);
+
   useEffect(() => { setPageMarbless(0); }, [marblessResults]);
   useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
@@ -156,6 +167,8 @@ function Index() {
     setWordleResults(null);
     setSpellingBeeResults(null);
     setMastermindResults(null);
+    setWordPeaksResults(null);
+
     setMarblessResults(null);
     setDodekuResult(null);
     setError(null);
@@ -380,6 +393,68 @@ function Index() {
     setWordleGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
   };
 
+  const solveWordPeaks = async () => {
+    setError(null);
+    setWordPeaksResults(null);
+    for (const g of wordPeaksGuesses) {
+      const w = g.word.trim().toUpperCase();
+      if (w.length !== 5) {
+        setError("Each guess must be exactly 5 letters.");
+        return;
+      }
+      if (!(await isValid5LetterWord(w))) {
+        setError(`"${w}" is not a valid 5-letter English word.`);
+        return;
+      }
+    }
+    setSolving(true);
+    const normalized = wordPeaksGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
+    const result = await wordPeaksSolve(normalized);
+    if (result.length === 0) setError("No words match these constraints.");
+    else setWordPeaksResults(result);
+    setSolving(false);
+  };
+
+  const cycleWPTile = (gi: number, ti: number) => {
+    setWordPeaksGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const order: WordPeaksDirection[] = ["CORRECT", "BEFORE", "AFTER"];
+        const next = [...g.pattern];
+        next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % 3];
+        return { ...g, pattern: next };
+      }),
+    );
+  };
+
+  const setWPLetter = (gi: number, ti: number, ch: string) => {
+    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    setWordPeaksGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const padded = g.word.padEnd(5, " ").slice(0, 5).split("");
+        padded[ti] = c || " ";
+        return { ...g, word: padded.join("").replace(/ +$/, "") };
+      }),
+    );
+  };
+
+  const focusWPTile = (gi: number, ti: number) => {
+    if (ti < 0 || ti > 4) return;
+    const el = document.getElementById(`wp-tile-${gi}-${ti}`) as HTMLInputElement | null;
+    el?.focus();
+    el?.select();
+  };
+
+  const addWPRow = () => {
+    setWordPeaksGuesses((prev) => [...prev, { word: "", pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] }]);
+  };
+
+  const removeWPRow = (gi: number) => {
+    setWordPeaksGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
+  };
+
+
   const solve = () => {
     setError(null);
     setPaths(null);
@@ -466,7 +541,7 @@ function Index() {
         <div className="mb-3 flex w-fit rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku";
-            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply";
+            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks";
             const inLadder = !isMath && !inSearch;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : inLadder;
             return (
@@ -515,13 +590,14 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply") && (
+        {(mode === "wordle" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks") && (
           <div className="mb-6 flex w-fit rounded-md border bg-muted p-1">
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
                   ? mode === "wordle" || mode === "mastermind"
-                  : mode === "spellingbee" || mode === "marbless" || mode === "wordiply";
+                  : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks";
+
               return (
                 <button
                   key={m.id}
@@ -564,7 +640,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply") && (
+        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("spellingbee")}
@@ -596,8 +672,19 @@ function Index() {
             >
               Wordiply
             </button>
+            <button
+              onClick={() => switchMode("wordpeaks")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordpeaks"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Word Peaks
+            </button>
           </div>
         )}
+
 
 
         {(mode === 4 || mode === 5 || mode === 6) && (
@@ -755,7 +842,11 @@ function Index() {
           {mode === "dodeku" && (
             <a href="https://dodeku.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Dodeku</a>
           )}
+          {mode === "wordpeaks" && (
+            <a href="https://vegeta897.github.io/word-peaks/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Peaks</a>
+          )}
         </div>
+
 
         {mode === "craftwords" && (
           <p className="mb-4 text-sm text-muted-foreground">
@@ -816,8 +907,133 @@ function Index() {
             Fill empty cells with the available tiles so that each given row and column sum matches. Use "X" for blocked cells, leave empties blank, or enter a fixed number.
           </p>
         )}
+        {mode === "wordpeaks" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter your guesses and click each tile to cycle GREEN SQUARE (correctly placed) → ORANGE TRIANGLE UP (the answer letter comes before this letter alphabetically) → LIGHT-BLUE TRIANGLE DOWN (the answer letter comes after this letter alphabetically). Get all 5-letter words consistent with the feedback.
+          </p>
+        )}
 
-        {mode === "wordle" ? (
+
+        {mode === "wordpeaks" ? (
+          <div className="space-y-4">
+            {wordPeaksGuesses.map((g, gi) => (
+              <div key={gi} className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  {Array.from({ length: 5 }).map((_, ti) => {
+                    const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
+                    const dir = g.pattern[ti];
+                    const bg =
+                      dir === "CORRECT"
+                        ? "#16a34a"
+                        : dir === "BEFORE"
+                          ? "#f97316"
+                          : "#7dd3fc";
+                    const clip =
+                      dir === "CORRECT"
+                        ? "none"
+                        : dir === "BEFORE"
+                          ? "polygon(50% 0%, 100% 100%, 0% 100%)"
+                          : "polygon(0% 0%, 100% 0%, 50% 100%)";
+                    return (
+                      <div
+                        key={ti}
+                        className="relative flex h-14 w-14 items-center justify-center"
+                        style={{ backgroundColor: bg, clipPath: clip === "none" ? undefined : clip, borderRadius: clip === "none" ? "0.25rem" : 0 }}
+                        onMouseDown={(e) => {
+                          const tgt = e.target as HTMLElement;
+                          if (tgt.tagName !== "INPUT") {
+                            e.preventDefault();
+                            cycleWPTile(gi, ti);
+                          }
+                        }}
+                      >
+                        <input
+                          id={`wp-tile-${gi}-${ti}`}
+                          type="text"
+                          inputMode="text"
+                          autoComplete="off"
+                          value={letter}
+                          aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${dir}`}
+                          onMouseDown={(e) => {
+                            if (document.activeElement === e.currentTarget) {
+                              e.preventDefault();
+                              cycleWPTile(gi, ti);
+                            }
+                          }}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onChange={(e) => {
+                            const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                            if (!v) {
+                              setWPLetter(gi, ti, "");
+                              return;
+                            }
+                            setWPLetter(gi, ti, v.slice(-1));
+                            if (ti < 4) focusWPTile(gi, ti + 1);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Backspace") {
+                              if (!letter && ti > 0) {
+                                e.preventDefault();
+                                focusWPTile(gi, ti - 1);
+                              }
+                            } else if (e.key === "ArrowLeft") {
+                              e.preventDefault();
+                              focusWPTile(gi, ti - 1);
+                            } else if (e.key === "ArrowRight") {
+                              e.preventDefault();
+                              focusWPTile(gi, ti + 1);
+                            } else if (e.key === " " || e.key === "Enter") {
+                              e.preventDefault();
+                              cycleWPTile(gi, ti);
+                            }
+                          }}
+                          style={{
+                            paddingTop: dir === "BEFORE" ? "16px" : dir === "AFTER" ? "0px" : "0px",
+                          }}
+                          className="h-full w-full bg-transparent text-center font-mono text-xl font-bold uppercase text-white caret-white outline-none"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                {wordPeaksGuesses.length > 1 && (
+                  <Button onClick={() => removeWPRow(gi)} variant="outline" size="sm">
+                    Remove
+                  </Button>
+                )}
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={addWPRow} variant="outline" size="lg">
+                Add guess
+              </Button>
+              <Button
+                onClick={() => {
+                  setWordPeaksGuesses([{ word: "", pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] }]);
+                  setWordPeaksResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button
+                onClick={() => {
+                  setWordPeaksGuesses((prev) => prev.map((g) => ({ ...g, pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] as WordPeaksDirection[] })));
+                  setWordPeaksResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset shapes only
+              </Button>
+              <Button onClick={solveWordPeaks} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
+        ) : mode === "wordle" ? (
+
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
               <span>Optional: Input</span>
@@ -1638,6 +1854,42 @@ function Index() {
             <Paginator page={pageMM} setPage={setPageMM} total={mastermindResults.length} />
           </section>
         )}
+
+        {wordPeaksResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {wordPeaksResults.length} possible {wordPeaksResults.length === 1 ? "answer" : "answers"}
+              </h2>
+              <button
+                onClick={() => {
+                  copyText(`${wordPeaksResults.length} possible ${wordPeaksResults.length === 1 ? "answer" : "answers"}:\n${wordPeaksResults.join(", ")}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all answers"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex flex-wrap gap-2 font-mono text-sm">
+                {wordPeaksResults.slice(pageWP * 50, pageWP * 50 + 50).map((w) => (
+                  <a
+                    key={w}
+                    href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                  >
+                    {w}
+                  </a>
+                ))}
+              </div>
+            </div>
+            <Paginator page={pageWP} setPage={setPageWP} total={wordPeaksResults.length} />
+          </section>
+        )}
+
 
         {marblessResults && (
           <section className="mt-10">

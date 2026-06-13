@@ -9,7 +9,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -36,7 +36,32 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   mastermind: 5,
   marbless: 0,
   dodeku: 0,
+  wordpeaks: 5,
 };
+
+
+export type WordPeaksDirection = "CORRECT" | "BEFORE" | "AFTER";
+
+export async function wordPeaksSolve(
+  guesses: { word: string; pattern: WordPeaksDirection[] }[],
+): Promise<string[]> {
+  const words = await getFiveLetterWords();
+  return words.filter((answer) =>
+    guesses.every((g) => {
+      const w = g.word.toUpperCase();
+      for (let i = 0; i < 5; i++) {
+        const a = answer.charCodeAt(i);
+        const c = w.charCodeAt(i);
+        const d = g.pattern[i];
+        if (d === "CORRECT") { if (a !== c) return false; }
+        else if (d === "BEFORE") { if (a >= c) return false; }
+        else { if (a <= c) return false; }
+      }
+      return true;
+    }),
+  );
+}
+
 
 export type DodekuCell = "X" | number | 0;
 
