@@ -107,6 +107,14 @@ function Index() {
   ]);
   const [wordPeaksResults, setWordPeaksResults] = useState<string[] | null>(null);
 
+  const [flLetters, setFlLetters] = useState<string[]>(["C","I","K","T","S","L","N","A","H","V"]);
+  const [flFlips, setFlFlips] = useState<string[]>(["","","","","","","U","E","",""]);
+  const [flGuesses, setFlGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
+    { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
+  ]);
+  const [flResults, setFlResults] = useState<{ flippable: string[]; answers: string[] } | null>(null);
+  const [pageFl, setPageFl] = useState(0);
+
   const [marblessColumns, setMarblessColumns] = useState<string[][]>([
     ["I", "G", "H", "Y", "R"],
     ["B", "R", "N", "D", "O"],
