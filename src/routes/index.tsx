@@ -933,18 +933,26 @@ function Index() {
                         ? "#16a34a"
                         : dir === "BEFORE"
                           ? "#f97316"
-                          : "#7dd3fc";
+                          : dir === "AFTER"
+                            ? "#7dd3fc"
+                            : "transparent";
                     const clip =
-                      dir === "CORRECT"
-                        ? "none"
-                        : dir === "BEFORE"
-                          ? "polygon(50% 0%, 100% 100%, 0% 100%)"
-                          : "polygon(0% 0%, 100% 0%, 50% 100%)";
+                      dir === "BEFORE"
+                        ? "polygon(50% 0%, 100% 100%, 0% 100%)"
+                        : dir === "AFTER"
+                          ? "polygon(0% 0%, 100% 0%, 50% 100%)"
+                          : "none";
+                    const isNone = dir === "NONE";
                     return (
                       <div
                         key={ti}
                         className="relative flex h-14 w-14 items-center justify-center"
-                        style={{ backgroundColor: bg, clipPath: clip === "none" ? undefined : clip, borderRadius: clip === "none" ? "0.25rem" : 0 }}
+                        style={{
+                          backgroundColor: bg,
+                          clipPath: clip === "none" ? undefined : clip,
+                          borderRadius: clip === "none" ? "0.25rem" : 0,
+                          border: isNone ? "2px solid #eab308" : undefined,
+                        }}
                         onMouseDown={(e) => {
                           const tgt = e.target as HTMLElement;
                           if (tgt.tagName !== "INPUT") {
