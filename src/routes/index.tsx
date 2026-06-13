@@ -1015,7 +1015,7 @@ function Index() {
               </Button>
               <Button
                 onClick={() => {
-                  setWordPeaksGuesses([{ word: "", pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] }]);
+                  setWordPeaksGuesses([{ word: "", pattern: ["NONE", "NONE", "NONE", "NONE", "NONE"] }]);
                   setWordPeaksResults(null);
                 }}
                 variant="outline"
