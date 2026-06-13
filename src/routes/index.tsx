@@ -1526,6 +1526,35 @@ function Index() {
           </section>
         )}
 
+        {dodekuResult && (
+          <section className="mt-10">
+            <h2 className="mb-4 text-lg font-semibold">Solution</h2>
+            <div className="inline-block rounded-lg border bg-card p-4">
+              <table className="border-collapse font-mono">
+                <tbody>
+                  {dodekuResult.map((row, r) => (
+                    <tr key={r}>
+                      {row.map((cell, c) => {
+                        const isBlocked = cell === "X";
+                        return (
+                          <td
+                            key={c}
+                            className={`h-12 w-12 border border-border text-center text-lg font-bold ${isBlocked ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
+                          >
+                            {isBlocked ? "X" : String(cell)}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+
+
       </div>
 
     </div>
