@@ -712,6 +712,9 @@ function Index() {
           {mode === "marbless" && (
             <a href="https://marbless.co/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Marbless</a>
           )}
+          {mode === "dodeku" && (
+            <a href="https://dodeku.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Dodeku</a>
+          )}
         </div>
 
         {mode === "craftwords" && (
@@ -765,6 +768,12 @@ function Index() {
         {mode === "marbless" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Set up 2 to 4 columns of 5 letters each. Each move removes the bottom letter from any column. Find all orderings that spell valid 5-letter English words.
+          </p>
+        )}
+
+        {mode === "dodeku" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Fill empty cells with the available tiles so that each given row and column sum matches. Use "X" for blocked cells, leave empties blank, or enter a fixed number.
           </p>
         )}
 
