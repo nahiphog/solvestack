@@ -640,7 +640,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply") && (
+        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("spellingbee")}
@@ -672,8 +672,19 @@ function Index() {
             >
               Wordiply
             </button>
+            <button
+              onClick={() => switchMode("wordpeaks")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordpeaks"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Word Peaks
+            </button>
           </div>
         )}
+
 
 
         {(mode === 4 || mode === 5 || mode === 6) && (
