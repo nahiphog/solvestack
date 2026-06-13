@@ -907,6 +907,12 @@ function Index() {
             Fill empty cells with the available tiles so that each given row and column sum matches. Use "X" for blocked cells, leave empties blank, or enter a fixed number.
           </p>
         )}
+        {mode === "wordpeaks" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter your guesses and click each tile to cycle GREEN SQUARE (correctly placed) → ORANGE TRIANGLE UP (the answer letter comes before this letter alphabetically) → LIGHT-BLUE TRIANGLE DOWN (the answer letter comes after this letter alphabetically). Get all 5-letter words consistent with the feedback.
+          </p>
+        )}
+
 
         {mode === "wordle" ? (
           <div className="space-y-4">
