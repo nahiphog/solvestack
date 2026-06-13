@@ -37,7 +37,29 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   marbless: 0,
   dodeku: 0,
   wordpeaks: 5,
+  flippingletters: 5,
 };
+
+
+export async function flippingLettersSolve(
+  allowedLetters: string[],
+  guesses: { word: string; pattern: WordleColor[] }[],
+): Promise<{ flippable: string[]; answers: string[] }> {
+  const allowed = new Set(allowedLetters.filter(Boolean).map((l) => l.toUpperCase()));
+  const words = await getFiveLetterWords();
+  const flippable = words.filter((w) => {
+    for (const c of w) if (!allowed.has(c)) return false;
+    return true;
+  });
+  const answers = flippable.filter((answer) =>
+    guesses.every((g) => {
+      const out = wordleOutput(g.word, answer);
+      for (let i = 0; i < out.length; i++) if (out[i] !== g.pattern[i]) return false;
+      return true;
+    }),
+  );
+  return { flippable, answers };
+}
 
 
 export type WordPeaksDirection = "NONE" | "CORRECT" | "BEFORE" | "AFTER";
