@@ -1119,10 +1119,21 @@ function Index() {
               ))}
             </div>
             <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={() => {
+                  setMarblessColumns((prev) => prev.map(() => ["", "", "", "", ""]));
+                  setMarblessResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Clear all
+              </Button>
               <Button onClick={solveMarbless} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
+
           </div>
 
         ) : mode === "dodeku" ? (
