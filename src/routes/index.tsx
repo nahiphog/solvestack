@@ -957,6 +957,9 @@ function Index() {
           {mode === "wordpeaks" && (
             <a href="https://vegeta897.github.io/word-peaks/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Peaks</a>
           )}
+          {mode === "flippingletters" && (
+            <a href="https://www.flippingletters.com/index.html" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Flipping Letters</a>
+          )}
         </div>
 
 
