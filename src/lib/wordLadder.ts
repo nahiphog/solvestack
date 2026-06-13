@@ -9,7 +9,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords" | "mastermind" | "marbless";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -35,7 +35,69 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   craftwords: 0,
   mastermind: 5,
   marbless: 0,
+  dodeku: 0,
 };
+
+export type DodekuCell = "X" | number | 0;
+
+export function dodekuSolve(
+  initialGrid: DodekuCell[][],
+  rowSums: (number | null)[],
+  colSums: (number | null)[],
+  availableTiles: number[],
+): (DodekuCell[][]) | null {
+  const rows = initialGrid.length;
+  const cols = initialGrid[0].length;
+  const grid: DodekuCell[][] = initialGrid.map((r) => r.slice());
+  const empties: [number, number][] = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) if (grid[r][c] === 0) empties.push([r, c]);
+
+  const used = new Set<number>();
+
+  const isNum = (v: DodekuCell): v is number => typeof v === "number" && v !== 0;
+  const rowSum = (r: number) => grid[r].reduce<number>((s, v) => s + (isNum(v) ? v : 0), 0);
+  const colSum = (c: number) => {
+    let t = 0;
+    for (let r = 0; r < rows; r++) { const v = grid[r][c]; if (isNum(v)) t += v; }
+    return t;
+  };
+  const rowMissing = (r: number) => grid[r].filter((v) => v === 0).length;
+  const colMissing = (c: number) => {
+    let n = 0;
+    for (let r = 0; r < rows; r++) if (grid[r][c] === 0) n++;
+    return n;
+  };
+
+  const feasible = (): boolean => {
+    const remaining = availableTiles.filter((t) => !used.has(t)).sort((a, b) => a - b);
+    const check = (target: number | null, current: number, missing: number) => {
+      if (target == null) return true;
+      if (missing === 0) return current === target;
+      const small = remaining.slice(0, missing).reduce((a, b) => a + b, 0);
+      const large = remaining.slice(-missing).reduce((a, b) => a + b, 0);
+      return current + small <= target && current + large >= target;
+    };
+    for (let r = 0; r < rows; r++) if (!check(rowSums[r], rowSum(r), rowMissing(r))) return false;
+    for (let c = 0; c < cols; c++) if (!check(colSums[c], colSum(c), colMissing(c))) return false;
+    return true;
+  };
+
+  const backtrack = (i: number): boolean => {
+    if (i === empties.length) return feasible();
+    const [r, c] = empties[i];
+    for (const t of availableTiles) {
+      if (used.has(t)) continue;
+      grid[r][c] = t;
+      used.add(t);
+      if (feasible() && backtrack(i + 1)) return true;
+      used.delete(t);
+      grid[r][c] = 0;
+    }
+    return false;
+  };
+
+  return backtrack(0) ? grid : null;
+}
 
 
 export type WordleColor = "GREY" | "GREEN" | "YELLOW";
