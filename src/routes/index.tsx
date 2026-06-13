@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { dodekuSolve, findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, type DodekuCell, type MarblessSolution, type Mode, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, type DodekuCell, type MarblessSolution, type Mode, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   marbless: { start: "", goal: "" },
   dodeku: { start: "", goal: "" },
   wordpeaks: { start: "PEDAL", goal: "" },
+  flippingletters: { start: "", goal: "" },
 
 };
 
@@ -106,6 +107,14 @@ function Index() {
   ]);
   const [wordPeaksResults, setWordPeaksResults] = useState<string[] | null>(null);
 
+  const [flLetters, setFlLetters] = useState<string[]>(["C","I","K","T","S","L","N","A","H","V"]);
+  const [flFlips, setFlFlips] = useState<string[]>(["","","","","","","U","E","",""]);
+  const [flGuesses, setFlGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
+    { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
+  ]);
+  const [flResults, setFlResults] = useState<{ flippable: string[]; answers: string[] } | null>(null);
+  const [pageFl, setPageFl] = useState(0);
+
   const [marblessColumns, setMarblessColumns] = useState<string[][]>([
     ["I", "G", "H", "Y", "R"],
     ["B", "R", "N", "D", "O"],
@@ -145,6 +154,7 @@ function Index() {
   useEffect(() => { setPageMarbless(0); }, [marblessResults]);
   useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
+  useEffect(() => { setPageFl(0); }, [flResults]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
@@ -167,6 +177,7 @@ function Index() {
     setSpellingBeeResults(null);
     setMastermindResults(null);
     setWordPeaksResults(null);
+    setFlResults(null);
 
     setMarblessResults(null);
     setDodekuResult(null);
@@ -459,6 +470,82 @@ function Index() {
     setWordPeaksGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
   };
 
+  const cycleFlTile = (gi: number, ti: number) => {
+    setFlGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const order: WordleColor[] = ["GREY", "YELLOW", "GREEN"];
+        const next = [...g.pattern];
+        next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % 3];
+        return { ...g, pattern: next };
+      }),
+    );
+  };
+  const setFlLetter = (gi: number, ti: number, ch: string) => {
+    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    setFlGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const padded = g.word.padEnd(5, " ").slice(0, 5).split("");
+        padded[ti] = c || " ";
+        return { ...g, word: padded.join("").replace(/ +$/, "") };
+      }),
+    );
+  };
+  const focusFlTile = (gi: number, ti: number) => {
+    if (ti < 0 || ti > 4) return;
+    const el = document.getElementById(`fl-tile-${gi}-${ti}`) as HTMLInputElement | null;
+    el?.focus();
+    el?.select();
+  };
+  const addFlRow = () => {
+    setFlGuesses((prev) => [...prev, { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+  };
+  const removeFlRow = (gi: number) => {
+    setFlGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
+  };
+
+  const solveFlippingLetters = async () => {
+    setError(null);
+    setFlResults(null);
+    const letters = flLetters.map((l) => l.trim().toUpperCase()).filter(Boolean);
+    if (letters.length !== 10) {
+      setError("Please enter all 10 letters.");
+      return;
+    }
+    if (new Set(letters).size !== 10) {
+      setError("The 10 letters must be distinct.");
+      return;
+    }
+    const flips = flFlips.map((l) => l.trim().toUpperCase());
+    for (let i = 0; i < 10; i++) {
+      if (flips[i] && !/^[A-Z]$/.test(flips[i])) {
+        setError(`Flipped letter for "${letters[i]}" must be a single letter.`);
+        return;
+      }
+    }
+    const allowed = [...letters, ...flips.filter(Boolean)];
+    for (const g of flGuesses) {
+      const w = g.word.trim().toUpperCase();
+      if (w.length !== 5) {
+        setError("Each guess must be exactly 5 letters.");
+        return;
+      }
+      if (!(await isValid5LetterWord(w))) {
+        setError(`"${w}" is not a valid 5-letter English word.`);
+        return;
+      }
+    }
+    setSolving(true);
+    const normalized = flGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
+    const result = await flippingLettersSolve(allowed, normalized);
+    if (result.answers.length === 0) setError("No words match these constraints.");
+    setFlResults(result);
+    setSolving(false);
+  };
+
+
+
 
   const solve = () => {
     setError(null);
@@ -546,7 +633,7 @@ function Index() {
         <div className="mb-3 flex w-fit rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku";
-            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks";
+            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters";
             const inLadder = !isMath && !inSearch;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : inLadder;
             return (
@@ -595,13 +682,13 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks") && (
+        {(mode === "wordle" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters") && (
           <div className="mb-6 flex w-fit rounded-md border bg-muted p-1">
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
                   ? mode === "wordle" || mode === "mastermind"
-                  : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks";
+                  : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters";
 
               return (
                 <button
@@ -645,7 +732,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks") && (
+        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("spellingbee")}
@@ -686,6 +773,16 @@ function Index() {
               }`}
             >
               Word Peaks
+            </button>
+            <button
+              onClick={() => switchMode("flippingletters")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "flippingletters"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Flipping Letters
             </button>
           </div>
         )}
@@ -860,6 +957,9 @@ function Index() {
           {mode === "wordpeaks" && (
             <a href="https://vegeta897.github.io/word-peaks/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Peaks</a>
           )}
+          {mode === "flippingletters" && (
+            <a href="https://www.flippingletters.com/index.html" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Flipping Letters</a>
+          )}
         </div>
 
 
@@ -927,9 +1027,118 @@ function Index() {
             Enter your guesses and click each tile to cycle GREEN SQUARE (correctly placed) → ORANGE TRIANGLE UP (the answer letter comes before this letter alphabetically) → LIGHT-BLUE TRIANGLE DOWN (the answer letter comes after this letter alphabetically). Get all 5-letter words consistent with the feedback.
           </p>
         )}
+        {mode === "flippingletters" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter the 10 distinct letters in your bank. For each letter that can be flipped 180°, type the letter it becomes in the small box below. Then enter Wordle-style guesses (GREY → YELLOW → GREEN) to filter the flippable 5-letter words.
+          </p>
+        )}
 
 
-        {mode === "wordpeaks" ? (
+
+        {mode === "flippingletters" ? (
+          <div className="space-y-6">
+            <div>
+              <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; flipped letter optional)</div>
+              <div className="flex flex-wrap gap-2">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1">
+                    <input
+                      type="text"
+                      value={flLetters[i] || ""}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+                        setFlLetters((prev) => { const n = [...prev]; n[i] = c; return n; });
+                      }}
+                      className="h-12 w-12 rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold uppercase outline-none focus:ring-2 focus:ring-ring"
+                      aria-label={`Letter ${i + 1}`}
+                    />
+                    <input
+                      type="text"
+                      value={flFlips[i] || ""}
+                      placeholder="↻"
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+                        setFlFlips((prev) => { const n = [...prev]; n[i] = c; return n; });
+                      }}
+                      className="h-8 w-12 rounded border border-dashed border-border bg-background text-center font-mono text-sm font-semibold uppercase text-muted-foreground outline-none focus:ring-2 focus:ring-ring"
+                      aria-label={`Flipped letter for ${flLetters[i] || `slot ${i + 1}`}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {flGuesses.map((g, gi) => (
+              <div key={gi} className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  {Array.from({ length: 5 }).map((_, ti) => {
+                    const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
+                    const color = g.pattern[ti];
+                    const colorClass =
+                      color === "GREEN"
+                        ? "bg-green-600 text-white border-green-600 caret-white"
+                        : color === "YELLOW"
+                          ? "bg-yellow-500 text-white border-yellow-500 caret-white"
+                          : "bg-muted text-foreground border-border caret-foreground";
+                    return (
+                      <input
+                        key={ti}
+                        id={`fl-tile-${gi}-${ti}`}
+                        type="text"
+                        inputMode="text"
+                        autoComplete="off"
+                        value={letter}
+                        aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${color}`}
+                        onMouseDown={(e) => {
+                          if (document.activeElement === e.currentTarget) {
+                            e.preventDefault();
+                            cycleFlTile(gi, ti);
+                          }
+                        }}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onChange={(e) => {
+                          const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                          if (!v) { setFlLetter(gi, ti, ""); return; }
+                          setFlLetter(gi, ti, v.slice(-1));
+                          if (ti < 4) focusFlTile(gi, ti + 1);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Backspace") {
+                            if (!letter && ti > 0) { e.preventDefault(); focusFlTile(gi, ti - 1); }
+                          } else if (e.key === "ArrowLeft") { e.preventDefault(); focusFlTile(gi, ti - 1); }
+                          else if (e.key === "ArrowRight") { e.preventDefault(); focusFlTile(gi, ti + 1); }
+                          else if (e.key === " " || e.key === "Enter") { e.preventDefault(); cycleFlTile(gi, ti); }
+                        }}
+                        className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                      />
+                    );
+                  })}
+                </div>
+                {flGuesses.length > 1 && (
+                  <Button onClick={() => removeFlRow(gi)} variant="outline" size="sm">Remove</Button>
+                )}
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={addFlRow} variant="outline" size="lg">Add guess</Button>
+              <Button
+                onClick={() => {
+                  setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                  setFlResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button onClick={solveFlippingLetters} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
+        ) : mode === "wordpeaks" ? (
           <div className="space-y-4">
             {wordPeaksGuesses.map((g, gi) => (
               <div key={gi} className="flex items-center gap-3">
@@ -1917,6 +2126,46 @@ function Index() {
             <Paginator page={pageWP} setPage={setPageWP} total={wordPeaksResults.length} />
           </section>
         )}
+
+        {flResults && (
+          <section className="mt-10">
+            <div className="mb-2 text-sm text-muted-foreground">
+              {flResults.flippable.length} flippable 5-letter {flResults.flippable.length === 1 ? "word" : "words"} from your letter bank.
+            </div>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {flResults.answers.length} possible {flResults.answers.length === 1 ? "answer" : "answers"}
+              </h2>
+              <button
+                onClick={() => {
+                  copyText(`${flResults.answers.length} possible ${flResults.answers.length === 1 ? "answer" : "answers"}:\n${flResults.answers.join(", ")}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all answers"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex flex-wrap gap-2 font-mono text-sm">
+                {flResults.answers.slice(pageFl * 50, pageFl * 50 + 50).map((w) => (
+                  <a
+                    key={w}
+                    href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                  >
+                    {w}
+                  </a>
+                ))}
+              </div>
+            </div>
+            <Paginator page={pageFl} setPage={setPageFl} total={flResults.answers.length} />
+          </section>
+        )}
+
+
 
 
         {marblessResults && (
