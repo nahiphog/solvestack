@@ -517,13 +517,7 @@ function Index() {
       setError("The 10 letters must be distinct.");
       return;
     }
-    const flips = flFlips.map((l) => l.trim().toUpperCase());
-    for (let i = 0; i < 10; i++) {
-      if (flips[i] && !/^[A-Z]$/.test(flips[i])) {
-        setError(`Flipped letter for "${letters[i]}" must be a single letter.`);
-        return;
-      }
-    }
+    const flips = letters.map((l) => FL_FLIP_MAP[l] || "");
     const allowed = [...letters, ...flips.filter(Boolean)];
     for (const g of flGuesses) {
       const w = g.word.trim().toUpperCase();
