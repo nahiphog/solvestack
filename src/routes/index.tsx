@@ -55,7 +55,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
 };
 
 const FL_FLIP_MAP: Record<string, string> = {
-  B: "Q", Q: "B", D: "P", P: "D", N: "U", U: "N", M: "W", W: "M",
+  A: "E", E: "A", D: "P", P: "D", N: "U", U: "N", M: "W", W: "M",
 };
 
 
