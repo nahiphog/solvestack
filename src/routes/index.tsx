@@ -1104,6 +1104,90 @@ function Index() {
             </div>
           </div>
 
+        ) : mode === "dodeku" ? (
+          <div className="space-y-4">
+            <div>
+              <div className="mb-1 text-sm font-medium">Grid (use "X" for blocked, blank for empty, or a fixed number)</div>
+              <div className="inline-block">
+                <div className="flex gap-1.5">
+                  <div className="w-12" />
+                  {[0, 1, 2, 3].map((c) => (
+                    <input
+                      key={c}
+                      value={dodekuColSums[c]}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/[^0-9]/g, "");
+                        setDodekuColSums((prev) => prev.map((x, i) => (i === c ? v : x)));
+                      }}
+                      placeholder="—"
+                      className="h-9 w-12 rounded border border-input bg-background text-center font-mono text-sm"
+                      aria-label={`Column ${c + 1} sum`}
+                    />
+                  ))}
+                </div>
+                {[0, 1, 2, 3].map((r) => (
+                  <div key={r} className="mt-1.5 flex gap-1.5">
+                    <input
+                      value={dodekuRowSums[r]}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/[^0-9]/g, "");
+                        setDodekuRowSums((prev) => prev.map((x, i) => (i === r ? v : x)));
+                      }}
+                      placeholder="—"
+                      className="h-12 w-12 rounded border border-input bg-background text-center font-mono text-sm"
+                      aria-label={`Row ${r + 1} sum`}
+                    />
+                    {[0, 1, 2, 3].map((c) => {
+                      const v = dodekuGrid[r][c];
+                      const isBlocked = v === "X" || v === "x";
+                      return (
+                        <input
+                          key={c}
+                          value={v}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            const cleaned = /^[xX]$/.test(raw) ? "X" : raw.replace(/[^0-9]/g, "");
+                            setDodekuGrid((prev) =>
+                              prev.map((row, ri) => (ri === r ? row.map((x, ci) => (ci === c ? cleaned : x)) : row)),
+                            );
+                          }}
+                          className={`flex h-12 w-12 items-center justify-center rounded border-2 border-border text-center font-mono text-lg font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${isBlocked ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
+                          aria-label={`Cell row ${r + 1} col ${c + 1}`}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Available tiles (comma-separated)</label>
+              <Input
+                value={dodekuTiles}
+                onChange={(e) => setDodekuTiles(e.target.value)}
+                className="font-mono"
+              />
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={() => {
+                  setDodekuGrid([["","","",""],["","","",""],["","","",""],["","","",""]]);
+                  setDodekuRowSums(["","","",""]);
+                  setDodekuColSums(["","","",""]);
+                  setDodekuTiles("");
+                  setDodekuResult(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button onClick={solveDodeku} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
+
         ) : (
           <div
             className={`grid gap-4 sm:items-end ${
