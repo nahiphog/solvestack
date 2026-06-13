@@ -401,9 +401,9 @@ function Index() {
       <div className="mx-auto max-w-3xl px-6 py-16">
         <header className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Word Ladder Solver</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Solve Stack</h1>
             <p className="mt-2 text-muted-foreground">
-              Enter two words. Get every shortest ladder between them.
+              Building solvers, one puzzle at a time.
             </p>
           </div>
           <button
