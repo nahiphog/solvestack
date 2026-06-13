@@ -736,6 +736,7 @@ function Index() {
           {mode === "mastermind" && (
             <>
               <a href="https://word500.com/game?mode=daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word500</a>
+              <span>, </span>
               <a href="https://play.woodle.today/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Woodle</a>
             </>
           )}
