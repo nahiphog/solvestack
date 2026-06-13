@@ -129,6 +129,8 @@ function Index() {
   const [pagePaths, setPagePaths] = useState(0);
   const [pageWordle, setPageWordle] = useState(0);
   const [pageMM, setPageMM] = useState(0);
+  const [pageWP, setPageWP] = useState(0);
+
   const [pageMarbless, setPageMarbless] = useState(0);
   const [pageWordiply, setPageWordiply] = useState(0);
   const [pageBee, setPageBee] = useState(0);
