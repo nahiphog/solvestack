@@ -689,13 +689,27 @@ function Index() {
             <a href="https://www.wordiply.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordiply</a>
           )}
           {mode === "wordle" && (
-            <>
-              <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordle</a>
-              <a href="https://bushong.net/~mconst/wordinone/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordle in one</a>
-              <a href="https://wordlein2.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordle in two</a>
-              <a href="https://cludl.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Cludl</a>
-              <a href="https://wordall.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word all</a>
-            </>
+            <div className="flex w-full flex-col gap-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-muted-foreground">Original:</span>
+                <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordle</a>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-muted-foreground">One unique solution:</span>
+                <a href="https://bushong.net/~mconst/wordinone/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word-in-one</a>
+                <a href="https://wordlein2.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word-in-two</a>
+                <a href="https://cludl.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Cludl</a>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-muted-foreground">Find all solutions:</span>
+                <a href="https://wordall.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word All</a>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-muted-foreground">Make bad guesses:</span>
+                <a href="https://lazyguyy.github.io/survivle/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Survivle</a>
+                <a href="https://dontwordle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Don't Wordle</a>
+              </div>
+            </div>
           )}
           {mode === "spellingbee" && (
             <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
