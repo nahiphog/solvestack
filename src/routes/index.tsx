@@ -54,6 +54,10 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
 
 };
 
+const FL_FLIP_MAP: Record<string, string> = {
+  B: "Q", Q: "B", D: "P", P: "D", N: "U", U: "N", M: "W", W: "M",
+};
+
 
 function Paginator({ page, setPage, total, perPage = 50 }: { page: number; setPage: (n: number) => void; total: number; perPage?: number }) {
   const pages = Math.ceil(total / perPage);
@@ -108,7 +112,7 @@ function Index() {
   const [wordPeaksResults, setWordPeaksResults] = useState<string[] | null>(null);
 
   const [flLetters, setFlLetters] = useState<string[]>(["C","I","K","T","S","L","N","A","H","V"]);
-  const [flFlips, setFlFlips] = useState<string[]>(["","","","","","","U","E","",""]);
+  const [flRevealed, setFlRevealed] = useState<boolean[]>(Array(10).fill(false));
   const [flGuesses, setFlGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
     { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
@@ -517,13 +521,7 @@ function Index() {
       setError("The 10 letters must be distinct.");
       return;
     }
-    const flips = flFlips.map((l) => l.trim().toUpperCase());
-    for (let i = 0; i < 10; i++) {
-      if (flips[i] && !/^[A-Z]$/.test(flips[i])) {
-        setError(`Flipped letter for "${letters[i]}" must be a single letter.`);
-        return;
-      }
-    }
+    const flips = letters.map((l) => FL_FLIP_MAP[l] || "");
     const allowed = [...letters, ...flips.filter(Boolean)];
     for (const g of flGuesses) {
       const w = g.word.trim().toUpperCase();
@@ -1029,7 +1027,7 @@ function Index() {
         )}
         {mode === "flippingletters" && (
           <p className="mb-4 text-sm text-muted-foreground">
-            Enter the 10 distinct letters in your bank. For each letter that can be flipped 180°, type the letter it becomes in the small box below. Then enter Wordle-style guesses (GREY → YELLOW → GREEN) to filter the flippable 5-letter words.
+            Enter the 10 distinct letters in your bank. Click a letter to check whether it's flippable (b↔q, d↔p, n↔u, m↔w). Then enter Wordle-style guesses (grey → yellow → green) to filter the flippable 5-letter words.
           </p>
         )}
 
@@ -1038,37 +1036,40 @@ function Index() {
         {mode === "flippingletters" ? (
           <div className="space-y-6">
             <div>
-              <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; flipped letter optional)</div>
+              <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; click a tile to see if it flips)</div>
               <div className="flex flex-wrap gap-2">
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1">
-                    <input
-                      type="text"
-                      value={flLetters[i] || ""}
-                      onFocus={(e) => e.currentTarget.select()}
-                      onChange={(e) => {
-                        const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
-                        setFlLetters((prev) => { const n = [...prev]; n[i] = c; return n; });
-                      }}
-                      className="h-12 w-12 rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold uppercase outline-none focus:ring-2 focus:ring-ring"
-                      aria-label={`Letter ${i + 1}`}
-                    />
-                    <input
-                      type="text"
-                      value={flFlips[i] || ""}
-                      placeholder="↻"
-                      onFocus={(e) => e.currentTarget.select()}
-                      onChange={(e) => {
-                        const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
-                        setFlFlips((prev) => { const n = [...prev]; n[i] = c; return n; });
-                      }}
-                      className="h-8 w-12 rounded border border-dashed border-border bg-background text-center font-mono text-sm font-semibold uppercase text-muted-foreground outline-none focus:ring-2 focus:ring-ring"
-                      aria-label={`Flipped letter for ${flLetters[i] || `slot ${i + 1}`}`}
-                    />
-                  </div>
-                ))}
+                {Array.from({ length: 10 }).map((_, i) => {
+                  const upper = (flLetters[i] || "").toUpperCase();
+                  const flip = FL_FLIP_MAP[upper] || "";
+                  const revealed = flRevealed[i];
+                  return (
+                    <div key={i} className="flex flex-col items-center gap-1">
+                      <input
+                        type="text"
+                        value={(flLetters[i] || "").toLowerCase()}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onChange={(e) => {
+                          const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+                          setFlLetters((prev) => { const n = [...prev]; n[i] = c; return n; });
+                          setFlRevealed((prev) => { const n = [...prev]; n[i] = false; return n; });
+                        }}
+                        onClick={() => {
+                          setFlRevealed((prev) => { const n = [...prev]; n[i] = !n[i]; return n; });
+                        }}
+                        className="h-12 w-12 rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold lowercase outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+                        aria-label={`Letter ${i + 1}`}
+                      />
+                      <div className="h-5 text-xs font-mono text-muted-foreground">
+                        {revealed && upper
+                          ? (flip ? `↻ ${flip.toLowerCase()}` : "—")
+                          : ""}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
+
 
             {flGuesses.map((g, gi) => (
               <div key={gi} className="flex items-center gap-3">
@@ -1089,7 +1090,7 @@ function Index() {
                         type="text"
                         inputMode="text"
                         autoComplete="off"
-                        value={letter}
+                        value={letter.toLowerCase()}
                         aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${color}`}
                         onMouseDown={(e) => {
                           if (document.activeElement === e.currentTarget) {
@@ -1111,7 +1112,7 @@ function Index() {
                           else if (e.key === "ArrowRight") { e.preventDefault(); focusFlTile(gi, ti + 1); }
                           else if (e.key === " " || e.key === "Enter") { e.preventDefault(); cycleFlTile(gi, ti); }
                         }}
-                        className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                        className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold lowercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
                       />
                     );
                   })}
@@ -2156,7 +2157,7 @@ function Index() {
                     rel="noopener noreferrer"
                     className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
                   >
-                    {w}
+                    {w.toLowerCase()}
                   </a>
                 ))}
               </div>
