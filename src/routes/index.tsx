@@ -10,7 +10,7 @@ import { Copy, Check, Sun, Moon } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Word Ladder Solver" },
+      { title: "Solve Stack" },
       { name: "description", content: "Find all shortest word ladders between two words." },
     ],
   }),
@@ -794,6 +794,14 @@ function Index() {
                   </td>
                 </tr>
                 <tr>
+                  <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">Multiple</td>
+                  <td className="border border-border px-3 py-1.5">
+                    <a href="https://zaratustra.itch.io/dordle" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Dordle</a>
+                    <span> · </span>
+                    <a href="https://www.quordle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Quordle</a>
+                  </td>
+                </tr>
+                <tr>
                   <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">One unique solution</td>
                   <td className="border border-border px-3 py-1.5">
                     <a href="https://bushong.net/~mconst/wordinone/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word-in-one</a>
@@ -823,6 +831,8 @@ function Index() {
                     <a href="https://lazyguyy.github.io/survivle/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Survivle</a>
                     <span> · </span>
                     <a href="https://dontwordle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Don't Wordle</a>
+                    <span> · </span>
+                    <a href="https://www.antiwordle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Antiwordle</a>
                   </td>
                 </tr>
               </tbody>
