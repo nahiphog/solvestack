@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
 import { dodekuSolve, findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type DodekuCell, type MarblessSolution, type Mode, type WordleColor } from "@/lib/wordLadder";
+import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon } from "lucide-react";
@@ -818,6 +819,32 @@ function Index() {
 
         {mode === "wordle" ? (
           <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm">
+              <span>Optional: Input</span>
+              <select
+                className="rounded border border-border bg-background px-2 py-1"
+                defaultValue="0"
+                onChange={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  if (n === 0) {
+                    setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                    setWordleResults(null);
+                    return;
+                  }
+                  const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
+                  if (!sheet || sheet.length === 0) return;
+                  const row = sheet[Math.floor(Math.random() * sheet.length)];
+                  setWordleGuesses(row.slice(0, n).map((w) => ({ word: w.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] })));
+                  setWordleResults(null);
+                }}
+              >
+                <option value="0">0</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+              <span>strategic starting words into the solver.</span>
+            </div>
             {wordleGuesses.map((g, gi) => (
               <div key={gi} className="flex items-center gap-3">
                 <div className="flex gap-1.5">
