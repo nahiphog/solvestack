@@ -50,6 +50,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   marbless: { start: "", goal: "" },
   dodeku: { start: "", goal: "" },
   wordpeaks: { start: "PEDAL", goal: "" },
+  flippingletters: { start: "", goal: "" },
 
 };
 
