@@ -177,6 +177,7 @@ function Index() {
     setSpellingBeeResults(null);
     setMastermindResults(null);
     setWordPeaksResults(null);
+    setFlResults(null);
 
     setMarblessResults(null);
     setDodekuResult(null);
