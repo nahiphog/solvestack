@@ -1855,6 +1855,42 @@ function Index() {
           </section>
         )}
 
+        {wordPeaksResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {wordPeaksResults.length} possible {wordPeaksResults.length === 1 ? "answer" : "answers"}
+              </h2>
+              <button
+                onClick={() => {
+                  copyText(`${wordPeaksResults.length} possible ${wordPeaksResults.length === 1 ? "answer" : "answers"}:\n${wordPeaksResults.join(", ")}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all answers"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex flex-wrap gap-2 font-mono text-sm">
+                {wordPeaksResults.slice(pageWP * 50, pageWP * 50 + 50).map((w) => (
+                  <a
+                    key={w}
+                    href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                  >
+                    {w}
+                  </a>
+                ))}
+              </div>
+            </div>
+            <Paginator page={pageWP} setPage={setPageWP} total={wordPeaksResults.length} />
+          </section>
+        )}
+
+
         {marblessResults && (
           <section className="mt-10">
             <div className="mb-4 flex items-center justify-between gap-3">
