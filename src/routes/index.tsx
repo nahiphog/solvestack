@@ -925,6 +925,16 @@ function Index() {
               >
                 Reset
               </Button>
+              <Button
+                onClick={() => {
+                  setWordleGuesses((prev) => prev.map((g) => ({ ...g, pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] })));
+                  setWordleResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset colors only
+              </Button>
               <Button onClick={solveWordle} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
               </Button>
