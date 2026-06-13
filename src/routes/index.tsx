@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type MarblessSolution, type Mode, type WordleColor } from "@/lib/wordLadder";
+import { dodekuSolve, findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type DodekuCell, type MarblessSolution, type Mode, type WordleColor } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon } from "lucide-react";
@@ -16,9 +16,10 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const SECTIONS: { id: "ladder" | "search"; label: string }[] = [
+const SECTIONS: { id: "ladder" | "search" | "math"; label: string }[] = [
   { id: "ladder", label: "Word ladder" },
   { id: "search", label: "Word search" },
+  { id: "math", label: "Mathematics" },
 ];
 
 const LADDER_MODES: { id: string; label: string }[] = [
@@ -46,6 +47,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   craftwords: { start: "BREAK", goal: "EVEN" },
   mastermind: { start: "WATER", goal: "" },
   marbless: { start: "", goal: "" },
+  dodeku: { start: "", goal: "" },
 };
 
 
