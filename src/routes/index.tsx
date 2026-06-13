@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type MarblessSolution, type Mode, type WordleColor } from "@/lib/wordLadder";
+import { dodekuSolve, findAllShortestPaths, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, type DodekuCell, type MarblessSolution, type Mode, type WordleColor } from "@/lib/wordLadder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon } from "lucide-react";
@@ -16,9 +16,10 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const SECTIONS: { id: "ladder" | "search"; label: string }[] = [
+const SECTIONS: { id: "ladder" | "search" | "math"; label: string }[] = [
   { id: "ladder", label: "Word ladder" },
   { id: "search", label: "Word search" },
+  { id: "math", label: "Mathematics" },
 ];
 
 const LADDER_MODES: { id: string; label: string }[] = [
@@ -46,6 +47,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   craftwords: { start: "BREAK", goal: "EVEN" },
   mastermind: { start: "WATER", goal: "" },
   marbless: { start: "", goal: "" },
+  dodeku: { start: "", goal: "" },
 };
 
 
@@ -102,6 +104,16 @@ function Index() {
     ["B", "R", "N", "D", "O"],
   ]);
   const [marblessResults, setMarblessResults] = useState<MarblessSolution[] | null>(null);
+  const [dodekuGrid, setDodekuGrid] = useState<string[][]>([
+    ["X", "X", "X", "1"],
+    ["X", "", "", ""],
+    ["", "", "", "11"],
+    ["", "4", "1", ""],
+  ]);
+  const [dodekuRowSums, setDodekuRowSums] = useState<string[]>(["5", "20", "35", ""]);
+  const [dodekuColSums, setDodekuColSums] = useState<string[]>(["8", "", "21", "32"]);
+  const [dodekuTiles, setDodekuTiles] = useState<string>("2,3,5,6,7,8,9,10,12");
+  const [dodekuResult, setDodekuResult] = useState<DodekuCell[][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -144,10 +156,44 @@ function Index() {
     setSpellingBeeResults(null);
     setMastermindResults(null);
     setMarblessResults(null);
+    setDodekuResult(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
     setGoal(d.goal);
+  };
+
+  const solveDodeku = () => {
+    setError(null);
+    setDodekuResult(null);
+    const initial: DodekuCell[][] = dodekuGrid.map((row) =>
+      row.map<DodekuCell>((v) => {
+        const s = v.trim();
+        if (s === "X" || s === "x") return "X";
+        if (s === "" || s === "0") return 0;
+        const n = parseInt(s, 10);
+        return Number.isFinite(n) ? n : 0;
+      }),
+    );
+    const rs = dodekuRowSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
+    const cs = dodekuColSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
+    const tiles = dodekuTiles
+      .split(/[\s,]+/)
+      .filter(Boolean)
+      .map((t) => parseInt(t, 10))
+      .filter((n) => Number.isFinite(n));
+    const emptyCount = initial.flat().filter((v) => v === 0).length;
+    if (tiles.length !== emptyCount) {
+      setError(`Number of tiles (${tiles.length}) must equal number of empty cells (${emptyCount}).`);
+      return;
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const res = dodekuSolve(initial, rs, cs, tiles);
+      if (!res) setError("No solution found.");
+      else setDodekuResult(res);
+      setSolving(false);
+    }, 0);
   };
 
   const solveSpellingBee = async () => {
@@ -418,12 +464,20 @@ function Index() {
 
         <div className="mb-3 flex w-fit rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
+            const isMath = mode === "dodeku";
             const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply";
-            const isActive = s.id === "search" ? inSearch : !inSearch;
+            const inLadder = !isMath && !inSearch;
+            const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : inLadder;
             return (
               <button
                 key={s.id}
-                onClick={() => s.id === "ladder" ? switchMode(4) : switchMode("wordle")}
+                onClick={() =>
+                  s.id === "ladder"
+                    ? switchMode(4)
+                    : s.id === "search"
+                      ? switchMode("wordle")
+                      : switchMode("dodeku")
+                }
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
                     ? "bg-background text-foreground shadow-sm"
@@ -658,6 +712,9 @@ function Index() {
           {mode === "marbless" && (
             <a href="https://marbless.co/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Marbless</a>
           )}
+          {mode === "dodeku" && (
+            <a href="https://dodeku.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Dodeku</a>
+          )}
         </div>
 
         {mode === "craftwords" && (
@@ -711,6 +768,12 @@ function Index() {
         {mode === "marbless" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Set up 2 to 4 columns of 5 letters each. Each move removes the bottom letter from any column. Find all orderings that spell valid 5-letter English words.
+          </p>
+        )}
+
+        {mode === "dodeku" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Fill empty cells with the available tiles so that each given row and column sum matches. Use "X" for blocked cells, leave empties blank, or enter a fixed number.
           </p>
         )}
 
@@ -1036,6 +1099,90 @@ function Index() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Button onClick={solveMarbless} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
+
+        ) : mode === "dodeku" ? (
+          <div className="space-y-4">
+            <div>
+              <div className="mb-1 text-sm font-medium">Grid (use "X" for blocked, blank for empty, or a fixed number)</div>
+              <div className="inline-block">
+                <div className="flex gap-1.5">
+                  <div className="w-12" />
+                  {[0, 1, 2, 3].map((c) => (
+                    <input
+                      key={c}
+                      value={dodekuColSums[c]}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/[^0-9]/g, "");
+                        setDodekuColSums((prev) => prev.map((x, i) => (i === c ? v : x)));
+                      }}
+                      placeholder="—"
+                      className="h-9 w-12 rounded border border-input bg-background text-center font-mono text-sm"
+                      aria-label={`Column ${c + 1} sum`}
+                    />
+                  ))}
+                </div>
+                {[0, 1, 2, 3].map((r) => (
+                  <div key={r} className="mt-1.5 flex gap-1.5">
+                    <input
+                      value={dodekuRowSums[r]}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/[^0-9]/g, "");
+                        setDodekuRowSums((prev) => prev.map((x, i) => (i === r ? v : x)));
+                      }}
+                      placeholder="—"
+                      className="h-12 w-12 rounded border border-input bg-background text-center font-mono text-sm"
+                      aria-label={`Row ${r + 1} sum`}
+                    />
+                    {[0, 1, 2, 3].map((c) => {
+                      const v = dodekuGrid[r][c];
+                      const isBlocked = v === "X" || v === "x";
+                      return (
+                        <input
+                          key={c}
+                          value={v}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            const cleaned = /^[xX]$/.test(raw) ? "X" : raw.replace(/[^0-9]/g, "");
+                            setDodekuGrid((prev) =>
+                              prev.map((row, ri) => (ri === r ? row.map((x, ci) => (ci === c ? cleaned : x)) : row)),
+                            );
+                          }}
+                          className={`flex h-12 w-12 items-center justify-center rounded border-2 border-border text-center font-mono text-lg font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${isBlocked ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
+                          aria-label={`Cell row ${r + 1} col ${c + 1}`}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Available tiles (comma-separated)</label>
+              <Input
+                value={dodekuTiles}
+                onChange={(e) => setDodekuTiles(e.target.value)}
+                className="font-mono"
+              />
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={() => {
+                  setDodekuGrid([["","","",""],["","","",""],["","","",""],["","","",""]]);
+                  setDodekuRowSums(["","","",""]);
+                  setDodekuColSums(["","","",""]);
+                  setDodekuTiles("");
+                  setDodekuResult(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button onClick={solveDodeku} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
@@ -1378,6 +1525,35 @@ function Index() {
 
           </section>
         )}
+
+        {dodekuResult && (
+          <section className="mt-10">
+            <h2 className="mb-4 text-lg font-semibold">Solution</h2>
+            <div className="inline-block rounded-lg border bg-card p-4">
+              <table className="border-collapse font-mono">
+                <tbody>
+                  {dodekuResult.map((row, r) => (
+                    <tr key={r}>
+                      {row.map((cell, c) => {
+                        const isBlocked = cell === "X";
+                        return (
+                          <td
+                            key={c}
+                            className={`h-12 w-12 border border-border text-center text-lg font-bold ${isBlocked ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
+                          >
+                            {isBlocked ? "X" : String(cell)}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+
 
       </div>
 
