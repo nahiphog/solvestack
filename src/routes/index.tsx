@@ -453,7 +453,7 @@ function Index() {
   };
 
   const addWPRow = () => {
-    setWordPeaksGuesses((prev) => [...prev, { word: "", pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] }]);
+    setWordPeaksGuesses((prev) => [...prev, { word: "", pattern: ["NONE", "NONE", "NONE", "NONE", "NONE"] }]);
   };
 
   const removeWPRow = (gi: number) => {
