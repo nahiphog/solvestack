@@ -991,7 +991,7 @@ function Index() {
               // Input order: 0=upper-left, 1=top, 2=upper-right, 3=middle, 4=lower-left, 5=bottom, 6=lower-right
               return (
                 <div className="flex items-center" style={{ gap: 0 }}>
-                  <div className="flex flex-col" style={{ marginTop: "32px", gap: "4px" }}>
+                  <div className="flex flex-col" style={{ marginTop: "28px", gap: "4px" }}>
                     {renderTile(0)}
                     {renderTile(4)}
                   </div>
@@ -1000,7 +1000,7 @@ function Index() {
                     {renderTile(3)}
                     {renderTile(5)}
                   </div>
-                  <div className="flex flex-col" style={{ marginTop: "32px", gap: "4px" }}>
+                  <div className="flex flex-col" style={{ marginTop: "28px", gap: "4px" }}>
                     {renderTile(2)}
                     {renderTile(6)}
                   </div>
