@@ -1141,34 +1141,8 @@ function Index() {
             <div>
               <div className="mb-1 text-sm font-medium">Grid (use "X" for blocked, blank for empty, or a fixed number)</div>
               <div className="inline-block">
-                <div className="flex gap-1.5">
-                  <div className="w-12" />
-                  {[0, 1, 2, 3].map((c) => (
-                    <input
-                      key={c}
-                      value={dodekuColSums[c]}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/[^0-9]/g, "");
-                        setDodekuColSums((prev) => prev.map((x, i) => (i === c ? v : x)));
-                      }}
-                      placeholder="—"
-                      className="h-9 w-12 rounded border border-input bg-background text-center font-mono text-sm"
-                      aria-label={`Column ${c + 1} sum`}
-                    />
-                  ))}
-                </div>
                 {[0, 1, 2, 3].map((r) => (
-                  <div key={r} className="mt-1.5 flex gap-1.5">
-                    <input
-                      value={dodekuRowSums[r]}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/[^0-9]/g, "");
-                        setDodekuRowSums((prev) => prev.map((x, i) => (i === r ? v : x)));
-                      }}
-                      placeholder="—"
-                      className="h-12 w-12 rounded border border-input bg-background text-center font-mono text-sm"
-                      aria-label={`Row ${r + 1} sum`}
-                    />
+                  <div key={r} className="mt-1.5 flex gap-1.5 first:mt-0">
                     {[0, 1, 2, 3].map((c) => {
                       const v = dodekuGrid[r][c];
                       const isBlocked = v === "X" || v === "x";
@@ -1188,8 +1162,33 @@ function Index() {
                         />
                       );
                     })}
+                    <input
+                      value={dodekuRowSums[r]}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/[^0-9]/g, "");
+                        setDodekuRowSums((prev) => prev.map((x, i) => (i === r ? v : x)));
+                      }}
+                      placeholder="—"
+                      className="ml-1.5 h-12 w-12 rounded border border-input bg-background text-center font-mono text-sm"
+                      aria-label={`Row ${r + 1} sum`}
+                    />
                   </div>
                 ))}
+                <div className="mt-1.5 flex gap-1.5">
+                  {[0, 1, 2, 3].map((c) => (
+                    <input
+                      key={c}
+                      value={dodekuColSums[c]}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/[^0-9]/g, "");
+                        setDodekuColSums((prev) => prev.map((x, i) => (i === c ? v : x)));
+                      }}
+                      placeholder="—"
+                      className="h-9 w-12 rounded border border-input bg-background text-center font-mono text-sm"
+                      aria-label={`Column ${c + 1} sum`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
             <div>
@@ -1212,7 +1211,7 @@ function Index() {
                 variant="outline"
                 size="lg"
               >
-                Reset
+                Clear all
               </Button>
               <Button onClick={solveDodeku} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
