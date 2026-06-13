@@ -393,6 +393,68 @@ function Index() {
     setWordleGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
   };
 
+  const solveWordPeaks = async () => {
+    setError(null);
+    setWordPeaksResults(null);
+    for (const g of wordPeaksGuesses) {
+      const w = g.word.trim().toUpperCase();
+      if (w.length !== 5) {
+        setError("Each guess must be exactly 5 letters.");
+        return;
+      }
+      if (!(await isValid5LetterWord(w))) {
+        setError(`"${w}" is not a valid 5-letter English word.`);
+        return;
+      }
+    }
+    setSolving(true);
+    const normalized = wordPeaksGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
+    const result = await wordPeaksSolve(normalized);
+    if (result.length === 0) setError("No words match these constraints.");
+    else setWordPeaksResults(result);
+    setSolving(false);
+  };
+
+  const cycleWPTile = (gi: number, ti: number) => {
+    setWordPeaksGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const order: WordPeaksDirection[] = ["CORRECT", "BEFORE", "AFTER"];
+        const next = [...g.pattern];
+        next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % 3];
+        return { ...g, pattern: next };
+      }),
+    );
+  };
+
+  const setWPLetter = (gi: number, ti: number, ch: string) => {
+    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    setWordPeaksGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const padded = g.word.padEnd(5, " ").slice(0, 5).split("");
+        padded[ti] = c || " ";
+        return { ...g, word: padded.join("").replace(/ +$/, "") };
+      }),
+    );
+  };
+
+  const focusWPTile = (gi: number, ti: number) => {
+    if (ti < 0 || ti > 4) return;
+    const el = document.getElementById(`wp-tile-${gi}-${ti}`) as HTMLInputElement | null;
+    el?.focus();
+    el?.select();
+  };
+
+  const addWPRow = () => {
+    setWordPeaksGuesses((prev) => [...prev, { word: "", pattern: ["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT"] }]);
+  };
+
+  const removeWPRow = (gi: number) => {
+    setWordPeaksGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
+  };
+
+
   const solve = () => {
     setError(null);
     setPaths(null);
