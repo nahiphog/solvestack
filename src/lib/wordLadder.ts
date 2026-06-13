@@ -40,21 +40,28 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
 };
 
 
-// 0 means variable length (no length validation)
-export const MODE_WORD_LENGTH: Record<string, number> = {
-  "4": 4,
-  "5": 5,
-  "6": 6,
-  splice: 5,
-  weaverx: 0,
-  pivots: 6,
-  wordiply: 0,
-  wordle: 5,
-  craftwords: 0,
-  mastermind: 5,
-  marbless: 0,
-  dodeku: 0,
-};
+export type WordPeaksDirection = "CORRECT" | "BEFORE" | "AFTER";
+
+export async function wordPeaksSolve(
+  guesses: { word: string; pattern: WordPeaksDirection[] }[],
+): Promise<string[]> {
+  const words = await getFiveLetterWords();
+  return words.filter((answer) =>
+    guesses.every((g) => {
+      const w = g.word.toUpperCase();
+      for (let i = 0; i < 5; i++) {
+        const a = answer.charCodeAt(i);
+        const c = w.charCodeAt(i);
+        const d = g.pattern[i];
+        if (d === "CORRECT") { if (a !== c) return false; }
+        else if (d === "BEFORE") { if (a >= c) return false; }
+        else { if (a <= c) return false; }
+      }
+      return true;
+    }),
+  );
+}
+
 
 export type DodekuCell = "X" | number | 0;
 
