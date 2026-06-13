@@ -1035,7 +1035,110 @@ function Index() {
 
 
 
-        {mode === "wordpeaks" ? (
+        {mode === "flippingletters" ? (
+          <div className="space-y-6">
+            <div>
+              <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; flipped letter optional)</div>
+              <div className="flex flex-wrap gap-2">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1">
+                    <input
+                      type="text"
+                      value={flLetters[i] || ""}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+                        setFlLetters((prev) => { const n = [...prev]; n[i] = c; return n; });
+                      }}
+                      className="h-12 w-12 rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold uppercase outline-none focus:ring-2 focus:ring-ring"
+                      aria-label={`Letter ${i + 1}`}
+                    />
+                    <input
+                      type="text"
+                      value={flFlips[i] || ""}
+                      placeholder="↻"
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+                        setFlFlips((prev) => { const n = [...prev]; n[i] = c; return n; });
+                      }}
+                      className="h-8 w-12 rounded border border-dashed border-border bg-background text-center font-mono text-sm font-semibold uppercase text-muted-foreground outline-none focus:ring-2 focus:ring-ring"
+                      aria-label={`Flipped letter for ${flLetters[i] || `slot ${i + 1}`}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {flGuesses.map((g, gi) => (
+              <div key={gi} className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  {Array.from({ length: 5 }).map((_, ti) => {
+                    const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
+                    const color = g.pattern[ti];
+                    const colorClass =
+                      color === "GREEN"
+                        ? "bg-green-600 text-white border-green-600 caret-white"
+                        : color === "YELLOW"
+                          ? "bg-yellow-500 text-white border-yellow-500 caret-white"
+                          : "bg-muted text-foreground border-border caret-foreground";
+                    return (
+                      <input
+                        key={ti}
+                        id={`fl-tile-${gi}-${ti}`}
+                        type="text"
+                        inputMode="text"
+                        autoComplete="off"
+                        value={letter}
+                        aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${color}`}
+                        onMouseDown={(e) => {
+                          if (document.activeElement === e.currentTarget) {
+                            e.preventDefault();
+                            cycleFlTile(gi, ti);
+                          }
+                        }}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onChange={(e) => {
+                          const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                          if (!v) { setFlLetter(gi, ti, ""); return; }
+                          setFlLetter(gi, ti, v.slice(-1));
+                          if (ti < 4) focusFlTile(gi, ti + 1);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Backspace") {
+                            if (!letter && ti > 0) { e.preventDefault(); focusFlTile(gi, ti - 1); }
+                          } else if (e.key === "ArrowLeft") { e.preventDefault(); focusFlTile(gi, ti - 1); }
+                          else if (e.key === "ArrowRight") { e.preventDefault(); focusFlTile(gi, ti + 1); }
+                          else if (e.key === " " || e.key === "Enter") { e.preventDefault(); cycleFlTile(gi, ti); }
+                        }}
+                        className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                      />
+                    );
+                  })}
+                </div>
+                {flGuesses.length > 1 && (
+                  <Button onClick={() => removeFlRow(gi)} variant="outline" size="sm">Remove</Button>
+                )}
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={addFlRow} variant="outline" size="lg">Add guess</Button>
+              <Button
+                onClick={() => {
+                  setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                  setFlResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button onClick={solveFlippingLetters} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
+        ) : mode === "wordpeaks" ? (
           <div className="space-y-4">
             {wordPeaksGuesses.map((g, gi) => (
               <div key={gi} className="flex items-center gap-3">
