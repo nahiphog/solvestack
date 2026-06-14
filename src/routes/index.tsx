@@ -835,12 +835,22 @@ function Index() {
             <button
               onClick={() => switchMode("flippingletters")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "flippingletters" || mode === "worwordle"
+                mode === "flippingletters"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Flipping Letters
+            </button>
+            <button
+              onClick={() => switchMode("worwordle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "worwordle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Worwordle
             </button>
           </div>
         )}
