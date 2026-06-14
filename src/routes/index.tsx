@@ -952,58 +952,69 @@ function Index() {
             <a href="https://www.wordiply.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordiply</a>
           )}
           {mode === "wordle" && (
-            <table className="text-sm border border-border border-collapse">
-              <tbody>
-                <tr>
-                  <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">Original</td>
-                  <td className="border border-border px-3 py-1.5">
-                    <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordle</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">Multiple</td>
-                  <td className="border border-border px-3 py-1.5">
-                    <a href="https://zaratustra.itch.io/dordle" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Dordle</a>
-                    <span> · </span>
-                    <a href="https://www.quordle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Quordle</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">One unique solution</td>
-                  <td className="border border-border px-3 py-1.5">
-                    <a href="https://bushong.net/~mconst/wordinone/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word-in-one</a>
-                    <span> · </span>
-                    <a href="https://wordlein2.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word-in-two</a>
-                    <span> · </span>
-                    <a href="https://cludl.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Cludl</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">Find all solutions</td>
-                  <td className="border border-border px-3 py-1.5">
-                    <a href="https://wordall.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word All</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">Goes on forever</td>
-                  <td className="border border-border px-3 py-1.5">
-                    <a href="https://wheelsrpgs.itch.io/wheeldle" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wheeldle</a>
-                    <span> · </span>
-                    <a href="https://devbanana.itch.io/infinidle" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Infinidle</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">Make bad guesses</td>
-                  <td className="border border-border px-3 py-1.5">
-                    <a href="https://lazyguyy.github.io/survivle/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Survivle</a>
-                    <span> · </span>
-                    <a href="https://dontwordle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Don't Wordle</a>
-                    <span> · </span>
-                    <a href="https://www.antiwordle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Antiwordle</a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div className="flex flex-col gap-2">
+              <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordle</a>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowWordleVariations((v) => !v)}
+                className="w-fit gap-1"
+              >
+                {showWordleVariations ? (
+                  <>See less variations <ChevronUp className="h-4 w-4" /></>
+                ) : (
+                  <>See more variations <ChevronDown className="h-4 w-4" /></>
+                )}
+              </Button>
+              {showWordleVariations && (
+                <table className="text-sm border border-border border-collapse">
+                  <tbody>
+                    <tr>
+                      <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">Multiple</td>
+                      <td className="border border-border px-3 py-1.5">
+                        <a href="https://zaratustra.itch.io/dordle" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Dordle</a>
+                        <span> · </span>
+                        <a href="https://www.quordle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Quordle</a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">One unique solution</td>
+                      <td className="border border-border px-3 py-1.5">
+                        <a href="https://bushong.net/~mconst/wordinone/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word-in-one</a>
+                        <span> · </span>
+                        <a href="https://wordlein2.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word-in-two</a>
+                        <span> · </span>
+                        <a href="https://cludl.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Cludl</a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">Find all solutions</td>
+                      <td className="border border-border px-3 py-1.5">
+                        <a href="https://wordall.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word All</a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">Goes on forever</td>
+                      <td className="border border-border px-3 py-1.5">
+                        <a href="https://wheelsrpgs.itch.io/wheeldle" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wheeldle</a>
+                        <span> · </span>
+                        <a href="https://devbanana.itch.io/infinidle" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Infinidle</a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border px-3 py-1.5 text-muted-foreground whitespace-nowrap align-top">Make bad guesses</td>
+                      <td className="border border-border px-3 py-1.5">
+                        <a href="https://lazyguyy.github.io/survivle/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Survivle</a>
+                        <span> · </span>
+                        <a href="https://dontwordle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Don't Wordle</a>
+                        <span> · </span>
+                        <a href="https://www.antiwordle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Antiwordle</a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              )}
+            </div>
           )}
           {mode === "spellingbee" && (
             <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
