@@ -1363,9 +1363,9 @@ function Index() {
                       dir === "CORRECT"
                         ? "#32CD32"
                         : dir === "BEFORE"
-                          ? "#F4A460"
+                          ? "#4682B4"
                           : dir === "AFTER"
-                            ? "#4682B4"
+                            ? "#F4A460"
                             : "transparent";
                     const clip =
                       dir === "BEFORE"
@@ -1382,7 +1382,7 @@ function Index() {
                           backgroundColor: bg,
                           clipPath: clip === "none" ? undefined : clip,
                           borderRadius: clip === "none" ? "0.25rem" : 0,
-                          border: isNone ? "2px solid #eab308" : undefined,
+                          border: isNone ? "2px solid #fde047" : undefined,
                         }}
                         onMouseDown={(e) => {
                           const tgt = e.target as HTMLElement;
