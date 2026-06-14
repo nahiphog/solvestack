@@ -1728,17 +1728,12 @@ function Index() {
         ) : mode === "mastermind" ? (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
-              <span>Optional: Input</span>
+              <span>Optional input: Place</span>
               <select
                 className="rounded border border-border bg-background px-2 py-1"
-                defaultValue="0"
+                defaultValue=""
                 onChange={(e) => {
                   const n = parseInt(e.target.value, 10);
-                  if (n === 0) {
-                    setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
-                    setMastermindResults(null);
-                    return;
-                  }
                   const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
                   if (!sheet || sheet.length === 0) return;
                   const row = sheet[Math.floor(Math.random() * sheet.length)];
@@ -1746,7 +1741,7 @@ function Index() {
                   setMastermindResults(null);
                 }}
               >
-                <option value="0">0</option>
+                <option value="" disabled>—</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
                 <option value="4">4</option>
