@@ -1131,9 +1131,15 @@ function Index() {
           </p>
         )}
         {mode === "wordpeaks" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Enter your guesses and click each tile to cycle GREEN SQUARE (correctly placed) → ORANGE TRIANGLE UP (the answer letter comes before this letter alphabetically) → LIGHT-BLUE TRIANGLE DOWN (the answer letter comes after this letter alphabetically). Get all 5-letter words consistent with the feedback.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Enter your guesses.</p>
+            <ul className="list-disc pl-5">
+              <li>Orange tile: it comes after the letter alphabetically.</li>
+              <li>Blue tile: it comes below the letter alphabetically.</li>
+              <li>Green tile: It is correct.</li>
+            </ul>
+            <p>Get all 5-letter words consistent with the feedback.</p>
+          </div>
         )}
         {mode === "flippingletters" && (
           <p className="mb-4 text-sm text-muted-foreground">
