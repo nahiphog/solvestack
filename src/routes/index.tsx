@@ -1098,9 +1098,14 @@ function Index() {
             Enter your guesses and click each tile to cycle GREEN SQUARE (correctly placed) → ORANGE TRIANGLE UP (the answer letter comes before this letter alphabetically) → LIGHT-BLUE TRIANGLE DOWN (the answer letter comes after this letter alphabetically). Get all 5-letter words consistent with the feedback.
           </p>
         )}
-        {mode === "flippingletters" || mode === "worwordle" && (
+        {mode === "flippingletters" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Enter the 10 distinct letters in your bank. Click a letter to check whether it's flippable (b↔q, d↔p, n↔u, m↔w). Then enter Wordle-style guesses (grey → yellow → green) to filter the flippable 5-letter words.
+          </p>
+        )}
+        {mode === "worwordle" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter Wordle-style 8-letter guesses (each = two 5-letter words "smushed" together, sharing 3 overlapping letters). Click each tile to cycle GREY → YELLOW → GREEN. Get all valid 8-letter Worwordle answers.
           </p>
         )}
 
