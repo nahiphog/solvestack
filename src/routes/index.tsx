@@ -1145,8 +1145,19 @@ function Index() {
             Enter Wordle-style 8-letter guesses (each = two 5-letter words "smushed" together, sharing 3 overlapping letters). Click each tile to cycle GREY → YELLOW → GREEN. Get all valid 8-letter Worwordle answers.
           </p>
         )}
-
-
+        {mode === "worwordle" && (
+          <div className="mb-4 flex items-center gap-3 text-sm">
+            <span className="text-muted-foreground">Optional: Input strategic starting words.</span>
+            <select
+              value={worStartingWords}
+              onChange={(e) => applyWorStartingWords(Number(e.target.value) as 0 | 2)}
+              className="rounded border bg-background px-2 py-1 text-sm"
+            >
+              <option value={0}>0</option>
+              <option value={2}>2</option>
+            </select>
+          </div>
+        )}
 
         {mode === "worwordle" ? (
           <div className="space-y-4">
