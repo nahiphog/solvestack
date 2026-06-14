@@ -134,6 +134,21 @@ function Index() {
   ]);
   const [worResults, setWorResults] = useState<string[] | null>(null);
   const [pageWor, setPageWor] = useState(0);
+  const [worStartingWords, setWorStartingWords] = useState<0 | 2>(0);
+
+  const applyWorStartingWords = (count: 0 | 2) => {
+    setWorStartingWords(count);
+    if (count === 2) {
+      const pair = WOR_STARTING_PAIRS[Math.floor(Math.random() * WOR_STARTING_PAIRS.length)];
+      setWorGuesses([
+        { word: pair[0], pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
+        { word: pair[1], pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
+      ]);
+    } else {
+      setWorGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    }
+    setWorResults(null);
+  };
 
   const [marblessColumns, setMarblessColumns] = useState<string[][]>([
     ["I", "G", "H", "Y", "R"],
