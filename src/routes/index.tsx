@@ -1150,9 +1150,10 @@ function Index() {
           </div>
         )}
         {mode === "flippingletters" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Enter the 10 distinct letters in your bank. Click a letter to check whether it's flippable (b↔q, d↔p, n↔u, m↔w). Then enter Wordle-style guesses (grey → yellow → green) to filter the flippable 5-letter words.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Enter the 10 distinct letters in your bank.</p>
+            <p>Click a letter to check whether it's flippable (a↔e, d↔p, n↔u, m↔w). Then enter Wordle-style guesses (grey → yellow → green) to filter the flippable 5-letter words.</p>
+          </div>
         )}
         {mode === "worwordle" && (
           <p className="mb-4 text-sm text-muted-foreground">
