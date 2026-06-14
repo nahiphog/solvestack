@@ -551,6 +551,57 @@ function Index() {
     setSolving(false);
   };
 
+  const cycleWorTile = (gi: number, ti: number) => {
+    setWorGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const order: WordleColor[] = ["GREY", "YELLOW", "GREEN"];
+        const next = [...g.pattern];
+        next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % 3];
+        return { ...g, pattern: next };
+      }),
+    );
+  };
+  const setWorLetter = (gi: number, ti: number, ch: string) => {
+    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    setWorGuesses((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const padded = g.word.padEnd(8, " ").slice(0, 8).split("");
+        padded[ti] = c || " ";
+        return { ...g, word: padded.join("").replace(/ +$/, "") };
+      }),
+    );
+  };
+  const focusWorTile = (gi: number, ti: number) => {
+    if (ti < 0 || ti > 7) return;
+    const el = document.getElementById(`wor-tile-${gi}-${ti}`) as HTMLInputElement | null;
+    el?.focus();
+    el?.select();
+  };
+  const addWorRow = () => {
+    setWorGuesses((prev) => [...prev, { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+  };
+  const removeWorRow = (gi: number) => {
+    setWorGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
+  };
+  const solveWorwordle = async () => {
+    setError(null);
+    setWorResults(null);
+    for (const g of worGuesses) {
+      const w = g.word.trim().toUpperCase();
+      if (w.length !== 8) {
+        setError("Each guess must be exactly 8 letters.");
+        return;
+      }
+    }
+    setSolving(true);
+    const normalized = worGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
+    const result = await worwordleSolve(normalized);
+    if (result.length === 0) setError("No words match these constraints.");
+    else setWorResults(result);
+    setSolving(false);
+  };
 
 
 
