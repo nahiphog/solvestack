@@ -1685,13 +1685,31 @@ function Index() {
                 variant="outline"
                 size="lg"
               >
-                Clear all
+                Reset
+              </Button>
+              <Button
+                onClick={() => {
+                  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+                  for (let i = alphabet.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [alphabet[i], alphabet[j]] = [alphabet[j], alphabet[i]];
+                  }
+                  const seven = alphabet.slice(0, 7);
+                  setSpellingBeeMiddle(seven[0]);
+                  setSpellingBeeOthers(seven.slice(1).join(""));
+                  setSpellingBeeResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Randomize
               </Button>
               <Button onClick={solveSpellingBee} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
           </div>
+
 
         ) : mode === "mastermind" ? (
           <div className="space-y-4">
