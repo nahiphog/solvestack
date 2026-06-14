@@ -1443,7 +1443,7 @@ function Index() {
                             }
                           }}
                           style={{
-                            paddingTop: dir === "BEFORE" ? "16px" : dir === "AFTER" ? "0px" : "0px",
+                            paddingTop: dir === "AFTER" ? "16px" : "0px",
                           }}
                           className={`h-full w-full bg-transparent text-center font-mono text-xl font-bold uppercase outline-none ${isNone ? "text-foreground caret-current" : "text-white caret-white"}`}
                         />
