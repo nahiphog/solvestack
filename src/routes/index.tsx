@@ -5,7 +5,7 @@ import { dodekuSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWo
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Copy, Check, Sun, Moon } from "lucide-react";
+import { Copy, Check, Sun, Moon, ChevronDown, ChevronUp } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
