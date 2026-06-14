@@ -239,6 +239,10 @@ function Index() {
     );
     const rs = dodekuRowSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
     const cs = dodekuColSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
+    if (rs.every((v) => v === null) && cs.every((v) => v === null)) {
+      setError("The row sums and column sums cannot be all empty");
+      return;
+    }
     const tiles = dodekuTiles
       .split(/[\s,]+/)
       .filter(Boolean)
@@ -985,7 +989,7 @@ function Index() {
                 className="w-fit gap-1"
               >
                 {showWordleVariations ? (
-                  <>See less variations <ChevronUp className="h-4 w-4" /></>
+                  <>Hide table <ChevronUp className="h-4 w-4" /></>
                 ) : (
                   <>See more variations <ChevronDown className="h-4 w-4" /></>
                 )}
@@ -1102,9 +1106,16 @@ function Index() {
         )}
 
         {mode === "wordle" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Enter your guesses and click each tile to cycle GREY (Absent) → YELLOW (Wrongly placed) → GREEN (correctly placed). Get all 5-letter words consistent with the feedback.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Enter your guesses.</p>
+            <p>Click tiles to toggle between different colors:</p>
+            <ul className="list-disc pl-5">
+              <li>Green tile: It is correct.</li>
+              <li>Yellow tile: Correct letter but in the wrong place.</li>
+              <li>Grey tile: Absent letter.</li>
+            </ul>
+            <p>Get all 5-letter words consistent with the feedback.</p>
+          </div>
         )}
 
         {mode === "spellingbee" && (
@@ -1114,9 +1125,10 @@ function Index() {
         )}
 
         {mode === "mastermind" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Enter a 5-letter guess and the totals of GREEN (correct placements) and YELLOW (wrong placements). Find all 5-letter words consistent with those totals.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Enter your guesses. And input the number of correct and wrong placements.</p>
+            <p>Get all 5-letter words consistent with the feedback.</p>
+          </div>
         )}
 
         {mode === "marbless" && (
@@ -1142,9 +1154,10 @@ function Index() {
           </div>
         )}
         {mode === "flippingletters" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Enter the 10 distinct letters in your bank. Click a letter to check whether it's flippable (b↔q, d↔p, n↔u, m↔w). Then enter Wordle-style guesses (grey → yellow → green) to filter the flippable 5-letter words.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Enter the 10 distinct letters in your bank.</p>
+            <p>Click a letter to check whether it's flippable (a↔e, d↔p, n↔u, m↔w). Then enter Wordle-style guesses (grey → yellow → green) to filter the flippable 5-letter words.</p>
+          </div>
         )}
         {mode === "worwordle" && (
           <p className="mb-4 text-sm text-muted-foreground">
@@ -1250,7 +1263,7 @@ function Index() {
           <div className="space-y-6">
             <div>
               <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; click a tile to see if it flips)</div>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-5 gap-2 w-fit">
                 {Array.from({ length: 10 }).map((_, i) => {
                   const upper = (flLetters[i] || "").toUpperCase();
                   const flip = FL_FLIP_MAP[upper] || "";
@@ -1258,6 +1271,7 @@ function Index() {
                   return (
                     <div key={i} className="flex flex-col items-center gap-1">
                       <input
+                        id={`fl-bank-${i}`}
                         type="text"
                         value={(flLetters[i] || "").toLowerCase()}
                         onFocus={(e) => e.currentTarget.select()}
@@ -1265,6 +1279,10 @@ function Index() {
                           const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
                           setFlLetters((prev) => { const n = [...prev]; n[i] = c; return n; });
                           setFlRevealed((prev) => { const n = [...prev]; n[i] = false; return n; });
+                          if (c && i < 9) {
+                            const next = document.getElementById(`fl-bank-${i + 1}`) as HTMLInputElement | null;
+                            next?.focus();
+                          }
                         }}
                         onClick={() => {
                           setFlRevealed((prev) => { const n = [...prev]; n[i] = !n[i]; return n; });
@@ -1370,9 +1388,9 @@ function Index() {
                             : "transparent";
                     const clip =
                       dir === "BEFORE"
-                        ? "polygon(50% 0%, 100% 100%, 0% 100%)"
+                        ? "polygon(0% 0%, 100% 0%, 50% 100%)"
                         : dir === "AFTER"
-                          ? "polygon(0% 0%, 100% 0%, 50% 100%)"
+                          ? "polygon(50% 0%, 100% 100%, 0% 100%)"
                           : "none";
                     const isNone = dir === "NONE";
                     return (
@@ -1434,7 +1452,7 @@ function Index() {
                             }
                           }}
                           style={{
-                            paddingTop: dir === "BEFORE" ? "16px" : dir === "AFTER" ? "0px" : "0px",
+                            paddingTop: dir === "AFTER" ? "16px" : "0px",
                           }}
                           className={`h-full w-full bg-transparent text-center font-mono text-xl font-bold uppercase outline-none ${isNone ? "text-foreground caret-current" : "text-white caret-white"}`}
                         />
@@ -1482,7 +1500,7 @@ function Index() {
 
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
-              <span>Optional: Input</span>
+              <span>Optional input: Place</span>
               <select
                 className="rounded border border-border bg-background px-2 py-1"
                 defaultValue="0"
@@ -1505,7 +1523,7 @@ function Index() {
                 <option value="3">3</option>
                 <option value="4">4</option>
               </select>
-              <span>strategic starting words into the solver.</span>
+              <span>strategic starting words.</span>
             </div>
             {wordleGuesses.map((g, gi) => (
               <div key={gi} className="flex items-center gap-3">
@@ -1714,17 +1732,12 @@ function Index() {
         ) : mode === "mastermind" ? (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
-              <span>Optional: Input</span>
+              <span>Optional input: Place</span>
               <select
                 className="rounded border border-border bg-background px-2 py-1"
-                defaultValue="0"
+                defaultValue=""
                 onChange={(e) => {
                   const n = parseInt(e.target.value, 10);
-                  if (n === 0) {
-                    setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
-                    setMastermindResults(null);
-                    return;
-                  }
                   const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
                   if (!sheet || sheet.length === 0) return;
                   const row = sheet[Math.floor(Math.random() * sheet.length)];
@@ -1732,7 +1745,7 @@ function Index() {
                   setMastermindResults(null);
                 }}
               >
-                <option value="0">0</option>
+                <option value="" disabled>—</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
                 <option value="4">4</option>
