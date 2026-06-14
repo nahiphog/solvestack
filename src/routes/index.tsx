@@ -1102,9 +1102,16 @@ function Index() {
         )}
 
         {mode === "wordle" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Enter your guesses and click each tile to cycle GREY (Absent) → YELLOW (Wrongly placed) → GREEN (correctly placed). Get all 5-letter words consistent with the feedback.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Enter your guesses.</p>
+            <p>Click tiles to toggle between different colors:</p>
+            <ul className="list-disc pl-5">
+              <li>Green tile: It is correct.</li>
+              <li>Yellow tile: Correct letter but in the wrong place.</li>
+              <li>Grey tile: Absent letter.</li>
+            </ul>
+            <p>Get all 5-letter words consistent with the feedback.</p>
+          </div>
         )}
 
         {mode === "spellingbee" && (
