@@ -59,6 +59,15 @@ const FL_FLIP_MAP: Record<string, string> = {
   A: "E", E: "A", D: "P", P: "D", N: "U", U: "N", M: "W", W: "M",
 };
 
+const WOR_STARTING_PAIRS: [string, string][] = [
+  ["ABIDECKS", "FORTHUMP"],
+  ["ALIGNOME", "BURPSYCH"],
+  ["PRUDECAY", "FILTHONG"],
+  ["KNIFECAL", "GHOSTUDY"],
+  ["FLAMEDIC", "GHOSTUNK"],
+  ["GUESTACK", "HYDROBIN"],
+];
+
 
 function Paginator({ page, setPage, total, perPage = 50 }: { page: number; setPage: (n: number) => void; total: number; perPage?: number }) {
   const pages = Math.ceil(total / perPage);
@@ -125,6 +134,21 @@ function Index() {
   ]);
   const [worResults, setWorResults] = useState<string[] | null>(null);
   const [pageWor, setPageWor] = useState(0);
+  const [worStartingWords, setWorStartingWords] = useState<0 | 2>(0);
+
+  const applyWorStartingWords = (count: 0 | 2) => {
+    setWorStartingWords(count);
+    if (count === 2) {
+      const pair = WOR_STARTING_PAIRS[Math.floor(Math.random() * WOR_STARTING_PAIRS.length)];
+      setWorGuesses([
+        { word: pair[0], pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
+        { word: pair[1], pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
+      ]);
+    } else {
+      setWorGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    }
+    setWorResults(null);
+  };
 
   const [marblessColumns, setMarblessColumns] = useState<string[][]>([
     ["I", "G", "H", "Y", "R"],
@@ -1121,8 +1145,19 @@ function Index() {
             Enter Wordle-style 8-letter guesses (each = two 5-letter words "smushed" together, sharing 3 overlapping letters). Click each tile to cycle GREY → YELLOW → GREEN. Get all valid 8-letter Worwordle answers.
           </p>
         )}
-
-
+        {mode === "worwordle" && (
+          <div className="mb-4 flex items-center gap-3 text-sm">
+            <span className="text-muted-foreground">Optional: Input strategic starting words.</span>
+            <select
+              value={worStartingWords}
+              onChange={(e) => applyWorStartingWords(Number(e.target.value) as 0 | 2)}
+              className="rounded border bg-background px-2 py-1 text-sm"
+            >
+              <option value={0}>0</option>
+              <option value={2}>2</option>
+            </select>
+          </div>
+        )}
 
         {mode === "worwordle" ? (
           <div className="space-y-4">
