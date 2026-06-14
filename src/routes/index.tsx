@@ -190,6 +190,7 @@ function Index() {
     setMastermindResults(null);
     setWordPeaksResults(null);
     setFlResults(null);
+    setWorResults(null);
 
     setMarblessResults(null);
     setDodekuResult(null);
