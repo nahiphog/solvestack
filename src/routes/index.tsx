@@ -1121,9 +1121,10 @@ function Index() {
         )}
 
         {mode === "mastermind" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Enter a 5-letter guess and the totals of GREEN (correct placements) and YELLOW (wrong placements). Find all 5-letter words consistent with those totals.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Enter your guesses. And input the number of correct and wrong placements.</p>
+            <p>Get all 5-letter words consistent with the feedback.</p>
+          </div>
         )}
 
         {mode === "marbless" && (
