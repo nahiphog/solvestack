@@ -59,6 +59,15 @@ const FL_FLIP_MAP: Record<string, string> = {
   A: "E", E: "A", D: "P", P: "D", N: "U", U: "N", M: "W", W: "M",
 };
 
+const WOR_STARTING_PAIRS: [string, string][] = [
+  ["ABIDECKS", "FORTHUMP"],
+  ["ALIGNOME", "BURPSYCH"],
+  ["PRUDECAY", "FILTHONG"],
+  ["KNIFECAL", "GHOSTUDY"],
+  ["FLAMEDIC", "GHOSTUNK"],
+  ["GUESTACK", "HYDROBIN"],
+];
+
 
 function Paginator({ page, setPage, total, perPage = 50 }: { page: number; setPage: (n: number) => void; total: number; perPage?: number }) {
   const pages = Math.ceil(total / perPage);
