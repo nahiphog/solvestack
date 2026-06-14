@@ -1496,7 +1496,7 @@ function Index() {
 
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
-              <span>Optional: Input</span>
+              <span>Optional input: Place</span>
               <select
                 className="rounded border border-border bg-background px-2 py-1"
                 defaultValue="0"
