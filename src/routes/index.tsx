@@ -1379,9 +1379,9 @@ function Index() {
                             : "transparent";
                     const clip =
                       dir === "BEFORE"
-                        ? "polygon(50% 0%, 100% 100%, 0% 100%)"
+                        ? "polygon(0% 0%, 100% 0%, 50% 100%)"
                         : dir === "AFTER"
-                          ? "polygon(0% 0%, 100% 0%, 50% 100%)"
+                          ? "polygon(50% 0%, 100% 100%, 0% 100%)"
                           : "none";
                     const isNone = dir === "NONE";
                     return (
