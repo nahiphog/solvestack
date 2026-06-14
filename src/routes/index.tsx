@@ -2314,6 +2314,48 @@ function Index() {
           </section>
         )}
 
+        {worResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {worResults.length} possible {worResults.length === 1 ? "answer" : "answers"}
+              </h2>
+              <button
+                onClick={() => {
+                  const items = worResults.map((w) => {
+                    const [a, b] = worwordleSplit(w);
+                    return `${w} (${a} + ${b})`;
+                  }).join(", ");
+                  copyText(`${worResults.length} possible ${worResults.length === 1 ? "answer" : "answers"}:\n${items}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all answers"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex flex-col gap-2 font-mono text-sm">
+                {worResults.slice(pageWor * 50, pageWor * 50 + 50).map((w) => {
+                  const [a, b] = worwordleSplit(w);
+                  return (
+                    <div key={w} className="flex items-center gap-2">
+                      <span className="rounded bg-muted px-2 py-1 font-semibold tracking-widest">{w}</span>
+                      <span className="text-muted-foreground">=</span>
+                      <a href={`https://www.dictionary.com/browse/${a.toLowerCase()}`} target="_blank" rel="noopener noreferrer" className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground">{a}</a>
+                      <span className="text-muted-foreground">+</span>
+                      <a href={`https://www.dictionary.com/browse/${b.toLowerCase()}`} target="_blank" rel="noopener noreferrer" className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground">{b}</a>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <Paginator page={pageWor} setPage={setPageWor} total={worResults.length} />
+          </section>
+        )}
+
+
+
 
 
 
