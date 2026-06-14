@@ -145,6 +145,7 @@ function Index() {
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [dark, setDark] = useState(true);
+  const [showWordleVariations, setShowWordleVariations] = useState(false);
   const [pagePaths, setPagePaths] = useState(0);
   const [pageWordle, setPageWordle] = useState(0);
   const [pageMM, setPageMM] = useState(0);
