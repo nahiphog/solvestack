@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
 import { dodekuSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
