@@ -1142,7 +1142,7 @@ function Index() {
         )}
         {mode === "worwordle" && (
           <p className="mb-4 text-sm text-muted-foreground">
-            Enter Wordle-style 8-letter guesses (each = two 5-letter words "smushed" together, sharing 3 overlapping letters). Click each tile to cycle GREY → YELLOW → GREEN. Get all valid 8-letter Worwordle answers.
+            Enter Wordle-style 8-letter guesses (each = two 5-letter words "smushed" together, sharing two overlapping letters). For example: (MICROUND = MICRO + ROUND) is a valid Worwordle input. Click each tile to cycle GREY → YELLOW → GREEN. Get all valid 8-letter Worwordle answers.
           </p>
         )}
         {mode === "worwordle" && (
@@ -1223,6 +1223,16 @@ function Index() {
                 size="lg"
               >
                 Reset
+              </Button>
+              <Button
+                onClick={() => {
+                  setWorGuesses((prev) => prev.map((g) => ({ ...g, pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] })));
+                  setWorResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset colors only
               </Button>
               <Button onClick={solveWorwordle} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
