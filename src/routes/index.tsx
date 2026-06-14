@@ -1519,7 +1519,7 @@ function Index() {
                 <option value="3">3</option>
                 <option value="4">4</option>
               </select>
-              <span>strategic starting words into the solver.</span>
+              <span>strategic starting words.</span>
             </div>
             {wordleGuesses.map((g, gi) => (
               <div key={gi} className="flex items-center gap-3">
