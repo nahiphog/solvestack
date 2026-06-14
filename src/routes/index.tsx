@@ -985,7 +985,7 @@ function Index() {
                 className="w-fit gap-1"
               >
                 {showWordleVariations ? (
-                  <>See less variations <ChevronUp className="h-4 w-4" /></>
+                  <>Hide table <ChevronUp className="h-4 w-4" /></>
                 ) : (
                   <>See more variations <ChevronDown className="h-4 w-4" /></>
                 )}
