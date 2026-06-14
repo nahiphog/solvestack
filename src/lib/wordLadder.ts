@@ -9,7 +9,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -38,7 +38,33 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   dodeku: 0,
   wordpeaks: 5,
   flippingletters: 5,
+  worwordle: 8,
 };
+
+let _worwordleWordsCache: string[] | null = null;
+async function getWorwordleWords(): Promise<string[]> {
+  if (_worwordleWordsCache) return _worwordleWordsCache;
+  const mod = await import("@/data/worwordleWords.json");
+  _worwordleWordsCache = mod.default as string[];
+  return _worwordleWordsCache;
+}
+
+export async function worwordleSolve(
+  guesses: { word: string; pattern: WordleColor[] }[],
+): Promise<string[]> {
+  const words = await getWorwordleWords();
+  return words.filter((answer) =>
+    guesses.every((g) => {
+      const out = wordleOutput(g.word, answer);
+      for (let i = 0; i < out.length; i++) if (out[i] !== g.pattern[i]) return false;
+      return true;
+    }),
+  );
+}
+
+export function worwordleSplit(word: string): [string, string] {
+  return [word.slice(0, 5), word.slice(-5)];
+}
 
 
 export async function flippingLettersSolve(
