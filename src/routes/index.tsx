@@ -29,7 +29,7 @@ const LADDER_MODES: { id: string; label: string }[] = [
 ];
 
 const SEARCH_MODES: { id: string; label: string }[] = [
-  { id: "wordle", label: "Classic" },
+  { id: "wordle", label: "Wordle" },
   { id: "miscellaneous", label: "Miscellaneous" },
 ];
 
