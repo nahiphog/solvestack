@@ -120,6 +120,12 @@ function Index() {
   const [flResults, setFlResults] = useState<{ flippable: string[]; answers: string[] } | null>(null);
   const [pageFl, setPageFl] = useState(0);
 
+  const [worGuesses, setWorGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
+    { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
+  ]);
+  const [worResults, setWorResults] = useState<string[] | null>(null);
+  const [pageWor, setPageWor] = useState(0);
+
   const [marblessColumns, setMarblessColumns] = useState<string[][]>([
     ["I", "G", "H", "Y", "R"],
     ["B", "R", "N", "D", "O"],
