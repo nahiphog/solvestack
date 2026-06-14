@@ -51,6 +51,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   dodeku: { start: "", goal: "" },
   wordpeaks: { start: "PEDAL", goal: "" },
   flippingletters: { start: "", goal: "" },
+  worwordle: { start: "", goal: "" },
 
 };
 
