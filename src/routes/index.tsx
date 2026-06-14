@@ -239,6 +239,10 @@ function Index() {
     );
     const rs = dodekuRowSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
     const cs = dodekuColSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
+    if (rs.every((v) => v === null) && cs.every((v) => v === null)) {
+      setError("The row sums and column sums cannot be all empty");
+      return;
+    }
     const tiles = dodekuTiles
       .split(/[\s,]+/)
       .filter(Boolean)
