@@ -1131,9 +1131,15 @@ function Index() {
           </p>
         )}
         {mode === "wordpeaks" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Enter your guesses and click each tile to cycle GREEN SQUARE (correctly placed) → ORANGE TRIANGLE UP (the answer letter comes before this letter alphabetically) → LIGHT-BLUE TRIANGLE DOWN (the answer letter comes after this letter alphabetically). Get all 5-letter words consistent with the feedback.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Enter your guesses.</p>
+            <ul className="list-disc pl-5">
+              <li>Orange tile: it comes after the letter alphabetically.</li>
+              <li>Blue tile: it comes below the letter alphabetically.</li>
+              <li>Green tile: It is correct.</li>
+            </ul>
+            <p>Get all 5-letter words consistent with the feedback.</p>
+          </div>
         )}
         {mode === "flippingletters" && (
           <p className="mb-4 text-sm text-muted-foreground">
@@ -1146,8 +1152,8 @@ function Index() {
           </p>
         )}
         {mode === "worwordle" && (
-          <div className="mb-4 flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground">Optional: Input strategic starting words.</span>
+          <div className="mb-4 flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Optional input: Place</span>
             <select
               value={worStartingWords}
               onChange={(e) => applyWorStartingWords(Number(e.target.value) as 0 | 2)}
@@ -1156,6 +1162,7 @@ function Index() {
               <option value={0}>0</option>
               <option value={2}>2</option>
             </select>
+            <span className="text-muted-foreground">strategic starting words.</span>
           </div>
         )}
 
@@ -1357,9 +1364,9 @@ function Index() {
                       dir === "CORRECT"
                         ? "#32CD32"
                         : dir === "BEFORE"
-                          ? "#F4A460"
+                          ? "#4682B4"
                           : dir === "AFTER"
-                            ? "#4682B4"
+                            ? "#F4A460"
                             : "transparent";
                     const clip =
                       dir === "BEFORE"
@@ -1376,7 +1383,7 @@ function Index() {
                           backgroundColor: bg,
                           clipPath: clip === "none" ? undefined : clip,
                           borderRadius: clip === "none" ? "0.25rem" : 0,
-                          border: isNone ? "2px solid #eab308" : undefined,
+                          border: isNone ? "2px solid #fde047" : undefined,
                         }}
                         onMouseDown={(e) => {
                           const tgt = e.target as HTMLElement;
@@ -1678,13 +1685,31 @@ function Index() {
                 variant="outline"
                 size="lg"
               >
-                Clear all
+                Reset
+              </Button>
+              <Button
+                onClick={() => {
+                  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+                  for (let i = alphabet.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [alphabet[i], alphabet[j]] = [alphabet[j], alphabet[i]];
+                  }
+                  const seven = alphabet.slice(0, 7);
+                  setSpellingBeeMiddle(seven[0]);
+                  setSpellingBeeOthers(seven.slice(1).join(""));
+                  setSpellingBeeResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Randomize
               </Button>
               <Button onClick={solveSpellingBee} disabled={solving} size="lg">
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
           </div>
+
 
         ) : mode === "mastermind" ? (
           <div className="space-y-4">
@@ -2015,8 +2040,8 @@ function Index() {
           <div
             className={`grid gap-4 sm:items-end ${
               mode === "wordiply"
-                ? "sm:grid-cols-[1fr_auto_auto]"
-                : "sm:grid-cols-[1fr_1fr_auto_auto]"
+                ? "sm:grid-cols-[1fr_auto_auto_auto]"
+                : "sm:grid-cols-[1fr_1fr_auto_auto_auto]"
             }`}
           >
             <div>
@@ -2046,6 +2071,18 @@ function Index() {
             )}
             <Button onClick={randomize} variant="outline" size="lg">
               Randomize
+            </Button>
+            <Button
+              onClick={() => {
+                setStart("");
+                if (mode !== "pivots") setGoal("");
+                setPaths(null);
+                setError(null);
+              }}
+              variant="outline"
+              size="lg"
+            >
+              Reset
             </Button>
             <Button onClick={solve} disabled={solving} size="lg">
               {solving ? "Solving..." : "Solve"}
