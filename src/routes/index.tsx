@@ -1111,7 +1111,77 @@ function Index() {
 
 
 
-        {mode === "flippingletters" || mode === "worwordle" ? (
+        {mode === "worwordle" ? (
+          <div className="space-y-4">
+            {worGuesses.map((g, gi) => (
+              <div key={gi} className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  {Array.from({ length: 8 }).map((_, ti) => {
+                    const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
+                    const color = g.pattern[ti];
+                    const colorClass =
+                      color === "GREEN"
+                        ? "bg-green-600 text-white border-green-600 caret-white"
+                        : color === "YELLOW"
+                          ? "bg-yellow-500 text-white border-yellow-500 caret-white"
+                          : "bg-muted text-foreground border-border caret-foreground";
+                    return (
+                      <input
+                        key={ti}
+                        id={`wor-tile-${gi}-${ti}`}
+                        type="text"
+                        inputMode="text"
+                        autoComplete="off"
+                        value={letter}
+                        aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${color}`}
+                        onMouseDown={(e) => {
+                          if (document.activeElement === e.currentTarget) {
+                            e.preventDefault();
+                            cycleWorTile(gi, ti);
+                          }
+                        }}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onChange={(e) => {
+                          const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                          if (!v) { setWorLetter(gi, ti, ""); return; }
+                          setWorLetter(gi, ti, v.slice(-1));
+                          if (ti < 7) focusWorTile(gi, ti + 1);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Backspace") {
+                            if (!letter && ti > 0) { e.preventDefault(); focusWorTile(gi, ti - 1); }
+                          } else if (e.key === "ArrowLeft") { e.preventDefault(); focusWorTile(gi, ti - 1); }
+                          else if (e.key === "ArrowRight") { e.preventDefault(); focusWorTile(gi, ti + 1); }
+                          else if (e.key === " " || e.key === "Enter") { e.preventDefault(); cycleWorTile(gi, ti); }
+                        }}
+                        className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                      />
+                    );
+                  })}
+                </div>
+                {worGuesses.length > 1 && (
+                  <Button onClick={() => removeWorRow(gi)} variant="outline" size="sm">Remove</Button>
+                )}
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={addWorRow} variant="outline" size="lg">Add guess</Button>
+              <Button
+                onClick={() => {
+                  setWorGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                  setWorResults(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button onClick={solveWorwordle} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
+        ) : mode === "flippingletters" ? (
           <div className="space-y-6">
             <div>
               <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; click a tile to see if it flips)</div>
