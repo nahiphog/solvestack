@@ -1259,7 +1259,7 @@ function Index() {
           <div className="space-y-6">
             <div>
               <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; click a tile to see if it flips)</div>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-5 gap-2 w-fit">
                 {Array.from({ length: 10 }).map((_, i) => {
                   const upper = (flLetters[i] || "").toUpperCase();
                   const flip = FL_FLIP_MAP[upper] || "";
@@ -1267,6 +1267,7 @@ function Index() {
                   return (
                     <div key={i} className="flex flex-col items-center gap-1">
                       <input
+                        id={`fl-bank-${i}`}
                         type="text"
                         value={(flLetters[i] || "").toLowerCase()}
                         onFocus={(e) => e.currentTarget.select()}
@@ -1274,6 +1275,10 @@ function Index() {
                           const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
                           setFlLetters((prev) => { const n = [...prev]; n[i] = c; return n; });
                           setFlRevealed((prev) => { const n = [...prev]; n[i] = false; return n; });
+                          if (c && i < 9) {
+                            const next = document.getElementById(`fl-bank-${i + 1}`) as HTMLInputElement | null;
+                            next?.focus();
+                          }
                         }}
                         onClick={() => {
                           setFlRevealed((prev) => { const n = [...prev]; n[i] = !n[i]; return n; });
