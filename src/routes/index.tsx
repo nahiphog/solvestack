@@ -29,7 +29,7 @@ const LADDER_MODES: { id: string; label: string }[] = [
 ];
 
 const SEARCH_MODES: { id: string; label: string }[] = [
-  { id: "wordle", label: "Classic" },
+  { id: "wordle", label: "Wordle" },
   { id: "miscellaneous", label: "Miscellaneous" },
 ];
 
@@ -745,8 +745,8 @@ function Index() {
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
-                  ? mode === "wordle" || mode === "mastermind"
-                  : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle";
+                  ? mode === "wordle" || mode === "flippingletters" || mode === "worwordle"
+                  : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind";
 
               return (
                 <button
@@ -765,7 +765,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "mastermind") && (
+        {(mode === "wordle" || mode === "flippingletters" || mode === "worwordle") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("wordle")}
@@ -775,22 +775,32 @@ function Index() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Wordle
+              Original
             </button>
             <button
-              onClick={() => switchMode("mastermind")}
+              onClick={() => switchMode("flippingletters")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "mastermind"
+                mode === "flippingletters"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Mastermind
+              Flipping Letters
+            </button>
+            <button
+              onClick={() => switchMode("worwordle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "worwordle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Worwordle
             </button>
           </div>
         )}
 
-        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle") && (
+        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("spellingbee")}
@@ -833,27 +843,18 @@ function Index() {
               Word Peaks
             </button>
             <button
-              onClick={() => switchMode("flippingletters")}
+              onClick={() => switchMode("mastermind")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "flippingletters"
+                mode === "mastermind"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Flipping Letters
-            </button>
-            <button
-              onClick={() => switchMode("worwordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "worwordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Worwordle
+              Mastermind
             </button>
           </div>
         )}
+
 
 
 
