@@ -2040,8 +2040,8 @@ function Index() {
           <div
             className={`grid gap-4 sm:items-end ${
               mode === "wordiply"
-                ? "sm:grid-cols-[1fr_auto_auto]"
-                : "sm:grid-cols-[1fr_1fr_auto_auto]"
+                ? "sm:grid-cols-[1fr_auto_auto_auto]"
+                : "sm:grid-cols-[1fr_1fr_auto_auto_auto]"
             }`}
           >
             <div>
@@ -2071,6 +2071,18 @@ function Index() {
             )}
             <Button onClick={randomize} variant="outline" size="lg">
               Randomize
+            </Button>
+            <Button
+              onClick={() => {
+                setStart("");
+                if (mode !== "pivots") setGoal("");
+                setPaths(null);
+                setError(null);
+              }}
+              variant="outline"
+              size="lg"
+            >
+              Reset
             </Button>
             <Button onClick={solve} disabled={solving} size="lg">
               {solving ? "Solving..." : "Solve"}
