@@ -758,8 +758,8 @@ function Index() {
             {LADDER_MODES.map((m) => {
               const isActive =
                 m.id === "classic"
-                  ? mode === 4 || mode === 5 || mode === 6
-                  : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords";
+                  ? mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords"
+                  : mode === "splice" || mode === "pivots";
               return (
                 <button
                   key={m.id}
