@@ -758,8 +758,8 @@ function Index() {
             {LADDER_MODES.map((m) => {
               const isActive =
                 m.id === "classic"
-                  ? mode === 4 || mode === 5 || mode === 6
-                  : mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords";
+                  ? mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords"
+                  : mode === "splice" || mode === "pivots";
               return (
                 <button
                   key={m.id}
@@ -895,36 +895,17 @@ function Index() {
 
 
 
-        {(mode === 4 || mode === 5 || mode === 6) && (
-          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
-            {([4, 5, 6] as const).map((n) => (
-              <button
-                key={n}
-                onClick={() => switchMode(n)}
-                className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                  mode === n
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {n} letters
-              </button>
-            ))}
-          </div>
-        )}
-
-
-        {(mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
+        {(mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
-              onClick={() => switchMode("splice")}
+              onClick={() => switchMode(4)}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "splice"
+                mode === 4 || mode === 5 || mode === 6
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Word Splice
+              X letters
             </button>
             <button
               onClick={() => switchMode("weaverx")}
@@ -945,6 +926,38 @@ function Index() {
               }`}
             >
               Craft Words
+            </button>
+          </div>
+        )}
+
+        {(mode === 4 || mode === 5 || mode === 6) && (
+          <div className="mb-4 flex items-center gap-2 text-sm">
+            <label htmlFor="word-length-select" className="text-muted-foreground">Word length:</label>
+            <select
+              id="word-length-select"
+              value={mode}
+              onChange={(e) => switchMode(Number(e.target.value) as Mode)}
+              className="rounded-md border bg-background px-2 py-1 text-sm"
+            >
+              <option value={4}>4</option>
+              <option value={5}>5</option>
+              <option value={6}>6</option>
+            </select>
+            <span className="text-muted-foreground">letters.</span>
+          </div>
+        )}
+
+        {(mode === "splice" || mode === "pivots") && (
+          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
+            <button
+              onClick={() => switchMode("splice")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "splice"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Word Splice
             </button>
             <button
               onClick={() => switchMode("pivots")}
