@@ -56,7 +56,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
 };
 
 const FL_FLIP_MAP: Record<string, string> = {
-  A: "E", E: "A", D: "P", P: "D", N: "U", U: "N", M: "W", W: "M",
+  A: "E", E: "A", B: "Q", Q: "B", D: "P", P: "D", N: "U", U: "N", M: "W", W: "M",
 };
 
 const WOR_STARTING_PAIRS: [string, string][] = [
@@ -1182,8 +1182,16 @@ function Index() {
         )}
         {mode === "flippingletters" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
-            <p>Enter the 10 distinct letters in your bank.</p>
-            <p>Click a letter to check whether it's flippable (a↔e, d↔p, n↔u, m↔w). Then enter Wordle-style guesses (grey → yellow → green) to filter the flippable 5-letter words.</p>
+            <p>Enter the 10 distinct letters into your bank.</p>
+            <p>Some letters are flippable:</p>
+            <ul className="list-disc pl-5">
+              <li>a ↔ e</li>
+              <li>b ↔ q</li>
+              <li>d ↔ p</li>
+              <li>n ↔ u</li>
+              <li>m ↔ w</li>
+            </ul>
+            <p>Then enter Wordle-style guesses (grey → yellow → green) to filter the flippable 5-letter words.</p>
           </div>
         )}
         {mode === "worwordle" && (
@@ -1289,7 +1297,7 @@ function Index() {
         ) : mode === "flippingletters" ? (
           <div className="space-y-6">
             <div>
-              <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; click a tile to see if it flips)</div>
+              <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; click a tile if it is flippable)</div>
               <div className="grid grid-cols-5 gap-2 w-fit">
                 {Array.from({ length: 10 }).map((_, i) => {
                   const upper = (flLetters[i] || "").toUpperCase();
@@ -1314,7 +1322,7 @@ function Index() {
                         onClick={() => {
                           setFlRevealed((prev) => { const n = [...prev]; n[i] = !n[i]; return n; });
                         }}
-                        className="h-12 w-12 rounded border-2 border-border bg-muted text-center font-mono text-xl font-bold lowercase outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+                        className="h-12 w-12 rounded border-2 border-yellow-500 bg-muted text-center font-mono text-xl font-bold lowercase outline-none focus:ring-2 focus:ring-ring cursor-pointer"
                         aria-label={`Letter ${i + 1}`}
                       />
                       <div className="h-5 text-xs font-mono text-muted-foreground">
