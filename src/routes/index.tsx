@@ -1263,7 +1263,7 @@ function Index() {
                   })}
                 </div>
                 {worGuesses.length > 1 && (
-                  <Button onClick={() => removeWorRow(gi)} variant="outline" size="sm">Remove</Button>
+                  <Button onClick={() => removeWorRow(gi)} variant="outline" size="sm">×</Button>
                 )}
               </div>
             ))}
@@ -1384,7 +1384,7 @@ function Index() {
                   })}
                 </div>
                 {flGuesses.length > 1 && (
-                  <Button onClick={() => removeFlRow(gi)} variant="outline" size="sm">Remove</Button>
+                  <Button onClick={() => removeFlRow(gi)} variant="outline" size="sm">×</Button>
                 )}
               </div>
             ))}
