@@ -714,6 +714,12 @@ function Index() {
             >
               About
             </Link>
+            <Link
+              to="/faq"
+              className="rounded-md border bg-muted px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+            >
+              FAQ
+            </Link>
             <button
               onClick={() => setDark((d) => !d)}
               className="rounded-md border bg-muted p-2 text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
