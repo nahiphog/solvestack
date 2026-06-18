@@ -1496,9 +1496,7 @@ function Index() {
                   })}
                 </div>
                 {wordPeaksGuesses.length > 1 && (
-                  <Button onClick={() => removeWPRow(gi)} variant="outline" size="sm">
-                    Remove
-                  </Button>
+                  <Button onClick={() => removeWPRow(gi)} variant="outline" size="sm">×</Button>
                 )}
               </div>
             ))}
@@ -1620,9 +1618,7 @@ function Index() {
                   })}
                 </div>
                 {wordleGuesses.length > 1 && (
-                  <Button onClick={() => removeGuessRow(gi)} variant="outline" size="sm">
-                    Remove
-                  </Button>
+                  <Button onClick={() => removeGuessRow(gi)} variant="outline" size="sm">×</Button>
                 )}
               </div>
             ))}
@@ -1870,9 +1866,7 @@ function Index() {
                   </select>
                 </div>
                 {mastermindRows.length > 1 && (
-                  <Button onClick={() => removeMastermindRow(ri)} variant="outline" size="sm">
-                    Remove
-                  </Button>
+                  <Button onClick={() => removeMastermindRow(ri)} variant="outline" size="sm">×</Button>
                 )}
               </div>
             ))}
