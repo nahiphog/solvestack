@@ -2940,6 +2940,64 @@ function Index() {
           </section>
         )}
 
+        {sdResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {sdResults.length}{sdResults.length === 1000 ? "+" : ""} {sdResults.length === 1 ? "solution" : "solutions"}
+              </h2>
+              <button
+                onClick={() => {
+                  const items = sdResults
+                    .map((sol, i) => `#${i + 1}\n${sol.map((row) => row.join(" ")).join("\n")}`)
+                    .join("\n\n");
+                  copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all solutions"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {sdResults.slice(pageSd * 20, pageSd * 20 + 20).map((sol, idx) => {
+                const i = pageSd * 20 + idx;
+                const REGION_COLORS: Record<number, { bg: string; border: string }> = {
+                  1: { bg: "bg-red-500/20",     border: "border-red-500" },
+                  2: { bg: "bg-blue-500/20",    border: "border-blue-500" },
+                  3: { bg: "bg-emerald-500/20", border: "border-emerald-500" },
+                  4: { bg: "bg-amber-500/20",   border: "border-amber-500" },
+                  5: { bg: "bg-purple-500/20",  border: "border-purple-500" },
+                  6: { bg: "bg-pink-500/20",    border: "border-pink-500" },
+                };
+                return (
+                  <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
+                    <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
+                    <div className="inline-block">
+                      {sol.map((row, r) => (
+                        <div key={r} className="mt-1 flex gap-1 first:mt-0">
+                          {row.map((cell, c) => {
+                            const reg = sdRegions[r][c];
+                            const col = REGION_COLORS[reg] || { bg: "bg-muted", border: "border-border" };
+                            return (
+                              <div key={c} className={`flex h-10 w-10 items-center justify-center rounded border-2 ${col.border} ${col.bg} font-mono text-base font-bold`}>
+                                {cell}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+            <Paginator page={pageSd} setPage={setPageSd} total={sdResults.length} perPage={20} />
+          </section>
+        )}
+
+
+
 
 
       </div>
