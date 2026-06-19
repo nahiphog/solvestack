@@ -985,20 +985,31 @@ function Index() {
         )}
 
         {(mode === 4 || mode === 5 || mode === 6) && (
-          <div className="mb-4 flex items-center gap-2 text-sm">
-            <label htmlFor="word-length-select" className="text-muted-foreground">Word length:</label>
-            <select
-              id="word-length-select"
-              value={mode}
-              onChange={(e) => switchMode(Number(e.target.value) as Mode)}
-              className="rounded-md border bg-background px-2 py-1 text-sm"
-            >
-              <option value={4}>4</option>
-              <option value={5}>5</option>
-              <option value={6}>6</option>
-            </select>
-            <span className="text-muted-foreground">letters.</span>
-          </div>
+          <>
+            <div className="mb-4 flex flex-wrap gap-3 text-sm">
+              <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver</a>
+              <span>·</span>
+              <a href="https://flipple.clevergoat.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Flipple</a>
+              <span>·</span>
+              <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Poople</a>
+              <span>·</span>
+              <a href="https://wordchains.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Chains</a>
+            </div>
+            <div className="mb-4 flex items-center gap-2 text-sm">
+              <label htmlFor="word-length-select" className="text-muted-foreground">Word length:</label>
+              <select
+                id="word-length-select"
+                value={mode}
+                onChange={(e) => switchMode(Number(e.target.value) as Mode)}
+                className="rounded-md border bg-background px-2 py-1 text-sm"
+              >
+                <option value={4}>4</option>
+                <option value={5}>5</option>
+                <option value={6}>6</option>
+              </select>
+              <span className="text-muted-foreground">letters.</span>
+            </div>
+          </>
         )}
 
         {(mode === "splice" || mode === "pivots") && (
@@ -1027,20 +1038,10 @@ function Index() {
         )}
 
         <div className="mb-4 flex flex-wrap gap-3 text-sm">
-          {mode === 4 && (
-            <>
-              <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver</a>
-              <span> · </span>
-              <a href="https://flipple.clevergoat.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Flipple</a>
-              <span> · </span>
-              <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Poople</a>
-              <span> · </span>
-              <a href="https://wordchains.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Chains</a>
-            </>
+          {mode === "splice" && (
+            <a href="https://wordsplice.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Splice</a>
           )}
-          {mode === 5 && (
-            <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver</a>
-          )}
+          
           {mode === "splice" && (
             <a href="https://wordsplice.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Splice</a>
           )}
@@ -1061,7 +1062,7 @@ function Index() {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowWordleVariations((v) => !v)}
-                className="w-fit gap-1"
+                className="w-48 justify-center gap-1"
               >
                 {showWordleVariations ? (
                   <>Hide table <ChevronUp className="h-4 w-4" /></>
@@ -1150,10 +1151,25 @@ function Index() {
         </div>
 
 
+        {(mode === 4 || mode === 5 || mode === 6) && (
+          <div className="mb-4 text-sm text-muted-foreground">
+            <p>Permissible move:</p>
+            <ul className="list-disc pl-5">
+              <li>Single letter substitution</li>
+            </ul>
+          </div>
+        )}
+
         {mode === "craftwords" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Each move: replace one letter, add one letter, remove one letter, or permute the letters.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground">
+            <p>Permissible move:</p>
+            <ul className="list-disc pl-5">
+              <li>Single letter substitution</li>
+              <li>Add a letter</li>
+              <li>Remove a letter</li>
+              <li>Rearrange the letters</li>
+            </ul>
+          </div>
         )}
 
         {mode === "splice" && (
@@ -1163,9 +1179,14 @@ function Index() {
         )}
 
         {mode === "weaverx" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Each move: change one letter, add one letter, or remove one letter.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground">
+            <p>Permissible move:</p>
+            <ul className="list-disc pl-5">
+              <li>Single letter substitution</li>
+              <li>Add a letter</li>
+              <li>Remove a letter</li>
+            </ul>
+          </div>
         )}
 
         {mode === "pivots" && (
@@ -1895,7 +1916,7 @@ function Index() {
                   </div>
                 </div>
                 <div>
-                  {ri === 0 && <label className="mb-1 block text-sm font-medium">correct</label>}
+                  <label className="mb-1 block text-sm font-medium">correct</label>
                   <select
                     value={row.greens}
                     onChange={(e) =>
@@ -1903,7 +1924,7 @@ function Index() {
                         prev.map((r, i) => (i === ri ? { ...r, greens: Number(e.target.value) } : r)),
                       )
                     }
-                    className="h-12 w-20 rounded border-2 border-green-600 bg-green-600 px-2 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring"
+                    className="h-12 w-12 rounded border-2 border-green-600 bg-green-600 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none"
                   >
                     {[0, 1, 2, 3, 4, 5].map((n) => (
                       <option key={n} value={n} className="bg-background text-foreground">
@@ -1913,7 +1934,7 @@ function Index() {
                   </select>
                 </div>
                 <div>
-                  {ri === 0 && <label className="mb-1 block text-sm font-medium">wrong</label>}
+                  <label className="mb-1 block text-sm font-medium">wrong</label>
                   <select
                     value={row.yellows}
                     onChange={(e) =>
@@ -1921,7 +1942,7 @@ function Index() {
                         prev.map((r, i) => (i === ri ? { ...r, yellows: Number(e.target.value) } : r)),
                       )
                     }
-                    className="h-12 w-20 rounded border-2 border-yellow-500 bg-yellow-500 px-2 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring"
+                    className="h-12 w-12 rounded border-2 border-yellow-500 bg-yellow-500 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none"
                   >
                     {[0, 1, 2, 3, 4, 5].map((n) => (
                       <option key={n} value={n} className="bg-background text-foreground">
@@ -2154,16 +2175,16 @@ function Index() {
                 className="font-mono text-lg uppercase tracking-widest w-[12ch]"
               />
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={randomize} variant="outline" size="lg">Randomize</Button>
+            <div className="flex flex-nowrap gap-2">
+              <Button onClick={randomize} variant="outline" size="sm">Randomize</Button>
               <Button
                 onClick={() => { setStart(""); setPaths(null); setError(null); }}
                 variant="outline"
-                size="lg"
+                size="sm"
               >
                 Reset
               </Button>
-              <Button onClick={solve} disabled={solving} size="lg">
+              <Button onClick={solve} disabled={solving} size="sm">
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
@@ -2194,8 +2215,8 @@ function Index() {
                 />
               </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={randomize} variant="outline" size="lg">Randomize</Button>
+            <div className="flex flex-nowrap gap-2">
+              <Button onClick={randomize} variant="outline" size="sm">Randomize</Button>
               <Button
                 onClick={() => {
                   setStart("");
@@ -2204,11 +2225,11 @@ function Index() {
                   setError(null);
                 }}
                 variant="outline"
-                size="lg"
+                size="sm"
               >
                 Reset
               </Button>
-              <Button onClick={solve} disabled={solving} size="lg">
+              <Button onClick={solve} disabled={solving} size="sm">
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
