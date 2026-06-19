@@ -214,7 +214,8 @@ function Index() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
-  useEffect(() => { setPagePaths(0); }, [paths]);
+  const [selectedPaths, setSelectedPaths] = useState<Set<number>>(new Set());
+  useEffect(() => { setPagePaths(0); setSelectedPaths(new Set()); }, [paths]);
   useEffect(() => { setPageWordle(0); }, [wordleResults]);
   useEffect(() => { setPageMM(0); }, [mastermindResults]);
   useEffect(() => { setPageWP(0); }, [wordPeaksResults]);
