@@ -2194,8 +2194,8 @@ function Index() {
                 />
               </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={randomize} variant="outline" size="lg">Randomize</Button>
+            <div className="flex flex-nowrap gap-2">
+              <Button onClick={randomize} variant="outline" size="sm">Randomize</Button>
               <Button
                 onClick={() => {
                   setStart("");
@@ -2204,11 +2204,11 @@ function Index() {
                   setError(null);
                 }}
                 variant="outline"
-                size="lg"
+                size="sm"
               >
                 Reset
               </Button>
-              <Button onClick={solve} disabled={solving} size="lg">
+              <Button onClick={solve} disabled={solving} size="sm">
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
