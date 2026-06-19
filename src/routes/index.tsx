@@ -1152,7 +1152,7 @@ function Index() {
 
         {mode === "craftwords" && (
           <p className="mb-4 text-sm text-muted-foreground">
-            Each move: replace one letter, add one letter, remove one letter, or permute the letters. Word lengths may vary.
+            Each move: replace one letter, add one letter, remove one letter, or permute the letters.
           </p>
         )}
 
@@ -1164,7 +1164,7 @@ function Index() {
 
         {mode === "weaverx" && (
           <p className="mb-4 text-sm text-muted-foreground">
-            Each move: change one letter, add one letter, or remove one letter. Word lengths may vary.
+            Each move: change one letter, add one letter, or remove one letter.
           </p>
         )}
 
