@@ -138,6 +138,28 @@ function Index() {
   ]);
   const [flResults, setFlResults] = useState<{ flippable: string[]; answers: string[] } | null>(null);
   const [pageFl, setPageFl] = useState(0);
+  const [flStartingWords, setFlStartingWords] = useState<0 | 1 | 2>(0);
+
+  const applyFlStartingWords = (count: 0 | 1 | 2) => {
+    setFlStartingWords(count);
+    if (count === 0) {
+      setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    } else {
+      const pool = [...FL_POTENTIAL_WORDS];
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      const picks: string[] = [];
+      const seen = new Set<string>();
+      for (const w of pool) {
+        if (!seen.has(w)) { seen.add(w); picks.push(w); }
+        if (picks.length >= count) break;
+      }
+      setFlGuesses(picks.map((w) => ({ word: w, pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] })));
+    }
+    setFlResults(null);
+  };
 
   const [worGuesses, setWorGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
     { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
