@@ -2364,7 +2364,7 @@ function Index() {
                   <div className="space-y-2">
                     {usedRegionsArr.map((reg) => {
                       const col = REGION_COLORS[reg];
-                      const def = sdRegionDefs[reg] || { func: "Sum" as SheetdokuFunc, target: "" };
+                      const def = sdRegionDefs[reg] || { func: "SUM" as SheetdokuFunc, target: "" };
                       return (
                         <div key={reg} className="flex flex-wrap items-center gap-2 text-sm">
                           <span className={`inline-block h-3 w-3 rounded-sm ${col?.chip || "bg-muted"}`} />
@@ -2378,16 +2378,17 @@ function Index() {
                             }}
                             className="rounded border bg-background px-2 py-1"
                           >
-                            <option value="Max">Max</option>
-                            <option value="Min">Min</option>
-                            <option value="Sum">Sum</option>
-                            <option value="Range">Range</option>
+                            <option value="MAX">MAX</option>
+                            <option value="MIN">MIN</option>
+                            <option value="SUM">SUM</option>
+                            <option value="PROD">PROD</option>
+                            <option value="RANGE">RANGE</option>
                           </select>
                           <Input
                             value={def.target}
                             onChange={(e) => {
                               const v = e.target.value.replace(/[^0-9]/g, "");
-                              setSdRegionDefs((prev) => ({ ...prev, [reg]: { ...(prev[reg] || { func: "Sum" as SheetdokuFunc }), target: v } }));
+                              setSdRegionDefs((prev) => ({ ...prev, [reg]: { ...(prev[reg] || { func: "SUM" as SheetdokuFunc }), target: v } }));
                               setSdResults(null);
                             }}
                             className="h-8 w-20 font-mono"
@@ -2400,7 +2401,7 @@ function Index() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     onClick={() => {
-                      setSdRegions(Array.from({ length: N }, () => Array(N).fill(1)));
+                      setSdRegions(Array.from({ length: N }, () => Array(N).fill(0)));
                       setSdInitial(Array.from({ length: N }, () => Array(N).fill("")));
                       setSdResults(null);
                     }}
