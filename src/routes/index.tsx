@@ -1151,10 +1151,25 @@ function Index() {
         </div>
 
 
+        {(mode === 4 || mode === 5 || mode === 6) && (
+          <div className="mb-4 text-sm text-muted-foreground">
+            <p>Permissible move:</p>
+            <ul className="list-disc pl-5">
+              <li>Single letter substitution</li>
+            </ul>
+          </div>
+        )}
+
         {mode === "craftwords" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Each move: replace one letter, add one letter, remove one letter, or permute the letters.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground">
+            <p>Permissible move:</p>
+            <ul className="list-disc pl-5">
+              <li>Single letter substitution</li>
+              <li>Add a letter</li>
+              <li>Remove a letter</li>
+              <li>Rearrange the letters</li>
+            </ul>
+          </div>
         )}
 
         {mode === "splice" && (
@@ -1164,9 +1179,14 @@ function Index() {
         )}
 
         {mode === "weaverx" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Each move: change one letter, add one letter, or remove one letter.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground">
+            <p>Permissible move:</p>
+            <ul className="list-disc pl-5">
+              <li>Single letter substitution</li>
+              <li>Add a letter</li>
+              <li>Remove a letter</li>
+            </ul>
+          </div>
         )}
 
         {mode === "pivots" && (
