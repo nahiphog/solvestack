@@ -1895,7 +1895,7 @@ function Index() {
                   </div>
                 </div>
                 <div>
-                  {ri === 0 && <label className="mb-1 block text-sm font-medium">correct</label>}
+                  <label className="mb-1 block text-sm font-medium">correct</label>
                   <select
                     value={row.greens}
                     onChange={(e) =>
@@ -1903,7 +1903,7 @@ function Index() {
                         prev.map((r, i) => (i === ri ? { ...r, greens: Number(e.target.value) } : r)),
                       )
                     }
-                    className="h-12 w-20 rounded border-2 border-green-600 bg-green-600 px-2 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring"
+                    className="h-12 w-12 rounded border-2 border-green-600 bg-green-600 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none"
                   >
                     {[0, 1, 2, 3, 4, 5].map((n) => (
                       <option key={n} value={n} className="bg-background text-foreground">
@@ -1913,7 +1913,7 @@ function Index() {
                   </select>
                 </div>
                 <div>
-                  {ri === 0 && <label className="mb-1 block text-sm font-medium">wrong</label>}
+                  <label className="mb-1 block text-sm font-medium">wrong</label>
                   <select
                     value={row.yellows}
                     onChange={(e) =>
@@ -1921,7 +1921,7 @@ function Index() {
                         prev.map((r, i) => (i === ri ? { ...r, yellows: Number(e.target.value) } : r)),
                       )
                     }
-                    className="h-12 w-20 rounded border-2 border-yellow-500 bg-yellow-500 px-2 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring"
+                    className="h-12 w-12 rounded border-2 border-yellow-500 bg-yellow-500 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none"
                   >
                     {[0, 1, 2, 3, 4, 5].map((n) => (
                       <option key={n} value={n} className="bg-background text-foreground">
