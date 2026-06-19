@@ -286,6 +286,7 @@ function Index() {
 
     setMarblessResults(null);
     setDodekuResult(null);
+    setSdResults(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
