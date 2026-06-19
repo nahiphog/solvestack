@@ -600,12 +600,20 @@ function Index() {
       return;
     }
     const flips = letters.map((l) => FL_FLIP_MAP[l] || "");
-    const allowed = [...letters, ...flips.filter(Boolean)];
+    void flips;
+    const allowed = [...letters];
+    const bankSet = new Set(letters);
     for (const g of flGuesses) {
       const w = g.word.trim().toUpperCase();
       if (w.length !== 5) {
         setError("Each guess must be exactly 5 letters.");
         return;
+      }
+      for (const ch of w) {
+        if (!bankSet.has(ch)) {
+          setError(`"${w}" uses "${ch.toLowerCase()}" which is not in the letter bank.`);
+          return;
+        }
       }
       if (!(await isValid5LetterWord(w))) {
         setError(`"${w}" is not a valid 5-letter English word.`);
