@@ -39,7 +39,74 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   wordpeaks: 5,
   flippingletters: 5,
   worwordle: 8,
+  sheetdoku: 0,
 };
+
+export type SheetdokuFunc = "Max" | "Min" | "Sum" | "Range";
+export interface SheetdokuRegionDef { func: SheetdokuFunc; target: number; }
+
+export function sheetdokuSolve(
+  N: number,
+  regions: number[][],
+  initial: number[][],
+  regionDefs: Record<number, SheetdokuRegionDef>,
+  maxSolutions = 1000,
+): number[][][] {
+  const cellsByRegion: Record<number, [number, number][]> = {};
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const reg = regions[r][c];
+    (cellsByRegion[reg] ||= []).push([r, c]);
+  }
+  const grid: number[][] = Array.from({ length: N }, () => Array(N).fill(0));
+  const rowUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
+  const colUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
+  const solutions: number[][][] = [];
+
+  const checkRegion = (reg: number): boolean => {
+    const def = regionDefs[reg];
+    if (!def) return true;
+    const cells = cellsByRegion[reg];
+    const vals: number[] = [];
+    for (const [r, c] of cells) if (grid[r][c] !== 0) vals.push(grid[r][c]);
+    if (vals.length === 0) return true;
+    const full = vals.length === cells.length;
+    if (def.func === "Max") {
+      const m = Math.max(...vals);
+      if (m > def.target) return false;
+      if (full && m !== def.target) return false;
+    } else if (def.func === "Min") {
+      const m = Math.min(...vals);
+      if (m < def.target) return false;
+      if (full && m !== def.target) return false;
+    } else if (def.func === "Sum") {
+      const s = vals.reduce((a, b) => a + b, 0);
+      if (s > def.target) return false;
+      if (full && s !== def.target) return false;
+    } else {
+      const rng = Math.max(...vals) - Math.min(...vals);
+      if (rng > def.target) return false;
+      if (full && rng !== def.target) return false;
+    }
+    return true;
+  };
+
+  const bt = (pos: number) => {
+    if (solutions.length >= maxSolutions) return;
+    if (pos === N * N) { solutions.push(grid.map((r) => [...r])); return; }
+    const r = Math.floor(pos / N), c = pos % N;
+    const fixed = initial[r][c];
+    const tryVal = (v: number) => {
+      if (rowUsed[r].has(v) || colUsed[c].has(v)) return;
+      grid[r][c] = v; rowUsed[r].add(v); colUsed[c].add(v);
+      if (checkRegion(regions[r][c])) bt(pos + 1);
+      grid[r][c] = 0; rowUsed[r].delete(v); colUsed[c].delete(v);
+    };
+    if (fixed !== 0) tryVal(fixed);
+    else for (let v = 1; v <= N; v++) tryVal(v);
+  };
+  bt(0);
+  return solutions;
+}
 
 let _worwordleWordsCache: string[] | null = null;
 async function getWorwordleWords(): Promise<string[]> {
