@@ -68,6 +68,16 @@ const WOR_STARTING_PAIRS: [string, string][] = [
   ["GUESTACK", "HYDROBIN"],
 ];
 
+const FL_POTENTIAL_WORDS: string[] = [
+  "TABLE","CHAIR","PHONE","BREAD","LIGHT","PLATE","KNIFE","CLOUD","STONE","PLANT",
+  "EARTH","OCEAN","BEACH","FIELD","WRITE","DANCE","SPEAK","LAUGH","DRINK","DRIVE",
+  "BUILD","TEACH","LEARN","WATCH","ANGRY","QUIET","TIRED","PROUD","BRAVE","NURSE",
+  "PILOT","JUDGE","CHILD","ADULT","GUEST","BLACK","WHITE","BROWN","IVORY","PEACH",
+  "MANGO","LEMON","SUGAR","HONEY","MONEY","HOUSE","WATER","MUSIC","DREAM","STORY",
+  "MOVIE","NOTES","TRAIN","PLANE","HOTEL","TOWER","ROADS","WORLD","HEART","BRAIN",
+  "POWER","SOUND","VOICE","SMILE","FAITH",
+];
+
 
 function Paginator({ page, setPage, total, perPage = 50 }: { page: number; setPage: (n: number) => void; total: number; perPage?: number }) {
   const pages = Math.ceil(total / perPage);
@@ -128,6 +138,28 @@ function Index() {
   ]);
   const [flResults, setFlResults] = useState<{ flippable: string[]; answers: string[] } | null>(null);
   const [pageFl, setPageFl] = useState(0);
+  const [flStartingWords, setFlStartingWords] = useState<0 | 1 | 2>(0);
+
+  const applyFlStartingWords = (count: 0 | 1 | 2) => {
+    setFlStartingWords(count);
+    if (count === 0) {
+      setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    } else {
+      const pool = [...FL_POTENTIAL_WORDS];
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      const picks: string[] = [];
+      const seen = new Set<string>();
+      for (const w of pool) {
+        if (!seen.has(w)) { seen.add(w); picks.push(w); }
+        if (picks.length >= count) break;
+      }
+      setFlGuesses(picks.map((w) => ({ word: w, pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] })));
+    }
+    setFlResults(null);
+  };
 
   const [worGuesses, setWorGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
     { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
@@ -182,7 +214,8 @@ function Index() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
-  useEffect(() => { setPagePaths(0); }, [paths]);
+  const [selectedPaths, setSelectedPaths] = useState<Set<number>>(new Set());
+  useEffect(() => { setPagePaths(0); setSelectedPaths(new Set()); }, [paths]);
   useEffect(() => { setPageWordle(0); }, [wordleResults]);
   useEffect(() => { setPageMM(0); }, [mastermindResults]);
   useEffect(() => { setPageWP(0); }, [wordPeaksResults]);
@@ -301,7 +334,7 @@ function Index() {
         return;
       }
       if (row.greens + row.yellows > 5) {
-        setError(`Row ${i + 1}: GREEN + YELLOW cannot exceed 5.`);
+        setError(`Row ${i + 1}: correct + wrong cannot exceed 5.`);
         return;
       }
     }
@@ -1336,6 +1369,20 @@ function Index() {
               </div>
             </div>
 
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span>Optional input: Place</span>
+              <select
+                className="rounded border border-border bg-background px-2 py-1"
+                value={flStartingWords}
+                onChange={(e) => applyFlStartingWords(parseInt(e.target.value, 10) as 0 | 1 | 2)}
+              >
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+              <span>flippable word(s) into the input.</span>
+            </div>
+
 
             {flGuesses.map((g, gi) => (
               <div key={gi} className="flex items-center gap-3">
@@ -1784,7 +1831,7 @@ function Index() {
               <span>strategic starting words into the solver.</span>
             </div>
             {mastermindRows.map((row, ri) => (
-              <div key={ri} className="flex flex-wrap items-end gap-3">
+              <div key={ri} className="flex flex-wrap items-end gap-3 rounded-lg border-2 border-border p-3">
                 <div>
                   {ri === 0 && <label className="mb-1 block text-sm font-medium">Guess</label>}
                   <div className="flex gap-1.5">
@@ -1830,7 +1877,7 @@ function Index() {
                   </div>
                 </div>
                 <div>
-                  {ri === 0 && <label className="mb-1 block text-sm font-medium">GREEN</label>}
+                  {ri === 0 && <label className="mb-1 block text-sm font-medium">correct</label>}
                   <select
                     value={row.greens}
                     onChange={(e) =>
@@ -1848,7 +1895,7 @@ function Index() {
                   </select>
                 </div>
                 <div>
-                  {ri === 0 && <label className="mb-1 block text-sm font-medium">YELLOW</label>}
+                  {ri === 0 && <label className="mb-1 block text-sm font-medium">wrong</label>}
                   <select
                     value={row.yellows}
                     onChange={(e) =>
@@ -2146,7 +2193,12 @@ function Index() {
               </h2>
               <button
                 onClick={() => {
-                  const items = paths.map((p, i) => {
+                  const hasSelection = selectedPaths.size > 0;
+                  const indices = hasSelection
+                    ? [...selectedPaths].sort((a, b) => a - b)
+                    : paths.map((_, i) => i);
+                  const items = indices.map((i) => {
+                    const p = paths[i];
                     if (mode === "pivots") {
                       const formatted = p.map((w, j) => {
                         if (j === 0) return w;
@@ -2159,18 +2211,26 @@ function Index() {
                   copyText(`${items}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-                aria-label="Copy all paths"
+                aria-label={selectedPaths.size > 0 ? "Copy selected paths" : "Copy all paths"}
               >
-                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> {selectedPaths.size > 0 ? "Copy" : "Copy all"}</>)}
               </button>
             </div>
             <ol className="space-y-3">
               {paths.slice(pagePaths * 50, pagePaths * 50 + 50).map((path, idx) => {
                 const i = pagePaths * 50 + idx;
+                const isSelected = selectedPaths.has(i);
                 return (
                 <li
                   key={i}
-                  className="flex items-center rounded-lg border bg-card p-4 font-mono text-card-foreground"
+                  onClick={() => {
+                    setSelectedPaths((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(i)) next.delete(i); else next.add(i);
+                      return next;
+                    });
+                  }}
+                  className={`flex cursor-pointer items-center rounded-lg border-2 bg-card p-4 font-mono text-card-foreground transition ${isSelected ? "border-yellow-500" : "border-border"}`}
                 >
                   <div className="flex-1">
                     <span className="mr-3 text-xs text-muted-foreground">#{i + 1}</span>
