@@ -2143,26 +2143,44 @@ function Index() {
             </div>
           </div>
 
-        ) : (
-          <div
-            className={`grid gap-4 sm:items-end ${
-              mode === "wordiply"
-                ? "sm:grid-cols-[1fr_auto_auto_auto]"
-                : "sm:grid-cols-[1fr_1fr_auto_auto_auto]"
-            }`}
-          >
+        ) : mode === "wordiply" ? (
+          <div className="space-y-3">
             <div>
-              <label className="mb-1 block text-sm font-medium">
-                {mode === "wordiply" ? "Substring" : "Start"}
-              </label>
+              <label className="mb-1 block text-sm font-medium">Substring</label>
               <Input
                 value={start}
                 onChange={(e) => setStart(clamp(e.target.value))}
                 maxLength={wordLength || 12}
-                className="font-mono text-lg uppercase tracking-widest"
+                className="font-mono text-lg uppercase tracking-widest w-[12ch]"
               />
             </div>
-            {mode !== "wordiply" && (
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={randomize} variant="outline" size="lg">Randomize</Button>
+              <Button
+                onClick={() => { setStart(""); setPaths(null); setError(null); }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button onClick={solve} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-end gap-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium">Start</label>
+                <Input
+                  value={start}
+                  onChange={(e) => setStart(clamp(e.target.value))}
+                  maxLength={Math.min(9, wordLength || 9)}
+                  className="font-mono text-lg uppercase tracking-widest w-[11ch]"
+                />
+              </div>
+              <div className="pb-2 text-2xl font-bold text-muted-foreground">→</div>
               <div>
                 <label className="mb-1 block text-sm font-medium">
                   Goal{mode === "pivots" ? " (fixed)" : ""}
@@ -2170,30 +2188,30 @@ function Index() {
                 <Input
                   value={goal}
                   onChange={(e) => setGoal(clamp(e.target.value))}
-                  maxLength={wordLength || 12}
+                  maxLength={Math.min(9, wordLength || 9)}
                   disabled={mode === "pivots"}
-                  className="font-mono text-lg uppercase tracking-widest"
+                  className="font-mono text-lg uppercase tracking-widest w-[11ch]"
                 />
               </div>
-            )}
-            <Button onClick={randomize} variant="outline" size="lg">
-              Randomize
-            </Button>
-            <Button
-              onClick={() => {
-                setStart("");
-                if (mode !== "pivots") setGoal("");
-                setPaths(null);
-                setError(null);
-              }}
-              variant="outline"
-              size="lg"
-            >
-              Reset
-            </Button>
-            <Button onClick={solve} disabled={solving} size="lg">
-              {solving ? "Solving..." : "Solve"}
-            </Button>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={randomize} variant="outline" size="lg">Randomize</Button>
+              <Button
+                onClick={() => {
+                  setStart("");
+                  if (mode !== "pivots") setGoal("");
+                  setPaths(null);
+                  setError(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button onClick={solve} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
           </div>
         )}
 
