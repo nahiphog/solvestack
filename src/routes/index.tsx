@@ -1851,7 +1851,7 @@ function Index() {
             {mastermindRows.map((row, ri) => (
               <div key={ri} className="flex flex-wrap items-end gap-3 rounded-lg border-2 border-border p-3">
                 <div>
-                  {ri === 0 && <label className="mb-1 block text-sm font-medium">Guess</label>}
+                  <label className="mb-1 block text-sm font-medium">Guess #{ri + 1}</label>
                   <div className="flex gap-1.5">
                     {Array.from({ length: 5 }).map((_, ti) => {
                       const letter = row.word[ti] && row.word[ti] !== " " ? row.word[ti] : "";
