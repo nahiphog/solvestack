@@ -1830,7 +1830,7 @@ function Index() {
                   </div>
                 </div>
                 <div>
-                  {ri === 0 && <label className="mb-1 block text-sm font-medium">GREEN</label>}
+                  {ri === 0 && <label className="mb-1 block text-sm font-medium">correct</label>}
                   <select
                     value={row.greens}
                     onChange={(e) =>
