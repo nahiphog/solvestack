@@ -145,7 +145,13 @@ function Index() {
     if (count === 0) {
       setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else {
-      const pool = [...FL_POTENTIAL_WORDS];
+      const bankSet = new Set(flLetters.map((l) => (l || "").toUpperCase()).filter(Boolean));
+      const eligible = FL_POTENTIAL_WORDS.filter((w) => {
+        const upper = w.toUpperCase();
+        for (const ch of upper) if (!bankSet.has(ch)) return false;
+        return true;
+      });
+      const pool = [...eligible];
       for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -156,6 +162,7 @@ function Index() {
         if (!seen.has(w)) { seen.add(w); picks.push(w); }
         if (picks.length >= count) break;
       }
+      while (picks.length < count) picks.push("");
       setFlGuesses(picks.map((w) => ({ word: w, pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] })));
     }
     setFlResults(null);
@@ -593,12 +600,20 @@ function Index() {
       return;
     }
     const flips = letters.map((l) => FL_FLIP_MAP[l] || "");
-    const allowed = [...letters, ...flips.filter(Boolean)];
+    void flips;
+    const allowed = [...letters];
+    const bankSet = new Set(letters);
     for (const g of flGuesses) {
       const w = g.word.trim().toUpperCase();
       if (w.length !== 5) {
         setError("Each guess must be exactly 5 letters.");
         return;
+      }
+      for (const ch of w) {
+        if (!bankSet.has(ch)) {
+          setError(`"${w}" uses "${ch.toLowerCase()}" which is not in the letter bank.`);
+          return;
+        }
       }
       if (!(await isValid5LetterWord(w))) {
         setError(`"${w}" is not a valid 5-letter English word.`);
@@ -1137,7 +1152,7 @@ function Index() {
 
         {mode === "craftwords" && (
           <p className="mb-4 text-sm text-muted-foreground">
-            Each move: replace one letter, add one letter, remove one letter, or permute the letters. Word lengths may vary.
+            Each move: replace one letter, add one letter, remove one letter, or permute the letters.
           </p>
         )}
 
@@ -1149,7 +1164,7 @@ function Index() {
 
         {mode === "weaverx" && (
           <p className="mb-4 text-sm text-muted-foreground">
-            Each move: change one letter, add one letter, or remove one letter. Word lengths may vary.
+            Each move: change one letter, add one letter, or remove one letter.
           </p>
         )}
 
@@ -1415,7 +1430,10 @@ function Index() {
                         onChange={(e) => {
                           const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
                           if (!v) { setFlLetter(gi, ti, ""); return; }
-                          setFlLetter(gi, ti, v.slice(-1));
+                          const bankSet = new Set(flLetters.map((l) => (l || "").toUpperCase()).filter(Boolean));
+                          const ch = v.slice(-1);
+                          if (!bankSet.has(ch)) return;
+                          setFlLetter(gi, ti, ch);
                           if (ti < 4) focusFlTile(gi, ti + 1);
                         }}
                         onKeyDown={(e) => {
@@ -1833,7 +1851,7 @@ function Index() {
             {mastermindRows.map((row, ri) => (
               <div key={ri} className="flex flex-wrap items-end gap-3 rounded-lg border-2 border-border p-3">
                 <div>
-                  {ri === 0 && <label className="mb-1 block text-sm font-medium">Guess</label>}
+                  <label className="mb-1 block text-sm font-medium">Guess #{ri + 1}</label>
                   <div className="flex gap-1.5">
                     {Array.from({ length: 5 }).map((_, ti) => {
                       const letter = row.word[ti] && row.word[ti] !== " " ? row.word[ti] : "";
@@ -2125,26 +2143,44 @@ function Index() {
             </div>
           </div>
 
-        ) : (
-          <div
-            className={`grid gap-4 sm:items-end ${
-              mode === "wordiply"
-                ? "sm:grid-cols-[1fr_auto_auto_auto]"
-                : "sm:grid-cols-[1fr_1fr_auto_auto_auto]"
-            }`}
-          >
+        ) : mode === "wordiply" ? (
+          <div className="space-y-3">
             <div>
-              <label className="mb-1 block text-sm font-medium">
-                {mode === "wordiply" ? "Substring" : "Start"}
-              </label>
+              <label className="mb-1 block text-sm font-medium">Substring</label>
               <Input
                 value={start}
                 onChange={(e) => setStart(clamp(e.target.value))}
                 maxLength={wordLength || 12}
-                className="font-mono text-lg uppercase tracking-widest"
+                className="font-mono text-lg uppercase tracking-widest w-[12ch]"
               />
             </div>
-            {mode !== "wordiply" && (
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={randomize} variant="outline" size="lg">Randomize</Button>
+              <Button
+                onClick={() => { setStart(""); setPaths(null); setError(null); }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button onClick={solve} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-end gap-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium">Start</label>
+                <Input
+                  value={start}
+                  onChange={(e) => setStart(clamp(e.target.value))}
+                  maxLength={Math.min(9, wordLength || 9)}
+                  className="font-mono text-lg uppercase tracking-widest w-[11ch]"
+                />
+              </div>
+              <div className="pb-2 text-2xl font-bold text-muted-foreground">→</div>
               <div>
                 <label className="mb-1 block text-sm font-medium">
                   Goal{mode === "pivots" ? " (fixed)" : ""}
@@ -2152,30 +2188,30 @@ function Index() {
                 <Input
                   value={goal}
                   onChange={(e) => setGoal(clamp(e.target.value))}
-                  maxLength={wordLength || 12}
+                  maxLength={Math.min(9, wordLength || 9)}
                   disabled={mode === "pivots"}
-                  className="font-mono text-lg uppercase tracking-widest"
+                  className="font-mono text-lg uppercase tracking-widest w-[11ch]"
                 />
               </div>
-            )}
-            <Button onClick={randomize} variant="outline" size="lg">
-              Randomize
-            </Button>
-            <Button
-              onClick={() => {
-                setStart("");
-                if (mode !== "pivots") setGoal("");
-                setPaths(null);
-                setError(null);
-              }}
-              variant="outline"
-              size="lg"
-            >
-              Reset
-            </Button>
-            <Button onClick={solve} disabled={solving} size="lg">
-              {solving ? "Solving..." : "Solve"}
-            </Button>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={randomize} variant="outline" size="lg">Randomize</Button>
+              <Button
+                onClick={() => {
+                  setStart("");
+                  if (mode !== "pivots") setGoal("");
+                  setPaths(null);
+                  setError(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button onClick={solve} disabled={solving} size="lg">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
           </div>
         )}
 
