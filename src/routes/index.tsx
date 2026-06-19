@@ -330,6 +330,57 @@ function Index() {
     }, 0);
   };
 
+  const solveSheetdoku = () => {
+    setError(null);
+    setSdResults(null);
+    const N = 5;
+    const initial: number[][] = sdInitial.map((row) =>
+      row.map((v) => {
+        const s = v.trim();
+        if (!s) return 0;
+        const n = parseInt(s, 10);
+        return Number.isFinite(n) && n >= 1 && n <= N ? n : 0;
+      }),
+    );
+    const usedRegions = new Set<number>();
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) usedRegions.add(sdRegions[r][c]);
+    const defs: Record<number, SheetdokuRegionDef> = {};
+    for (const reg of usedRegions) {
+      const d = sdRegionDefs[reg];
+      if (!d) { setError(`Region ${reg}: no function defined.`); return; }
+      const t = parseInt(d.target, 10);
+      if (!Number.isFinite(t)) { setError(`Region ${reg}: invalid target value.`); return; }
+      defs[reg] = { func: d.func, target: t };
+    }
+    // Validate fixed values vs row/col uniqueness
+    for (let r = 0; r < N; r++) {
+      const seen = new Set<number>();
+      for (let c = 0; c < N; c++) {
+        const v = initial[r][c];
+        if (v === 0) continue;
+        if (seen.has(v)) { setError(`Row ${r + 1}: duplicate fixed value ${v}.`); return; }
+        seen.add(v);
+      }
+    }
+    for (let c = 0; c < N; c++) {
+      const seen = new Set<number>();
+      for (let r = 0; r < N; r++) {
+        const v = initial[r][c];
+        if (v === 0) continue;
+        if (seen.has(v)) { setError(`Column ${c + 1}: duplicate fixed value ${v}.`); return; }
+        seen.add(v);
+      }
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const res = sheetdokuSolve(N, sdRegions, initial, defs);
+      if (res.length === 0) setError("No solutions found.");
+      else setSdResults(res);
+      setSolving(false);
+    }, 0);
+  };
+
+
   const solveSpellingBee = async () => {
     setError(null);
     setSpellingBeeResults(null);
