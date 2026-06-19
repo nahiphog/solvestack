@@ -985,20 +985,31 @@ function Index() {
         )}
 
         {(mode === 4 || mode === 5 || mode === 6) && (
-          <div className="mb-4 flex items-center gap-2 text-sm">
-            <label htmlFor="word-length-select" className="text-muted-foreground">Word length:</label>
-            <select
-              id="word-length-select"
-              value={mode}
-              onChange={(e) => switchMode(Number(e.target.value) as Mode)}
-              className="rounded-md border bg-background px-2 py-1 text-sm"
-            >
-              <option value={4}>4</option>
-              <option value={5}>5</option>
-              <option value={6}>6</option>
-            </select>
-            <span className="text-muted-foreground">letters.</span>
-          </div>
+          <>
+            <div className="mb-4 flex flex-wrap gap-3 text-sm">
+              <a href="https://wordwormdormdork.com/weaver/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver</a>
+              <span>·</span>
+              <a href="https://flipple.clevergoat.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Flipple</a>
+              <span>·</span>
+              <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Poople</a>
+              <span>·</span>
+              <a href="https://wordchains.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Chains</a>
+            </div>
+            <div className="mb-4 flex items-center gap-2 text-sm">
+              <label htmlFor="word-length-select" className="text-muted-foreground">Word length:</label>
+              <select
+                id="word-length-select"
+                value={mode}
+                onChange={(e) => switchMode(Number(e.target.value) as Mode)}
+                className="rounded-md border bg-background px-2 py-1 text-sm"
+              >
+                <option value={4}>4</option>
+                <option value={5}>5</option>
+                <option value={6}>6</option>
+              </select>
+              <span className="text-muted-foreground">letters.</span>
+            </div>
+          </>
         )}
 
         {(mode === "splice" || mode === "pivots") && (
