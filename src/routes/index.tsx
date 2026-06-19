@@ -220,14 +220,14 @@ function Index() {
     ["","","","",""],
   ]);
   const [sdRegionDefs, setSdRegionDefs] = useState<Record<number, { func: SheetdokuFunc; target: string }>>({
-    1: { func: "Max", target: "5" },
-    2: { func: "Sum", target: "10" },
-    3: { func: "Min", target: "4" },
-    4: { func: "Min", target: "1" },
-    5: { func: "Range", target: "4" },
-    6: { func: "Sum", target: "5" },
+    1: { func: "MAX", target: "5" },
+    2: { func: "SUM", target: "10" },
+    3: { func: "MIN", target: "4" },
+    4: { func: "MIN", target: "1" },
+    5: { func: "RANGE", target: "4" },
+    6: { func: "SUM", target: "5" },
   });
-  const [sdPaintRegion, setSdPaintRegion] = useState<number>(1);
+  const [sdPaintRegion, setSdPaintRegion] = useState<number>(0);
   const [sdResults, setSdResults] = useState<number[][][] | null>(null);
   const [pageSd, setPageSd] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -346,6 +346,7 @@ function Index() {
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) usedRegions.add(sdRegions[r][c]);
     const defs: Record<number, SheetdokuRegionDef> = {};
     for (const reg of usedRegions) {
+      if (reg === 0) continue; // regionless has no constraint
       const d = sdRegionDefs[reg];
       if (!d) { setError(`Region ${reg}: no function defined.`); return; }
       const t = parseInt(d.target, 10);
@@ -1347,13 +1348,15 @@ function Index() {
         )}
         {mode === "sheetdoku" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p><a href="https://www.sheetdoku.com/" target="_blank" rel="noreferrer" className="underline">Sheetdoku</a></p>
             <p>Fill a 5×5 Latin square (each row and column contains 1–5 exactly once) partitioned into regions.</p>
             <p>For each region, set its function and target value:</p>
             <ul className="list-disc pl-5">
-              <li><b>Max</b>: the largest value in the region equals the target.</li>
-              <li><b>Min</b>: the smallest value in the region equals the target.</li>
-              <li><b>Sum</b>: the values in the region sum to the target.</li>
-              <li><b>Range</b>: max − min in the region equals the target.</li>
+              <li><b>MAX</b>: the largest value in the region equals the target.</li>
+              <li><b>MIN</b>: the smallest value in the region equals the target.</li>
+              <li><b>SUM</b>: the values in the region sum to the target.</li>
+              <li><b>PROD</b>: the values in the region multiply to the target.</li>
+              <li><b>RANGE</b>: max − min in the region equals the target.</li>
             </ul>
             <p>Pick a region color, then click cells to assign them. Enter any pre-filled cell values inside the grid.</p>
           </div>
@@ -2288,6 +2291,7 @@ function Index() {
           (() => {
             const N = 5;
             const REGION_COLORS: Record<number, { bg: string; border: string; chip: string }> = {
+              0: { bg: "bg-gray-400/20",    border: "border-gray-400",    chip: "bg-gray-400" },
               1: { bg: "bg-red-500/20",     border: "border-red-500",     chip: "bg-red-500" },
               2: { bg: "bg-blue-500/20",    border: "border-blue-500",    chip: "bg-blue-500" },
               3: { bg: "bg-emerald-500/20", border: "border-emerald-500", chip: "bg-emerald-500" },
@@ -2295,13 +2299,13 @@ function Index() {
               5: { bg: "bg-purple-500/20",  border: "border-purple-500",  chip: "bg-purple-500" },
               6: { bg: "bg-pink-500/20",    border: "border-pink-500",    chip: "bg-pink-500" },
             };
-            const usedRegionsArr = Array.from(new Set(sdRegions.flat())).sort((a, b) => a - b);
+            const usedRegionsArr = Array.from(new Set(sdRegions.flat())).filter((r) => r !== 0).sort((a, b) => a - b);
             return (
               <div className="space-y-4">
                 <div>
                   <div className="mb-2 text-sm font-medium">Paint region (click cells to assign)</div>
                   <div className="flex flex-wrap gap-2">
-                    {[1, 2, 3, 4, 5, 6].map((reg) => (
+                    {[0, 1, 2, 3, 4, 5, 6].map((reg) => (
                       <button
                         key={reg}
                         onClick={() => setSdPaintRegion(reg)}
@@ -2312,7 +2316,7 @@ function Index() {
                         }`}
                       >
                         <span className={`inline-block h-3 w-3 rounded-sm ${REGION_COLORS[reg].chip}`} />
-                        Region {reg}
+                        {reg === 0 ? "Regionless" : `Region ${reg}`}
                       </button>
                     ))}
                   </div>
@@ -2360,7 +2364,7 @@ function Index() {
                   <div className="space-y-2">
                     {usedRegionsArr.map((reg) => {
                       const col = REGION_COLORS[reg];
-                      const def = sdRegionDefs[reg] || { func: "Sum" as SheetdokuFunc, target: "" };
+                      const def = sdRegionDefs[reg] || { func: "SUM" as SheetdokuFunc, target: "" };
                       return (
                         <div key={reg} className="flex flex-wrap items-center gap-2 text-sm">
                           <span className={`inline-block h-3 w-3 rounded-sm ${col?.chip || "bg-muted"}`} />
@@ -2374,16 +2378,17 @@ function Index() {
                             }}
                             className="rounded border bg-background px-2 py-1"
                           >
-                            <option value="Max">Max</option>
-                            <option value="Min">Min</option>
-                            <option value="Sum">Sum</option>
-                            <option value="Range">Range</option>
+                            <option value="MAX">MAX</option>
+                            <option value="MIN">MIN</option>
+                            <option value="SUM">SUM</option>
+                            <option value="PROD">PROD</option>
+                            <option value="RANGE">RANGE</option>
                           </select>
                           <Input
                             value={def.target}
                             onChange={(e) => {
                               const v = e.target.value.replace(/[^0-9]/g, "");
-                              setSdRegionDefs((prev) => ({ ...prev, [reg]: { ...(prev[reg] || { func: "Sum" as SheetdokuFunc }), target: v } }));
+                              setSdRegionDefs((prev) => ({ ...prev, [reg]: { ...(prev[reg] || { func: "SUM" as SheetdokuFunc }), target: v } }));
                               setSdResults(null);
                             }}
                             className="h-8 w-20 font-mono"
@@ -2396,7 +2401,7 @@ function Index() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     onClick={() => {
-                      setSdRegions(Array.from({ length: N }, () => Array(N).fill(1)));
+                      setSdRegions(Array.from({ length: N }, () => Array(N).fill(0)));
                       setSdInitial(Array.from({ length: N }, () => Array(N).fill("")));
                       setSdResults(null);
                     }}
@@ -2963,6 +2968,7 @@ function Index() {
               {sdResults.slice(pageSd * 20, pageSd * 20 + 20).map((sol, idx) => {
                 const i = pageSd * 20 + idx;
                 const REGION_COLORS: Record<number, { bg: string; border: string }> = {
+                  0: { bg: "bg-gray-400/20",    border: "border-gray-400" },
                   1: { bg: "bg-red-500/20",     border: "border-red-500" },
                   2: { bg: "bg-blue-500/20",    border: "border-blue-500" },
                   3: { bg: "bg-emerald-500/20", border: "border-emerald-500" },
