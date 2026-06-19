@@ -346,6 +346,7 @@ function Index() {
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) usedRegions.add(sdRegions[r][c]);
     const defs: Record<number, SheetdokuRegionDef> = {};
     for (const reg of usedRegions) {
+      if (reg === 0) continue; // regionless has no constraint
       const d = sdRegionDefs[reg];
       if (!d) { setError(`Region ${reg}: no function defined.`); return; }
       const t = parseInt(d.target, 10);
@@ -2290,6 +2291,7 @@ function Index() {
           (() => {
             const N = 5;
             const REGION_COLORS: Record<number, { bg: string; border: string; chip: string }> = {
+              0: { bg: "bg-gray-400/20",    border: "border-gray-400",    chip: "bg-gray-400" },
               1: { bg: "bg-red-500/20",     border: "border-red-500",     chip: "bg-red-500" },
               2: { bg: "bg-blue-500/20",    border: "border-blue-500",    chip: "bg-blue-500" },
               3: { bg: "bg-emerald-500/20", border: "border-emerald-500", chip: "bg-emerald-500" },
@@ -2297,13 +2299,13 @@ function Index() {
               5: { bg: "bg-purple-500/20",  border: "border-purple-500",  chip: "bg-purple-500" },
               6: { bg: "bg-pink-500/20",    border: "border-pink-500",    chip: "bg-pink-500" },
             };
-            const usedRegionsArr = Array.from(new Set(sdRegions.flat())).sort((a, b) => a - b);
+            const usedRegionsArr = Array.from(new Set(sdRegions.flat())).filter((r) => r !== 0).sort((a, b) => a - b);
             return (
               <div className="space-y-4">
                 <div>
                   <div className="mb-2 text-sm font-medium">Paint region (click cells to assign)</div>
                   <div className="flex flex-wrap gap-2">
-                    {[1, 2, 3, 4, 5, 6].map((reg) => (
+                    {[0, 1, 2, 3, 4, 5, 6].map((reg) => (
                       <button
                         key={reg}
                         onClick={() => setSdPaintRegion(reg)}
@@ -2314,7 +2316,7 @@ function Index() {
                         }`}
                       >
                         <span className={`inline-block h-3 w-3 rounded-sm ${REGION_COLORS[reg].chip}`} />
-                        Region {reg}
+                        {reg === 0 ? "Regionless" : `Region ${reg}`}
                       </button>
                     ))}
                   </div>
