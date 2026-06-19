@@ -2284,7 +2284,137 @@ function Index() {
             </div>
           </div>
 
+        ) : mode === "sheetdoku" ? (
+          (() => {
+            const N = 5;
+            const REGION_COLORS: Record<number, { bg: string; border: string; chip: string }> = {
+              1: { bg: "bg-red-500/20",     border: "border-red-500",     chip: "bg-red-500" },
+              2: { bg: "bg-blue-500/20",    border: "border-blue-500",    chip: "bg-blue-500" },
+              3: { bg: "bg-emerald-500/20", border: "border-emerald-500", chip: "bg-emerald-500" },
+              4: { bg: "bg-amber-500/20",   border: "border-amber-500",   chip: "bg-amber-500" },
+              5: { bg: "bg-purple-500/20",  border: "border-purple-500",  chip: "bg-purple-500" },
+              6: { bg: "bg-pink-500/20",    border: "border-pink-500",    chip: "bg-pink-500" },
+            };
+            const usedRegionsArr = Array.from(new Set(sdRegions.flat())).sort((a, b) => a - b);
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-sm font-medium">Paint region (click cells to assign)</div>
+                  <div className="flex flex-wrap gap-2">
+                    {[1, 2, 3, 4, 5, 6].map((reg) => (
+                      <button
+                        key={reg}
+                        onClick={() => setSdPaintRegion(reg)}
+                        className={`flex items-center gap-2 rounded-md border-2 px-3 py-1.5 text-sm font-medium transition ${
+                          sdPaintRegion === reg
+                            ? `${REGION_COLORS[reg].border} ${REGION_COLORS[reg].bg}`
+                            : "border-border bg-muted hover:bg-accent"
+                        }`}
+                      >
+                        <span className={`inline-block h-3 w-3 rounded-sm ${REGION_COLORS[reg].chip}`} />
+                        Region {reg}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-2 text-sm font-medium">Grid (click to paint region, type 1–5 for a fixed value)</div>
+                  <div className="inline-block">
+                    {[0, 1, 2, 3, 4].map((r) => (
+                      <div key={r} className="mt-1.5 flex gap-1.5 first:mt-0">
+                        {[0, 1, 2, 3, 4].map((c) => {
+                          const reg = sdRegions[r][c];
+                          const col = REGION_COLORS[reg] || { bg: "bg-muted", border: "border-border", chip: "" };
+                          const val = sdInitial[r][c];
+                          return (
+                            <div
+                              key={c}
+                              onClick={() => {
+                                setSdRegions((prev) => prev.map((row, ri) => ri === r ? row.map((x, ci) => ci === c ? sdPaintRegion : x) : row));
+                                setSdResults(null);
+                              }}
+                              className={`relative flex h-14 w-14 cursor-pointer items-center justify-center rounded border-2 ${col.border} ${col.bg}`}
+                              aria-label={`Cell row ${r + 1} col ${c + 1}, region ${reg}`}
+                            >
+                              <span className="absolute left-1 top-0.5 text-[10px] font-semibold text-muted-foreground">{reg}</span>
+                              <input
+                                value={val}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => {
+                                  const cleaned = e.target.value.replace(/[^1-5]/g, "").slice(-1);
+                                  setSdInitial((prev) => prev.map((row, ri) => ri === r ? row.map((x, ci) => ci === c ? cleaned : x) : row));
+                                  setSdResults(null);
+                                }}
+                                className="h-9 w-9 rounded bg-transparent text-center font-mono text-lg font-bold outline-none focus:ring-2 focus:ring-ring"
+                                aria-label={`Value row ${r + 1} col ${c + 1}`}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-2 text-sm font-medium">Region functions</div>
+                  <div className="space-y-2">
+                    {usedRegionsArr.map((reg) => {
+                      const col = REGION_COLORS[reg];
+                      const def = sdRegionDefs[reg] || { func: "Sum" as SheetdokuFunc, target: "" };
+                      return (
+                        <div key={reg} className="flex flex-wrap items-center gap-2 text-sm">
+                          <span className={`inline-block h-3 w-3 rounded-sm ${col?.chip || "bg-muted"}`} />
+                          <span className="w-20">Region {reg}</span>
+                          <select
+                            value={def.func}
+                            onChange={(e) => {
+                              const f = e.target.value as SheetdokuFunc;
+                              setSdRegionDefs((prev) => ({ ...prev, [reg]: { ...(prev[reg] || { target: "" }), func: f } }));
+                              setSdResults(null);
+                            }}
+                            className="rounded border bg-background px-2 py-1"
+                          >
+                            <option value="Max">Max</option>
+                            <option value="Min">Min</option>
+                            <option value="Sum">Sum</option>
+                            <option value="Range">Range</option>
+                          </select>
+                          <Input
+                            value={def.target}
+                            onChange={(e) => {
+                              const v = e.target.value.replace(/[^0-9]/g, "");
+                              setSdRegionDefs((prev) => ({ ...prev, [reg]: { ...(prev[reg] || { func: "Sum" as SheetdokuFunc }), target: v } }));
+                              setSdResults(null);
+                            }}
+                            className="h-8 w-20 font-mono"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    onClick={() => {
+                      setSdRegions(Array.from({ length: N }, () => Array(N).fill(1)));
+                      setSdInitial(Array.from({ length: N }, () => Array(N).fill("")));
+                      setSdResults(null);
+                    }}
+                    variant="outline"
+                    size="lg"
+                  >
+                    Clear all
+                  </Button>
+                  <Button onClick={solveSheetdoku} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+              </div>
+            );
+          })()
+
         ) : mode === "wordiply" ? (
+
           <div className="space-y-3">
             <div>
               <label className="mb-1 block text-sm font-medium">Substring</label>
