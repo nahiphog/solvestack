@@ -2193,7 +2193,12 @@ function Index() {
               </h2>
               <button
                 onClick={() => {
-                  const items = paths.map((p, i) => {
+                  const hasSelection = selectedPaths.size > 0;
+                  const indices = hasSelection
+                    ? [...selectedPaths].sort((a, b) => a - b)
+                    : paths.map((_, i) => i);
+                  const items = indices.map((i) => {
+                    const p = paths[i];
                     if (mode === "pivots") {
                       const formatted = p.map((w, j) => {
                         if (j === 0) return w;
@@ -2206,18 +2211,26 @@ function Index() {
                   copyText(`${items}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-                aria-label="Copy all paths"
+                aria-label={selectedPaths.size > 0 ? "Copy selected paths" : "Copy all paths"}
               >
-                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> {selectedPaths.size > 0 ? "Copy" : "Copy all"}</>)}
               </button>
             </div>
             <ol className="space-y-3">
               {paths.slice(pagePaths * 50, pagePaths * 50 + 50).map((path, idx) => {
                 const i = pagePaths * 50 + idx;
+                const isSelected = selectedPaths.has(i);
                 return (
                 <li
                   key={i}
-                  className="flex items-center rounded-lg border bg-card p-4 font-mono text-card-foreground"
+                  onClick={() => {
+                    setSelectedPaths((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(i)) next.delete(i); else next.add(i);
+                      return next;
+                    });
+                  }}
+                  className={`flex cursor-pointer items-center rounded-lg border-2 bg-card p-4 font-mono text-card-foreground transition ${isSelected ? "border-yellow-500" : "border-border"}`}
                 >
                   <div className="flex-1">
                     <span className="mr-3 text-xs text-muted-foreground">#{i + 1}</span>
