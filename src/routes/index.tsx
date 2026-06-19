@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { dodekuSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   wordpeaks: { start: "PEDAL", goal: "" },
   flippingletters: { start: "", goal: "" },
   worwordle: { start: "", goal: "" },
+  sheetdoku: { start: "", goal: "" },
 
 };
 
@@ -204,6 +205,31 @@ function Index() {
   const [dodekuColSums, setDodekuColSums] = useState<string[]>(["8", "", "21", "32"]);
   const [dodekuTiles, setDodekuTiles] = useState<string>("2,3,5,6,7,8,9,10,12");
   const [dodekuResult, setDodekuResult] = useState<DodekuCell[][] | null>(null);
+  const [sdRegions, setSdRegions] = useState<number[][]>([
+    [1,1,2,2,3],
+    [1,1,2,2,3],
+    [1,1,2,4,4],
+    [1,5,5,4,4],
+    [5,5,5,6,6],
+  ]);
+  const [sdInitial, setSdInitial] = useState<string[][]>([
+    ["","","","1",""],
+    ["","","","",""],
+    ["","","","","2"],
+    ["","3","","",""],
+    ["","","","",""],
+  ]);
+  const [sdRegionDefs, setSdRegionDefs] = useState<Record<number, { func: SheetdokuFunc; target: string }>>({
+    1: { func: "Max", target: "5" },
+    2: { func: "Sum", target: "10" },
+    3: { func: "Min", target: "4" },
+    4: { func: "Min", target: "1" },
+    5: { func: "Range", target: "4" },
+    6: { func: "Sum", target: "5" },
+  });
+  const [sdPaintRegion, setSdPaintRegion] = useState<number>(1);
+  const [sdResults, setSdResults] = useState<number[][][] | null>(null);
+  const [pageSd, setPageSd] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -232,6 +258,7 @@ function Index() {
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
   useEffect(() => { setPageFl(0); }, [flResults]);
   useEffect(() => { setPageWor(0); }, [worResults]);
+  useEffect(() => { setPageSd(0); }, [sdResults]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
@@ -259,6 +286,7 @@ function Index() {
 
     setMarblessResults(null);
     setDodekuResult(null);
+    setSdResults(null);
     setError(null);
     const d = DEFAULTS[String(m)];
     setStart(d.start);
@@ -301,6 +329,57 @@ function Index() {
       setSolving(false);
     }, 0);
   };
+
+  const solveSheetdoku = () => {
+    setError(null);
+    setSdResults(null);
+    const N = 5;
+    const initial: number[][] = sdInitial.map((row) =>
+      row.map((v) => {
+        const s = v.trim();
+        if (!s) return 0;
+        const n = parseInt(s, 10);
+        return Number.isFinite(n) && n >= 1 && n <= N ? n : 0;
+      }),
+    );
+    const usedRegions = new Set<number>();
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) usedRegions.add(sdRegions[r][c]);
+    const defs: Record<number, SheetdokuRegionDef> = {};
+    for (const reg of usedRegions) {
+      const d = sdRegionDefs[reg];
+      if (!d) { setError(`Region ${reg}: no function defined.`); return; }
+      const t = parseInt(d.target, 10);
+      if (!Number.isFinite(t)) { setError(`Region ${reg}: invalid target value.`); return; }
+      defs[reg] = { func: d.func, target: t };
+    }
+    // Validate fixed values vs row/col uniqueness
+    for (let r = 0; r < N; r++) {
+      const seen = new Set<number>();
+      for (let c = 0; c < N; c++) {
+        const v = initial[r][c];
+        if (v === 0) continue;
+        if (seen.has(v)) { setError(`Row ${r + 1}: duplicate fixed value ${v}.`); return; }
+        seen.add(v);
+      }
+    }
+    for (let c = 0; c < N; c++) {
+      const seen = new Set<number>();
+      for (let r = 0; r < N; r++) {
+        const v = initial[r][c];
+        if (v === 0) continue;
+        if (seen.has(v)) { setError(`Column ${c + 1}: duplicate fixed value ${v}.`); return; }
+        seen.add(v);
+      }
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const res = sheetdokuSolve(N, sdRegions, initial, defs);
+      if (res.length === 0) setError("No solutions found.");
+      else setSdResults(res);
+      setSolving(false);
+    }, 0);
+  };
+
 
   const solveSpellingBee = async () => {
     setError(null);
@@ -781,7 +860,7 @@ function Index() {
 
         <div className="mb-3 flex w-fit rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
-            const isMath = mode === "dodeku";
+            const isMath = mode === "dodeku" || mode === "sheetdoku";
             const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle";
             const inLadder = !isMath && !inSearch;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : inLadder;
@@ -945,6 +1024,34 @@ function Index() {
             </button>
           </div>
         )}
+
+        {(mode === "dodeku" || mode === "sheetdoku") && (
+          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
+            <button
+              onClick={() => switchMode("dodeku")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "dodeku"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Dodeku
+            </button>
+            <button
+              onClick={() => switchMode("sheetdoku")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "sheetdoku"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Sheetdoku
+            </button>
+          </div>
+        )}
+
+
+
 
 
 
@@ -1237,6 +1344,19 @@ function Index() {
           <p className="mb-4 text-sm text-muted-foreground">
             Fill empty cells with the available tiles so that each given row and column sum matches. Use "X" for blocked cells, leave empties blank, or enter a fixed number.
           </p>
+        )}
+        {mode === "sheetdoku" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Fill a 5×5 Latin square (each row and column contains 1–5 exactly once) partitioned into regions.</p>
+            <p>For each region, set its function and target value:</p>
+            <ul className="list-disc pl-5">
+              <li><b>Max</b>: the largest value in the region equals the target.</li>
+              <li><b>Min</b>: the smallest value in the region equals the target.</li>
+              <li><b>Sum</b>: the values in the region sum to the target.</li>
+              <li><b>Range</b>: max − min in the region equals the target.</li>
+            </ul>
+            <p>Pick a region color, then click cells to assign them. Enter any pre-filled cell values inside the grid.</p>
+          </div>
         )}
         {mode === "wordpeaks" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
@@ -2164,7 +2284,137 @@ function Index() {
             </div>
           </div>
 
+        ) : mode === "sheetdoku" ? (
+          (() => {
+            const N = 5;
+            const REGION_COLORS: Record<number, { bg: string; border: string; chip: string }> = {
+              1: { bg: "bg-red-500/20",     border: "border-red-500",     chip: "bg-red-500" },
+              2: { bg: "bg-blue-500/20",    border: "border-blue-500",    chip: "bg-blue-500" },
+              3: { bg: "bg-emerald-500/20", border: "border-emerald-500", chip: "bg-emerald-500" },
+              4: { bg: "bg-amber-500/20",   border: "border-amber-500",   chip: "bg-amber-500" },
+              5: { bg: "bg-purple-500/20",  border: "border-purple-500",  chip: "bg-purple-500" },
+              6: { bg: "bg-pink-500/20",    border: "border-pink-500",    chip: "bg-pink-500" },
+            };
+            const usedRegionsArr = Array.from(new Set(sdRegions.flat())).sort((a, b) => a - b);
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-sm font-medium">Paint region (click cells to assign)</div>
+                  <div className="flex flex-wrap gap-2">
+                    {[1, 2, 3, 4, 5, 6].map((reg) => (
+                      <button
+                        key={reg}
+                        onClick={() => setSdPaintRegion(reg)}
+                        className={`flex items-center gap-2 rounded-md border-2 px-3 py-1.5 text-sm font-medium transition ${
+                          sdPaintRegion === reg
+                            ? `${REGION_COLORS[reg].border} ${REGION_COLORS[reg].bg}`
+                            : "border-border bg-muted hover:bg-accent"
+                        }`}
+                      >
+                        <span className={`inline-block h-3 w-3 rounded-sm ${REGION_COLORS[reg].chip}`} />
+                        Region {reg}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-2 text-sm font-medium">Grid (click to paint region, type 1–5 for a fixed value)</div>
+                  <div className="inline-block">
+                    {[0, 1, 2, 3, 4].map((r) => (
+                      <div key={r} className="mt-1.5 flex gap-1.5 first:mt-0">
+                        {[0, 1, 2, 3, 4].map((c) => {
+                          const reg = sdRegions[r][c];
+                          const col = REGION_COLORS[reg] || { bg: "bg-muted", border: "border-border", chip: "" };
+                          const val = sdInitial[r][c];
+                          return (
+                            <div
+                              key={c}
+                              onClick={() => {
+                                setSdRegions((prev) => prev.map((row, ri) => ri === r ? row.map((x, ci) => ci === c ? sdPaintRegion : x) : row));
+                                setSdResults(null);
+                              }}
+                              className={`relative flex h-14 w-14 cursor-pointer items-center justify-center rounded border-2 ${col.border} ${col.bg}`}
+                              aria-label={`Cell row ${r + 1} col ${c + 1}, region ${reg}`}
+                            >
+                              <span className="absolute left-1 top-0.5 text-[10px] font-semibold text-muted-foreground">{reg}</span>
+                              <input
+                                value={val}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => {
+                                  const cleaned = e.target.value.replace(/[^1-5]/g, "").slice(-1);
+                                  setSdInitial((prev) => prev.map((row, ri) => ri === r ? row.map((x, ci) => ci === c ? cleaned : x) : row));
+                                  setSdResults(null);
+                                }}
+                                className="h-9 w-9 rounded bg-transparent text-center font-mono text-lg font-bold outline-none focus:ring-2 focus:ring-ring"
+                                aria-label={`Value row ${r + 1} col ${c + 1}`}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-2 text-sm font-medium">Region functions</div>
+                  <div className="space-y-2">
+                    {usedRegionsArr.map((reg) => {
+                      const col = REGION_COLORS[reg];
+                      const def = sdRegionDefs[reg] || { func: "Sum" as SheetdokuFunc, target: "" };
+                      return (
+                        <div key={reg} className="flex flex-wrap items-center gap-2 text-sm">
+                          <span className={`inline-block h-3 w-3 rounded-sm ${col?.chip || "bg-muted"}`} />
+                          <span className="w-20">Region {reg}</span>
+                          <select
+                            value={def.func}
+                            onChange={(e) => {
+                              const f = e.target.value as SheetdokuFunc;
+                              setSdRegionDefs((prev) => ({ ...prev, [reg]: { ...(prev[reg] || { target: "" }), func: f } }));
+                              setSdResults(null);
+                            }}
+                            className="rounded border bg-background px-2 py-1"
+                          >
+                            <option value="Max">Max</option>
+                            <option value="Min">Min</option>
+                            <option value="Sum">Sum</option>
+                            <option value="Range">Range</option>
+                          </select>
+                          <Input
+                            value={def.target}
+                            onChange={(e) => {
+                              const v = e.target.value.replace(/[^0-9]/g, "");
+                              setSdRegionDefs((prev) => ({ ...prev, [reg]: { ...(prev[reg] || { func: "Sum" as SheetdokuFunc }), target: v } }));
+                              setSdResults(null);
+                            }}
+                            className="h-8 w-20 font-mono"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    onClick={() => {
+                      setSdRegions(Array.from({ length: N }, () => Array(N).fill(1)));
+                      setSdInitial(Array.from({ length: N }, () => Array(N).fill("")));
+                      setSdResults(null);
+                    }}
+                    variant="outline"
+                    size="lg"
+                  >
+                    Clear all
+                  </Button>
+                  <Button onClick={solveSheetdoku} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+              </div>
+            );
+          })()
+
         ) : mode === "wordiply" ? (
+
           <div className="space-y-3">
             <div>
               <label className="mb-1 block text-sm font-medium">Substring</label>
@@ -2689,6 +2939,64 @@ function Index() {
             </div>
           </section>
         )}
+
+        {sdResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {sdResults.length}{sdResults.length === 1000 ? "+" : ""} {sdResults.length === 1 ? "solution" : "solutions"}
+              </h2>
+              <button
+                onClick={() => {
+                  const items = sdResults
+                    .map((sol, i) => `#${i + 1}\n${sol.map((row) => row.join(" ")).join("\n")}`)
+                    .join("\n\n");
+                  copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all solutions"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {sdResults.slice(pageSd * 20, pageSd * 20 + 20).map((sol, idx) => {
+                const i = pageSd * 20 + idx;
+                const REGION_COLORS: Record<number, { bg: string; border: string }> = {
+                  1: { bg: "bg-red-500/20",     border: "border-red-500" },
+                  2: { bg: "bg-blue-500/20",    border: "border-blue-500" },
+                  3: { bg: "bg-emerald-500/20", border: "border-emerald-500" },
+                  4: { bg: "bg-amber-500/20",   border: "border-amber-500" },
+                  5: { bg: "bg-purple-500/20",  border: "border-purple-500" },
+                  6: { bg: "bg-pink-500/20",    border: "border-pink-500" },
+                };
+                return (
+                  <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
+                    <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
+                    <div className="inline-block">
+                      {sol.map((row, r) => (
+                        <div key={r} className="mt-1 flex gap-1 first:mt-0">
+                          {row.map((cell, c) => {
+                            const reg = sdRegions[r][c];
+                            const col = REGION_COLORS[reg] || { bg: "bg-muted", border: "border-border" };
+                            return (
+                              <div key={c} className={`flex h-10 w-10 items-center justify-center rounded border-2 ${col.border} ${col.bg} font-mono text-base font-bold`}>
+                                {cell}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+            <Paginator page={pageSd} setPage={setPageSd} total={sdResults.length} perPage={20} />
+          </section>
+        )}
+
+
 
 
 
