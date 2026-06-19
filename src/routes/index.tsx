@@ -68,6 +68,16 @@ const WOR_STARTING_PAIRS: [string, string][] = [
   ["GUESTACK", "HYDROBIN"],
 ];
 
+const FL_POTENTIAL_WORDS: string[] = [
+  "TABLE","CHAIR","PHONE","BREAD","LIGHT","PLATE","KNIFE","CLOUD","STONE","PLANT",
+  "EARTH","OCEAN","BEACH","FIELD","WRITE","DANCE","SPEAK","LAUGH","DRINK","DRIVE",
+  "BUILD","TEACH","LEARN","WATCH","ANGRY","QUIET","TIRED","PROUD","BRAVE","NURSE",
+  "PILOT","JUDGE","CHILD","ADULT","GUEST","BLACK","WHITE","BROWN","IVORY","PEACH",
+  "MANGO","LEMON","SUGAR","HONEY","MONEY","HOUSE","WATER","MUSIC","DREAM","STORY",
+  "MOVIE","NOTES","TRAIN","PLANE","HOTEL","TOWER","ROADS","WORLD","HEART","BRAIN",
+  "POWER","SOUND","VOICE","SMILE","FAITH",
+];
+
 
 function Paginator({ page, setPage, total, perPage = 50 }: { page: number; setPage: (n: number) => void; total: number; perPage?: number }) {
   const pages = Math.ceil(total / perPage);
