@@ -52,6 +52,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   wordpeaks: { start: "PEDAL", goal: "" },
   flippingletters: { start: "", goal: "" },
   worwordle: { start: "", goal: "" },
+  sheetdoku: { start: "", goal: "" },
 
 };
 
