@@ -1430,7 +1430,10 @@ function Index() {
                         onChange={(e) => {
                           const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
                           if (!v) { setFlLetter(gi, ti, ""); return; }
-                          setFlLetter(gi, ti, v.slice(-1));
+                          const bankSet = new Set(flLetters.map((l) => (l || "").toUpperCase()).filter(Boolean));
+                          const ch = v.slice(-1);
+                          if (!bankSet.has(ch)) return;
+                          setFlLetter(gi, ti, ch);
                           if (ti < 4) focusFlTile(gi, ti + 1);
                         }}
                         onKeyDown={(e) => {
