@@ -2968,6 +2968,7 @@ function Index() {
               {sdResults.slice(pageSd * 20, pageSd * 20 + 20).map((sol, idx) => {
                 const i = pageSd * 20 + idx;
                 const REGION_COLORS: Record<number, { bg: string; border: string }> = {
+                  0: { bg: "bg-gray-400/20",    border: "border-gray-400" },
                   1: { bg: "bg-red-500/20",     border: "border-red-500" },
                   2: { bg: "bg-blue-500/20",    border: "border-blue-500" },
                   3: { bg: "bg-emerald-500/20", border: "border-emerald-500" },
