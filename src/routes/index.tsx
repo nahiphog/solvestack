@@ -205,6 +205,31 @@ function Index() {
   const [dodekuColSums, setDodekuColSums] = useState<string[]>(["8", "", "21", "32"]);
   const [dodekuTiles, setDodekuTiles] = useState<string>("2,3,5,6,7,8,9,10,12");
   const [dodekuResult, setDodekuResult] = useState<DodekuCell[][] | null>(null);
+  const [sdRegions, setSdRegions] = useState<number[][]>([
+    [1,1,2,2,3],
+    [1,1,2,2,3],
+    [1,1,2,4,4],
+    [1,5,5,4,4],
+    [5,5,5,6,6],
+  ]);
+  const [sdInitial, setSdInitial] = useState<string[][]>([
+    ["","","","1",""],
+    ["","","","",""],
+    ["","","","","2"],
+    ["","3","","",""],
+    ["","","","",""],
+  ]);
+  const [sdRegionDefs, setSdRegionDefs] = useState<Record<number, { func: SheetdokuFunc; target: string }>>({
+    1: { func: "Max", target: "5" },
+    2: { func: "Sum", target: "10" },
+    3: { func: "Min", target: "4" },
+    4: { func: "Min", target: "1" },
+    5: { func: "Range", target: "4" },
+    6: { func: "Sum", target: "5" },
+  });
+  const [sdPaintRegion, setSdPaintRegion] = useState<number>(1);
+  const [sdResults, setSdResults] = useState<number[][][] | null>(null);
+  const [pageSd, setPageSd] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
