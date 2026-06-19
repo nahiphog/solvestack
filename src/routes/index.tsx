@@ -1061,7 +1061,7 @@ function Index() {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowWordleVariations((v) => !v)}
-                className="w-fit gap-1"
+                className="w-48 justify-center gap-1"
               >
                 {showWordleVariations ? (
                   <>Hide table <ChevronUp className="h-4 w-4" /></>
