@@ -301,7 +301,7 @@ function Index() {
         return;
       }
       if (row.greens + row.yellows > 5) {
-        setError(`Row ${i + 1}: GREEN + YELLOW cannot exceed 5.`);
+        setError(`Row ${i + 1}: correct + wrong cannot exceed 5.`);
         return;
       }
     }
