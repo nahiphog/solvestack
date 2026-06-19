@@ -1025,6 +1025,34 @@ function Index() {
           </div>
         )}
 
+        {(mode === "dodeku" || mode === "sheetdoku") && (
+          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
+            <button
+              onClick={() => switchMode("dodeku")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "dodeku"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Dodeku
+            </button>
+            <button
+              onClick={() => switchMode("sheetdoku")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "sheetdoku"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Sheetdoku
+            </button>
+          </div>
+        )}
+
+
+
+
 
 
 
