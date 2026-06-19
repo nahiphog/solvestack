@@ -220,14 +220,14 @@ function Index() {
     ["","","","",""],
   ]);
   const [sdRegionDefs, setSdRegionDefs] = useState<Record<number, { func: SheetdokuFunc; target: string }>>({
-    1: { func: "Max", target: "5" },
-    2: { func: "Sum", target: "10" },
-    3: { func: "Min", target: "4" },
-    4: { func: "Min", target: "1" },
-    5: { func: "Range", target: "4" },
-    6: { func: "Sum", target: "5" },
+    1: { func: "MAX", target: "5" },
+    2: { func: "SUM", target: "10" },
+    3: { func: "MIN", target: "4" },
+    4: { func: "MIN", target: "1" },
+    5: { func: "RANGE", target: "4" },
+    6: { func: "SUM", target: "5" },
   });
-  const [sdPaintRegion, setSdPaintRegion] = useState<number>(1);
+  const [sdPaintRegion, setSdPaintRegion] = useState<number>(0);
   const [sdResults, setSdResults] = useState<number[][][] | null>(null);
   const [pageSd, setPageSd] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -1347,13 +1347,15 @@ function Index() {
         )}
         {mode === "sheetdoku" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p><a href="https://www.sheetdoku.com/" target="_blank" rel="noreferrer" className="underline">Sheetdoku</a></p>
             <p>Fill a 5×5 Latin square (each row and column contains 1–5 exactly once) partitioned into regions.</p>
             <p>For each region, set its function and target value:</p>
             <ul className="list-disc pl-5">
-              <li><b>Max</b>: the largest value in the region equals the target.</li>
-              <li><b>Min</b>: the smallest value in the region equals the target.</li>
-              <li><b>Sum</b>: the values in the region sum to the target.</li>
-              <li><b>Range</b>: max − min in the region equals the target.</li>
+              <li><b>MAX</b>: the largest value in the region equals the target.</li>
+              <li><b>MIN</b>: the smallest value in the region equals the target.</li>
+              <li><b>SUM</b>: the values in the region sum to the target.</li>
+              <li><b>PROD</b>: the values in the region multiply to the target.</li>
+              <li><b>RANGE</b>: max − min in the region equals the target.</li>
             </ul>
             <p>Pick a region color, then click cells to assign them. Enter any pre-filled cell values inside the grid.</p>
           </div>
