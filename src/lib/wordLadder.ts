@@ -42,7 +42,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   sheetdoku: 0,
 };
 
-export type SheetdokuFunc = "Max" | "Min" | "Sum" | "Range";
+export type SheetdokuFunc = "MAX" | "MIN" | "SUM" | "PROD" | "RANGE";
 export interface SheetdokuRegionDef { func: SheetdokuFunc; target: number; }
 
 export function sheetdokuSolve(
@@ -70,18 +70,22 @@ export function sheetdokuSolve(
     for (const [r, c] of cells) if (grid[r][c] !== 0) vals.push(grid[r][c]);
     if (vals.length === 0) return true;
     const full = vals.length === cells.length;
-    if (def.func === "Max") {
+    if (def.func === "MAX") {
       const m = Math.max(...vals);
       if (m > def.target) return false;
       if (full && m !== def.target) return false;
-    } else if (def.func === "Min") {
+    } else if (def.func === "MIN") {
       const m = Math.min(...vals);
       if (m < def.target) return false;
       if (full && m !== def.target) return false;
-    } else if (def.func === "Sum") {
+    } else if (def.func === "SUM") {
       const s = vals.reduce((a, b) => a + b, 0);
       if (s > def.target) return false;
       if (full && s !== def.target) return false;
+    } else if (def.func === "PROD") {
+      const p = vals.reduce((a, b) => a * b, 1);
+      if (p > def.target) return false;
+      if (full && p !== def.target) return false;
     } else {
       const rng = Math.max(...vals) - Math.min(...vals);
       if (rng > def.target) return false;
