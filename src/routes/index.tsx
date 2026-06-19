@@ -145,7 +145,13 @@ function Index() {
     if (count === 0) {
       setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else {
-      const pool = [...FL_POTENTIAL_WORDS];
+      const bankSet = new Set(flLetters.map((l) => (l || "").toUpperCase()).filter(Boolean));
+      const eligible = FL_POTENTIAL_WORDS.filter((w) => {
+        const upper = w.toUpperCase();
+        for (const ch of upper) if (!bankSet.has(ch)) return false;
+        return true;
+      });
+      const pool = [...eligible];
       for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -156,6 +162,7 @@ function Index() {
         if (!seen.has(w)) { seen.add(w); picks.push(w); }
         if (picks.length >= count) break;
       }
+      while (picks.length < count) picks.push("");
       setFlGuesses(picks.map((w) => ({ word: w, pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] })));
     }
     setFlResults(null);
