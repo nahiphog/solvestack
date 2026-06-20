@@ -1168,12 +1168,12 @@ function Index() {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowWordleVariations((v) => !v)}
-                className="w-48 justify-center gap-1"
+                className="w-48 justify-between gap-1"
               >
                 {showWordleVariations ? (
-                  <>Hide table <ChevronUp className="h-4 w-4" /></>
+                  <><span>Hide table</span> <ChevronUp className="h-4 w-4" /></>
                 ) : (
-                  <>See more variations <ChevronDown className="h-4 w-4" /></>
+                  <><span>See more variations</span> <ChevronDown className="h-4 w-4" /></>
                 )}
               </Button>
               {showWordleVariations && (
