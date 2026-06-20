@@ -330,6 +330,11 @@ function Index() {
     setDodekuResult(null);
     setSdResults(null);
     setError(null);
+    if (m === "fibble") {
+      setWordleGuesses([{ word: "CRANE", pattern: ["GREEN", "GREY", "YELLOW", "GREY", "GREY"] }]);
+    } else if (m === "wordle") {
+      setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    }
     const d = DEFAULTS[String(m)];
     setStart(d.start);
     setGoal(d.goal);
