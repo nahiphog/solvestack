@@ -42,7 +42,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   sheetdoku: 0,
 };
 
-export type SheetdokuFunc = "MAX" | "MIN" | "SUM" | "PROD" | "RANGE";
+export type SheetdokuFunc = "MAX" | "MIN" | "SUM" | "AVG" | "PROD" | "RANGE";
 export interface SheetdokuRegionDef { func: SheetdokuFunc; target: number; }
 
 export function sheetdokuSolve(
