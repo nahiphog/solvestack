@@ -3050,7 +3050,7 @@ function Index() {
                 );
               })}
             </ol>
-            <Paginator page={pageDodeku} setPage={setPageDodeku} total={dodekuResult.length} perPage={20} />
+            <Paginator page={pageDodeku} setPage={setPageDodeku} total={dodekuResult.length} perPage={50} />
           </section>
         )}
 
