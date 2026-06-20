@@ -2369,9 +2369,10 @@ function Index() {
                             }}
                             className="rounded border bg-background px-2 py-1"
                           >
-                            <option value="MAX">MAX</option>
-                            <option value="MIN">MIN</option>
                             <option value="SUM">SUM</option>
+                            <option value="MIN">MIN</option>
+                            <option value="MAX">MAX</option>
+                            <option value="AVG">AVG</option>
                             <option value="PROD">PROD</option>
                             <option value="RANGE">RANGE</option>
                           </select>
