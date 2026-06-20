@@ -1346,16 +1346,9 @@ function Index() {
         )}
         {mode === "sheetdoku" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
-            <p><a href="https://www.sheetdoku.com/" target="_blank" rel="noreferrer" className="underline">Sheetdoku</a></p>
+            <p><a href="https://www.sheetdoku.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Sheetdoku</a></p>
             <p>Fill a 5×5 Latin square (each row and column contains 1–5 exactly once) partitioned into regions.</p>
-            <p>For each region, set its function and target value:</p>
-            <ul className="list-disc pl-5">
-              <li><b>MAX</b>: the largest value in the region equals the target.</li>
-              <li><b>MIN</b>: the smallest value in the region equals the target.</li>
-              <li><b>SUM</b>: the values in the region sum to the target.</li>
-              <li><b>PROD</b>: the values in the region multiply to the target.</li>
-              <li><b>RANGE</b>: max − min in the region equals the target.</li>
-            </ul>
+            <p>For each region, set its function and target value.</p>
             <p>Pick a region color, then click cells to assign them. Enter any pre-filled cell values inside the grid.</p>
           </div>
         )}
