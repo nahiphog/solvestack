@@ -1307,6 +1307,9 @@ function Index() {
           {mode === "worwordle" && (
             <a href="https://worwordle.netlify.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Worwordle</a>
           )}
+          {mode === "fibble" && (
+            <a href="https://fibble.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Fibble</a>
+          )}
         </div>
 
 
