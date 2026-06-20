@@ -44,6 +44,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   pivots: { start: "421356", goal: "123456" },
   wordiply: { start: "TOWER", goal: "" },
   wordle: { start: "TOWER", goal: "" },
+  fibble: { start: "", goal: "" },
   spellingbee: { start: "T", goal: "OWERAB" },
   craftwords: { start: "BREAK", goal: "EVEN" },
   mastermind: { start: "WATER", goal: "" },
