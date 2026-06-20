@@ -568,7 +568,7 @@ function Index() {
     }
     setSolving(true);
     const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
-    const result = await wordleSolve(normalized);
+    const result = mode === "fibble" ? await fibbleSolve(normalized) : await wordleSolve(normalized);
     if (result.length === 0) setError("No words match these constraints.");
     else setWordleResults(result);
     setSolving(false);
