@@ -1150,9 +1150,7 @@ function Index() {
             <a href="https://wordsplice.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Splice</a>
           )}
           
-          {mode === "splice" && (
-            <a href="https://wordsplice.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Splice</a>
-          )}
+
           
           {mode === "weaverx" && (
             <a href="https://wordwormdormdork.com/weaver-x/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver X</a>
@@ -1170,12 +1168,12 @@ function Index() {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowWordleVariations((v) => !v)}
-                className="w-48 justify-center gap-1"
+                className="w-48 justify-between gap-1"
               >
                 {showWordleVariations ? (
-                  <>Hide table <ChevronUp className="h-4 w-4" /></>
+                  <><span>Hide table</span> <ChevronUp className="h-4 w-4" /></>
                 ) : (
-                  <>See more variations <ChevronDown className="h-4 w-4" /></>
+                  <><span>See more variations</span> <ChevronDown className="h-4 w-4" /></>
                 )}
               </Button>
               {showWordleVariations && (
@@ -1348,16 +1346,9 @@ function Index() {
         )}
         {mode === "sheetdoku" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
-            <p><a href="https://www.sheetdoku.com/" target="_blank" rel="noreferrer" className="underline">Sheetdoku</a></p>
+            <p><a href="https://www.sheetdoku.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Sheetdoku</a></p>
             <p>Fill a 5×5 Latin square (each row and column contains 1–5 exactly once) partitioned into regions.</p>
-            <p>For each region, set its function and target value:</p>
-            <ul className="list-disc pl-5">
-              <li><b>MAX</b>: the largest value in the region equals the target.</li>
-              <li><b>MIN</b>: the smallest value in the region equals the target.</li>
-              <li><b>SUM</b>: the values in the region sum to the target.</li>
-              <li><b>PROD</b>: the values in the region multiply to the target.</li>
-              <li><b>RANGE</b>: max − min in the region equals the target.</li>
-            </ul>
+            <p>For each region, set its function and target value.</p>
             <p>Pick a region color, then click cells to assign them. Enter any pre-filled cell values inside the grid.</p>
           </div>
         )}
@@ -1887,7 +1878,7 @@ function Index() {
                 };
                 const TILE_W = 72;
                 const TILE_H = 64;
-                const R = 100;
+                const R = 50;
                 // i: 0=top (0°), 1=upper-right (60°), 2=lower-right (120°),
                 // 3=middle, 4=bottom (180°), 5=lower-left (240°), 6=upper-left (300°)
                 const bearingByIndex: Record<number, number | null> = {
@@ -2378,9 +2369,10 @@ function Index() {
                             }}
                             className="rounded border bg-background px-2 py-1"
                           >
-                            <option value="MAX">MAX</option>
-                            <option value="MIN">MIN</option>
                             <option value="SUM">SUM</option>
+                            <option value="MIN">MIN</option>
+                            <option value="MAX">MAX</option>
+                            <option value="AVG">AVG</option>
                             <option value="PROD">PROD</option>
                             <option value="RANGE">RANGE</option>
                           </select>

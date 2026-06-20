@@ -42,7 +42,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   sheetdoku: 0,
 };
 
-export type SheetdokuFunc = "MAX" | "MIN" | "SUM" | "PROD" | "RANGE";
+export type SheetdokuFunc = "MAX" | "MIN" | "SUM" | "AVG" | "PROD" | "RANGE";
 export interface SheetdokuRegionDef { func: SheetdokuFunc; target: number; }
 
 export function sheetdokuSolve(
@@ -86,6 +86,11 @@ export function sheetdokuSolve(
       const p = vals.reduce((a, b) => a * b, 1);
       if (p > def.target) return false;
       if (full && p !== def.target) return false;
+    } else if (def.func === "AVG") {
+      if (full) {
+        const s = vals.reduce((a, b) => a + b, 0);
+        if (s !== def.target * cells.length) return false;
+      }
     } else {
       const rng = Math.max(...vals) - Math.min(...vals);
       if (rng > def.target) return false;
