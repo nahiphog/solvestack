@@ -1445,9 +1445,15 @@ function Index() {
           </div>
         )}
         {mode === "worwordle" && (
-          <p className="mb-4 text-sm text-muted-foreground">
-            Enter Wordle-style 8-letter guesses (each = two 5-letter words "smushed" together, sharing two overlapping letters). For example: (MICROUND = MICRO + ROUND) is a valid Worwordle input. Click each tile to cycle GREY → YELLOW → GREEN. Get all valid 8-letter Worwordle answers.
-          </p>
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Enter Wordle-style 8-letter guesses.</p>
+            <p>Each guess consists of two 5-letter words "smushed" together, sharing two overlapping letters. For example:</p>
+            <ul className="list-disc pl-5 space-y-0.5">
+              <li>MIC<span className="text-green-600">RO</span>UND = MIC<span className="text-green-600">RO</span> + <span className="text-green-600">RO</span>UND</li>
+              <li>ERA<span className="text-green-600">SE</span>RUM = ERA<span className="text-green-600">SE</span> + <span className="text-green-600">SE</span>RUM</li>
+              <li>ORG<span className="text-green-600">AN</span>GST = ORG<span className="text-green-600">AN</span> + <span className="text-green-600">AN</span>GST</li>
+            </ul>
+          </div>
         )}
         {mode === "worwordle" && (
           <div className="mb-4 flex items-center gap-2 text-sm">
@@ -1813,13 +1819,14 @@ function Index() {
 
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
-              <span>Optional input: Place</span>
+              <span>Optional input: {mode === "fibble" ? "Add" : "Place"}</span>
               <select
                 className="rounded border border-border bg-background px-2 py-1"
                 defaultValue="0"
                 onChange={(e) => {
                   const n = parseInt(e.target.value, 10);
                   if (n === 0) {
+                    if (mode === "fibble") return;
                     setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
                     setWordleResults(null);
                     return;
@@ -1827,7 +1834,12 @@ function Index() {
                   const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
                   if (!sheet || sheet.length === 0) return;
                   const row = sheet[Math.floor(Math.random() * sheet.length)];
-                  setWordleGuesses(row.slice(0, n).map((w) => ({ word: w.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] })));
+                  const newGuesses = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] }));
+                  if (mode === "fibble") {
+                    setWordleGuesses((prev) => [...prev, ...newGuesses]);
+                  } else {
+                    setWordleGuesses(newGuesses);
+                  }
                   setWordleResults(null);
                 }}
               >
@@ -3010,8 +3022,8 @@ function Index() {
               </button>
             </div>
             <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {dodekuResult.slice(pageDodeku * 20, pageDodeku * 20 + 20).map((sol, idx) => {
-                const i = pageDodeku * 20 + idx;
+              {dodekuResult.slice(pageDodeku * 50, pageDodeku * 50 + 50).map((sol, idx) => {
+                const i = pageDodeku * 50 + idx;
                 return (
                   <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
                     <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
