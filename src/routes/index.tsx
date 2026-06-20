@@ -979,7 +979,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "flippingletters" || mode === "worwordle") && (
+        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("wordle")}
@@ -990,6 +990,16 @@ function Index() {
               }`}
             >
               Original
+            </button>
+            <button
+              onClick={() => switchMode("fibble")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "fibble"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Fibble
             </button>
             <button
               onClick={() => switchMode("flippingletters")}
