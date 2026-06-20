@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { dodekuSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +44,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   pivots: { start: "421356", goal: "123456" },
   wordiply: { start: "TOWER", goal: "" },
   wordle: { start: "TOWER", goal: "" },
+  fibble: { start: "", goal: "" },
   spellingbee: { start: "T", goal: "OWERAB" },
   craftwords: { start: "BREAK", goal: "EVEN" },
   mastermind: { start: "WATER", goal: "" },
@@ -329,6 +330,11 @@ function Index() {
     setDodekuResult(null);
     setSdResults(null);
     setError(null);
+    if (m === "fibble") {
+      setWordleGuesses([{ word: "CRANE", pattern: ["GREEN", "GREY", "YELLOW", "GREY", "GREY"] }]);
+    } else if (m === "wordle") {
+      setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    }
     const d = DEFAULTS[String(m)];
     setStart(d.start);
     setGoal(d.goal);
@@ -562,7 +568,7 @@ function Index() {
     }
     setSolving(true);
     const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
-    const result = await wordleSolve(normalized);
+    const result = mode === "fibble" ? await fibbleSolve(normalized) : await wordleSolve(normalized);
     if (result.length === 0) setError("No words match these constraints.");
     else setWordleResults(result);
     setSolving(false);
@@ -904,7 +910,7 @@ function Index() {
         <div className="mb-3 flex w-fit rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku";
-            const inSearch = mode === "wordle" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle";
+            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle";
             const inLadder = !isMath && !inSearch;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : inLadder;
             return (
@@ -953,12 +959,12 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle") && (
+        {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle") && (
           <div className="mb-6 flex w-fit rounded-md border bg-muted p-1">
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
-                  ? mode === "wordle" || mode === "flippingletters" || mode === "worwordle"
+                  ? mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle"
                   : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind";
 
               return (
@@ -978,7 +984,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "flippingletters" || mode === "worwordle") && (
+        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle") && (
           <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("wordle")}
@@ -989,6 +995,16 @@ function Index() {
               }`}
             >
               Original
+            </button>
+            <button
+              onClick={() => switchMode("fibble")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "fibble"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Fibble
             </button>
             <button
               onClick={() => switchMode("flippingletters")}
@@ -1296,6 +1312,9 @@ function Index() {
           {mode === "worwordle" && (
             <a href="https://worwordle.netlify.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Worwordle</a>
           )}
+          {mode === "fibble" && (
+            <a href="https://fibble.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Fibble</a>
+          )}
         </div>
 
 
@@ -1360,6 +1379,12 @@ function Index() {
             </ul>
             <p>Get all 5-letter words consistent with the feedback.</p>
           </div>
+        )}
+
+        {mode === "fibble" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Just like Wordle, but it lies to you once every row.
+          </p>
         )}
 
         {mode === "spellingbee" && (
@@ -1784,7 +1809,7 @@ function Index() {
               </Button>
             </div>
           </div>
-        ) : mode === "wordle" ? (
+        ) : (mode === "wordle" || mode === "fibble") ? (
 
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
