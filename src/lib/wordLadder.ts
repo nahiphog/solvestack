@@ -32,6 +32,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   pivots: 6,
   wordiply: 0,
   wordle: 5,
+  fibble: 5,
   craftwords: 0,
   mastermind: 5,
   marbless: 0,
