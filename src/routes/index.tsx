@@ -1532,8 +1532,10 @@ function Index() {
                         id={`fl-bank-${i}`}
                         type="text"
                         value={(flLetters[i] || "").toLowerCase()}
+                        disabled={flLocked}
                         onFocus={(e) => e.currentTarget.select()}
                         onChange={(e) => {
+                          if (flLocked) return;
                           const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
                           setFlLetters((prev) => { const n = [...prev]; n[i] = c; return n; });
                           setFlRevealed((prev) => { const n = [...prev]; n[i] = false; return n; });
@@ -1543,9 +1545,10 @@ function Index() {
                           }
                         }}
                         onClick={() => {
+                          if (flLocked) return;
                           setFlRevealed((prev) => { const n = [...prev]; n[i] = !n[i]; return n; });
                         }}
-                        className="h-12 w-12 rounded border-2 border-yellow-500 bg-muted text-center font-mono text-xl font-bold lowercase outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+                        className={`h-12 w-12 rounded border-2 border-yellow-500 bg-muted text-center font-mono text-xl font-bold lowercase outline-none focus:ring-2 focus:ring-ring ${flLocked ? "cursor-not-allowed opacity-90" : "cursor-pointer"}`}
                         aria-label={`Letter ${i + 1}`}
                       />
                       <div className="h-5 text-xs font-mono text-muted-foreground">
