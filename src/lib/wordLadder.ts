@@ -300,6 +300,24 @@ export async function wordleSolve(
   );
 }
 
+export async function fibbleSolve(
+  guesses: { word: string; pattern: WordleColor[] }[],
+): Promise<string[]> {
+  // In Fibble, exactly one tile lies in each guess row.
+  const words = await getFiveLetterWords();
+  return words.filter((answer) =>
+    guesses.every((g) => {
+      const out = wordleOutput(g.word, answer);
+      let mismatches = 0;
+      for (let i = 0; i < out.length; i++) {
+        if (out[i] !== g.pattern[i]) mismatches++;
+        if (mismatches > 1) return false;
+      }
+      return mismatches === 1;
+    }),
+  );
+}
+
 export function pivotsBracketRange(prev: string, curr: string): [number, number] | null {
   for (let i = 0; i <= 2; i++) {
     const p = prev.slice(i, i + 4);
