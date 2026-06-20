@@ -244,7 +244,8 @@ function Index() {
   const [dodekuRowSums, setDodekuRowSums] = useState<string[]>(["5", "20", "35", ""]);
   const [dodekuColSums, setDodekuColSums] = useState<string[]>(["8", "", "21", "32"]);
   const [dodekuTiles, setDodekuTiles] = useState<string>("2,3,5,6,7,8,9,10,12");
-  const [dodekuResult, setDodekuResult] = useState<DodekuCell[][] | null>(null);
+  const [dodekuResult, setDodekuResult] = useState<DodekuCell[][][] | null>(null);
+  const [pageDodeku, setPageDodeku] = useState(0);
   const [sdRegions, setSdRegions] = useState<number[][]>([
     [1,1,2,2,3],
     [1,1,2,2,3],
@@ -362,9 +363,10 @@ function Index() {
       return;
     }
     setSolving(true);
+    setPageDodeku(0);
     setTimeout(() => {
       const res = dodekuSolve(initial, rs, cs, tiles);
-      if (!res) setError("No solution found.");
+      if (res.length === 0) setError("No solution found.");
       else setDodekuResult(res);
       setSolving(false);
     }, 0);
@@ -2965,28 +2967,53 @@ function Index() {
 
         {dodekuResult && (
           <section className="mt-10">
-            <h2 className="mb-4 text-lg font-semibold">Solution</h2>
-            <div className="inline-block rounded-lg border bg-card p-4">
-              <table className="border-collapse font-mono">
-                <tbody>
-                  {dodekuResult.map((row, r) => (
-                    <tr key={r}>
-                      {row.map((cell, c) => {
-                        const isBlocked = cell === "X";
-                        return (
-                          <td
-                            key={c}
-                            className={`h-12 w-12 border border-border text-center text-lg font-bold ${isBlocked ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
-                          >
-                            {isBlocked ? "X" : String(cell)}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {dodekuResult.length}{dodekuResult.length === 1000 ? "+" : ""} {dodekuResult.length === 1 ? "solution" : "solutions"}
+              </h2>
+              <button
+                onClick={() => {
+                  const items = dodekuResult
+                    .map((sol, i) => `#${i + 1}\n${sol.map((row) => row.map((c) => (c === "X" ? "X" : String(c))).join(" ")).join("\n")}`)
+                    .join("\n\n");
+                  copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all solutions"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
             </div>
+            <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {dodekuResult.slice(pageDodeku * 20, pageDodeku * 20 + 20).map((sol, idx) => {
+                const i = pageDodeku * 20 + idx;
+                return (
+                  <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
+                    <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
+                    <table className="border-collapse font-mono">
+                      <tbody>
+                        {sol.map((row, r) => (
+                          <tr key={r}>
+                            {row.map((cell, c) => {
+                              const isBlocked = cell === "X";
+                              return (
+                                <td
+                                  key={c}
+                                  className={`h-10 w-10 border border-border text-center text-base font-bold ${isBlocked ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
+                                >
+                                  {isBlocked ? "X" : String(cell)}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </li>
+                );
+              })}
+            </ol>
+            <Paginator page={pageDodeku} setPage={setPageDodeku} total={dodekuResult.length} perPage={20} />
           </section>
         )}
 
