@@ -140,16 +140,31 @@ function Index() {
   const [flResults, setFlResults] = useState<{ flippable: string[]; answers: string[] } | null>(null);
   const [pageFl, setPageFl] = useState(0);
   const [flStartingWords, setFlStartingWords] = useState<0 | 1 | 2>(0);
+  const [flLocked, setFlLocked] = useState<boolean>(false);
+
+  const flExpandedSet = (): Set<string> => {
+    const set = new Set<string>();
+    flLetters.forEach((l, i) => {
+      const u = (l || "").toUpperCase();
+      if (!u) return;
+      set.add(u);
+      if (flRevealed[i]) {
+        const f = FL_FLIP_MAP[u];
+        if (f) set.add(f);
+      }
+    });
+    return set;
+  };
 
   const applyFlStartingWords = (count: 0 | 1 | 2) => {
     setFlStartingWords(count);
     if (count === 0) {
       setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else {
-      const bankSet = new Set(flLetters.map((l) => (l || "").toUpperCase()).filter(Boolean));
+      const allowed = flExpandedSet();
       const eligible = FL_POTENTIAL_WORDS.filter((w) => {
         const upper = w.toUpperCase();
-        for (const ch of upper) if (!bankSet.has(ch)) return false;
+        for (const ch of upper) if (!allowed.has(ch)) return false;
         return true;
       });
       const pool = [...eligible];
@@ -168,6 +183,31 @@ function Index() {
     }
     setFlResults(null);
   };
+
+  const toggleFlLock = () => {
+    if (flLocked) {
+      // Unlocking: clear lower section state
+      setFlLocked(false);
+      setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+      setFlStartingWords(0);
+      setFlResults(null);
+      setError(null);
+    } else {
+      // Validate before locking
+      const letters = flLetters.map((l) => (l || "").trim().toUpperCase()).filter(Boolean);
+      if (letters.length !== 10) {
+        setError("Please enter all 10 letters before locking.");
+        return;
+      }
+      if (new Set(letters).size !== 10) {
+        setError("The 10 letters must be distinct.");
+        return;
+      }
+      setError(null);
+      setFlLocked(true);
+    }
+  };
+
 
   const [worGuesses, setWorGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
     { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
