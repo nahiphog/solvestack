@@ -194,7 +194,8 @@ export function dodekuSolve(
   rowSums: (number | null)[],
   colSums: (number | null)[],
   availableTiles: number[],
-): (DodekuCell[][]) | null {
+  maxSolutions = 1000,
+): DodekuCell[][][] {
   const rows = initialGrid.length;
   const cols = initialGrid[0].length;
   const grid: DodekuCell[][] = initialGrid.map((r) => r.slice());
@@ -231,21 +232,27 @@ export function dodekuSolve(
     return true;
   };
 
-  const backtrack = (i: number): boolean => {
-    if (i === empties.length) return feasible();
+  const solutions: DodekuCell[][][] = [];
+  const backtrack = (i: number): void => {
+    if (solutions.length >= maxSolutions) return;
+    if (i === empties.length) {
+      if (feasible()) solutions.push(grid.map((r) => r.slice()));
+      return;
+    }
     const [r, c] = empties[i];
     for (const t of availableTiles) {
       if (used.has(t)) continue;
       grid[r][c] = t;
       used.add(t);
-      if (feasible() && backtrack(i + 1)) return true;
+      if (feasible()) backtrack(i + 1);
       used.delete(t);
       grid[r][c] = 0;
+      if (solutions.length >= maxSolutions) return;
     }
-    return false;
   };
 
-  return backtrack(0) ? grid : null;
+  backtrack(0);
+  return solutions;
 }
 
 
