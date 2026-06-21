@@ -1340,6 +1340,10 @@ function Index() {
               <a href="https://word500.com/game?mode=daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word500</a>
               <span> · </span>
               <a href="https://play.woodle.today/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Woodle</a>
+              <span> · </span>
+              <a href="https://blindle.kahveciderin.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Blindle</a>
+              <span> · </span>
+              <a href="https://play-cows-and-bulls.web.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Cows and Bulls</a>
             </>
           )}
           {mode === "marbless" && (
