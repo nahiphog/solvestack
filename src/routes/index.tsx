@@ -146,6 +146,21 @@ function Index() {
   const [flStartingWords, setFlStartingWords] = useState<0 | 1 | 2>(0);
   const [flLocked, setFlLocked] = useState<boolean>(false);
   const [jgStartingWord, setJgStartingWord] = useState<0 | 1>(0);
+  const [wbInput, setWbInput] = useState("RED, BLUE, GREY");
+
+  const topPillRef = useRef<HTMLDivElement>(null);
+  const [topPillWidth, setTopPillWidth] = useState<number | undefined>(undefined);
+  useLayoutEffect(() => {
+    const el = topPillRef.current;
+    if (!el) return;
+    const update = () => setTopPillWidth(el.offsetWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => { ro.disconnect(); window.removeEventListener("resize", update); };
+  }, []);
+
 
 
 
