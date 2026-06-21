@@ -1506,8 +1506,7 @@ function Index() {
             <p>Each guess consists of two 5-letter words "smushed" together, sharing two overlapping letters. For example:</p>
             <ul className="list-disc pl-5 space-y-0.5">
               <li>MIC<span className="text-green-600">RO</span>UND = MIC<span className="text-green-600">RO</span> + <span className="text-green-600">RO</span>UND</li>
-              <li>ERA<span className="text-green-600">SE</span>RUM = ERA<span className="text-green-600">SE</span> + <span className="text-green-600">SE</span>RUM</li>
-              <li>ORG<span className="text-green-600">AN</span>GST = ORG<span className="text-green-600">AN</span> + <span className="text-green-600">AN</span>GST</li>
+              <li>YOU<span className="text-green-600">TH</span>INK = YOU<span className="text-green-600">TH</span> + <span className="text-green-600">TH</span>INK</li>
             </ul>
           </div>
         )}
