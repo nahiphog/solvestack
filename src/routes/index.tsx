@@ -1456,7 +1456,7 @@ function Index() {
         {mode === "mastermind" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p>Enter your guesses. And input the number of correct and wrong placements.</p>
-            <p>Get all 5-letter words consistent with the feedback.</p>
+            <p>Get all words consistent with the feedback.</p>
           </div>
         )}
 
