@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -125,6 +125,7 @@ function Index() {
   const [spellingBeeMiddle, setSpellingBeeMiddle] = useState("T");
   const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
+  const [mastermindLen, setMastermindLen] = useState<4 | 5>(5);
   const [mastermindRows, setMastermindRows] = useState<{ word: string; greens: number; yellows: number }[]>([
     { word: "WATER", greens: 4, yellows: 0 },
   ]);
@@ -463,22 +464,22 @@ function Index() {
     for (let i = 0; i < mastermindRows.length; i++) {
       const row = mastermindRows[i];
       const w = row.word.trim().toUpperCase();
-      if (w.length !== 5) {
-        setError(`Row ${i + 1}: guess must be exactly 5 letters.`);
+      if (w.length !== mastermindLen) {
+        setError(`Row ${i + 1}: guess must be exactly ${mastermindLen} letters.`);
         return;
       }
-      if (!(await isValid5LetterWord(w))) {
-        setError(`Row ${i + 1}: "${w}" is not a valid 5-letter English word.`);
+      if (!(await isValidNLetterWord(w, mastermindLen))) {
+        setError(`Row ${i + 1}: "${w}" is not a valid ${mastermindLen}-letter English word.`);
         return;
       }
-      if (row.greens + row.yellows > 5) {
-        setError(`Row ${i + 1}: correct + wrong cannot exceed 5.`);
+      if (row.greens + row.yellows > mastermindLen) {
+        setError(`Row ${i + 1}: correct + wrong cannot exceed ${mastermindLen}.`);
         return;
       }
     }
     setSolving(true);
     const perRow = await Promise.all(
-      mastermindRows.map((r) => mastermindSolve(r.word.toUpperCase(), r.greens, r.yellows)),
+      mastermindRows.map((r) => mastermindSolve(r.word.toUpperCase(), r.greens, r.yellows, mastermindLen)),
     );
     const intersection = perRow.reduce<string[]>((acc, list, idx) => {
       if (idx === 0) return list;
@@ -495,7 +496,7 @@ function Index() {
     setMastermindRows((prev) =>
       prev.map((r, i) => {
         if (i !== ri) return r;
-        const padded = r.word.padEnd(5, " ").slice(0, 5).split("");
+        const padded = r.word.padEnd(mastermindLen, " ").slice(0, mastermindLen).split("");
         padded[ti] = c || " ";
         return { ...r, word: padded.join("").replace(/ +$/, "") };
       }),
@@ -503,7 +504,7 @@ function Index() {
   };
 
   const focusMastermindTile = (ri: number, ti: number) => {
-    if (ti < 0 || ti > 4) return;
+    if (ti < 0 || ti >= mastermindLen) return;
     const el = document.getElementById(`mastermind-tile-${ri}-${ti}`) as HTMLInputElement | null;
     el?.focus();
     el?.select();
@@ -511,6 +512,26 @@ function Index() {
 
   const addMastermindRow = () => {
     setMastermindRows((prev) => [...prev, { word: "", greens: 0, yellows: 0 }]);
+  };
+
+  const addMastermindGuessFromAnswer = (word: string) => {
+    setMastermindRows((prev) => [...prev, { word: word.toUpperCase(), greens: 0, yellows: 0 }]);
+    setMastermindResults(null);
+  };
+
+  const addWordleGuessFromAnswer = (word: string) => {
+    setWordleGuesses((prev) => [...prev, { word: word.toUpperCase(), pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] }]);
+    setWordleResults(null);
+  };
+
+  const addWordPeaksGuessFromAnswer = (word: string) => {
+    setWordPeaksGuesses((prev) => [...prev, { word: word.toUpperCase(), pattern: ["NONE", "NONE", "NONE", "NONE", "NONE"] }]);
+    setWordPeaksResults(null);
+  };
+
+  const addWorGuessFromAnswer = (word: string) => {
+    setWorGuesses((prev) => [...prev, { word: word.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    setWorResults(null);
   };
 
   const removeMastermindRow = (ri: number) => {
@@ -1001,6 +1022,16 @@ function Index() {
         {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum") && (
           <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
+              onClick={() => switchMode("wordle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              (Original)
+            </button>
+            <button
               onClick={() => switchMode("fibble")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "fibble"
@@ -1029,16 +1060,6 @@ function Index() {
               }`}
             >
               JeffGoldblumLe
-            </button>
-            <button
-              onClick={() => switchMode("wordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Original
             </button>
             <button
               onClick={() => switchMode("worwordle")}
@@ -1142,6 +1163,16 @@ function Index() {
         {(mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords") && (
           <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
+              onClick={() => switchMode(5)}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === 4 || mode === 5 || mode === 6
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              (X letters)
+            </button>
+            <button
               onClick={() => switchMode("craftwords")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "craftwords"
@@ -1160,16 +1191,6 @@ function Index() {
               }`}
             >
               Weaver X
-            </button>
-            <button
-              onClick={() => switchMode(4)}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === 4 || mode === 5 || mode === 6
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              X letters
             </button>
           </div>
         )}
@@ -1212,7 +1233,7 @@ function Index() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              PlayPivots
+              Play Pivots
             </button>
             <button
               onClick={() => switchMode("splice")}
@@ -1238,7 +1259,7 @@ function Index() {
             <a href="https://wordwormdormdork.com/weaver-x/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Weaver X</a>
           )}
           {mode === "pivots" && (
-            <a href="https://playpivots.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">PlayPivots</a>
+            <a href="https://playpivots.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Play Pivots</a>
           )}
           {mode === "wordiply" && (
             <a href="https://www.wordiply.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordiply</a>
@@ -1485,8 +1506,7 @@ function Index() {
             <p>Each guess consists of two 5-letter words "smushed" together, sharing two overlapping letters. For example:</p>
             <ul className="list-disc pl-5 space-y-0.5">
               <li>MIC<span className="text-green-600">RO</span>UND = MIC<span className="text-green-600">RO</span> + <span className="text-green-600">RO</span>UND</li>
-              <li>ERA<span className="text-green-600">SE</span>RUM = ERA<span className="text-green-600">SE</span> + <span className="text-green-600">SE</span>RUM</li>
-              <li>ORG<span className="text-green-600">AN</span>GST = ORG<span className="text-green-600">AN</span> + <span className="text-green-600">AN</span>GST</li>
+              <li>YOU<span className="text-green-600">TH</span>INK = YOU<span className="text-green-600">TH</span> + <span className="text-green-600">TH</span>INK</li>
             </ul>
           </div>
         )}
@@ -2098,32 +2118,51 @@ function Index() {
         ) : mode === "mastermind" ? (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
-              <span>Optional input: Place</span>
+              <span>Word length:</span>
               <select
-                className="rounded border border-border bg-background px-2 py-1"
-                defaultValue=""
+                value={mastermindLen}
                 onChange={(e) => {
-                  const n = parseInt(e.target.value, 10);
-                  const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
-                  if (!sheet || sheet.length === 0) return;
-                  const row = sheet[Math.floor(Math.random() * sheet.length)];
-                  setMastermindRows(row.slice(0, n).map((w) => ({ word: w.toUpperCase(), greens: 0, yellows: 0 })));
+                  const n = Number(e.target.value) as 4 | 5;
+                  setMastermindLen(n);
+                  setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
                   setMastermindResults(null);
                 }}
+                className="rounded border border-border bg-background px-2 py-1"
               >
-                <option value="" disabled>—</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
+                <option value={4}>4</option>
+                <option value={5}>5</option>
               </select>
-              <span>strategic starting words into the solver.</span>
+              <span>letters.</span>
             </div>
+            {mastermindLen === 5 && (
+              <div className="flex items-center gap-2 text-sm">
+                <span>Optional input: Place</span>
+                <select
+                  className="rounded border border-border bg-background px-2 py-1"
+                  defaultValue=""
+                  onChange={(e) => {
+                    const n = parseInt(e.target.value, 10);
+                    const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
+                    if (!sheet || sheet.length === 0) return;
+                    const row = sheet[Math.floor(Math.random() * sheet.length)];
+                    setMastermindRows(row.slice(0, n).map((w) => ({ word: w.toUpperCase(), greens: 0, yellows: 0 })));
+                    setMastermindResults(null);
+                  }}
+                >
+                  <option value="" disabled>—</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+                <span>strategic starting words into the solver.</span>
+              </div>
+            )}
             {mastermindRows.map((row, ri) => (
               <div key={ri} className="flex flex-wrap items-end gap-3 rounded-lg border-2 border-border p-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium">Guess #{ri + 1}</label>
                   <div className="flex gap-1.5">
-                    {Array.from({ length: 5 }).map((_, ti) => {
+                    {Array.from({ length: mastermindLen }).map((_, ti) => {
                       const letter = row.word[ti] && row.word[ti] !== " " ? row.word[ti] : "";
                       return (
                         <input
@@ -2142,7 +2181,7 @@ function Index() {
                               return;
                             }
                             setMastermindLetter(ri, ti, v.slice(-1));
-                            if (ti < 4) focusMastermindTile(ri, ti + 1);
+                            if (ti < mastermindLen - 1) focusMastermindTile(ri, ti + 1);
                           }}
                           onKeyDown={(e) => {
                             if (e.key === "Backspace") {
@@ -2176,7 +2215,7 @@ function Index() {
                     className="h-12 w-12 rounded border-2 border-green-600 bg-green-600 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
                     style={{ textAlignLast: "center" }}
                   >
-                    {[0, 1, 2, 3, 4, 5].map((n) => (
+                    {Array.from({ length: mastermindLen + 1 }, (_, n) => n).map((n) => (
                       <option key={n} value={n} className="bg-background text-foreground">
                         {n}
                       </option>
@@ -2195,7 +2234,7 @@ function Index() {
                     className="h-12 w-12 rounded border-2 border-yellow-500 bg-yellow-500 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
                     style={{ textAlignLast: "center" }}
                   >
-                    {[0, 1, 2, 3, 4, 5].map((n) => (
+                    {Array.from({ length: mastermindLen + 1 }, (_, n) => n).map((n) => (
                       <option key={n} value={n} className="bg-background text-foreground">
                         {n}
                       </option>
@@ -2741,15 +2780,12 @@ function Index() {
                   </div>
                   <div className="flex flex-wrap gap-2 font-mono text-sm">
                     {words.map((w) => (
-                      <a
+                      <span
                         key={w}
-                        href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                        className="rounded bg-muted px-2 py-1 tracking-widest"
                       >
                         {w}
-                      </a>
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -2779,15 +2815,14 @@ function Index() {
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
                 {wordleResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
-                  <a
+                  <button
                     key={w}
-                    href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    type="button"
+                    onClick={() => addWordleGuessFromAnswer(w)}
                     className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
                   >
                     {w}
-                  </a>
+                  </button>
                 ))}
               </div>
             </div>
@@ -2828,15 +2863,12 @@ function Index() {
                     </div>
                     <div className="flex flex-wrap gap-2 font-mono text-sm">
                       {words.map((w) => (
-                        <a
+                        <span
                           key={w}
-                          href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                          className="rounded bg-muted px-2 py-1 tracking-widest"
                         >
                           {w}
-                        </a>
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -2866,15 +2898,14 @@ function Index() {
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
                 {mastermindResults.slice(pageMM * 50, pageMM * 50 + 50).map((w) => (
-                  <a
+                  <button
                     key={w}
-                    href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    type="button"
+                    onClick={() => addMastermindGuessFromAnswer(w)}
                     className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
                   >
                     {w}
-                  </a>
+                  </button>
                 ))}
               </div>
             </div>
@@ -2901,15 +2932,14 @@ function Index() {
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
                 {wordPeaksResults.slice(pageWP * 50, pageWP * 50 + 50).map((w) => (
-                  <a
+                  <button
                     key={w}
-                    href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    type="button"
+                    onClick={() => addWordPeaksGuessFromAnswer(w)}
                     className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
                   >
                     {w}
-                  </a>
+                  </button>
                 ))}
               </div>
             </div>
@@ -2939,15 +2969,12 @@ function Index() {
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
                 {flResults.answers.slice(pageFl * 50, pageFl * 50 + 50).map((w) => (
-                  <a
+                  <span
                     key={w}
-                    href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                    className="rounded bg-muted px-2 py-1 tracking-widest"
                   >
                     {w.toLowerCase()}
-                  </a>
+                  </span>
                 ))}
               </div>
             </div>
@@ -2981,11 +3008,17 @@ function Index() {
                   const [a, b] = worwordleSplit(w);
                   return (
                     <div key={w} className="flex items-center gap-2">
-                      <span className="rounded bg-muted px-2 py-1 font-semibold tracking-widest">{w}</span>
+                      <button
+                        type="button"
+                        onClick={() => addWorGuessFromAnswer(w)}
+                        className="rounded bg-muted px-2 py-1 font-semibold tracking-widest hover:bg-accent hover:text-accent-foreground"
+                      >
+                        {w}
+                      </button>
                       <span className="text-muted-foreground">=</span>
-                      <a href={`https://www.dictionary.com/browse/${a.toLowerCase()}`} target="_blank" rel="noopener noreferrer" className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground">{a}</a>
+                      <span className="rounded bg-muted px-2 py-1 tracking-widest">{a}</span>
                       <span className="text-muted-foreground">+</span>
-                      <a href={`https://www.dictionary.com/browse/${b.toLowerCase()}`} target="_blank" rel="noopener noreferrer" className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground">{b}</a>
+                      <span className="rounded bg-muted px-2 py-1 tracking-widest">{b}</span>
                     </div>
                   );
                 })}
