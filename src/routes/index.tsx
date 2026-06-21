@@ -864,6 +864,48 @@ function Index() {
     else setWorResults(result);
     setSolving(false);
   };
+  const solveWordBunny = () => {
+    setError(null);
+    setPaths(null);
+    const words = wbInput
+      .split(/[,\n]/)
+      .map((w) => w.trim().toUpperCase())
+      .filter(Boolean);
+    if (words.length < 2) {
+      setError("Please enter at least 2 comma-separated words.");
+      return;
+    }
+    for (const w of words) {
+      if (!isValidWord(w, "wordbunny")) {
+        setError(`"${w}" is not in the Word Bunny dictionary.`);
+        return;
+      }
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const MAX = 200;
+      let combos: string[][] = [[words[0]]];
+      for (let i = 0; i < words.length - 1; i++) {
+        const segs = findAllShortestPaths(words[i], words[i + 1], "wordbunny");
+        if (segs.length === 0) {
+          setError(`No path exists between "${words[i]}" and "${words[i + 1]}".`);
+          setSolving(false);
+          return;
+        }
+        const next: string[][] = [];
+        outer: for (const c of combos) {
+          for (const s of segs) {
+            next.push([...c, ...s.slice(1)]);
+            if (next.length >= MAX) break outer;
+          }
+        }
+        combos = next;
+      }
+      setPaths(combos);
+      setSolving(false);
+    }, 0);
+  };
+
 
 
 
