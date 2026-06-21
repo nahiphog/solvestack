@@ -2815,15 +2815,14 @@ function Index() {
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
                 {wordleResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
-                  <a
+                  <button
                     key={w}
-                    href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    type="button"
+                    onClick={() => addWordleGuessFromAnswer(w)}
                     className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
                   >
                     {w}
-                  </a>
+                  </button>
                 ))}
               </div>
             </div>
