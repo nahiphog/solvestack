@@ -55,6 +55,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   worwordle: { start: "", goal: "" },
   sheetdoku: { start: "", goal: "" },
   jeffgoldblum: { start: "", goal: "" },
+  wordbunny: { start: "", goal: "" },
 
 };
 
