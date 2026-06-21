@@ -2163,7 +2163,7 @@ function Index() {
                 <div>
                   <label className="mb-1 block text-sm font-medium">Guess #{ri + 1}</label>
                   <div className="flex gap-1.5">
-                    {Array.from({ length: 5 }).map((_, ti) => {
+                    {Array.from({ length: mastermindLen }).map((_, ti) => {
                       const letter = row.word[ti] && row.word[ti] !== " " ? row.word[ti] : "";
                       return (
                         <input
