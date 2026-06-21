@@ -946,7 +946,7 @@ function Index() {
           </div>
         </header>
 
-        <div className="mb-3 flex w-fit rounded-md border bg-muted p-1">
+        <div className="mb-3 flex w-full rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum";
@@ -975,7 +975,7 @@ function Index() {
         </div>
 
         {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
-          <div className="mb-6 flex w-fit rounded-md border bg-muted p-1">
+          <div className="mb-6 flex w-full rounded-md border bg-muted p-1">
             {LADDER_MODES.map((m) => {
               const isActive =
                 m.id === "classic"
@@ -999,7 +999,7 @@ function Index() {
         )}
 
         {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum") && (
-          <div className="mb-6 flex w-fit rounded-md border bg-muted p-1">
+          <div className="mb-6 flex w-full rounded-md border bg-muted p-1">
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
