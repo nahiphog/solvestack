@@ -1003,7 +1003,7 @@ function Index() {
                 <button
                   key={m.id}
                   onClick={() => m.id === "classic" ? switchMode(4) : switchMode("splice")}
-                  className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                  className={`flex-1 rounded px-4 py-1.5 text-sm font-medium transition ${
                     isActive
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
