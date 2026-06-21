@@ -2182,7 +2182,7 @@ function Index() {
                               return;
                             }
                             setMastermindLetter(ri, ti, v.slice(-1));
-                            if (ti < 4) focusMastermindTile(ri, ti + 1);
+                            if (ti < mastermindLen - 1) focusMastermindTile(ri, ti + 1);
                           }}
                           onKeyDown={(e) => {
                             if (e.key === "Backspace") {
