@@ -1451,7 +1451,7 @@ function Index() {
 
         {(mode === 4 || mode === 5 || mode === 6) && (
           <div className="mb-4 text-sm text-muted-foreground">
-            <p>Permissible move:</p>
+            <p>Permissible moves:</p>
             <ul className="list-disc pl-5">
               <li>Single letter substitution</li>
             </ul>
@@ -1460,7 +1460,7 @@ function Index() {
 
         {mode === "craftwords" && (
           <div className="mb-4 text-sm text-muted-foreground">
-            <p>Permissible move:</p>
+            <p>Permissible moves:</p>
             <ul className="list-disc pl-5">
               <li>Single letter substitution</li>
               <li>Add a letter</li>
@@ -1478,7 +1478,7 @@ function Index() {
 
         {mode === "weaverx" && (
           <div className="mb-4 text-sm text-muted-foreground">
-            <p>Permissible move:</p>
+            <p>Permissible moves:</p>
             <ul className="list-disc pl-5">
               <li>Single letter substitution</li>
               <li>Add a letter</li>
@@ -1489,7 +1489,7 @@ function Index() {
 
         {mode === "wordbunny" && (
           <div className="mb-4 text-sm text-muted-foreground">
-            <p>Permissible move:</p>
+            <p>Permissible moves:</p>
             <ul className="list-disc pl-5">
               <li>Single letter substitution</li>
               <li>Add a letter</li>
@@ -1497,6 +1497,7 @@ function Index() {
               <li>Swap the positions of exactly two letters</li>
               <li>Shift the position of one letter to another location</li>
             </ul>
+            <p className="mt-2">No words can repeat in the path.</p>
           </div>
         )}
 
