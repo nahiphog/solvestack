@@ -984,6 +984,7 @@ function Index() {
           </div>
         )}
 
+        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle") && (
           <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("fibble")}
