@@ -1445,6 +1445,19 @@ function Index() {
           </div>
         )}
 
+        {mode === "wordbunny" && (
+          <div className="mb-4 text-sm text-muted-foreground">
+            <p>Permissible move:</p>
+            <ul className="list-disc pl-5">
+              <li>Single letter substitution</li>
+              <li>Add a letter</li>
+              <li>Remove a letter</li>
+              <li>Swap the positions of exactly two letters</li>
+              <li>Shift the position of one letter to another location</li>
+            </ul>
+          </div>
+        )}
+
         {mode === "pivots" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Enter a permutation of "123456". Each move reverses 4 consecutive digits. Goal is "123456".
