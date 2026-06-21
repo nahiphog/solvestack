@@ -2119,26 +2119,45 @@ function Index() {
         ) : mode === "mastermind" ? (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
-              <span>Optional input: Place</span>
+              <span>Word length:</span>
               <select
-                className="rounded border border-border bg-background px-2 py-1"
-                defaultValue=""
+                value={mastermindLen}
                 onChange={(e) => {
-                  const n = parseInt(e.target.value, 10);
-                  const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
-                  if (!sheet || sheet.length === 0) return;
-                  const row = sheet[Math.floor(Math.random() * sheet.length)];
-                  setMastermindRows(row.slice(0, n).map((w) => ({ word: w.toUpperCase(), greens: 0, yellows: 0 })));
+                  const n = Number(e.target.value) as 4 | 5;
+                  setMastermindLen(n);
+                  setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
                   setMastermindResults(null);
                 }}
+                className="rounded border border-border bg-background px-2 py-1"
               >
-                <option value="" disabled>—</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
+                <option value={4}>4</option>
+                <option value={5}>5</option>
               </select>
-              <span>strategic starting words into the solver.</span>
+              <span>letters.</span>
             </div>
+            {mastermindLen === 5 && (
+              <div className="flex items-center gap-2 text-sm">
+                <span>Optional input: Place</span>
+                <select
+                  className="rounded border border-border bg-background px-2 py-1"
+                  defaultValue=""
+                  onChange={(e) => {
+                    const n = parseInt(e.target.value, 10);
+                    const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
+                    if (!sheet || sheet.length === 0) return;
+                    const row = sheet[Math.floor(Math.random() * sheet.length)];
+                    setMastermindRows(row.slice(0, n).map((w) => ({ word: w.toUpperCase(), greens: 0, yellows: 0 })));
+                    setMastermindResults(null);
+                  }}
+                >
+                  <option value="" disabled>—</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+                <span>strategic starting words into the solver.</span>
+              </div>
+            )}
             {mastermindRows.map((row, ri) => (
               <div key={ri} className="flex flex-wrap items-end gap-3 rounded-lg border-2 border-border p-3">
                 <div>
