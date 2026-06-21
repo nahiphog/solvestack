@@ -555,23 +555,33 @@ function Index() {
 
 
 
+  const wordleTileLen = mode === "jeffgoldblum" ? 12 : 5;
+
   const solveWordle = async () => {
     setError(null);
     setWordleResults(null);
     for (const g of wordleGuesses) {
       const w = g.word.trim().toUpperCase();
-      if (w.length !== 5) {
-        setError("Each guess must be exactly 5 letters.");
+      if (w.length !== wordleTileLen) {
+        setError(`Each guess must be exactly ${wordleTileLen} letters.`);
         return;
       }
-      if (!(await isValid5LetterWord(w))) {
+      if (mode === "jeffgoldblum") {
+        if (!(await isValidJeffGoldblumWord(w))) {
+          setError(`"${w}" is not a valid 12-letter English word.`);
+          return;
+        }
+      } else if (!(await isValid5LetterWord(w))) {
         setError(`"${w}" is not a valid 5-letter English word.`);
         return;
       }
     }
     setSolving(true);
     const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
-    const result = mode === "fibble" ? await fibbleSolve(normalized) : await wordleSolve(normalized);
+    const result =
+      mode === "fibble" ? await fibbleSolve(normalized)
+      : mode === "jeffgoldblum" ? await jeffGoldblumLeSolve(normalized)
+      : await wordleSolve(normalized);
     if (result.length === 0) setError("No words match these constraints.");
     else setWordleResults(result);
     setSolving(false);
@@ -594,7 +604,7 @@ function Index() {
     setWordleGuesses((prev) =>
       prev.map((g, i) => {
         if (i !== gi) return g;
-        const padded = g.word.padEnd(5, " ").slice(0, 5).split("");
+        const padded = g.word.padEnd(wordleTileLen, " ").slice(0, wordleTileLen).split("");
         padded[ti] = c || " ";
         return { ...g, word: padded.join("").replace(/ +$/, "") };
       }),
@@ -602,15 +612,16 @@ function Index() {
   };
 
   const focusTile = (gi: number, ti: number) => {
-    if (ti < 0 || ti > 4) return;
+    if (ti < 0 || ti >= wordleTileLen) return;
     const el = document.getElementById(`wordle-tile-${gi}-${ti}`) as HTMLInputElement | null;
     el?.focus();
     el?.select();
   };
 
   const addGuessRow = () => {
-    setWordleGuesses((prev) => [...prev, { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    setWordleGuesses((prev) => [...prev, { word: "", pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] }]);
   };
+
 
   const removeGuessRow = (gi: number) => {
     setWordleGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
