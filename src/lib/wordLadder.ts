@@ -9,7 +9,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -41,7 +41,35 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   flippingletters: 5,
   worwordle: 8,
   sheetdoku: 0,
+  jeffgoldblum: 12,
 };
+
+let _jeffGoldblumWordsCache: string[] | null = null;
+async function getJeffGoldblumWords(): Promise<string[]> {
+  if (_jeffGoldblumWordsCache) return _jeffGoldblumWordsCache;
+  const mod = await import("@/data/jeffGoldblumLeWords.json");
+  const words = mod.default as string[];
+  _jeffGoldblumWordsCache = [...words, "JEFFGOLDBLUM"];
+  return _jeffGoldblumWordsCache;
+}
+
+export async function isValidJeffGoldblumWord(w: string): Promise<boolean> {
+  const words = await getJeffGoldblumWords();
+  return words.includes(w.toUpperCase());
+}
+
+export async function jeffGoldblumLeSolve(
+  guesses: { word: string; pattern: WordleColor[] }[],
+): Promise<string[]> {
+  const words = await getJeffGoldblumWords();
+  return words.filter((answer) =>
+    guesses.every((g) => {
+      const out = wordleOutput(g.word, answer);
+      for (let i = 0; i < out.length; i++) if (out[i] !== g.pattern[i]) return false;
+      return true;
+    }),
+  );
+}
 
 export type SheetdokuFunc = "MAX" | "MIN" | "SUM" | "AVG" | "PROD" | "RANGE";
 export interface SheetdokuRegionDef { func: SheetdokuFunc; target: number; }

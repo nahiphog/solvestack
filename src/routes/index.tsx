@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useState } from "react";
-import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidWord, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   flippingletters: { start: "", goal: "" },
   worwordle: { start: "", goal: "" },
   sheetdoku: { start: "", goal: "" },
+  jeffgoldblum: { start: "", goal: "" },
 
 };
 
@@ -334,6 +335,8 @@ function Index() {
       setWordleGuesses([{ word: "CRANE", pattern: ["GREEN", "GREY", "YELLOW", "GREY", "GREY"] }]);
     } else if (m === "wordle") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    } else if (m === "jeffgoldblum") {
+      setWordleGuesses([{ word: "JEFFGOLDBLUM", pattern: Array(12).fill("GREY") as WordleColor[] }]);
     }
     const d = DEFAULTS[String(m)];
     setStart(d.start);
@@ -552,23 +555,33 @@ function Index() {
 
 
 
+  const wordleTileLen = mode === "jeffgoldblum" ? 12 : 5;
+
   const solveWordle = async () => {
     setError(null);
     setWordleResults(null);
     for (const g of wordleGuesses) {
       const w = g.word.trim().toUpperCase();
-      if (w.length !== 5) {
-        setError("Each guess must be exactly 5 letters.");
+      if (w.length !== wordleTileLen) {
+        setError(`Each guess must be exactly ${wordleTileLen} letters.`);
         return;
       }
-      if (!(await isValid5LetterWord(w))) {
+      if (mode === "jeffgoldblum") {
+        if (!(await isValidJeffGoldblumWord(w))) {
+          setError(`"${w}" is not a valid 12-letter English word.`);
+          return;
+        }
+      } else if (!(await isValid5LetterWord(w))) {
         setError(`"${w}" is not a valid 5-letter English word.`);
         return;
       }
     }
     setSolving(true);
     const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
-    const result = mode === "fibble" ? await fibbleSolve(normalized) : await wordleSolve(normalized);
+    const result =
+      mode === "fibble" ? await fibbleSolve(normalized)
+      : mode === "jeffgoldblum" ? await jeffGoldblumLeSolve(normalized)
+      : await wordleSolve(normalized);
     if (result.length === 0) setError("No words match these constraints.");
     else setWordleResults(result);
     setSolving(false);
@@ -591,7 +604,7 @@ function Index() {
     setWordleGuesses((prev) =>
       prev.map((g, i) => {
         if (i !== gi) return g;
-        const padded = g.word.padEnd(5, " ").slice(0, 5).split("");
+        const padded = g.word.padEnd(wordleTileLen, " ").slice(0, wordleTileLen).split("");
         padded[ti] = c || " ";
         return { ...g, word: padded.join("").replace(/ +$/, "") };
       }),
@@ -599,15 +612,16 @@ function Index() {
   };
 
   const focusTile = (gi: number, ti: number) => {
-    if (ti < 0 || ti > 4) return;
+    if (ti < 0 || ti >= wordleTileLen) return;
     const el = document.getElementById(`wordle-tile-${gi}-${ti}`) as HTMLInputElement | null;
     el?.focus();
     el?.select();
   };
 
   const addGuessRow = () => {
-    setWordleGuesses((prev) => [...prev, { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    setWordleGuesses((prev) => [...prev, { word: "", pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] }]);
   };
+
 
   const removeGuessRow = (gi: number) => {
     setWordleGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
@@ -910,7 +924,7 @@ function Index() {
         <div className="mb-3 flex w-fit rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku";
-            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle";
+            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum";
             const inLadder = !isMath && !inSearch;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : inLadder;
             return (
@@ -959,12 +973,12 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle") && (
+        {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum") && (
           <div className="mb-6 flex w-fit rounded-md border bg-muted p-1">
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
-                  ? mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle"
+                  ? mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum"
                   : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind";
 
               return (
@@ -984,7 +998,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle") && (
+        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum") && (
           <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("fibble")}
@@ -1005,6 +1019,16 @@ function Index() {
               }`}
             >
               Flipping Letters
+            </button>
+            <button
+              onClick={() => switchMode("jeffgoldblum")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "jeffgoldblum"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              JeffGoldblumLe
             </button>
             <button
               onClick={() => switchMode("wordle")}
@@ -1315,7 +1339,11 @@ function Index() {
           {mode === "fibble" && (
             <a href="https://fibble.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Fibble</a>
           )}
+          {mode === "jeffgoldblum" && (
+            <a href="https://jeffgoldblumle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">JeffGoldblumLe</a>
+          )}
         </div>
+
 
 
         {(mode === 4 || mode === 5 || mode === 6) && (
@@ -1386,6 +1414,13 @@ function Index() {
             Just like Wordle, but it lies to you once every row.
           </p>
         )}
+
+        {mode === "jeffgoldblum" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter Wordle-style 12-letter guesses, but you only have 3 tries, and it also accepts "JEFFGOLDBLUM".
+          </p>
+        )}
+
 
         {mode === "spellingbee" && (
           <p className="mb-4 text-sm text-muted-foreground">
@@ -1815,45 +1850,47 @@ function Index() {
               </Button>
             </div>
           </div>
-        ) : (mode === "wordle" || mode === "fibble") ? (
+        ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum") ? (
 
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm">
-              <span>Optional input: {mode === "fibble" ? "Add" : "Place"}</span>
-              <select
-                className="rounded border border-border bg-background px-2 py-1"
-                defaultValue="0"
-                onChange={(e) => {
-                  const n = parseInt(e.target.value, 10);
-                  if (n === 0) {
-                    if (mode === "fibble") return;
-                    setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+            {mode !== "jeffgoldblum" && (
+              <div className="flex items-center gap-2 text-sm">
+                <span>Optional input: {mode === "fibble" ? "Add" : "Place"}</span>
+                <select
+                  className="rounded border border-border bg-background px-2 py-1"
+                  defaultValue="0"
+                  onChange={(e) => {
+                    const n = parseInt(e.target.value, 10);
+                    if (n === 0) {
+                      if (mode === "fibble") return;
+                      setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                      setWordleResults(null);
+                      return;
+                    }
+                    const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
+                    if (!sheet || sheet.length === 0) return;
+                    const row = sheet[Math.floor(Math.random() * sheet.length)];
+                    const newGuesses = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] }));
+                    if (mode === "fibble") {
+                      setWordleGuesses((prev) => [...prev, ...newGuesses]);
+                    } else {
+                      setWordleGuesses(newGuesses);
+                    }
                     setWordleResults(null);
-                    return;
-                  }
-                  const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
-                  if (!sheet || sheet.length === 0) return;
-                  const row = sheet[Math.floor(Math.random() * sheet.length)];
-                  const newGuesses = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] }));
-                  if (mode === "fibble") {
-                    setWordleGuesses((prev) => [...prev, ...newGuesses]);
-                  } else {
-                    setWordleGuesses(newGuesses);
-                  }
-                  setWordleResults(null);
-                }}
-              >
-                <option value="0">0</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select>
-              <span>strategic starting words.</span>
-            </div>
+                  }}
+                >
+                  <option value="0">0</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+                <span>strategic starting words.</span>
+              </div>
+            )}
             {wordleGuesses.map((g, gi) => (
               <div key={gi} className="flex items-center gap-3">
                 <div className="flex gap-1.5">
-                  {Array.from({ length: 5 }).map((_, ti) => {
+                  {Array.from({ length: wordleTileLen }).map((_, ti) => {
                     const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
                     const color = g.pattern[ti];
                     const colorClass =
@@ -1862,6 +1899,7 @@ function Index() {
                         : color === "YELLOW"
                           ? "bg-yellow-500 text-white border-yellow-500 caret-white"
                           : "bg-muted text-foreground border-border caret-foreground";
+                    const tileSize = mode === "jeffgoldblum" ? "h-9 w-9 text-base" : "h-12 w-12 text-xl";
                     return (
                       <input
                         key={ti}
@@ -1885,7 +1923,7 @@ function Index() {
                             return;
                           }
                           setGuessLetter(gi, ti, v.slice(-1));
-                          if (ti < 4) focusTile(gi, ti + 1);
+                          if (ti < wordleTileLen - 1) focusTile(gi, ti + 1);
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Backspace") {
@@ -1904,7 +1942,7 @@ function Index() {
                             cycleTile(gi, ti);
                           }
                         }}
-                        className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                        className={`flex items-center justify-center rounded border-2 text-center font-mono font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${tileSize} ${colorClass}`}
                       />
                     );
                   })}
@@ -1920,7 +1958,11 @@ function Index() {
               </Button>
               <Button
                 onClick={() => {
-                  setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                  if (mode === "jeffgoldblum") {
+                    setWordleGuesses([{ word: "JEFFGOLDBLUM", pattern: Array(12).fill("GREY") as WordleColor[] }]);
+                  } else {
+                    setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                  }
                   setWordleResults(null);
                 }}
                 variant="outline"
@@ -1930,7 +1972,7 @@ function Index() {
               </Button>
               <Button
                 onClick={() => {
-                  setWordleGuesses((prev) => prev.map((g) => ({ ...g, pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] })));
+                  setWordleGuesses((prev) => prev.map((g) => ({ ...g, pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] })));
                   setWordleResults(null);
                 }}
                 variant="outline"
@@ -1943,6 +1985,7 @@ function Index() {
               </Button>
             </div>
           </div>
+
         ) : mode === "spellingbee" ? (
           <div className="flex flex-col items-start gap-4">
             {(() => {
