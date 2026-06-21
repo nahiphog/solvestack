@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useState } from "react";
 import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
@@ -55,6 +55,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   worwordle: { start: "", goal: "" },
   sheetdoku: { start: "", goal: "" },
   jeffgoldblum: { start: "", goal: "" },
+  wordbunny: { start: "", goal: "" },
 
 };
 
@@ -145,6 +146,21 @@ function Index() {
   const [flStartingWords, setFlStartingWords] = useState<0 | 1 | 2>(0);
   const [flLocked, setFlLocked] = useState<boolean>(false);
   const [jgStartingWord, setJgStartingWord] = useState<0 | 1>(0);
+  const [wbInput, setWbInput] = useState("RED, BLUE, GREY");
+
+  const topPillRef = useRef<HTMLDivElement>(null);
+  const [topPillWidth, setTopPillWidth] = useState<number | undefined>(undefined);
+  useLayoutEffect(() => {
+    const el = topPillRef.current;
+    if (!el) return;
+    const update = () => setTopPillWidth(el.offsetWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => { ro.disconnect(); window.removeEventListener("resize", update); };
+  }, []);
+
 
 
 
@@ -342,6 +358,8 @@ function Index() {
     } else if (m === "jeffgoldblum") {
       setWordleGuesses([{ word: "JEFFGOLDBLUM", pattern: Array(12).fill("GREY") as WordleColor[] }]);
       setJgStartingWord(0);
+    } else if (m === "wordbunny") {
+      setWbInput("RED, BLUE, GREY");
     }
     const d = DEFAULTS[String(m)];
     setStart(d.start);
@@ -846,6 +864,48 @@ function Index() {
     else setWorResults(result);
     setSolving(false);
   };
+  const solveWordBunny = () => {
+    setError(null);
+    setPaths(null);
+    const words = wbInput
+      .split(/[,\n]/)
+      .map((w) => w.trim().toUpperCase())
+      .filter(Boolean);
+    if (words.length < 2) {
+      setError("Please enter at least 2 comma-separated words.");
+      return;
+    }
+    for (const w of words) {
+      if (!isValidWord(w, "wordbunny")) {
+        setError(`"${w}" is not in the Word Bunny dictionary.`);
+        return;
+      }
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const MAX = 200;
+      let combos: string[][] = [[words[0]]];
+      for (let i = 0; i < words.length - 1; i++) {
+        const segs = findAllShortestPaths(words[i], words[i + 1], "wordbunny");
+        if (segs.length === 0) {
+          setError(`No path exists between "${words[i]}" and "${words[i + 1]}".`);
+          setSolving(false);
+          return;
+        }
+        const next: string[][] = [];
+        outer: for (const c of combos) {
+          for (const s of segs) {
+            next.push([...c, ...s.slice(1)]);
+            if (next.length >= MAX) break outer;
+          }
+        }
+        combos = next;
+      }
+      setPaths(combos);
+      setSolving(false);
+    }, 0);
+  };
+
 
 
 
@@ -946,7 +1006,7 @@ function Index() {
           </div>
         </header>
 
-        <div className="mb-3 flex w-full rounded-md border bg-muted p-1">
+        <div ref={topPillRef} className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum";
@@ -974,18 +1034,18 @@ function Index() {
           })}
         </div>
 
-        {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
-          <div className="mb-6 flex w-full rounded-md border bg-muted p-1">
+        {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords" || mode === "wordbunny") && (
+          <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
             {LADDER_MODES.map((m) => {
               const isActive =
                 m.id === "classic"
-                  ? mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords"
+                  ? mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords" || mode === "wordbunny"
                   : mode === "splice" || mode === "pivots";
               return (
                 <button
                   key={m.id}
                   onClick={() => m.id === "classic" ? switchMode(4) : switchMode("splice")}
-                  className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                  className={`flex-1 rounded px-4 py-1.5 text-sm font-medium transition ${
                     isActive
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
@@ -999,7 +1059,7 @@ function Index() {
         )}
 
         {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum") && (
-          <div className="mb-6 flex w-full rounded-md border bg-muted p-1">
+          <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
@@ -1010,7 +1070,8 @@ function Index() {
                 <button
                   key={m.id}
                   onClick={() => m.id === "wordle" ? switchMode("wordle") : switchMode("spellingbee")}
-                  className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                  className={`flex-1 rounded px-4 py-1.5 text-sm font-medium transition ${
+
                     isActive
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
@@ -1164,7 +1225,7 @@ function Index() {
 
 
 
-        {(mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords") && (
+        {(mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords" || mode === "wordbunny") && (
           <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode(5)}
@@ -1195,6 +1256,16 @@ function Index() {
               }`}
             >
               Weaver X
+            </button>
+            <button
+              onClick={() => switchMode("wordbunny")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordbunny"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Word Bunny
             </button>
           </div>
         )}
@@ -1371,6 +1442,9 @@ function Index() {
           {mode === "jeffgoldblum" && (
             <a href="https://jeffgoldblumle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">JeffGoldblumLe</a>
           )}
+          {mode === "wordbunny" && (
+            <a href="https://wordbunny.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Bunny</a>
+          )}
         </div>
 
 
@@ -1409,6 +1483,19 @@ function Index() {
               <li>Single letter substitution</li>
               <li>Add a letter</li>
               <li>Remove a letter</li>
+            </ul>
+          </div>
+        )}
+
+        {mode === "wordbunny" && (
+          <div className="mb-4 text-sm text-muted-foreground">
+            <p>Permissible move:</p>
+            <ul className="list-disc pl-5">
+              <li>Single letter substitution</li>
+              <li>Add a letter</li>
+              <li>Remove a letter</li>
+              <li>Swap the positions of exactly two letters</li>
+              <li>Shift the position of one letter to another location</li>
             </ul>
           </div>
         )}
@@ -2652,7 +2739,32 @@ function Index() {
             );
           })()
 
+        ) : mode === "wordbunny" ? (
+          <div className="space-y-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Words (comma-separated)</label>
+              <textarea
+                value={wbInput}
+                onChange={(e) => setWbInput(e.target.value)}
+                rows={3}
+                className="flex w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-base uppercase tracking-widest outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div className="flex flex-nowrap gap-2">
+              <Button
+                onClick={() => { setWbInput(""); setPaths(null); setError(null); }}
+                variant="outline"
+                size="sm"
+              >
+                Reset
+              </Button>
+              <Button onClick={solveWordBunny} disabled={solving} size="sm">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
         ) : mode === "wordiply" ? (
+
 
           <div className="space-y-3">
             <div>

@@ -5,11 +5,12 @@ import graphSplice from "@/data/wordSplice.json";
 import graphWeaverX from "@/data/wordWeaverX.json";
 import graphPivots from "@/data/wordPivots.json";
 import graphCraftWords from "@/data/wordCraftWords.json";
+import graphWordBunny from "@/data/wordBunny.json";
 
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "wordbunny";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -20,6 +21,7 @@ const GRAPHS: Record<string, Graph> = {
   weaverx: graphWeaverX as Graph,
   pivots: graphPivots as Graph,
   craftwords: graphCraftWords as Graph,
+  wordbunny: graphWordBunny as Graph,
 };
 
 // 0 means variable length (no length validation)
@@ -42,6 +44,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   worwordle: 8,
   sheetdoku: 0,
   jeffgoldblum: 12,
+  wordbunny: 0,
 };
 
 let _jeffGoldblumWordsCache: string[] | null = null;
