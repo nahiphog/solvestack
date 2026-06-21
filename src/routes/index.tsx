@@ -54,6 +54,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   flippingletters: { start: "", goal: "" },
   worwordle: { start: "", goal: "" },
   sheetdoku: { start: "", goal: "" },
+  jeffgoldblum: { start: "", goal: "" },
 
 };
 
