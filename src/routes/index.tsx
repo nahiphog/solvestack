@@ -144,6 +144,9 @@ function Index() {
   const [pageFl, setPageFl] = useState(0);
   const [flStartingWords, setFlStartingWords] = useState<0 | 1 | 2>(0);
   const [flLocked, setFlLocked] = useState<boolean>(false);
+  const [jgStartingWord, setJgStartingWord] = useState<0 | 1>(0);
+
+
 
   const flExpandedSet = (): Set<string> => {
     const set = new Set<string>();
@@ -338,6 +341,7 @@ function Index() {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else if (m === "jeffgoldblum") {
       setWordleGuesses([{ word: "JEFFGOLDBLUM", pattern: Array(12).fill("GREY") as WordleColor[] }]);
+      setJgStartingWord(0);
     }
     const d = DEFAULTS[String(m)];
     setStart(d.start);
@@ -1911,6 +1915,27 @@ function Index() {
                 <span>strategic starting words.</span>
               </div>
             )}
+            {mode === "jeffgoldblum" && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Optional input: Place</span>
+                <select
+                  value={jgStartingWord}
+                  onChange={(e) => {
+                    const v = Number(e.target.value) as 0 | 1;
+                    setJgStartingWord(v);
+                    if (v === 1) {
+                      const word = Math.random() < 0.5 ? "PRAISEWORTHY" : "WISECRACKING";
+                      setWordleGuesses((prev) => [...prev, { word, pattern: Array(12).fill("GREY") as WordleColor[] }]);
+                    }
+                  }}
+                  className="rounded border border-border bg-background px-2 py-1"
+                >
+                  <option value={0}>0</option>
+                  <option value={1}>1</option>
+                </select>
+                <span className="text-muted-foreground">word into the solver.</span>
+              </div>
+            )}
             {wordleGuesses.map((g, gi) => (
               <div key={gi} className="flex items-center gap-3">
                 <div className="flex gap-1.5">
@@ -1984,6 +2009,7 @@ function Index() {
                 onClick={() => {
                   if (mode === "jeffgoldblum") {
                     setWordleGuesses([{ word: "JEFFGOLDBLUM", pattern: Array(12).fill("GREY") as WordleColor[] }]);
+                    setJgStartingWord(0);
                   } else {
                     setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
                   }
