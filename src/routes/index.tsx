@@ -2881,6 +2881,7 @@ function Index() {
               {paths.slice(pagePaths * 50, pagePaths * 50 + 50).map((path, idx) => {
                 const i = pagePaths * 50 + idx;
                 const isSelected = selectedPaths.has(i);
+                const wbWords = mode === "wordbunny" ? new Set(wbInput.split(/[,\n]/).map((x) => x.trim().toUpperCase()).filter(Boolean)) : null;
                 return (
                 <li
                   key={i}
@@ -2899,9 +2900,10 @@ function Index() {
                       const display = mode === "pivots" && j > 0
                         ? formatPivotsWord(w, pivotsBracketRange(path[j - 1], w))
                         : w;
+                      const shown = wbWords?.has(w) ? `(${display})` : display;
                       return (
                         <span key={j} className="inline-block whitespace-nowrap">
-                          <span className="font-semibold tracking-widest">{display}</span>
+                          <span className="font-semibold tracking-widest">{shown}</span>
                           {j < path.length - 1 && (
                             <span className="mx-2 text-muted-foreground">→</span>
                           )}
