@@ -358,6 +358,8 @@ function Index() {
     } else if (m === "jeffgoldblum") {
       setWordleGuesses([{ word: "JEFFGOLDBLUM", pattern: Array(12).fill("GREY") as WordleColor[] }]);
       setJgStartingWord(0);
+    } else if (m === "wordbunny") {
+      setWbInput("RED, BLUE, GREY");
     }
     const d = DEFAULTS[String(m)];
     setStart(d.start);
