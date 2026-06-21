@@ -1415,6 +1415,13 @@ function Index() {
           </p>
         )}
 
+        {mode === "jeffgoldblum" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Enter Wordle-style 12-letter guesses, but you only have 3 tries, and it also accepts "JEFFGOLDBLUM".
+          </p>
+        )}
+
+
         {mode === "spellingbee" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Enter the middle letter and the 6 outer letters. Find all valid 4+ letter words using only these 7 letters that include the middle letter, grouped by score.
