@@ -361,10 +361,11 @@ export async function mastermindSolve(
   guess: string,
   greens: number,
   yellows: number,
+  length = 5,
 ): Promise<string[]> {
   const g = guess.toUpperCase();
-  if (g.length !== 5) return [];
-  const words = await getFiveLetterWords();
+  if (g.length !== length) return [];
+  const words = await getNLetterWords(length);
   return words.filter((answer) => {
     const out = wordleOutput(g, answer);
     let gc = 0, yc = 0;
@@ -374,6 +375,19 @@ export async function mastermindSolve(
     }
     return gc === greens && yc === yellows;
   });
+}
+
+const _nLetterCache: Record<number, string[]> = {};
+async function getNLetterWords(n: number): Promise<string[]> {
+  if (_nLetterCache[n]) return _nLetterCache[n];
+  const all = await getAllEnglishWords();
+  _nLetterCache[n] = all.filter((w) => w.length === n);
+  return _nLetterCache[n];
+}
+
+export async function isValidNLetterWord(w: string, n: number): Promise<boolean> {
+  const words = await getNLetterWords(n);
+  return words.includes(w.toUpperCase());
 }
 
 export type MarblessSolution = { words: string[]; moves: number[] };
