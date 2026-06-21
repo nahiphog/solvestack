@@ -1233,7 +1233,7 @@ function Index() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              PlayPivots
+              Play Pivots
             </button>
             <button
               onClick={() => switchMode("splice")}
