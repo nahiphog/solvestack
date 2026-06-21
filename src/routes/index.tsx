@@ -991,12 +991,12 @@ function Index() {
           })}
         </div>
 
-        {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords" || mode === "wordbunny") && (
+        {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
           <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
             {LADDER_MODES.map((m) => {
               const isActive =
                 m.id === "classic"
-                  ? mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords" || mode === "wordbunny"
+                  ? mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords"
                   : mode === "splice" || mode === "pivots";
               return (
                 <button
