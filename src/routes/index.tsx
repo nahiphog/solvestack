@@ -1116,16 +1116,16 @@ function Index() {
 
 
         {(mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords") && (
-          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
-              onClick={() => switchMode(4)}
+              onClick={() => switchMode("craftwords")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === 4 || mode === 5 || mode === 6
+                mode === "craftwords"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              X letters
+              Craft Words
             </button>
             <button
               onClick={() => switchMode("weaverx")}
@@ -1138,14 +1138,14 @@ function Index() {
               Weaver X
             </button>
             <button
-              onClick={() => switchMode("craftwords")}
+              onClick={() => switchMode(4)}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "craftwords"
+                mode === 4 || mode === 5 || mode === 6
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Craft Words
+              X letters
             </button>
           </div>
         )}
