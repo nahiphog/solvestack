@@ -2196,8 +2196,9 @@ function Index() {
                 <span>strategic starting words into the solver.</span>
               </div>
             )}
-
+            {mastermindRows.map((row, ri) => (
               <div key={ri} className="flex flex-wrap items-end gap-3 rounded-lg border-2 border-border p-3">
+
                 <div>
                   <label className="mb-1 block text-sm font-medium">Guess #{ri + 1}</label>
                   <div className="flex gap-1.5">
