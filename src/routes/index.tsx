@@ -2130,7 +2130,8 @@ function Index() {
                         prev.map((r, i) => (i === ri ? { ...r, greens: Number(e.target.value) } : r)),
                       )
                     }
-                    className="h-12 w-12 rounded border-2 border-green-600 bg-green-600 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none"
+                    className="h-12 w-12 rounded border-2 border-green-600 bg-green-600 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
+                    style={{ textAlignLast: "center" }}
                   >
                     {[0, 1, 2, 3, 4, 5].map((n) => (
                       <option key={n} value={n} className="bg-background text-foreground">
