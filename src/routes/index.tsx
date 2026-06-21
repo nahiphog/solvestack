@@ -2789,7 +2789,7 @@ function Index() {
               {paths.slice(pagePaths * 50, pagePaths * 50 + 50).map((path, idx) => {
                 const i = pagePaths * 50 + idx;
                 const isSelected = selectedPaths.has(i);
-                const wbWords: Set<string> | null = null;
+                
                 return (
                 <li
                   key={i}
@@ -2808,7 +2808,7 @@ function Index() {
                       const display = mode === "pivots" && j > 0
                         ? formatPivotsWord(w, pivotsBracketRange(path[j - 1], w))
                         : w;
-                      const shown = wbWords?.has(w) ? `(${display})` : display;
+                      const shown = display;
                       return (
                         <span key={j} className="inline-block whitespace-nowrap">
                           <span className="font-semibold tracking-widest">{shown}</span>
