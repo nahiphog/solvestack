@@ -49,7 +49,7 @@ async function getJeffGoldblumWords(): Promise<string[]> {
   if (_jeffGoldblumWordsCache) return _jeffGoldblumWordsCache;
   const mod = await import("@/data/jeffGoldblumLeWords.json");
   const words = mod.default as string[];
-  _jeffGoldblumWordsCache = [...words, "JEFFGOLDBLUM"];
+  _jeffGoldblumWordsCache = [...new Set([...words, "JEFFGOLDBLUM"])];
   return _jeffGoldblumWordsCache;
 }
 
