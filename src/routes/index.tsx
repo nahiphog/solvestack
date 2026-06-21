@@ -3008,11 +3008,17 @@ function Index() {
                   const [a, b] = worwordleSplit(w);
                   return (
                     <div key={w} className="flex items-center gap-2">
-                      <span className="rounded bg-muted px-2 py-1 font-semibold tracking-widest">{w}</span>
+                      <button
+                        type="button"
+                        onClick={() => addWorGuessFromAnswer(w)}
+                        className="rounded bg-muted px-2 py-1 font-semibold tracking-widest hover:bg-accent hover:text-accent-foreground"
+                      >
+                        {w}
+                      </button>
                       <span className="text-muted-foreground">=</span>
-                      <a href={`https://www.dictionary.com/browse/${a.toLowerCase()}`} target="_blank" rel="noopener noreferrer" className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground">{a}</a>
+                      <span className="rounded bg-muted px-2 py-1 tracking-widest">{a}</span>
                       <span className="text-muted-foreground">+</span>
-                      <a href={`https://www.dictionary.com/browse/${b.toLowerCase()}`} target="_blank" rel="noopener noreferrer" className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground">{b}</a>
+                      <span className="rounded bg-muted px-2 py-1 tracking-widest">{b}</span>
                     </div>
                   );
                 })}
