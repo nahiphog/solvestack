@@ -2697,7 +2697,32 @@ function Index() {
             );
           })()
 
+        ) : mode === "wordbunny" ? (
+          <div className="space-y-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Words (comma-separated)</label>
+              <textarea
+                value={wbInput}
+                onChange={(e) => setWbInput(e.target.value)}
+                rows={3}
+                className="flex w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-base uppercase tracking-widest outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div className="flex flex-nowrap gap-2">
+              <Button
+                onClick={() => { setWbInput(""); setPaths(null); setError(null); }}
+                variant="outline"
+                size="sm"
+              >
+                Reset
+              </Button>
+              <Button onClick={solveWordBunny} disabled={solving} size="sm">
+                {solving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+          </div>
         ) : mode === "wordiply" ? (
+
 
           <div className="space-y-3">
             <div>
