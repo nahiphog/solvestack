@@ -985,17 +985,7 @@ function Index() {
         )}
 
         {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle") && (
-          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("wordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Original
-            </button>
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("fibble")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1017,6 +1007,16 @@ function Index() {
               Flipping Letters
             </button>
             <button
+              onClick={() => switchMode("wordle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Original
+            </button>
+            <button
               onClick={() => switchMode("worwordle")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "worwordle"
@@ -1030,17 +1030,7 @@ function Index() {
         )}
 
         {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind") && (
-          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("spellingbee")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "spellingbee"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Spelling Bee
-            </button>
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("marbless")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1052,14 +1042,24 @@ function Index() {
               Marbless
             </button>
             <button
-              onClick={() => switchMode("wordiply")}
+              onClick={() => switchMode("mastermind")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wordiply"
+                mode === "mastermind"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Wordiply
+              Mastermind
+            </button>
+            <button
+              onClick={() => switchMode("spellingbee")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "spellingbee"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Spelling Bee
             </button>
             <button
               onClick={() => switchMode("wordpeaks")}
@@ -1072,20 +1072,20 @@ function Index() {
               Word Peaks
             </button>
             <button
-              onClick={() => switchMode("mastermind")}
+              onClick={() => switchMode("wordiply")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "mastermind"
+                mode === "wordiply"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Mastermind
+              Wordiply
             </button>
           </div>
         )}
 
         {(mode === "dodeku" || mode === "sheetdoku") && (
-          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("dodeku")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1116,16 +1116,16 @@ function Index() {
 
 
         {(mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords") && (
-          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
-              onClick={() => switchMode(4)}
+              onClick={() => switchMode("craftwords")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === 4 || mode === 5 || mode === 6
+                mode === "craftwords"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              X letters
+              Craft Words
             </button>
             <button
               onClick={() => switchMode("weaverx")}
@@ -1138,14 +1138,14 @@ function Index() {
               Weaver X
             </button>
             <button
-              onClick={() => switchMode("craftwords")}
+              onClick={() => switchMode(4)}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "craftwords"
+                mode === 4 || mode === 5 || mode === 6
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Craft Words
+              X letters
             </button>
           </div>
         )}
@@ -1179,17 +1179,7 @@ function Index() {
         )}
 
         {(mode === "splice" || mode === "pivots") && (
-          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("splice")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "splice"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Word Splice
-            </button>
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("pivots")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1199,6 +1189,16 @@ function Index() {
               }`}
             >
               PlayPivots
+            </button>
+            <button
+              onClick={() => switchMode("splice")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "splice"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Word Splice
             </button>
           </div>
         )}
@@ -2130,7 +2130,8 @@ function Index() {
                         prev.map((r, i) => (i === ri ? { ...r, greens: Number(e.target.value) } : r)),
                       )
                     }
-                    className="h-12 w-12 rounded border-2 border-green-600 bg-green-600 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none"
+                    className="h-12 w-12 rounded border-2 border-green-600 bg-green-600 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
+                    style={{ textAlignLast: "center" }}
                   >
                     {[0, 1, 2, 3, 4, 5].map((n) => (
                       <option key={n} value={n} className="bg-background text-foreground">
@@ -2148,7 +2149,8 @@ function Index() {
                         prev.map((r, i) => (i === ri ? { ...r, yellows: Number(e.target.value) } : r)),
                       )
                     }
-                    className="h-12 w-12 rounded border-2 border-yellow-500 bg-yellow-500 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none"
+                    className="h-12 w-12 rounded border-2 border-yellow-500 bg-yellow-500 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
+                    style={{ textAlignLast: "center" }}
                   >
                     {[0, 1, 2, 3, 4, 5].map((n) => (
                       <option key={n} value={n} className="bg-background text-foreground">
@@ -2536,11 +2538,14 @@ function Index() {
                 <Input
                   value={start}
                   onChange={(e) => setStart(clamp(e.target.value))}
-                  maxLength={Math.min(9, wordLength || 9)}
-                  className="font-mono text-lg uppercase tracking-widest w-[11ch]"
+                  maxLength={Math.min(10, wordLength || 10)}
+                  className="font-mono text-lg uppercase tracking-widest w-[10ch]"
                 />
               </div>
-              <div className="pb-2 text-2xl font-bold text-muted-foreground">→</div>
+              <div className="flex flex-col">
+                <label className="mb-1 block text-sm font-medium invisible select-none" aria-hidden="true">.</label>
+                <div className="flex h-10 items-center text-2xl font-bold text-muted-foreground">→</div>
+              </div>
               <div>
                 <label className="mb-1 block text-sm font-medium">
                   Goal{mode === "pivots" ? " (fixed)" : ""}
@@ -2548,9 +2553,9 @@ function Index() {
                 <Input
                   value={goal}
                   onChange={(e) => setGoal(clamp(e.target.value))}
-                  maxLength={Math.min(9, wordLength || 9)}
+                  maxLength={Math.min(10, wordLength || 10)}
                   disabled={mode === "pivots"}
-                  className="font-mono text-lg uppercase tracking-widest w-[11ch]"
+                  className="font-mono text-lg uppercase tracking-widest w-[10ch]"
                 />
               </div>
             </div>
