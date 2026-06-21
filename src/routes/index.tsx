@@ -1400,6 +1400,9 @@ function Index() {
           {mode === "jeffgoldblum" && (
             <a href="https://jeffgoldblumle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">JeffGoldblumLe</a>
           )}
+          {mode === "wordbunny" && (
+            <a href="https://wordbunny.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Bunny</a>
+          )}
         </div>
 
 
