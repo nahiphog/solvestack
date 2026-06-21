@@ -1340,6 +1340,10 @@ function Index() {
               <a href="https://word500.com/game?mode=daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word500</a>
               <span> · </span>
               <a href="https://play.woodle.today/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Woodle</a>
+              <span> · </span>
+              <a href="https://blindle.kahveciderin.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Blindle</a>
+              <span> · </span>
+              <a href="https://play-cows-and-bulls.web.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Cows and Bulls</a>
             </>
           )}
           {mode === "marbless" && (
@@ -1452,7 +1456,7 @@ function Index() {
         {mode === "mastermind" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p>Enter your guesses. And input the number of correct and wrong placements.</p>
-            <p>Get all 5-letter words consistent with the feedback.</p>
+            <p>Get all words consistent with the feedback.</p>
           </div>
         )}
 
@@ -2157,8 +2161,44 @@ function Index() {
                 <span>strategic starting words into the solver.</span>
               </div>
             )}
+            {mastermindLen === 4 && (
+              <div className="flex items-center gap-2 text-sm">
+                <span>Optional input: Place</span>
+                <select
+                  className="rounded border border-border bg-background px-2 py-1"
+                  defaultValue=""
+                  onChange={(e) => {
+                    const n = parseInt(e.target.value, 10);
+                    if (n === 0) {
+                      setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
+                      setMastermindResults(null);
+                      return;
+                    }
+                    if (n === 3) {
+                      const triplets = [
+                        ["RANK", "SHOW", "TIME"],
+                        ["LEAF", "ROCK", "WIND"],
+                        ["KIND", "LOVE", "STAR"],
+                        ["JUMP", "LIFE", "TASK"],
+                        ["HOPE", "RUNS", "WALK"],
+                        ["FISH", "PLAY", "WORD"],
+                      ];
+                      const pick = triplets[Math.floor(Math.random() * triplets.length)];
+                      setMastermindRows(pick.map((w) => ({ word: w, greens: 0, yellows: 0 })));
+                      setMastermindResults(null);
+                    }
+                  }}
+                >
+                  <option value="" disabled>—</option>
+                  <option value="0">0</option>
+                  <option value="3">3</option>
+                </select>
+                <span>strategic starting words into the solver.</span>
+              </div>
+            )}
             {mastermindRows.map((row, ri) => (
               <div key={ri} className="flex flex-wrap items-end gap-3 rounded-lg border-2 border-border p-3">
+
                 <div>
                   <label className="mb-1 block text-sm font-medium">Guess #{ri + 1}</label>
                   <div className="flex gap-1.5">
