@@ -2863,15 +2863,12 @@ function Index() {
                     </div>
                     <div className="flex flex-wrap gap-2 font-mono text-sm">
                       {words.map((w) => (
-                        <a
+                        <span
                           key={w}
-                          href={`https://www.dictionary.com/browse/${w.toLowerCase()}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                          className="rounded bg-muted px-2 py-1 tracking-widest"
                         >
                           {w}
-                        </a>
+                        </span>
                       ))}
                     </div>
                   </div>
