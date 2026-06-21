@@ -984,18 +984,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle") && (
-          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("wordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Original
-            </button>
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("fibble")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1017,6 +1006,16 @@ function Index() {
               Flipping Letters
             </button>
             <button
+              onClick={() => switchMode("wordle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wordle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Original
+            </button>
+            <button
               onClick={() => switchMode("worwordle")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "worwordle"
@@ -1030,17 +1029,7 @@ function Index() {
         )}
 
         {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind") && (
-          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("spellingbee")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "spellingbee"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Spelling Bee
-            </button>
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("marbless")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1052,14 +1041,24 @@ function Index() {
               Marbless
             </button>
             <button
-              onClick={() => switchMode("wordiply")}
+              onClick={() => switchMode("mastermind")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wordiply"
+                mode === "mastermind"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Wordiply
+              Mastermind
+            </button>
+            <button
+              onClick={() => switchMode("spellingbee")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "spellingbee"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Spelling Bee
             </button>
             <button
               onClick={() => switchMode("wordpeaks")}
@@ -1072,20 +1071,20 @@ function Index() {
               Word Peaks
             </button>
             <button
-              onClick={() => switchMode("mastermind")}
+              onClick={() => switchMode("wordiply")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "mastermind"
+                mode === "wordiply"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Mastermind
+              Wordiply
             </button>
           </div>
         )}
 
         {(mode === "dodeku" || mode === "sheetdoku") && (
-          <div className="mb-4 flex flex-col rounded-md border bg-muted p-1">
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("dodeku")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
