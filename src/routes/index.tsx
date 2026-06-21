@@ -464,22 +464,22 @@ function Index() {
     for (let i = 0; i < mastermindRows.length; i++) {
       const row = mastermindRows[i];
       const w = row.word.trim().toUpperCase();
-      if (w.length !== 5) {
-        setError(`Row ${i + 1}: guess must be exactly 5 letters.`);
+      if (w.length !== mastermindLen) {
+        setError(`Row ${i + 1}: guess must be exactly ${mastermindLen} letters.`);
         return;
       }
-      if (!(await isValid5LetterWord(w))) {
-        setError(`Row ${i + 1}: "${w}" is not a valid 5-letter English word.`);
+      if (!(await isValidNLetterWord(w, mastermindLen))) {
+        setError(`Row ${i + 1}: "${w}" is not a valid ${mastermindLen}-letter English word.`);
         return;
       }
-      if (row.greens + row.yellows > 5) {
-        setError(`Row ${i + 1}: correct + wrong cannot exceed 5.`);
+      if (row.greens + row.yellows > mastermindLen) {
+        setError(`Row ${i + 1}: correct + wrong cannot exceed ${mastermindLen}.`);
         return;
       }
     }
     setSolving(true);
     const perRow = await Promise.all(
-      mastermindRows.map((r) => mastermindSolve(r.word.toUpperCase(), r.greens, r.yellows)),
+      mastermindRows.map((r) => mastermindSolve(r.word.toUpperCase(), r.greens, r.yellows, mastermindLen)),
     );
     const intersection = perRow.reduce<string[]>((acc, list, idx) => {
       if (idx === 0) return list;
@@ -496,7 +496,7 @@ function Index() {
     setMastermindRows((prev) =>
       prev.map((r, i) => {
         if (i !== ri) return r;
-        const padded = r.word.padEnd(5, " ").slice(0, 5).split("");
+        const padded = r.word.padEnd(mastermindLen, " ").slice(0, mastermindLen).split("");
         padded[ti] = c || " ";
         return { ...r, word: padded.join("").replace(/ +$/, "") };
       }),
@@ -504,7 +504,7 @@ function Index() {
   };
 
   const focusMastermindTile = (ri: number, ti: number) => {
-    if (ti < 0 || ti > 4) return;
+    if (ti < 0 || ti >= mastermindLen) return;
     const el = document.getElementById(`mastermind-tile-${ri}-${ti}`) as HTMLInputElement | null;
     el?.focus();
     el?.select();
@@ -512,6 +512,26 @@ function Index() {
 
   const addMastermindRow = () => {
     setMastermindRows((prev) => [...prev, { word: "", greens: 0, yellows: 0 }]);
+  };
+
+  const addMastermindGuessFromAnswer = (word: string) => {
+    setMastermindRows((prev) => [...prev, { word: word.toUpperCase(), greens: 0, yellows: 0 }]);
+    setMastermindResults(null);
+  };
+
+  const addWordleGuessFromAnswer = (word: string) => {
+    setWordleGuesses((prev) => [...prev, { word: word.toUpperCase(), pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] }]);
+    setWordleResults(null);
+  };
+
+  const addWordPeaksGuessFromAnswer = (word: string) => {
+    setWordPeaksGuesses((prev) => [...prev, { word: word.toUpperCase(), pattern: ["NONE", "NONE", "NONE", "NONE", "NONE"] }]);
+    setWordPeaksResults(null);
+  };
+
+  const addWorGuessFromAnswer = (word: string) => {
+    setWorGuesses((prev) => [...prev, { word: word.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    setWorResults(null);
   };
 
   const removeMastermindRow = (ri: number) => {
