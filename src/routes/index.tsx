@@ -2235,7 +2235,7 @@ function Index() {
                     className="h-12 w-12 rounded border-2 border-yellow-500 bg-yellow-500 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
                     style={{ textAlignLast: "center" }}
                   >
-                    {[0, 1, 2, 3, 4, 5].map((n) => (
+                    {Array.from({ length: mastermindLen + 1 }, (_, n) => n).map((n) => (
                       <option key={n} value={n} className="bg-background text-foreground">
                         {n}
                       </option>
