@@ -2538,11 +2538,14 @@ function Index() {
                 <Input
                   value={start}
                   onChange={(e) => setStart(clamp(e.target.value))}
-                  maxLength={Math.min(9, wordLength || 9)}
-                  className="font-mono text-lg uppercase tracking-widest w-[11ch]"
+                  maxLength={Math.min(10, wordLength || 10)}
+                  className="font-mono text-lg uppercase tracking-widest w-[10ch]"
                 />
               </div>
-              <div className="pb-2 text-2xl font-bold text-muted-foreground">→</div>
+              <div className="flex flex-col">
+                <label className="mb-1 block text-sm font-medium invisible select-none" aria-hidden="true">.</label>
+                <div className="flex h-10 items-center text-2xl font-bold text-muted-foreground">→</div>
+              </div>
               <div>
                 <label className="mb-1 block text-sm font-medium">
                   Goal{mode === "pivots" ? " (fixed)" : ""}
@@ -2550,9 +2553,9 @@ function Index() {
                 <Input
                   value={goal}
                   onChange={(e) => setGoal(clamp(e.target.value))}
-                  maxLength={Math.min(9, wordLength || 9)}
+                  maxLength={Math.min(10, wordLength || 10)}
                   disabled={mode === "pivots"}
-                  className="font-mono text-lg uppercase tracking-widest w-[11ch]"
+                  className="font-mono text-lg uppercase tracking-widest w-[10ch]"
                 />
               </div>
             </div>
