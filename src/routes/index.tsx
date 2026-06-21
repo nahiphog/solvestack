@@ -877,7 +877,7 @@ function Index() {
     }
     for (const w of words) {
       if (!isValidWord(w, "wordbunny")) {
-        setError(`"${w}" is not in the Word Bunny dictionary.`);
+        setError(`"${w}" is not a valid word.`);
         return;
       }
     }
