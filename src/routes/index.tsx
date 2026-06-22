@@ -242,14 +242,13 @@ function Index() {
     setWorStartingWords(count);
     if (count === 2) {
       const pair = WOR_STARTING_PAIRS[Math.floor(Math.random() * WOR_STARTING_PAIRS.length)];
-      setWorGuesses([
+      setWorGuesses((prev) => [
+        ...prev,
         { word: pair[0], pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
         { word: pair[1], pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
       ]);
-    } else {
-      setWorGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+      setWorResults(null);
     }
-    setWorResults(null);
   };
 
   const [marblessColumns, setMarblessColumns] = useState<string[][]>([
@@ -1042,7 +1041,7 @@ function Index() {
         )}
 
         {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum") && (
-          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
+          <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("wordle")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1097,7 +1096,7 @@ function Index() {
         )}
 
         {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind") && (
-          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
+          <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("marbless")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1539,7 +1538,7 @@ function Index() {
         )}
         {mode === "worwordle" && (
           <div className="mb-4 flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Optional input: Place</span>
+            <span className="text-muted-foreground">Optional input: Add</span>
             <select
               value={worStartingWords}
               onChange={(e) => applyWorStartingWords(Number(e.target.value) as 0 | 2)}
@@ -1902,27 +1901,18 @@ function Index() {
           <div className="space-y-4">
             {mode !== "jeffgoldblum" && (
               <div className="flex items-center gap-2 text-sm">
-                <span>Optional input: {mode === "fibble" ? "Add" : "Place"}</span>
+                <span>Optional input: Add</span>
                 <select
                   className="rounded border border-border bg-background px-2 py-1"
                   defaultValue="0"
                   onChange={(e) => {
                     const n = parseInt(e.target.value, 10);
-                    if (n === 0) {
-                      if (mode === "fibble") return;
-                      setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
-                      setWordleResults(null);
-                      return;
-                    }
+                    if (n === 0) return;
                     const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
                     if (!sheet || sheet.length === 0) return;
                     const row = sheet[Math.floor(Math.random() * sheet.length)];
                     const newGuesses = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] }));
-                    if (mode === "fibble") {
-                      setWordleGuesses((prev) => [...prev, ...newGuesses]);
-                    } else {
-                      setWordleGuesses(newGuesses);
-                    }
+                    setWordleGuesses((prev) => [...prev, ...newGuesses]);
                     setWordleResults(null);
                   }}
                 >
@@ -2185,7 +2175,7 @@ function Index() {
             </div>
             {mastermindLen === 5 && (
               <div className="flex items-center gap-2 text-sm">
-                <span>Optional input: Place</span>
+                <span>Optional input: Add</span>
                 <select
                   className="rounded border border-border bg-background px-2 py-1"
                   defaultValue=""
@@ -2194,7 +2184,8 @@ function Index() {
                     const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
                     if (!sheet || sheet.length === 0) return;
                     const row = sheet[Math.floor(Math.random() * sheet.length)];
-                    setMastermindRows(row.slice(0, n).map((w) => ({ word: w.toUpperCase(), greens: 0, yellows: 0 })));
+                    const additions = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), greens: 0, yellows: 0 }));
+                    setMastermindRows((prev) => [...prev, ...additions]);
                     setMastermindResults(null);
                   }}
                 >
@@ -2208,17 +2199,13 @@ function Index() {
             )}
             {mastermindLen === 4 && (
               <div className="flex items-center gap-2 text-sm">
-                <span>Optional input: Place</span>
+                <span>Optional input: Add</span>
                 <select
                   className="rounded border border-border bg-background px-2 py-1"
                   defaultValue=""
                   onChange={(e) => {
                     const n = parseInt(e.target.value, 10);
-                    if (n === 0) {
-                      setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
-                      setMastermindResults(null);
-                      return;
-                    }
+                    if (n === 0) return;
                     if (n === 3) {
                       const triplets = [
                         ["RANK", "SHOW", "TIME"],
@@ -2229,7 +2216,8 @@ function Index() {
                         ["FISH", "PLAY", "WORD"],
                       ];
                       const pick = triplets[Math.floor(Math.random() * triplets.length)];
-                      setMastermindRows(pick.map((w) => ({ word: w, greens: 0, yellows: 0 })));
+                      const additions = pick.map((w) => ({ word: w, greens: 0, yellows: 0 }));
+                      setMastermindRows((prev) => [...prev, ...additions]);
                       setMastermindResults(null);
                     }
                   }}
@@ -2288,43 +2276,45 @@ function Index() {
                     })}
                   </div>
                 </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium">correct</label>
-                  <select
-                    value={row.greens}
-                    onChange={(e) =>
-                      setMastermindRows((prev) =>
-                        prev.map((r, i) => (i === ri ? { ...r, greens: Number(e.target.value) } : r)),
-                      )
-                    }
-                    className="h-12 w-12 rounded border-2 border-green-600 bg-green-600 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
-                    style={{ textAlignLast: "center" }}
-                  >
-                    {Array.from({ length: mastermindLen + 1 }, (_, n) => n).map((n) => (
-                      <option key={n} value={n} className="bg-background text-foreground">
-                        {n}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium">wrong</label>
-                  <select
-                    value={row.yellows}
-                    onChange={(e) =>
-                      setMastermindRows((prev) =>
-                        prev.map((r, i) => (i === ri ? { ...r, yellows: Number(e.target.value) } : r)),
-                      )
-                    }
-                    className="h-12 w-12 rounded border-2 border-yellow-500 bg-yellow-500 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
-                    style={{ textAlignLast: "center" }}
-                  >
-                    {Array.from({ length: mastermindLen + 1 }, (_, n) => n).map((n) => (
-                      <option key={n} value={n} className="bg-background text-foreground">
-                        {n}
-                      </option>
-                    ))}
-                  </select>
+                <div className="flex gap-3">
+                  <div>
+                    <label className="mb-1 block text-sm font-medium">correct</label>
+                    <select
+                      value={row.greens}
+                      onChange={(e) =>
+                        setMastermindRows((prev) =>
+                          prev.map((r, i) => (i === ri ? { ...r, greens: Number(e.target.value) } : r)),
+                        )
+                      }
+                      className="h-12 w-12 rounded border-2 border-green-600 bg-green-600 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
+                      style={{ textAlignLast: "center" }}
+                    >
+                      {Array.from({ length: mastermindLen + 1 }, (_, n) => n).map((n) => (
+                        <option key={n} value={n} className="bg-background text-foreground">
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium">wrong</label>
+                    <select
+                      value={row.yellows}
+                      onChange={(e) =>
+                        setMastermindRows((prev) =>
+                          prev.map((r, i) => (i === ri ? { ...r, yellows: Number(e.target.value) } : r)),
+                        )
+                      }
+                      className="h-12 w-12 rounded border-2 border-yellow-500 bg-yellow-500 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
+                      style={{ textAlignLast: "center" }}
+                    >
+                      {Array.from({ length: mastermindLen + 1 }, (_, n) => n).map((n) => (
+                        <option key={n} value={n} className="bg-background text-foreground">
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 {mastermindRows.length > 1 && (
                   <Button onClick={() => removeMastermindRow(ri)} variant="outline" size="sm">×</Button>
@@ -2557,7 +2547,7 @@ function Index() {
                 <div>
                   <div className="mb-2 text-sm font-medium">Paint region (click cells to assign)</div>
                   <div className="flex flex-wrap gap-2">
-                    {[0, 1, 2, 3, 4, 5, 6].map((reg) => (
+                    {[1, 2, 3, 4, 5, 6, 0].map((reg) => (
                       <button
                         key={reg}
                         onClick={() => setSdPaintRegion(reg)}
