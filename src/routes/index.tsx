@@ -2276,43 +2276,45 @@ function Index() {
                     })}
                   </div>
                 </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium">correct</label>
-                  <select
-                    value={row.greens}
-                    onChange={(e) =>
-                      setMastermindRows((prev) =>
-                        prev.map((r, i) => (i === ri ? { ...r, greens: Number(e.target.value) } : r)),
-                      )
-                    }
-                    className="h-12 w-12 rounded border-2 border-green-600 bg-green-600 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
-                    style={{ textAlignLast: "center" }}
-                  >
-                    {Array.from({ length: mastermindLen + 1 }, (_, n) => n).map((n) => (
-                      <option key={n} value={n} className="bg-background text-foreground">
-                        {n}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium">wrong</label>
-                  <select
-                    value={row.yellows}
-                    onChange={(e) =>
-                      setMastermindRows((prev) =>
-                        prev.map((r, i) => (i === ri ? { ...r, yellows: Number(e.target.value) } : r)),
-                      )
-                    }
-                    className="h-12 w-12 rounded border-2 border-yellow-500 bg-yellow-500 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
-                    style={{ textAlignLast: "center" }}
-                  >
-                    {Array.from({ length: mastermindLen + 1 }, (_, n) => n).map((n) => (
-                      <option key={n} value={n} className="bg-background text-foreground">
-                        {n}
-                      </option>
-                    ))}
-                  </select>
+                <div className="flex gap-3">
+                  <div>
+                    <label className="mb-1 block text-sm font-medium">correct</label>
+                    <select
+                      value={row.greens}
+                      onChange={(e) =>
+                        setMastermindRows((prev) =>
+                          prev.map((r, i) => (i === ri ? { ...r, greens: Number(e.target.value) } : r)),
+                        )
+                      }
+                      className="h-12 w-12 rounded border-2 border-green-600 bg-green-600 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
+                      style={{ textAlignLast: "center" }}
+                    >
+                      {Array.from({ length: mastermindLen + 1 }, (_, n) => n).map((n) => (
+                        <option key={n} value={n} className="bg-background text-foreground">
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium">wrong</label>
+                    <select
+                      value={row.yellows}
+                      onChange={(e) =>
+                        setMastermindRows((prev) =>
+                          prev.map((r, i) => (i === ri ? { ...r, yellows: Number(e.target.value) } : r)),
+                        )
+                      }
+                      className="h-12 w-12 rounded border-2 border-yellow-500 bg-yellow-500 text-center font-mono text-lg font-bold text-white outline-none focus:ring-2 focus:ring-ring appearance-none px-0"
+                      style={{ textAlignLast: "center" }}
+                    >
+                      {Array.from({ length: mastermindLen + 1 }, (_, n) => n).map((n) => (
+                        <option key={n} value={n} className="bg-background text-foreground">
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 {mastermindRows.length > 1 && (
                   <Button onClick={() => removeMastermindRow(ri)} variant="outline" size="sm">×</Button>
