@@ -348,6 +348,7 @@ function Index() {
   useEffect(() => { setPageFl(0); }, [flResults]);
   useEffect(() => { setPageWor(0); }, [worResults]);
   useEffect(() => { setPageSd(0); }, [sdResults]);
+  useEffect(() => { setPageSudoku(0); }, [sudokuResults]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
