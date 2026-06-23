@@ -1566,6 +1566,12 @@ function Index() {
             <p>Pick a region color, then click cells to assign them. Enter any pre-filled cell values inside the grid.</p>
           </div>
         )}
+        {mode === "sudoku" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Fill the 9×9 grid so each row, column, and 3×3 region contains 1–9 exactly once.</p>
+            <p>Enter any pre-filled cell values inside the grid, then click Solve.</p>
+          </div>
+        )}
         {mode === "wordpeaks" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p>Enter your guesses.</p>
