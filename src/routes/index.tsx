@@ -481,6 +481,28 @@ function Index() {
     }, 0);
   };
 
+  const solveSudoku = () => {
+    setError(null);
+    setSudokuResults(null);
+    const board: number[][] = sudokuBoard.map((row) =>
+      row.map((v) => {
+        const s = v.trim();
+        if (!s) return 0;
+        const n = parseInt(s, 10);
+        return Number.isFinite(n) && n >= 1 && n <= 9 ? n : 0;
+      }),
+    );
+    setSolving(true);
+    setTimeout(() => {
+      const res = sudokuSolve(board, SUDOKU_REGIONS);
+      if (res.length === 0) setError("No solutions found.");
+      else setSudokuResults(res);
+      setSolving(false);
+    }, 0);
+  };
+
+
+
 
   const solveSpellingBee = async () => {
     setError(null);
