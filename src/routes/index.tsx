@@ -17,10 +17,11 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const SECTIONS: { id: "ladder" | "search" | "math"; label: string }[] = [
+const SECTIONS: { id: "ladder" | "search" | "math" | "logic"; label: string }[] = [
   { id: "search", label: "Word search" },
   { id: "ladder", label: "Word ladder" },
   { id: "math", label: "Mathematics" },
+  { id: "logic", label: "Logic" },
 ];
 
 const LADDER_MODES: { id: string; label: string }[] = [
