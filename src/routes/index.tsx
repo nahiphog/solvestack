@@ -1229,6 +1229,17 @@ function Index() {
           </div>
         )}
 
+        {mode === "sudoku" && (
+          <div className="mb-4 grid grid-cols-1 gap-1 rounded-md border bg-muted p-1">
+            <button
+              onClick={() => switchMode("sudoku")}
+              className="rounded bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-sm transition"
+            >
+              Sudoku
+            </button>
+          </div>
+        )}
+
 
 
 
