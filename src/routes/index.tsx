@@ -306,15 +306,15 @@ function Index() {
     [7,7,7,8,8,8,9,9,9],
   ];
   const SUDOKU_DEFAULT: string[][] = [
-    ["5","4","6","","","","","3","2"],
-    ["7","1","9","","","","4","5","8"],
-    ["2","8","3","5","","1","","",""],
-    ["3","5","4","1","7","2","6","",""],
-    ["","","","","","","","",""],
-    ["","","8","4","","3","2","",""],
-    ["","","","3","","7","8","6","1"],
-    ["6","","2","","","","9","","5"],
-    ["8","7","1","9","6","5","3","2","4"],
+    ["8","","","","","","","",""],
+    ["","","3","6","","","","",""],
+    ["","7","","","9","","2","",""],
+    ["","5","","","","7","","",""],
+    ["","","","","4","5","7","",""],
+    ["","","","1","","","","3",""],
+    ["","","1","","","","","6","8"],
+    ["","","8","5","","","","1",""],
+    ["","9","","","","","4","",""],
   ];
   const [sudokuBoard, setSudokuBoard] = useState<string[][]>(SUDOKU_DEFAULT.map((r) => r.slice()));
   const [sudokuResults, setSudokuResults] = useState<number[][][] | null>(null);
@@ -1568,6 +1568,11 @@ function Index() {
         )}
         {mode === "sudoku" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>
+              <a href="https://www.nytimes.com/puzzles/sudoku" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">New York Times</a>
+              {", "}
+              <a href="https://www.netflix.com/tudum/puzzled/sudoku/daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Netflix</a>
+            </p>
             <p>Fill the 9×9 grid so each row, column, and 3×3 region contains 1–9 exactly once.</p>
             <p>Enter any pre-filled cell values inside the grid, then click Solve.</p>
           </div>
@@ -2788,16 +2793,10 @@ function Index() {
                   >
                     Clear all
                   </Button>
-                  <Button
-                    onClick={() => { setSudokuBoard(SUDOKU_DEFAULT.map((r) => r.slice())); setSudokuResults(null); }}
-                    variant="outline"
-                    size="lg"
-                  >
-                    Reset
-                  </Button>
                   <Button onClick={solveSudoku} disabled={solving} size="lg">
                     {solving ? "Solving..." : "Solve"}
                   </Button>
+
                 </div>
               </div>
             );
