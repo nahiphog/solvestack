@@ -294,6 +294,31 @@ function Index() {
   const [sdPaintRegion, setSdPaintRegion] = useState<number>(0);
   const [sdResults, setSdResults] = useState<number[][][] | null>(null);
   const [pageSd, setPageSd] = useState(0);
+  const SUDOKU_REGIONS: number[][] = [
+    [1,1,1,2,2,2,3,3,3],
+    [1,1,1,2,2,2,3,3,3],
+    [1,1,1,2,2,2,3,3,3],
+    [4,4,4,5,5,5,6,6,6],
+    [4,4,4,5,5,5,6,6,6],
+    [4,4,4,5,5,5,6,6,6],
+    [7,7,7,8,8,8,9,9,9],
+    [7,7,7,8,8,8,9,9,9],
+    [7,7,7,8,8,8,9,9,9],
+  ];
+  const SUDOKU_DEFAULT: string[][] = [
+    ["5","4","6","","","","","3","2"],
+    ["7","1","9","","","","4","5","8"],
+    ["2","8","3","5","","1","","",""],
+    ["3","5","4","1","7","2","6","",""],
+    ["","","","","","","","",""],
+    ["","","8","4","","3","2","",""],
+    ["","","","3","","7","8","6","1"],
+    ["6","","2","","","","9","","5"],
+    ["8","7","1","9","6","5","3","2","4"],
+  ];
+  const [sudokuBoard, setSudokuBoard] = useState<string[][]>(SUDOKU_DEFAULT.map((r) => r.slice()));
+  const [sudokuResults, setSudokuResults] = useState<number[][][] | null>(null);
+  const [pageSudoku, setPageSudoku] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
