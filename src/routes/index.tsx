@@ -2732,6 +2732,77 @@ function Index() {
             );
           })()
 
+        ) : mode === "sudoku" ? (
+          (() => {
+            const REGION_BG: Record<number, string> = {
+              1: "bg-red-500/20",
+              2: "bg-blue-500/20",
+              3: "bg-emerald-500/20",
+              4: "bg-amber-500/20",
+              5: "bg-purple-500/20",
+              6: "bg-pink-500/20",
+              7: "bg-cyan-500/20",
+              8: "bg-orange-500/20",
+              9: "bg-lime-500/20",
+            };
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-sm font-medium">Grid (type 1–9; leave blank for empty)</div>
+                  <div className="inline-block">
+                    {sudokuBoard.map((row, r) => (
+                      <div key={r} className="flex">
+                        {row.map((val, c) => {
+                          const reg = SUDOKU_REGIONS[r][c];
+                          const bg = REGION_BG[reg] || "bg-muted";
+                          return (
+                            <div
+                              key={c}
+                              className={`flex h-10 w-10 items-center justify-center border border-border ${bg}`}
+                            >
+                              <input
+                                value={val}
+                                onChange={(e) => {
+                                  const cleaned = e.target.value.replace(/[^1-9]/g, "").slice(-1);
+                                  setSudokuBoard((prev) => prev.map((rr, ri) => ri === r ? rr.map((x, ci) => ci === c ? cleaned : x) : rr));
+                                  setSudokuResults(null);
+                                }}
+                                className="h-9 w-9 rounded bg-transparent text-center font-mono text-lg font-bold outline-none focus:ring-2 focus:ring-ring"
+                                aria-label={`Cell row ${r + 1} col ${c + 1}`}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    onClick={() => {
+                      setSudokuBoard(Array.from({ length: 9 }, () => Array(9).fill("")));
+                      setSudokuResults(null);
+                    }}
+                    variant="outline"
+                    size="lg"
+                  >
+                    Clear all
+                  </Button>
+                  <Button
+                    onClick={() => { setSudokuBoard(SUDOKU_DEFAULT.map((r) => r.slice())); setSudokuResults(null); }}
+                    variant="outline"
+                    size="lg"
+                  >
+                    Reset
+                  </Button>
+                  <Button onClick={solveSudoku} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+              </div>
+            );
+          })()
+
         ) : mode === "wordiply" ? (
 
 
