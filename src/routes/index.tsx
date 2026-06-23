@@ -1017,8 +1017,9 @@ function Index() {
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum";
-            const inLadder = !isMath && !inSearch;
-            const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : inLadder;
+            const inLogic = mode === "sudoku";
+            const inLadder = !isMath && !inSearch && !inLogic;
+            const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : s.id === "logic" ? inLogic : inLadder;
             return (
               <button
                 key={s.id}
@@ -1027,7 +1028,9 @@ function Index() {
                     ? switchMode(4)
                     : s.id === "search"
                       ? switchMode("wordle")
-                      : switchMode("dodeku")
+                      : s.id === "logic"
+                        ? switchMode("sudoku")
+                        : switchMode("dodeku")
                 }
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
