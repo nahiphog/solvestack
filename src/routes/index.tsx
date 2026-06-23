@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useState } from "react";
-import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, spellingBeeSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, spellingBeeSolve, sudokuSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,10 +17,11 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const SECTIONS: { id: "ladder" | "search" | "math"; label: string }[] = [
+const SECTIONS: { id: "ladder" | "search" | "math" | "logic"; label: string }[] = [
   { id: "search", label: "Word search" },
   { id: "ladder", label: "Word ladder" },
   { id: "math", label: "Mathematics" },
+  { id: "logic", label: "Logic" },
 ];
 
 const LADDER_MODES: { id: string; label: string }[] = [
@@ -55,6 +56,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   worwordle: { start: "", goal: "" },
   sheetdoku: { start: "", goal: "" },
   jeffgoldblum: { start: "", goal: "" },
+  sudoku: { start: "", goal: "" },
   
 
 };
@@ -292,6 +294,31 @@ function Index() {
   const [sdPaintRegion, setSdPaintRegion] = useState<number>(0);
   const [sdResults, setSdResults] = useState<number[][][] | null>(null);
   const [pageSd, setPageSd] = useState(0);
+  const SUDOKU_REGIONS: number[][] = [
+    [1,1,1,2,2,2,3,3,3],
+    [1,1,1,2,2,2,3,3,3],
+    [1,1,1,2,2,2,3,3,3],
+    [4,4,4,5,5,5,6,6,6],
+    [4,4,4,5,5,5,6,6,6],
+    [4,4,4,5,5,5,6,6,6],
+    [7,7,7,8,8,8,9,9,9],
+    [7,7,7,8,8,8,9,9,9],
+    [7,7,7,8,8,8,9,9,9],
+  ];
+  const SUDOKU_DEFAULT: string[][] = [
+    ["5","4","6","","","","","3","2"],
+    ["7","1","9","","","","4","5","8"],
+    ["2","8","3","5","","1","","",""],
+    ["3","5","4","1","7","2","6","",""],
+    ["","","","","","","","",""],
+    ["","","8","4","","3","2","",""],
+    ["","","","3","","7","8","6","1"],
+    ["6","","2","","","","9","","5"],
+    ["8","7","1","9","6","5","3","2","4"],
+  ];
+  const [sudokuBoard, setSudokuBoard] = useState<string[][]>(SUDOKU_DEFAULT.map((r) => r.slice()));
+  const [sudokuResults, setSudokuResults] = useState<number[][][] | null>(null);
+  const [pageSudoku, setPageSudoku] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -321,6 +348,7 @@ function Index() {
   useEffect(() => { setPageFl(0); }, [flResults]);
   useEffect(() => { setPageWor(0); }, [worResults]);
   useEffect(() => { setPageSd(0); }, [sdResults]);
+  useEffect(() => { setPageSudoku(0); }, [sudokuResults]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
@@ -349,6 +377,7 @@ function Index() {
     setMarblessResults(null);
     setDodekuResult(null);
     setSdResults(null);
+    setSudokuResults(null);
     setError(null);
     if (m === "fibble") {
       setWordleGuesses([{ word: "CRANE", pattern: ["GREEN", "GREY", "YELLOW", "GREY", "GREY"] }]);
@@ -451,6 +480,28 @@ function Index() {
       setSolving(false);
     }, 0);
   };
+
+  const solveSudoku = () => {
+    setError(null);
+    setSudokuResults(null);
+    const board: number[][] = sudokuBoard.map((row) =>
+      row.map((v) => {
+        const s = v.trim();
+        if (!s) return 0;
+        const n = parseInt(s, 10);
+        return Number.isFinite(n) && n >= 1 && n <= 9 ? n : 0;
+      }),
+    );
+    setSolving(true);
+    setTimeout(() => {
+      const res = sudokuSolve(board, SUDOKU_REGIONS);
+      if (res.length === 0) setError("No solutions found.");
+      else setSudokuResults(res);
+      setSolving(false);
+    }, 0);
+  };
+
+
 
 
   const solveSpellingBee = async () => {
@@ -966,8 +1017,9 @@ function Index() {
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum";
-            const inLadder = !isMath && !inSearch;
-            const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : inLadder;
+            const inLogic = mode === "sudoku";
+            const inLadder = !isMath && !inSearch && !inLogic;
+            const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : s.id === "logic" ? inLogic : inLadder;
             return (
               <button
                 key={s.id}
@@ -976,7 +1028,9 @@ function Index() {
                     ? switchMode(4)
                     : s.id === "search"
                       ? switchMode("wordle")
-                      : switchMode("dodeku")
+                      : s.id === "logic"
+                        ? switchMode("sudoku")
+                        : switchMode("dodeku")
                 }
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
@@ -1171,6 +1225,17 @@ function Index() {
               }`}
             >
               Sheetdoku
+            </button>
+          </div>
+        )}
+
+        {mode === "sudoku" && (
+          <div className="mb-4 grid grid-cols-1 gap-1 rounded-md border bg-muted p-1">
+            <button
+              onClick={() => switchMode("sudoku")}
+              className="rounded bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-sm transition"
+            >
+              Sudoku
             </button>
           </div>
         )}
@@ -1499,6 +1564,12 @@ function Index() {
             <p>Fill a 5×5 Latin square (each row and column contains 1–5 exactly once) partitioned into regions.</p>
             <p>For each region, set its function and target value.</p>
             <p>Pick a region color, then click cells to assign them. Enter any pre-filled cell values inside the grid.</p>
+          </div>
+        )}
+        {mode === "sudoku" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Fill the 9×9 grid so each row, column, and 3×3 region contains 1–9 exactly once.</p>
+            <p>Enter any pre-filled cell values inside the grid, then click Solve.</p>
           </div>
         )}
         {mode === "wordpeaks" && (
@@ -2661,6 +2732,77 @@ function Index() {
             );
           })()
 
+        ) : mode === "sudoku" ? (
+          (() => {
+            const REGION_BG: Record<number, string> = {
+              1: "bg-red-500/20",
+              2: "bg-blue-500/20",
+              3: "bg-emerald-500/20",
+              4: "bg-amber-500/20",
+              5: "bg-purple-500/20",
+              6: "bg-pink-500/20",
+              7: "bg-cyan-500/20",
+              8: "bg-orange-500/20",
+              9: "bg-lime-500/20",
+            };
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-sm font-medium">Grid (type 1–9; leave blank for empty)</div>
+                  <div className="inline-block">
+                    {sudokuBoard.map((row, r) => (
+                      <div key={r} className="flex">
+                        {row.map((val, c) => {
+                          const reg = SUDOKU_REGIONS[r][c];
+                          const bg = REGION_BG[reg] || "bg-muted";
+                          return (
+                            <div
+                              key={c}
+                              className={`flex h-10 w-10 items-center justify-center border border-border ${bg}`}
+                            >
+                              <input
+                                value={val}
+                                onChange={(e) => {
+                                  const cleaned = e.target.value.replace(/[^1-9]/g, "").slice(-1);
+                                  setSudokuBoard((prev) => prev.map((rr, ri) => ri === r ? rr.map((x, ci) => ci === c ? cleaned : x) : rr));
+                                  setSudokuResults(null);
+                                }}
+                                className="h-9 w-9 rounded bg-transparent text-center font-mono text-lg font-bold outline-none focus:ring-2 focus:ring-ring"
+                                aria-label={`Cell row ${r + 1} col ${c + 1}`}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    onClick={() => {
+                      setSudokuBoard(Array.from({ length: 9 }, () => Array(9).fill("")));
+                      setSudokuResults(null);
+                    }}
+                    variant="outline"
+                    size="lg"
+                  >
+                    Clear all
+                  </Button>
+                  <Button
+                    onClick={() => { setSudokuBoard(SUDOKU_DEFAULT.map((r) => r.slice())); setSudokuResults(null); }}
+                    variant="outline"
+                    size="lg"
+                  >
+                    Reset
+                  </Button>
+                  <Button onClick={solveSudoku} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+              </div>
+            );
+          })()
+
         ) : mode === "wordiply" ? (
 
 
@@ -3269,6 +3411,69 @@ function Index() {
             <Paginator page={pageSd} setPage={setPageSd} total={sdResults.length} perPage={20} />
           </section>
         )}
+
+        {sudokuResults && (() => {
+          const REGION_BG: Record<number, string> = {
+            1: "bg-red-500/20",
+            2: "bg-blue-500/20",
+            3: "bg-emerald-500/20",
+            4: "bg-amber-500/20",
+            5: "bg-purple-500/20",
+            6: "bg-pink-500/20",
+            7: "bg-cyan-500/20",
+            8: "bg-orange-500/20",
+            9: "bg-lime-500/20",
+          };
+          const perPage = 10;
+          return (
+            <section className="mt-10">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <h2 className="text-lg font-semibold">
+                  {sudokuResults.length}{sudokuResults.length === 200 ? "+" : ""} {sudokuResults.length === 1 ? "solution" : "solutions"}
+                </h2>
+                <button
+                  onClick={() => {
+                    const items = sudokuResults
+                      .map((sol, i) => `#${i + 1}\n${sol.map((row) => row.join(" ")).join("\n")}`)
+                      .join("\n\n");
+                    copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                  }}
+                  className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                  aria-label="Copy all solutions"
+                >
+                  {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                </button>
+              </div>
+              <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {sudokuResults.slice(pageSudoku * perPage, pageSudoku * perPage + perPage).map((sol, idx) => {
+                  const i = pageSudoku * perPage + idx;
+                  return (
+                    <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
+                      <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
+                      <div className="inline-block">
+                        {sol.map((row, r) => (
+                          <div key={r} className="flex">
+                            {row.map((cell, c) => {
+                              const reg = SUDOKU_REGIONS[r][c];
+                              const bg = REGION_BG[reg] || "bg-muted";
+                              return (
+                                <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg} font-mono text-sm font-bold`}>
+                                  {cell}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+              <Paginator page={pageSudoku} setPage={setPageSudoku} total={sudokuResults.length} perPage={perPage} />
+            </section>
+          );
+        })()}
+
 
 
 

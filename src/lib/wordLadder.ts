@@ -10,7 +10,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -44,6 +44,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   worwordle: 8,
   sheetdoku: 0,
   jeffgoldblum: 12,
+  sudoku: 0,
   
 };
 
@@ -148,6 +149,51 @@ export function sheetdokuSolve(
   bt(0);
   return solutions;
 }
+
+export function sudokuSolve(
+  board: number[][],
+  regions: number[][],
+  maxSolutions = 200,
+): number[][][] {
+  const N = 9;
+  const b = board.map((r) => r.slice());
+  const rowUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
+  const colUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
+  const regUsed: Map<number, Set<number>> = new Map();
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const reg = regions[r][c];
+    if (!regUsed.has(reg)) regUsed.set(reg, new Set());
+    const v = b[r][c];
+    if (v !== 0) {
+      if (rowUsed[r].has(v) || colUsed[c].has(v) || regUsed.get(reg)!.has(v)) return [];
+      rowUsed[r].add(v); colUsed[c].add(v); regUsed.get(reg)!.add(v);
+    }
+  }
+  const solutions: number[][][] = [];
+  const findEmpty = (): [number, number] | null => {
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (b[r][c] === 0) return [r, c];
+    return null;
+  };
+  const bt = () => {
+    if (solutions.length >= maxSolutions) return;
+    const e = findEmpty();
+    if (!e) { solutions.push(b.map((r) => r.slice())); return; }
+    const [r, c] = e;
+    const reg = regions[r][c];
+    const ru = rowUsed[r], cu = colUsed[c], gu = regUsed.get(reg)!;
+    for (let v = 1; v <= 9; v++) {
+      if (ru.has(v) || cu.has(v) || gu.has(v)) continue;
+      b[r][c] = v; ru.add(v); cu.add(v); gu.add(v);
+      bt();
+      b[r][c] = 0; ru.delete(v); cu.delete(v); gu.delete(v);
+      if (solutions.length >= maxSolutions) return;
+    }
+  };
+  bt();
+  return solutions;
+}
+
+
 
 let _worwordleWordsCache: string[] | null = null;
 async function getWorwordleWords(): Promise<string[]> {
