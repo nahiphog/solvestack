@@ -377,6 +377,7 @@ function Index() {
     setMarblessResults(null);
     setDodekuResult(null);
     setSdResults(null);
+    setSudokuResults(null);
     setError(null);
     if (m === "fibble") {
       setWordleGuesses([{ word: "CRANE", pattern: ["GREEN", "GREY", "YELLOW", "GREY", "GREY"] }]);
