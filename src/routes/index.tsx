@@ -2793,16 +2793,10 @@ function Index() {
                   >
                     Clear all
                   </Button>
-                  <Button
-                    onClick={() => { setSudokuBoard(SUDOKU_DEFAULT.map((r) => r.slice())); setSudokuResults(null); }}
-                    variant="outline"
-                    size="lg"
-                  >
-                    Reset
-                  </Button>
                   <Button onClick={solveSudoku} disabled={solving} size="lg">
                     {solving ? "Solving..." : "Solve"}
                   </Button>
+
                 </div>
               </div>
             );
