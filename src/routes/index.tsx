@@ -1134,7 +1134,7 @@ function Index() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              JeffGoldblumLe
+              Jeff Goldblumle
             </button>
             <button
               onClick={() => switchMode("worwordle")}
