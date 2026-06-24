@@ -1459,7 +1459,7 @@ function Index() {
 
         {(mode === 4 || mode === 5 || mode === 6) && (
           <div className="mb-4 text-sm text-muted-foreground">
-            <p>Permissible moves:</p>
+            <p>Permissible move:</p>
             <ul className="list-disc pl-5">
               <li>Single letter substitution</li>
             </ul>
