@@ -2002,7 +2002,7 @@ function Index() {
             )}
             {mode === "jeffgoldblum" && (
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Optional input: Place</span>
+                <span className="text-muted-foreground">Optional input: Add</span>
                 <select
                   value={jgStartingWord}
                   onChange={(e) => {
