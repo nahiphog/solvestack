@@ -29,7 +29,7 @@ function AboutPage() {
 
         <div className="space-y-6 text-base leading-relaxed">
           <p>
-            <span className="font-semibold">1.</span> Why did I create this website? I love puzzles, and often times after attempting one, I want to know if there's a better and/or alternative solution. This is why I created this website. It is also for my girlfriend to participate in this activity from time to time.
+            <span className="font-semibold">1.</span> I created this website because I love puzzles and constantly find myself searching for better, alternative solutions.
           </p>
 
           <div>
