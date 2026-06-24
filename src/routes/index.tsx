@@ -1570,7 +1570,7 @@ function Index() {
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p>
               <a href="https://www.nytimes.com/puzzles/sudoku" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">New York Times</a>
-              {", "}
+              {" · "}
               <a href="https://www.netflix.com/tudum/puzzled/sudoku/daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Netflix</a>
             </p>
             <p>Fill the 9×9 grid so each row, column, and 3×3 region contains 1–9 exactly once.</p>
