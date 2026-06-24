@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
 const SECTIONS: { id: "ladder" | "search" | "math" | "logic"; label: string }[] = [
   { id: "search", label: "Word search" },
   { id: "ladder", label: "Word ladder" },
-  { id: "math", label: "Mathematics" },
+  { id: "math", label: "Math" },
   { id: "logic", label: "Logic" },
 ];
 
@@ -1134,7 +1134,7 @@ function Index() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              JeffGoldblumLe
+              Jeff Goldblumle
             </button>
             <button
               onClick={() => switchMode("worwordle")}
@@ -1451,7 +1451,7 @@ function Index() {
             <a href="https://fibble.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Fibble</a>
           )}
           {mode === "jeffgoldblum" && (
-            <a href="https://jeffgoldblumle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">JeffGoldblumLe</a>
+            <a href="https://jeffgoldblumle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Jeff Goldblumle</a>
           )}
         </div>
 
@@ -1459,7 +1459,7 @@ function Index() {
 
         {(mode === 4 || mode === 5 || mode === 6) && (
           <div className="mb-4 text-sm text-muted-foreground">
-            <p>Permissible moves:</p>
+            <p>Permissible move:</p>
             <ul className="list-disc pl-5">
               <li>Single letter substitution</li>
             </ul>
@@ -1570,7 +1570,7 @@ function Index() {
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p>
               <a href="https://www.nytimes.com/puzzles/sudoku" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">New York Times</a>
-              {", "}
+              {" · "}
               <a href="https://www.netflix.com/tudum/puzzled/sudoku/daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Netflix</a>
             </p>
             <p>Fill the 9×9 grid so each row, column, and 3×3 region contains 1–9 exactly once.</p>
@@ -2002,7 +2002,7 @@ function Index() {
             )}
             {mode === "jeffgoldblum" && (
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Optional input: Place</span>
+                <span className="text-muted-foreground">Optional input: Add</span>
                 <select
                   value={jgStartingWord}
                   onChange={(e) => {
