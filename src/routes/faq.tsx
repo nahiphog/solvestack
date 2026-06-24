@@ -53,6 +53,31 @@ function FaqPage() {
             <p className="font-semibold">Q3. Why some websites don&apos;t accept certain words?</p>
             <p className="mt-1">A3. The word list that they used might differ from mine.</p>
           </div>
+
+          <div>
+            <p className="font-semibold">Q4. What other repositories of puzzles do you recommend?</p>
+            <ul className="mt-2 list-disc pl-6 space-y-1">
+              {[
+                ["Playlin", "https://playlin.io/"],
+                ["New York Times", "https://www.nytco.com/games/"],
+                ["Boston Globe", "https://www.bostonglobe.com/games/"],
+                ["The Atlantic", "https://www.theatlantic.com/games/"],
+                ["OneLook", "https://onelook.com/games"],
+                ["Netflix", "https://www.netflix.com/tudum/games"],
+                ["PuzzMallow", "https://puzzmallow.com/"],
+                ["Kelly Dornhaus", "https://kellydornhaus.com/"],
+                ["Merriam Webster", "https://www.merriam-webster.com/games/"],
+                ["Reddit games", "https://www.reddit.com/r/GamesOnReddit/"],
+                ["By Thomas", "https://bythomas.co.uk/"],
+                ["Clever Goat", "https://clevergoat.com/"],
+                ["Coffee First", "https://coffeefirst.games/"],
+              ].map(([label, href]) => (
+                <li key={href}>
+                  <a className="text-primary underline" href={href} target="_blank" rel="noopener noreferrer">{label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </div>
