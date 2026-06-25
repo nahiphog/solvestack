@@ -526,6 +526,8 @@ function Index() {
       else setSudokuVarResults(res);
       setSolving(false);
     }, 0);
+  };
+
 
 
 
