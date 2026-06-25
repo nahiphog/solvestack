@@ -10,7 +10,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -45,6 +45,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   sheetdoku: 0,
   jeffgoldblum: 12,
   sudoku: 0,
+  sudokuvariation: 0,
   
 };
 
@@ -381,9 +382,12 @@ export async function fibbleSolve(
   guesses: { word: string; pattern: WordleColor[] }[],
 ): Promise<string[]> {
   // In Fibble, exactly one tile lies in each guess row.
+  // Additionally, candidate true patterns that are all-GREEN are excluded
+  // (i.e. guess === answer is never a valid solution for a row).
   const words = await getFiveLetterWords();
   return words.filter((answer) =>
     guesses.every((g) => {
+      if (g.word === answer) return false;
       const out = wordleOutput(g.word, answer);
       let mismatches = 0;
       for (let i = 0; i < out.length; i++) {

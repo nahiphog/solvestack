@@ -57,6 +57,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   sheetdoku: { start: "", goal: "" },
   jeffgoldblum: { start: "", goal: "" },
   sudoku: { start: "", goal: "" },
+  sudokuvariation: { start: "", goal: "" },
   
 
 };
@@ -319,6 +320,10 @@ function Index() {
   const [sudokuBoard, setSudokuBoard] = useState<string[][]>(SUDOKU_DEFAULT.map((r) => r.slice()));
   const [sudokuResults, setSudokuResults] = useState<number[][][] | null>(null);
   const [pageSudoku, setPageSudoku] = useState(0);
+  const [sudokuVarBoard, setSudokuVarBoard] = useState<string[][]>(SUDOKU_DEFAULT.map((r) => r.slice()));
+  const [sudokuVarResults, setSudokuVarResults] = useState<number[][][] | null>(null);
+  const [pageSudokuVar, setPageSudokuVar] = useState(0);
+  const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -342,13 +347,14 @@ function Index() {
   useEffect(() => { setPageMM(0); }, [mastermindResults]);
   useEffect(() => { setPageWP(0); }, [wordPeaksResults]);
 
-  useEffect(() => { setPageMarbless(0); }, [marblessResults]);
+  useEffect(() => { setPageMarbless(0); setSelectedMarbless(new Set()); }, [marblessResults]);
   useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
   useEffect(() => { setPageFl(0); }, [flResults]);
   useEffect(() => { setPageWor(0); }, [worResults]);
   useEffect(() => { setPageSd(0); }, [sdResults]);
   useEffect(() => { setPageSudoku(0); }, [sudokuResults]);
+  useEffect(() => { setPageSudokuVar(0); }, [sudokuVarResults]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
@@ -378,6 +384,7 @@ function Index() {
     setDodekuResult(null);
     setSdResults(null);
     setSudokuResults(null);
+    setSudokuVarResults(null);
     setError(null);
     if (m === "fibble") {
       setWordleGuesses([{ word: "CRANE", pattern: ["GREEN", "GREY", "YELLOW", "GREY", "GREY"] }]);
@@ -500,6 +507,27 @@ function Index() {
       setSolving(false);
     }, 0);
   };
+
+  const solveSudokuVariation = () => {
+    setError(null);
+    setSudokuVarResults(null);
+    const board: number[][] = sudokuVarBoard.map((row) =>
+      row.map((v) => {
+        const s = v.trim();
+        if (!s) return 0;
+        const n = parseInt(s, 10);
+        return Number.isFinite(n) && n >= 1 && n <= 9 ? n : 0;
+      }),
+    );
+    setSolving(true);
+    setTimeout(() => {
+      const res = sudokuSolve(board, SUDOKU_REGIONS);
+      if (res.length === 0) setError("No solutions found.");
+      else setSudokuVarResults(res);
+      setSolving(false);
+    }, 0);
+  };
+
 
 
 
@@ -1017,7 +1045,7 @@ function Index() {
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum";
-            const inLogic = mode === "sudoku";
+            const inLogic = mode === "sudoku" || mode === "sudokuvariation";
             const inLadder = !isMath && !inSearch && !inLogic;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : s.id === "logic" ? inLogic : inLadder;
             return (
@@ -1229,13 +1257,27 @@ function Index() {
           </div>
         )}
 
-        {mode === "sudoku" && (
-          <div className="mb-4 grid grid-cols-1 gap-1 rounded-md border bg-muted p-1">
+        {(mode === "sudoku" || mode === "sudokuvariation") && (
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("sudoku")}
-              className="rounded bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-sm transition"
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "sudoku"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              Sudoku
+              Sudoku (original)
+            </button>
+            <button
+              onClick={() => switchMode("sudokuvariation")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "sudokuvariation"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Sudoku (variation)
             </button>
           </div>
         )}
@@ -1575,6 +1617,11 @@ function Index() {
             </p>
             <p>Fill the 9×9 grid so each row, column, and 3×3 region contains 1–9 exactly once.</p>
             <p>Enter any pre-filled cell values inside the grid, then click Solve.</p>
+          </div>
+        )}
+        {mode === "sudokuvariation" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>A typical Sudoku, but with more variations!</p>
           </div>
         )}
         {mode === "wordpeaks" && (
@@ -2737,8 +2784,9 @@ function Index() {
             );
           })()
 
-        ) : mode === "sudoku" ? (
+        ) : (mode === "sudoku" || mode === "sudokuvariation") ? (
           (() => {
+            const isVar = mode === "sudokuvariation";
             const REGION_BG: Record<number, string> = {
               1: "bg-red-500/20",
               2: "bg-blue-500/20",
@@ -2750,16 +2798,20 @@ function Index() {
               8: "bg-orange-500/20",
               9: "bg-lime-500/20",
             };
+            const board = isVar ? sudokuVarBoard : sudokuBoard;
+            const setBoard = isVar ? setSudokuVarBoard : setSudokuBoard;
+            const clearResults = () => (isVar ? setSudokuVarResults(null) : setSudokuResults(null));
+            const onSolve = isVar ? solveSudokuVariation : solveSudoku;
             return (
               <div className="space-y-4">
                 <div>
                   <div className="mb-2 text-sm font-medium">Grid (type 1–9; leave blank for empty)</div>
                   <div className="inline-block">
-                    {sudokuBoard.map((row, r) => (
+                    {board.map((row, r) => (
                       <div key={r} className="flex">
                         {row.map((val, c) => {
                           const reg = SUDOKU_REGIONS[r][c];
-                          const bg = REGION_BG[reg] || "bg-muted";
+                          const bg = isVar ? (REGION_BG[reg] || "bg-muted") : "bg-background";
                           return (
                             <div
                               key={c}
@@ -2769,8 +2821,8 @@ function Index() {
                                 value={val}
                                 onChange={(e) => {
                                   const cleaned = e.target.value.replace(/[^1-9]/g, "").slice(-1);
-                                  setSudokuBoard((prev) => prev.map((rr, ri) => ri === r ? rr.map((x, ci) => ci === c ? cleaned : x) : rr));
-                                  setSudokuResults(null);
+                                  setBoard((prev) => prev.map((rr, ri) => ri === r ? rr.map((x, ci) => ci === c ? cleaned : x) : rr));
+                                  clearResults();
                                 }}
                                 className="h-9 w-9 rounded bg-transparent text-center font-mono text-lg font-bold outline-none focus:ring-2 focus:ring-ring"
                                 aria-label={`Cell row ${r + 1} col ${c + 1}`}
@@ -2785,15 +2837,15 @@ function Index() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     onClick={() => {
-                      setSudokuBoard(Array.from({ length: 9 }, () => Array(9).fill("")));
-                      setSudokuResults(null);
+                      setBoard(Array.from({ length: 9 }, () => Array(9).fill("")));
+                      clearResults();
                     }}
                     variant="outline"
                     size="lg"
                   >
                     Clear all
                   </Button>
-                  <Button onClick={solveSudoku} disabled={solving} size="lg">
+                  <Button onClick={onSolve} disabled={solving} size="lg">
                     {solving ? "Solving..." : "Solve"}
                   </Button>
 
@@ -2801,6 +2853,7 @@ function Index() {
               </div>
             );
           })()
+
 
         ) : mode === "wordiply" ? (
 
@@ -3260,22 +3313,40 @@ function Index() {
               </h2>
               <button
                 onClick={() => {
-                  const items = marblessResults
-                    .map((s, i) => `${i + 1}. ${s.words.join(" ")} · moves: ${s.moves.join(",")}`)
+                  const hasSel = selectedMarbless.size > 0;
+                  const indices = hasSel
+                    ? [...selectedMarbless].sort((a, b) => a - b)
+                    : marblessResults.map((_, i) => i);
+                  const items = indices
+                    .map((i) => {
+                      const s = marblessResults[i];
+                      return `${i + 1}. ${s.words.join(" ")} · moves: ${s.moves.join(",")}`;
+                    })
                     .join("\n");
                   copyText(`${items}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-                aria-label="Copy all solutions"
+                aria-label={selectedMarbless.size > 0 ? "Copy selected solutions" : "Copy all solutions"}
               >
-                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> {selectedMarbless.size > 0 ? "Copy" : "Copy all"}</>)}
               </button>
             </div>
             <ol className="space-y-4">
               {marblessResults.slice(pageMarbless * 50, pageMarbless * 50 + 50).map((sol, idx) => {
                 const i = pageMarbless * 50 + idx;
+                const isSelected = selectedMarbless.has(i);
                 return (
-                <li key={i} className="rounded-lg border bg-card p-4 text-card-foreground">
+                <li
+                  key={i}
+                  onClick={() => {
+                    setSelectedMarbless((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(i)) next.delete(i); else next.add(i);
+                      return next;
+                    });
+                  }}
+                  className={`cursor-pointer rounded-lg border-2 bg-card p-4 text-card-foreground transition ${isSelected ? "border-yellow-500" : "border-border"}`}
+                >
                   <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
                   <table className="w-full border-collapse font-mono text-sm">
                     <thead>
@@ -3411,7 +3482,7 @@ function Index() {
           </section>
         )}
 
-        {sudokuResults && (() => {
+        {(() => {
           const REGION_BG: Record<number, string> = {
             1: "bg-red-500/20",
             2: "bg-blue-500/20",
@@ -3424,15 +3495,20 @@ function Index() {
             9: "bg-lime-500/20",
           };
           const perPage = 10;
-          return (
+          const renderSudokuResults = (
+            results: number[][][],
+            page: number,
+            setPage: (n: number) => void,
+            colored: boolean,
+          ) => (
             <section className="mt-10">
               <div className="mb-4 flex items-start justify-between gap-3">
                 <h2 className="text-lg font-semibold">
-                  {sudokuResults.length}{sudokuResults.length === 200 ? "+" : ""} {sudokuResults.length === 1 ? "solution" : "solutions"}
+                  {results.length}{results.length === 200 ? "+" : ""} {results.length === 1 ? "solution" : "solutions"}
                 </h2>
                 <button
                   onClick={() => {
-                    const items = sudokuResults
+                    const items = results
                       .map((sol, i) => `#${i + 1}\n${sol.map((row) => row.join(" ")).join("\n")}`)
                       .join("\n\n");
                     copyText(`${items}\n\nSolved via ${window.location.href}.`);
@@ -3444,8 +3520,8 @@ function Index() {
                 </button>
               </div>
               <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {sudokuResults.slice(pageSudoku * perPage, pageSudoku * perPage + perPage).map((sol, idx) => {
-                  const i = pageSudoku * perPage + idx;
+                {results.slice(page * perPage, page * perPage + perPage).map((sol, idx) => {
+                  const i = page * perPage + idx;
                   return (
                     <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
                       <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
@@ -3454,7 +3530,7 @@ function Index() {
                           <div key={r} className="flex">
                             {row.map((cell, c) => {
                               const reg = SUDOKU_REGIONS[r][c];
-                              const bg = REGION_BG[reg] || "bg-muted";
+                              const bg = colored ? (REGION_BG[reg] || "bg-muted") : "bg-background";
                               return (
                                 <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg} font-mono text-sm font-bold`}>
                                   {cell}
@@ -3468,8 +3544,14 @@ function Index() {
                   );
                 })}
               </ol>
-              <Paginator page={pageSudoku} setPage={setPageSudoku} total={sudokuResults.length} perPage={perPage} />
+              <Paginator page={page} setPage={setPage} total={results.length} perPage={perPage} />
             </section>
+          );
+          return (
+            <>
+              {sudokuResults && renderSudokuResults(sudokuResults, pageSudoku, setPageSudoku, false)}
+              {sudokuVarResults && renderSudokuResults(sudokuVarResults, pageSudokuVar, setPageSudokuVar, true)}
+            </>
           );
         })()}
 
