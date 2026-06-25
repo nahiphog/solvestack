@@ -28,9 +28,8 @@ function FaqPage() {
 
         <div className="space-y-6 text-base leading-relaxed">
           <div className="rounded-lg border bg-card p-5 shadow-sm">
-            <p className="font-semibold">Q1. Where did I get the word list from?</p>
+            <p className="font-semibold">Where did I get the word list from?</p>
             <p className="mt-1">
-              A1.{" "}
               <a
                 className="text-primary underline"
                 href="https://norvig.com/ngrams/word.list"
@@ -43,17 +42,17 @@ function FaqPage() {
           </div>
 
           <div className="rounded-lg border bg-card p-5 shadow-sm">
-            <p className="font-semibold">Q2. Would you be adding more puzzle solvers to this site? If yes, which ones?</p>
-            <p className="mt-1">A2. Yes. But only for those that I&apos;m passionate in.</p>
+            <p className="font-semibold">Would you be adding more puzzle solvers to this site? If yes, which ones?</p>
+            <p className="mt-1">Yes. But only for those that I&apos;m passionate in.</p>
           </div>
 
           <div className="rounded-lg border bg-card p-5 shadow-sm">
-            <p className="font-semibold">Q3. Why some websites don&apos;t accept certain words?</p>
-            <p className="mt-1">A3. The word list that they used might differ from mine.</p>
+            <p className="font-semibold">Why some websites don&apos;t accept certain words?</p>
+            <p className="mt-1">The word list that they used might differ from mine.</p>
           </div>
 
           <div className="rounded-lg border bg-card p-5 shadow-sm">
-            <p className="font-semibold">Q4. Where do you find such puzzles? What other repositories of puzzles do you recommend?</p>
+            <p className="font-semibold">Where do you find such puzzles? What other repositories of puzzles do you recommend?</p>
             <p className="mt-1">I found them on specific Discord servers, and some bingeworthy instagram profiles. The repositories (in no particular order) are:</p>
             {(() => {
               const items: [string, string][] = [
