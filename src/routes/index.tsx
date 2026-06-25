@@ -526,7 +526,12 @@ function Index() {
     );
     setSolving(true);
     setTimeout(() => {
-      const res = sudokuSolve(board, SUDOKU_REGIONS);
+      const res = sudokuSolve(board, SUDOKU_REGIONS, 200, {
+        king: sudokuVarKing,
+        knight: sudokuVarKnight,
+        diagonal: sudokuVarDiagonal,
+        nonConsecutive: sudokuVarNonConsec,
+      });
       if (res.length === 0) setError("No solutions found.");
       else setSudokuVarResults(res);
       setSolving(false);
