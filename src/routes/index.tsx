@@ -508,6 +508,25 @@ function Index() {
     }, 0);
   };
 
+  const solveSudokuVariation = () => {
+    setError(null);
+    setSudokuVarResults(null);
+    const board: number[][] = sudokuVarBoard.map((row) =>
+      row.map((v) => {
+        const s = v.trim();
+        if (!s) return 0;
+        const n = parseInt(s, 10);
+        return Number.isFinite(n) && n >= 1 && n <= 9 ? n : 0;
+      }),
+    );
+    setSolving(true);
+    setTimeout(() => {
+      const res = sudokuSolve(board, SUDOKU_REGIONS);
+      if (res.length === 0) setError("No solutions found.");
+      else setSudokuVarResults(res);
+      setSolving(false);
+    }, 0);
+
 
 
 
