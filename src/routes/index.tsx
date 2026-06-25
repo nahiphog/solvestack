@@ -328,6 +328,9 @@ function Index() {
   const [sudokuVarKnight, setSudokuVarKnight] = useState(false);
   const [sudokuVarDiagonal, setSudokuVarDiagonal] = useState(false);
   const [sudokuVarNonConsec, setSudokuVarNonConsec] = useState(false);
+  const [sudokuVarIrregular, setSudokuVarIrregular] = useState(false);
+  const [sudokuVarRegions, setSudokuVarRegions] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
+  const [sudokuVarPaintColor, setSudokuVarPaintColor] = useState<number>(1);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
@@ -524,9 +527,22 @@ function Index() {
         return Number.isFinite(n) && n >= 1 && n <= 9 ? n : 0;
       }),
     );
+    let regions = SUDOKU_REGIONS;
+    if (sudokuVarIrregular) {
+      const counts = new Map<number, number>();
+      for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) {
+        const v = sudokuVarRegions[r][c];
+        if (!v) { setError("All cells must be painted with one of the 9 region colors."); return; }
+        counts.set(v, (counts.get(v) || 0) + 1);
+      }
+      for (let k = 1; k <= 9; k++) {
+        if ((counts.get(k) || 0) !== 9) { setError("Each of the 9 colored regions must contain exactly 9 cells."); return; }
+      }
+      regions = sudokuVarRegions;
+    }
     setSolving(true);
     setTimeout(() => {
-      const res = sudokuSolve(board, SUDOKU_REGIONS, 200, {
+      const res = sudokuSolve(board, regions, 200, {
         king: sudokuVarKing,
         knight: sudokuVarKnight,
         diagonal: sudokuVarDiagonal,
@@ -1631,7 +1647,7 @@ function Index() {
         )}
         {mode === "sudokuvariation" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
-            <p>A typical Sudoku, but with more variations!</p>
+            <p>A typical 9×9 Sudoku, but with more variations!</p>
           </div>
         )}
         {mode === "wordpeaks" && (
@@ -2812,19 +2828,68 @@ function Index() {
             const setBoard = isVar ? setSudokuVarBoard : setSudokuBoard;
             const clearResults = () => (isVar ? setSudokuVarResults(null) : setSudokuResults(null));
             const onSolve = isVar ? solveSudokuVariation : solveSudoku;
+            const regionsForCells = isVar && sudokuVarIrregular ? sudokuVarRegions : SUDOKU_REGIONS;
+            const paintCell = (r: number, c: number) => {
+              if (!(isVar && sudokuVarIrregular)) return;
+              setSudokuVarRegions((prev) => prev.map((rr, ri) => ri === r ? rr.map((x, ci) => ci === c ? sudokuVarPaintColor : x) : rr));
+              clearResults();
+            };
             return (
               <div className="space-y-4">
+                {isVar && (
+                  <div className="space-y-2 text-sm">
+                    {[
+                      { state: sudokuVarKnight, set: setSudokuVarKnight, label: "Anti-knight", desc: "Cells separated by a chess knight's move cannot contain the same digit." },
+                      { state: sudokuVarKing, set: setSudokuVarKing, label: "Anti-king", desc: "Cells separated by a chess king's move cannot contain the same digit." },
+                      { state: sudokuVarDiagonal, set: setSudokuVarDiagonal, label: "Diagonal", desc: "The two main diagonals contain the digits 1 through 9 exactly once each." },
+                      { state: sudokuVarNonConsec, set: setSudokuVarNonConsec, label: "Non-consecutive", desc: "Consecutive digits may not be orthogonally adjacent to each other." },
+                      { state: sudokuVarIrregular, set: setSudokuVarIrregular, label: "Irregular", desc: "Each colored region contains each digit from 1-9 exactly once." },
+                    ].map((opt) => (
+                      <label key={opt.label} className="flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={opt.state}
+                          onChange={(e) => {
+                            opt.set(e.target.checked);
+                            if (opt.label === "Irregular") {
+                              setSudokuVarRegions(Array.from({ length: 9 }, () => Array(9).fill(0)));
+                            }
+                            clearResults();
+                          }}
+                          className="mt-1"
+                        />
+                        <span><span className="font-medium">{opt.label}:</span> <span className="text-muted-foreground">{opt.desc}</span></span>
+                      </label>
+                    ))}
+                    {sudokuVarIrregular && (
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <span className="text-xs text-muted-foreground">Paint region:</span>
+                        {[1,2,3,4,5,6,7,8,9].map((k) => (
+                          <button
+                            key={k}
+                            onClick={() => setSudokuVarPaintColor(k)}
+                            className={`flex h-7 w-7 items-center justify-center rounded border text-xs font-bold ${REGION_BG[k]} ${sudokuVarPaintColor === k ? "ring-2 ring-foreground" : "border-border"}`}
+                            aria-label={`Paint with region ${k}`}
+                          >
+                            {k}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div>
-                  <div className="mb-2 text-sm font-medium">Grid (type 1–9; leave blank for empty)</div>
-                  <div className="relative inline-block">
+                  <div className="mb-2 text-sm font-medium">Grid (type 1–9; leave blank for empty){isVar && sudokuVarIrregular ? " · click cells to paint" : ""}</div>
+                  <div className="relative inline-block border-[3px] border-black dark:border-white">
                     {board.map((row, r) => (
                       <div key={r} className="flex">
                         {row.map((val, c) => {
-                          const reg = SUDOKU_REGIONS[r][c];
-                          const bg = REGION_BG[reg] || "bg-muted";
+                          const reg = regionsForCells[r][c];
+                          const bg = reg ? (REGION_BG[reg] || "bg-muted") : "bg-muted";
                           return (
                             <div
                               key={c}
+                              onClick={() => paintCell(r, c)}
                               className={`flex h-10 w-10 items-center justify-center border border-border ${bg}`}
                             >
                               <input
@@ -2854,30 +2919,13 @@ function Index() {
                     )}
                   </div>
                 </div>
-                {isVar && (
-                  <div className="space-y-1 text-sm">
-                    {[
-                      { state: sudokuVarKnight, set: setSudokuVarKnight, label: "Anti-knight", desc: "Cells separated by a chess knight's move cannot contain the same digit." },
-                      { state: sudokuVarKing, set: setSudokuVarKing, label: "Anti-king", desc: "Cells separated by a chess king's move cannot contain the same digit." },
-                      { state: sudokuVarDiagonal, set: setSudokuVarDiagonal, label: "Diagonal", desc: "The two main diagonals contain the digits 1 through 9 exactly once each." },
-                      { state: sudokuVarNonConsec, set: setSudokuVarNonConsec, label: "Non-consecutive", desc: "Consecutive digits may not be orthogonally adjacent to each other." },
-                    ].map((opt) => (
-                      <label key={opt.label} className="flex items-start gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={opt.state}
-                          onChange={(e) => { opt.set(e.target.checked); clearResults(); }}
-                          className="mt-1"
-                        />
-                        <span><span className="font-medium">{opt.label}:</span> <span className="text-muted-foreground">{opt.desc}</span></span>
-                      </label>
-                    ))}
-                  </div>
-                )}
                 <div className="flex flex-wrap gap-3">
                   <Button
                     onClick={() => {
                       setBoard(Array.from({ length: 9 }, () => Array(9).fill("")));
+                      if (isVar && sudokuVarIrregular) {
+                        setSudokuVarRegions(Array.from({ length: 9 }, () => Array(9).fill(0)));
+                      }
                       clearResults();
                     }}
                     variant="outline"
@@ -3565,11 +3613,12 @@ function Index() {
                   return (
                     <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
                       <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
-                      <div className="inline-block">
+                      <div className="inline-block border-[3px] border-black dark:border-white">
                         {sol.map((row, r) => (
                           <div key={r} className="flex">
                             {row.map((cell, c) => {
-                              const reg = SUDOKU_REGIONS[r][c];
+                              const regs = colored && sudokuVarIrregular ? sudokuVarRegions : SUDOKU_REGIONS;
+                              const reg = regs[r][c];
                               const bg = colored ? (REGION_BG[reg] || "bg-muted") : "bg-background";
                               return (
                                 <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg} font-mono text-sm font-bold`}>
