@@ -27,9 +27,7 @@ function FaqPage() {
         </header>
 
         <div className="space-y-6 text-base leading-relaxed">
-          <p className="font-semibold">Frequently Asked Questions:</p>
-
-          <div>
+          <div className="rounded-lg border bg-card p-5 shadow-sm">
             <p className="font-semibold">Q1. Where did I get the word list from?</p>
             <p className="mt-1">
               A1.{" "}
@@ -44,21 +42,21 @@ function FaqPage() {
             </p>
           </div>
 
-          <div>
+          <div className="rounded-lg border bg-card p-5 shadow-sm">
             <p className="font-semibold">Q2. Would you be adding more puzzle solvers to this site? If yes, which ones?</p>
             <p className="mt-1">A2. Yes. But only for those that I&apos;m passionate in.</p>
           </div>
 
-          <div>
+          <div className="rounded-lg border bg-card p-5 shadow-sm">
             <p className="font-semibold">Q3. Why some websites don&apos;t accept certain words?</p>
             <p className="mt-1">A3. The word list that they used might differ from mine.</p>
           </div>
 
-          <div>
+          <div className="rounded-lg border bg-card p-5 shadow-sm">
             <p className="font-semibold">Q4. Where do you find such puzzles? What other repositories of puzzles do you recommend?</p>
             <p className="mt-1">I found them on specific Discord servers, and some bingeworthy instagram profiles. The repositories (in no particular order) are:</p>
-            <ul className="mt-2 list-disc pl-6 space-y-1">
-              {[
+            {(() => {
+              const items: [string, string][] = [
                 ["Playlin", "https://playlin.io/"],
                 ["New York Times", "https://www.nytco.com/games/"],
                 ["Boston Globe", "https://www.bostonglobe.com/games/"],
@@ -72,12 +70,23 @@ function FaqPage() {
                 ["By Thomas", "https://bythomas.co.uk/"],
                 ["Clever Goat", "https://clevergoat.com/"],
                 ["Coffee First", "https://coffeefirst.games/"],
-              ].map(([label, href]) => (
-                <li key={href}>
-                  <a className="text-primary underline" href={href} target="_blank" rel="noopener noreferrer">{label}</a>
-                </li>
-              ))}
-            </ul>
+              ];
+              return (
+                <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-3">
+                  {items.map(([label, href]) => (
+                    <a
+                      key={href}
+                      className="text-primary underline"
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {label}
+                    </a>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
