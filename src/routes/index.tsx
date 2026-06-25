@@ -1045,7 +1045,7 @@ function Index() {
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum";
-            const inLogic = mode === "sudoku";
+            const inLogic = mode === "sudoku" || mode === "sudokuvariation";
             const inLadder = !isMath && !inSearch && !inLogic;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : s.id === "logic" ? inLogic : inLadder;
             return (
