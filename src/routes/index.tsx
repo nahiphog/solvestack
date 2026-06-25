@@ -2816,12 +2816,12 @@ function Index() {
               <div className="space-y-4">
                 <div>
                   <div className="mb-2 text-sm font-medium">Grid (type 1–9; leave blank for empty)</div>
-                  <div className="inline-block">
+                  <div className="relative inline-block">
                     {board.map((row, r) => (
                       <div key={r} className="flex">
                         {row.map((val, c) => {
                           const reg = SUDOKU_REGIONS[r][c];
-                          const bg = isVar ? (REGION_BG[reg] || "bg-muted") : "bg-background";
+                          const bg = REGION_BG[reg] || "bg-muted";
                           return (
                             <div
                               key={c}
@@ -2842,6 +2842,16 @@ function Index() {
                         })}
                       </div>
                     ))}
+                    {isVar && sudokuVarDiagonal && (
+                      <svg
+                        className="pointer-events-none absolute inset-0 h-full w-full"
+                        preserveAspectRatio="none"
+                        viewBox="0 0 100 100"
+                      >
+                        <line x1="0" y1="0" x2="100" y2="100" stroke="rgb(56 189 248 / 0.6)" strokeWidth="0.5" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
+                        <line x1="0" y1="100" x2="100" y2="0" stroke="rgb(56 189 248 / 0.6)" strokeWidth="0.5" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
+                      </svg>
+                    )}
                   </div>
                 </div>
                 {isVar && (
