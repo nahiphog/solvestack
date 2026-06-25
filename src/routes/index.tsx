@@ -57,6 +57,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   sheetdoku: { start: "", goal: "" },
   jeffgoldblum: { start: "", goal: "" },
   sudoku: { start: "", goal: "" },
+  sudokuvariation: { start: "", goal: "" },
   
 
 };
