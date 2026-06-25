@@ -3464,7 +3464,7 @@ function Index() {
           </section>
         )}
 
-        {sudokuResults && (() => {
+        {(() => {
           const REGION_BG: Record<number, string> = {
             1: "bg-red-500/20",
             2: "bg-blue-500/20",
@@ -3477,15 +3477,20 @@ function Index() {
             9: "bg-lime-500/20",
           };
           const perPage = 10;
-          return (
+          const renderSudokuResults = (
+            results: number[][][],
+            page: number,
+            setPage: (n: number) => void,
+            colored: boolean,
+          ) => (
             <section className="mt-10">
               <div className="mb-4 flex items-start justify-between gap-3">
                 <h2 className="text-lg font-semibold">
-                  {sudokuResults.length}{sudokuResults.length === 200 ? "+" : ""} {sudokuResults.length === 1 ? "solution" : "solutions"}
+                  {results.length}{results.length === 200 ? "+" : ""} {results.length === 1 ? "solution" : "solutions"}
                 </h2>
                 <button
                   onClick={() => {
-                    const items = sudokuResults
+                    const items = results
                       .map((sol, i) => `#${i + 1}\n${sol.map((row) => row.join(" ")).join("\n")}`)
                       .join("\n\n");
                     copyText(`${items}\n\nSolved via ${window.location.href}.`);
@@ -3497,8 +3502,8 @@ function Index() {
                 </button>
               </div>
               <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {sudokuResults.slice(pageSudoku * perPage, pageSudoku * perPage + perPage).map((sol, idx) => {
-                  const i = pageSudoku * perPage + idx;
+                {results.slice(page * perPage, page * perPage + perPage).map((sol, idx) => {
+                  const i = page * perPage + idx;
                   return (
                     <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
                       <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
@@ -3507,7 +3512,7 @@ function Index() {
                           <div key={r} className="flex">
                             {row.map((cell, c) => {
                               const reg = SUDOKU_REGIONS[r][c];
-                              const bg = REGION_BG[reg] || "bg-muted";
+                              const bg = colored ? (REGION_BG[reg] || "bg-muted") : "bg-background";
                               return (
                                 <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg} font-mono text-sm font-bold`}>
                                   {cell}
@@ -3521,8 +3526,14 @@ function Index() {
                   );
                 })}
               </ol>
-              <Paginator page={pageSudoku} setPage={setPageSudoku} total={sudokuResults.length} perPage={perPage} />
+              <Paginator page={page} setPage={setPage} total={results.length} perPage={perPage} />
             </section>
+          );
+          return (
+            <>
+              {sudokuResults && renderSudokuResults(sudokuResults, pageSudoku, setPageSudoku, false)}
+              {sudokuVarResults && renderSudokuResults(sudokuVarResults, pageSudokuVar, setPageSudokuVar, true)}
+            </>
           );
         })()}
 
