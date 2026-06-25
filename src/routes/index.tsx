@@ -3313,22 +3313,40 @@ function Index() {
               </h2>
               <button
                 onClick={() => {
-                  const items = marblessResults
-                    .map((s, i) => `${i + 1}. ${s.words.join(" ")} · moves: ${s.moves.join(",")}`)
+                  const hasSel = selectedMarbless.size > 0;
+                  const indices = hasSel
+                    ? [...selectedMarbless].sort((a, b) => a - b)
+                    : marblessResults.map((_, i) => i);
+                  const items = indices
+                    .map((i) => {
+                      const s = marblessResults[i];
+                      return `${i + 1}. ${s.words.join(" ")} · moves: ${s.moves.join(",")}`;
+                    })
                     .join("\n");
                   copyText(`${items}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-                aria-label="Copy all solutions"
+                aria-label={selectedMarbless.size > 0 ? "Copy selected solutions" : "Copy all solutions"}
               >
-                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> {selectedMarbless.size > 0 ? "Copy" : "Copy all"}</>)}
               </button>
             </div>
             <ol className="space-y-4">
               {marblessResults.slice(pageMarbless * 50, pageMarbless * 50 + 50).map((sol, idx) => {
                 const i = pageMarbless * 50 + idx;
+                const isSelected = selectedMarbless.has(i);
                 return (
-                <li key={i} className="rounded-lg border bg-card p-4 text-card-foreground">
+                <li
+                  key={i}
+                  onClick={() => {
+                    setSelectedMarbless((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(i)) next.delete(i); else next.add(i);
+                      return next;
+                    });
+                  }}
+                  className={`cursor-pointer rounded-lg border-2 bg-card p-4 text-card-foreground transition ${isSelected ? "border-yellow-500" : "border-border"}`}
+                >
                   <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
                   <table className="w-full border-collapse font-mono text-sm">
                     <thead>
