@@ -2844,6 +2844,26 @@ function Index() {
                     ))}
                   </div>
                 </div>
+                {isVar && (
+                  <div className="space-y-1 text-sm">
+                    {[
+                      { state: sudokuVarKnight, set: setSudokuVarKnight, label: "Anti-knight", desc: "Cells separated by a chess knight's move cannot contain the same digit." },
+                      { state: sudokuVarKing, set: setSudokuVarKing, label: "Anti-king", desc: "Cells separated by a chess king's move cannot contain the same digit." },
+                      { state: sudokuVarDiagonal, set: setSudokuVarDiagonal, label: "Diagonal", desc: "The two main diagonals contain the digits 1 through 9 exactly once each." },
+                      { state: sudokuVarNonConsec, set: setSudokuVarNonConsec, label: "Non-consecutive", desc: "Consecutive digits may not be orthogonally adjacent to each other." },
+                    ].map((opt) => (
+                      <label key={opt.label} className="flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={opt.state}
+                          onChange={(e) => { opt.set(e.target.checked); clearResults(); }}
+                          className="mt-1"
+                        />
+                        <span><span className="font-medium">{opt.label}:</span> <span className="text-muted-foreground">{opt.desc}</span></span>
+                      </label>
+                    ))}
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-3">
                   <Button
                     onClick={() => {
