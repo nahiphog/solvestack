@@ -55,7 +55,8 @@ function FaqPage() {
           </div>
 
           <div>
-            <p className="font-semibold">Q4. What other repositories of puzzles do you recommend?</p>
+            <p className="font-semibold">Q4. Where do you find such puzzles? What other repositories of puzzles do you recommend?</p>
+            <p className="mt-1">I found them on specific Discord servers, and some bingeworthy instagram profiles. The repositories (in no particular order) are:</p>
             <ul className="mt-2 list-disc pl-6 space-y-1">
               {[
                 ["Playlin", "https://playlin.io/"],
