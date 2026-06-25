@@ -151,16 +151,58 @@ export function sheetdokuSolve(
   return solutions;
 }
 
+export interface SudokuVariations {
+  king?: boolean;
+  knight?: boolean;
+  diagonal?: boolean;
+  nonConsecutive?: boolean;
+}
+
 export function sudokuSolve(
   board: number[][],
   regions: number[][],
   maxSolutions = 200,
+  variations: SudokuVariations = {},
 ): number[][][] {
   const N = 9;
   const b = board.map((r) => r.slice());
   const rowUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const colUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const regUsed: Map<number, Set<number>> = new Map();
+  const { king, knight, diagonal, nonConsecutive } = variations;
+
+  const inBounds = (r: number, c: number) => r >= 0 && r < N && c >= 0 && c < N;
+  const checkExtra = (r: number, c: number, v: number): boolean => {
+    if (king) {
+      const moves: [number, number][] = [[r+1,c+1],[r+1,c-1],[r-1,c+1],[r-1,c-1]];
+      for (const [rr, cc] of moves) if (inBounds(rr, cc) && b[rr][cc] === v) return false;
+    }
+    if (knight) {
+      const moves: [number, number][] = [[r+2,c+1],[r+2,c-1],[r-2,c+1],[r-2,c-1],[r+1,c+2],[r+1,c-2],[r-1,c+2],[r-1,c-2]];
+      for (const [rr, cc] of moves) if (inBounds(rr, cc) && b[rr][cc] === v) return false;
+    }
+    if (diagonal) {
+      if (r === c) {
+        for (let k = 0; k < N; k++) if (k !== r && b[k][k] === v) return false;
+      }
+      if (r + c === N - 1) {
+        for (let k = 0; k < N; k++) {
+          const rr = N - 1 - k, cc = k;
+          if (rr !== r && b[rr][cc] === v) return false;
+        }
+      }
+    }
+    if (nonConsecutive) {
+      const moves: [number, number][] = [[r,c+1],[r,c-1],[r+1,c],[r-1,c]];
+      for (const [rr, cc] of moves) {
+        if (!inBounds(rr, cc)) continue;
+        const adj = b[rr][cc];
+        if (adj !== 0 && Math.abs(adj - v) === 1) return false;
+      }
+    }
+    return true;
+  };
+
   for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
     const reg = regions[r][c];
     if (!regUsed.has(reg)) regUsed.set(reg, new Set());
@@ -168,6 +210,16 @@ export function sudokuSolve(
     if (v !== 0) {
       if (rowUsed[r].has(v) || colUsed[c].has(v) || regUsed.get(reg)!.has(v)) return [];
       rowUsed[r].add(v); colUsed[c].add(v); regUsed.get(reg)!.add(v);
+    }
+  }
+  // Validate pre-filled against extras
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const v = b[r][c];
+    if (v !== 0) {
+      b[r][c] = 0;
+      const ok = checkExtra(r, c, v);
+      b[r][c] = v;
+      if (!ok) return [];
     }
   }
   const solutions: number[][][] = [];
@@ -184,6 +236,7 @@ export function sudokuSolve(
     const ru = rowUsed[r], cu = colUsed[c], gu = regUsed.get(reg)!;
     for (let v = 1; v <= 9; v++) {
       if (ru.has(v) || cu.has(v) || gu.has(v)) continue;
+      if (!checkExtra(r, c, v)) continue;
       b[r][c] = v; ru.add(v); cu.add(v); gu.add(v);
       bt();
       b[r][c] = 0; ru.delete(v); cu.delete(v); gu.delete(v);
