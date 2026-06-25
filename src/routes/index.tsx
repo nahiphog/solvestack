@@ -1257,13 +1257,27 @@ function Index() {
           </div>
         )}
 
-        {mode === "sudoku" && (
-          <div className="mb-4 grid grid-cols-1 gap-1 rounded-md border bg-muted p-1">
+        {(mode === "sudoku" || mode === "sudokuvariation") && (
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("sudoku")}
-              className="rounded bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-sm transition"
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "sudoku"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              Sudoku
+              Sudoku (original)
+            </button>
+            <button
+              onClick={() => switchMode("sudokuvariation")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "sudokuvariation"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Sudoku (variation)
             </button>
           </div>
         )}
