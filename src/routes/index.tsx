@@ -2821,7 +2821,7 @@ function Index() {
                       <div key={r} className="flex">
                         {row.map((val, c) => {
                           const reg = SUDOKU_REGIONS[r][c];
-                          const bg = isVar ? (REGION_BG[reg] || "bg-muted") : "bg-background";
+                          const bg = REGION_BG[reg] || "bg-muted";
                           return (
                             <div
                               key={c}
