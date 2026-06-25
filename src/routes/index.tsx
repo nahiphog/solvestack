@@ -328,6 +328,9 @@ function Index() {
   const [sudokuVarKnight, setSudokuVarKnight] = useState(false);
   const [sudokuVarDiagonal, setSudokuVarDiagonal] = useState(false);
   const [sudokuVarNonConsec, setSudokuVarNonConsec] = useState(false);
+  const [sudokuVarIrregular, setSudokuVarIrregular] = useState(false);
+  const [sudokuVarRegions, setSudokuVarRegions] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
+  const [sudokuVarPaintColor, setSudokuVarPaintColor] = useState<number>(1);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
@@ -524,9 +527,22 @@ function Index() {
         return Number.isFinite(n) && n >= 1 && n <= 9 ? n : 0;
       }),
     );
+    let regions = SUDOKU_REGIONS;
+    if (sudokuVarIrregular) {
+      const counts = new Map<number, number>();
+      for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) {
+        const v = sudokuVarRegions[r][c];
+        if (!v) { setError("All cells must be painted with one of the 9 region colors."); return; }
+        counts.set(v, (counts.get(v) || 0) + 1);
+      }
+      for (let k = 1; k <= 9; k++) {
+        if ((counts.get(k) || 0) !== 9) { setError("Each of the 9 colored regions must contain exactly 9 cells."); return; }
+      }
+      regions = sudokuVarRegions;
+    }
     setSolving(true);
     setTimeout(() => {
-      const res = sudokuSolve(board, SUDOKU_REGIONS, 200, {
+      const res = sudokuSolve(board, regions, 200, {
         king: sudokuVarKing,
         knight: sudokuVarKnight,
         diagonal: sudokuVarDiagonal,
@@ -1631,7 +1647,7 @@ function Index() {
         )}
         {mode === "sudokuvariation" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
-            <p>A typical Sudoku, but with more variations!</p>
+            <p>A typical 9×9 Sudoku, but with more variations!</p>
           </div>
         )}
         {mode === "wordpeaks" && (
