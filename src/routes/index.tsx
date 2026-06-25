@@ -2784,8 +2784,9 @@ function Index() {
             );
           })()
 
-        ) : mode === "sudoku" ? (
+        ) : (mode === "sudoku" || mode === "sudokuvariation") ? (
           (() => {
+            const isVar = mode === "sudokuvariation";
             const REGION_BG: Record<number, string> = {
               1: "bg-red-500/20",
               2: "bg-blue-500/20",
@@ -2797,16 +2798,20 @@ function Index() {
               8: "bg-orange-500/20",
               9: "bg-lime-500/20",
             };
+            const board = isVar ? sudokuVarBoard : sudokuBoard;
+            const setBoard = isVar ? setSudokuVarBoard : setSudokuBoard;
+            const clearResults = () => (isVar ? setSudokuVarResults(null) : setSudokuResults(null));
+            const onSolve = isVar ? solveSudokuVariation : solveSudoku;
             return (
               <div className="space-y-4">
                 <div>
                   <div className="mb-2 text-sm font-medium">Grid (type 1–9; leave blank for empty)</div>
                   <div className="inline-block">
-                    {sudokuBoard.map((row, r) => (
+                    {board.map((row, r) => (
                       <div key={r} className="flex">
                         {row.map((val, c) => {
                           const reg = SUDOKU_REGIONS[r][c];
-                          const bg = REGION_BG[reg] || "bg-muted";
+                          const bg = isVar ? (REGION_BG[reg] || "bg-muted") : "bg-background";
                           return (
                             <div
                               key={c}
@@ -2816,8 +2821,8 @@ function Index() {
                                 value={val}
                                 onChange={(e) => {
                                   const cleaned = e.target.value.replace(/[^1-9]/g, "").slice(-1);
-                                  setSudokuBoard((prev) => prev.map((rr, ri) => ri === r ? rr.map((x, ci) => ci === c ? cleaned : x) : rr));
-                                  setSudokuResults(null);
+                                  setBoard((prev) => prev.map((rr, ri) => ri === r ? rr.map((x, ci) => ci === c ? cleaned : x) : rr));
+                                  clearResults();
                                 }}
                                 className="h-9 w-9 rounded bg-transparent text-center font-mono text-lg font-bold outline-none focus:ring-2 focus:ring-ring"
                                 aria-label={`Cell row ${r + 1} col ${c + 1}`}
@@ -2832,15 +2837,15 @@ function Index() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     onClick={() => {
-                      setSudokuBoard(Array.from({ length: 9 }, () => Array(9).fill("")));
-                      setSudokuResults(null);
+                      setBoard(Array.from({ length: 9 }, () => Array(9).fill("")));
+                      clearResults();
                     }}
                     variant="outline"
                     size="lg"
                   >
                     Clear all
                   </Button>
-                  <Button onClick={solveSudoku} disabled={solving} size="lg">
+                  <Button onClick={onSolve} disabled={solving} size="lg">
                     {solving ? "Solving..." : "Solve"}
                   </Button>
 
@@ -2848,6 +2853,7 @@ function Index() {
               </div>
             );
           })()
+
 
         ) : mode === "wordiply" ? (
 
