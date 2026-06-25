@@ -347,13 +347,14 @@ function Index() {
   useEffect(() => { setPageMM(0); }, [mastermindResults]);
   useEffect(() => { setPageWP(0); }, [wordPeaksResults]);
 
-  useEffect(() => { setPageMarbless(0); }, [marblessResults]);
+  useEffect(() => { setPageMarbless(0); setSelectedMarbless(new Set()); }, [marblessResults]);
   useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
   useEffect(() => { setPageFl(0); }, [flResults]);
   useEffect(() => { setPageWor(0); }, [worResults]);
   useEffect(() => { setPageSd(0); }, [sdResults]);
   useEffect(() => { setPageSudoku(0); }, [sudokuResults]);
+  useEffect(() => { setPageSudokuVar(0); }, [sudokuVarResults]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
