@@ -1619,6 +1619,11 @@ function Index() {
             <p>Enter any pre-filled cell values inside the grid, then click Solve.</p>
           </div>
         )}
+        {mode === "sudokuvariation" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>A typical Sudoku, but with more variations!</p>
+          </div>
+        )}
         {mode === "wordpeaks" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p>Enter your guesses.</p>
