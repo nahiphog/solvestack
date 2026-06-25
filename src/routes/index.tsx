@@ -320,6 +320,10 @@ function Index() {
   const [sudokuBoard, setSudokuBoard] = useState<string[][]>(SUDOKU_DEFAULT.map((r) => r.slice()));
   const [sudokuResults, setSudokuResults] = useState<number[][][] | null>(null);
   const [pageSudoku, setPageSudoku] = useState(0);
+  const [sudokuVarBoard, setSudokuVarBoard] = useState<string[][]>(SUDOKU_DEFAULT.map((r) => r.slice()));
+  const [sudokuVarResults, setSudokuVarResults] = useState<number[][][] | null>(null);
+  const [pageSudokuVar, setPageSudokuVar] = useState(0);
+  const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
   const [copied, setCopied] = useState(false);
