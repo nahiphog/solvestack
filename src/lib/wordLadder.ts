@@ -381,9 +381,12 @@ export async function fibbleSolve(
   guesses: { word: string; pattern: WordleColor[] }[],
 ): Promise<string[]> {
   // In Fibble, exactly one tile lies in each guess row.
+  // Additionally, candidate true patterns that are all-GREEN are excluded
+  // (i.e. guess === answer is never a valid solution for a row).
   const words = await getFiveLetterWords();
   return words.filter((answer) =>
     guesses.every((g) => {
+      if (g.word === answer) return false;
       const out = wordleOutput(g.word, answer);
       let mismatches = 0;
       for (let i = 0; i < out.length; i++) {
