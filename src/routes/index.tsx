@@ -3613,11 +3613,12 @@ function Index() {
                   return (
                     <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
                       <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
-                      <div className="inline-block">
+                      <div className="inline-block border-[3px] border-black dark:border-white">
                         {sol.map((row, r) => (
                           <div key={r} className="flex">
                             {row.map((cell, c) => {
-                              const reg = SUDOKU_REGIONS[r][c];
+                              const regs = colored && sudokuVarIrregular ? sudokuVarRegions : SUDOKU_REGIONS;
+                              const reg = regs[r][c];
                               const bg = colored ? (REGION_BG[reg] || "bg-muted") : "bg-background";
                               return (
                                 <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg} font-mono text-sm font-bold`}>
