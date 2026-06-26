@@ -2950,7 +2950,7 @@ function Index() {
                         {[1,2,3,4,5,6,7,8,9].map((k) => (
                           <button
                             key={k}
-                            onClick={() => setSudokuVarPaintColor(k)}
+                            onClick={() => setSudokuVarPaintColor((prev) => prev === k ? 0 : k)}
                             className={`flex h-7 w-7 items-center justify-center rounded border text-xs font-bold ${REGION_BG[k]} ${sudokuVarPaintColor === k ? "ring-2 ring-foreground" : "border-border"}`}
                             aria-label={`Paint with region ${k}`}
                           >
