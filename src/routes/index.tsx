@@ -3005,6 +3005,29 @@ function Index() {
                         <line x1="0" y1="100" x2="100" y2="0" stroke="rgb(56 189 248 / 0.6)" strokeWidth="0.5" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
                       </svg>
                     )}
+                    {!isVar && (
+                      <svg
+                        className="pointer-events-none absolute inset-0 h-full w-full"
+                        preserveAspectRatio="none"
+                        viewBox="0 0 9 9"
+                      >
+                        <line x1="3" y1="0" x2="3" y2="9" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                        <line x1="6" y1="0" x2="6" y2="9" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                        <line x1="0" y1="3" x2="9" y2="3" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                        <line x1="0" y1="6" x2="9" y2="6" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                      </svg>
+                    )}
+                    {isVar && sudokuVarWindoku && (
+                      <svg
+                        className="pointer-events-none absolute inset-0 h-full w-full"
+                        preserveAspectRatio="none"
+                        viewBox="0 0 9 9"
+                      >
+                        {[[1,1],[1,5],[5,1],[5,5]].map(([r, c], i) => (
+                          <rect key={i} x={c} y={r} width={3} height={3} fill="none" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
+                        ))}
+                      </svg>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3">
