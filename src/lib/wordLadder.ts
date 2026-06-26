@@ -170,7 +170,9 @@ export function sudokuSolve(
   const rowUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const colUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const regUsed: Map<number, Set<number>> = new Map();
-  const { king, knight, diagonal, nonConsecutive } = variations;
+  const extraUsed: Map<number, Set<number>> = new Map();
+  const { king, knight, diagonal, nonConsecutive, extraRegions } = variations;
+  const extraAt = (r: number, c: number): number => (extraRegions ? extraRegions[r][c] : 0);
 
   const inBounds = (r: number, c: number) => r >= 0 && r < N && c >= 0 && c < N;
   const checkExtra = (r: number, c: number, v: number): boolean => {
