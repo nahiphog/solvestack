@@ -2858,7 +2858,7 @@ function Index() {
                           }}
                           className="mt-1"
                         />
-                        <span><span className="font-medium">{opt.label}:</span> <span className="text-muted-foreground">{opt.desc}</span></span>
+                        <span><span className="font-medium">{opt.label}:</span> <span className="text-muted-foreground">{opt.desc}</span>{(opt as { beta?: boolean }).beta && (<span title="This feature is experimental, it might cause your browser to lag. Proceed with caution." className="ml-1 cursor-help text-amber-600 font-semibold">(BETA)</span>)}</span>
                       </label>
                     ))}
                     {sudokuVarIrregular && (
