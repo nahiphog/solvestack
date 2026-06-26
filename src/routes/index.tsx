@@ -2912,6 +2912,7 @@ function Index() {
             const regionsForCells = isVar && sudokuVarIrregular ? sudokuVarRegions : SUDOKU_REGIONS;
             const paintCell = (r: number, c: number) => {
               if (!(isVar && sudokuVarIrregular)) return;
+              if (sudokuVarPaintColor === 0) return;
               setSudokuVarRegions((prev) => prev.map((rr, ri) => ri === r ? rr.map((x, ci) => ci === c ? sudokuVarPaintColor : x) : rr));
               clearResults();
             };
