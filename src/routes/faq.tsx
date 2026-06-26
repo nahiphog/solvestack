@@ -69,6 +69,7 @@ function FaqPage() {
                 ["By Thomas", "https://bythomas.co.uk/"],
                 ["Clever Goat", "https://clevergoat.com/"],
                 ["Coffee First", "https://coffeefirst.games/"],
+                ["Dles", "https://dles.gg"],
               ];
               return (
                 <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-3">
