@@ -156,6 +156,7 @@ export interface SudokuVariations {
   knight?: boolean;
   diagonal?: boolean;
   nonConsecutive?: boolean;
+  extraRegions?: number[][]; // 0 = no extra region; non-zero values group cells that must each be unique
 }
 
 export function sudokuSolve(
