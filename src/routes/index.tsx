@@ -3764,10 +3764,6 @@ function Index() {
                   );
                 })}
               </ol>
-                    </li>
-                  );
-                })}
-              </ol>
               <Paginator page={page} setPage={setPage} total={results.length} perPage={perPage} />
             </section>
           );
