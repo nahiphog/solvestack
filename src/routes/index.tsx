@@ -3724,7 +3724,7 @@ function Index() {
                   return (
                     <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
                       <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
-                      <div className="inline-block border-[3px] border-black dark:border-white">
+                      <div className="relative inline-block border-[3px] border-black dark:border-white">
                         {sol.map((row, r) => (
                           <div key={r} className="flex">
                             {row.map((cell, c) => {
@@ -3744,7 +3744,26 @@ function Index() {
                             })}
                           </div>
                         ))}
+                        {!colored && (
+                          <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 9 9">
+                            <line x1="3" y1="0" x2="3" y2="9" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                            <line x1="6" y1="0" x2="6" y2="9" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                            <line x1="0" y1="3" x2="9" y2="3" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                            <line x1="0" y1="6" x2="9" y2="6" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                          </svg>
+                        )}
+                        {colored && sudokuVarWindoku && (
+                          <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 9 9">
+                            {[[1,1],[1,5],[5,1],[5,5]].map(([rr, cc], i2) => (
+                              <rect key={i2} x={cc} y={rr} width={3} height={3} fill="none" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
+                            ))}
+                          </svg>
+                        )}
                       </div>
+                    </li>
+                  );
+                })}
+              </ol>
                     </li>
                   );
                 })}
