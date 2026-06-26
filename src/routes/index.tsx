@@ -306,6 +306,17 @@ function Index() {
     [7,7,7,8,8,8,9,9,9],
     [7,7,7,8,8,8,9,9,9],
   ];
+  const WINDOKU_REGIONS: number[][] = [
+    [1,6,6,6,1,7,7,7,1],
+    [8,2,2,2,8,3,3,3,8],
+    [8,2,2,2,8,3,3,3,8],
+    [8,2,2,2,8,3,3,3,8],
+    [1,6,6,6,1,7,7,7,1],
+    [9,4,4,4,9,5,5,5,9],
+    [9,4,4,4,9,5,5,5,9],
+    [9,4,4,4,9,5,5,5,9],
+    [1,6,6,6,1,7,7,7,1],
+  ];
   const SUDOKU_DEFAULT: string[][] = [
     ["8","","","","","","","",""],
     ["","","3","6","","","","",""],
@@ -328,6 +339,7 @@ function Index() {
   const [sudokuVarKnight, setSudokuVarKnight] = useState(false);
   const [sudokuVarDiagonal, setSudokuVarDiagonal] = useState(false);
   const [sudokuVarNonConsec, setSudokuVarNonConsec] = useState(false);
+  const [sudokuVarWindoku, setSudokuVarWindoku] = useState(false);
   const [sudokuVarIrregular, setSudokuVarIrregular] = useState(false);
   const [sudokuVarRegions, setSudokuVarRegions] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
   const [sudokuVarPaintColor, setSudokuVarPaintColor] = useState<number>(1);
@@ -553,6 +565,7 @@ function Index() {
         knight: sudokuVarKnight,
         diagonal: sudokuVarDiagonal,
         nonConsecutive: sudokuVarNonConsec,
+        extraRegions: sudokuVarWindoku ? WINDOKU_REGIONS : undefined,
       });
       if (res.length === 0) setError("No solutions found.");
       else setSudokuVarResults(res);
@@ -2899,6 +2912,7 @@ function Index() {
             const regionsForCells = isVar && sudokuVarIrregular ? sudokuVarRegions : SUDOKU_REGIONS;
             const paintCell = (r: number, c: number) => {
               if (!(isVar && sudokuVarIrregular)) return;
+              if (sudokuVarPaintColor === 0) return;
               setSudokuVarRegions((prev) => prev.map((rr, ri) => ri === r ? rr.map((x, ci) => ci === c ? sudokuVarPaintColor : x) : rr));
               clearResults();
             };
@@ -2911,6 +2925,7 @@ function Index() {
                       { state: sudokuVarKing, set: setSudokuVarKing, label: "Anti-king", desc: "Cells separated by a chess king's move cannot contain the same digit." },
                       { state: sudokuVarDiagonal, set: setSudokuVarDiagonal, label: "Diagonal", desc: "The two main diagonals contain the digits 1 through 9 exactly once each." },
                       { state: sudokuVarNonConsec, set: setSudokuVarNonConsec, label: "Non-consecutive", desc: "Consecutive digits may not be orthogonally adjacent to each other.", beta: true },
+                      { state: sudokuVarWindoku, set: setSudokuVarWindoku, label: "Windoku", desc: "In addition to normal sudoku rules. The digits 1 through 9 must each appear exactly once in each of the four boxes." },
                       { state: sudokuVarIrregular, set: setSudokuVarIrregular, label: "Irregular", desc: "Each colored region contains each digit from 1-9 exactly once." },
                     ].map((opt) => (
                       <label key={opt.label} className="flex items-start gap-2 cursor-pointer">
@@ -2935,7 +2950,7 @@ function Index() {
                         {[1,2,3,4,5,6,7,8,9].map((k) => (
                           <button
                             key={k}
-                            onClick={() => setSudokuVarPaintColor(k)}
+                            onClick={() => setSudokuVarPaintColor((prev) => prev === k ? 0 : k)}
                             className={`flex h-7 w-7 items-center justify-center rounded border text-xs font-bold ${REGION_BG[k]} ${sudokuVarPaintColor === k ? "ring-2 ring-foreground" : "border-border"}`}
                             aria-label={`Paint with region ${k}`}
                           >
@@ -2988,6 +3003,29 @@ function Index() {
                       >
                         <line x1="0" y1="0" x2="100" y2="100" stroke="rgb(56 189 248 / 0.6)" strokeWidth="0.5" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
                         <line x1="0" y1="100" x2="100" y2="0" stroke="rgb(56 189 248 / 0.6)" strokeWidth="0.5" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
+                      </svg>
+                    )}
+                    {!isVar && (
+                      <svg
+                        className="pointer-events-none absolute inset-0 h-full w-full"
+                        preserveAspectRatio="none"
+                        viewBox="0 0 9 9"
+                      >
+                        <line x1="3" y1="0" x2="3" y2="9" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                        <line x1="6" y1="0" x2="6" y2="9" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                        <line x1="0" y1="3" x2="9" y2="3" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                        <line x1="0" y1="6" x2="9" y2="6" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                      </svg>
+                    )}
+                    {isVar && sudokuVarWindoku && (
+                      <svg
+                        className="pointer-events-none absolute inset-0 h-full w-full"
+                        preserveAspectRatio="none"
+                        viewBox="0 0 9 9"
+                      >
+                        {[[1,1],[1,5],[5,1],[5,5]].map(([r, c], i) => (
+                          <rect key={i} x={c} y={r} width={3} height={3} fill="none" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
+                        ))}
                       </svg>
                     )}
                   </div>
@@ -3686,7 +3724,7 @@ function Index() {
                   return (
                     <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
                       <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
-                      <div className="inline-block border-[3px] border-black dark:border-white">
+                      <div className="relative inline-block border-[3px] border-black dark:border-white">
                         {sol.map((row, r) => (
                           <div key={r} className="flex">
                             {row.map((cell, c) => {
@@ -3706,6 +3744,21 @@ function Index() {
                             })}
                           </div>
                         ))}
+                        {!colored && (
+                          <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 9 9">
+                            <line x1="3" y1="0" x2="3" y2="9" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                            <line x1="6" y1="0" x2="6" y2="9" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                            <line x1="0" y1="3" x2="9" y2="3" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                            <line x1="0" y1="6" x2="9" y2="6" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
+                          </svg>
+                        )}
+                        {colored && sudokuVarWindoku && (
+                          <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 9 9">
+                            {[[1,1],[1,5],[5,1],[5,5]].map(([rr, cc], i2) => (
+                              <rect key={i2} x={cc} y={rr} width={3} height={3} fill="none" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
+                            ))}
+                          </svg>
+                        )}
                       </div>
                     </li>
                   );

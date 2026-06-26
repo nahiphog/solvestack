@@ -156,6 +156,7 @@ export interface SudokuVariations {
   knight?: boolean;
   diagonal?: boolean;
   nonConsecutive?: boolean;
+  extraRegions?: number[][]; // 0 = no extra region; non-zero values group cells that must each be unique
 }
 
 export function sudokuSolve(
@@ -169,7 +170,9 @@ export function sudokuSolve(
   const rowUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const colUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const regUsed: Map<number, Set<number>> = new Map();
-  const { king, knight, diagonal, nonConsecutive } = variations;
+  const extraUsed: Map<number, Set<number>> = new Map();
+  const { king, knight, diagonal, nonConsecutive, extraRegions } = variations;
+  const extraAt = (r: number, c: number): number => (extraRegions ? extraRegions[r][c] : 0);
 
   const inBounds = (r: number, c: number) => r >= 0 && r < N && c >= 0 && c < N;
   const checkExtra = (r: number, c: number, v: number): boolean => {
@@ -206,10 +209,14 @@ export function sudokuSolve(
   for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
     const reg = regions[r][c];
     if (!regUsed.has(reg)) regUsed.set(reg, new Set());
+    const er = extraAt(r, c);
+    if (er && !extraUsed.has(er)) extraUsed.set(er, new Set());
     const v = b[r][c];
     if (v !== 0) {
       if (rowUsed[r].has(v) || colUsed[c].has(v) || regUsed.get(reg)!.has(v)) return [];
+      if (er && extraUsed.get(er)!.has(v)) return [];
       rowUsed[r].add(v); colUsed[c].add(v); regUsed.get(reg)!.add(v);
+      if (er) extraUsed.get(er)!.add(v);
     }
   }
   // Validate pre-filled against extras
@@ -234,12 +241,15 @@ export function sudokuSolve(
     const [r, c] = e;
     const reg = regions[r][c];
     const ru = rowUsed[r], cu = colUsed[c], gu = regUsed.get(reg)!;
+    const er = extraAt(r, c);
+    const eu = er ? extraUsed.get(er)! : null;
     for (let v = 1; v <= 9; v++) {
       if (ru.has(v) || cu.has(v) || gu.has(v)) continue;
+      if (eu && eu.has(v)) continue;
       if (!checkExtra(r, c, v)) continue;
-      b[r][c] = v; ru.add(v); cu.add(v); gu.add(v);
+      b[r][c] = v; ru.add(v); cu.add(v); gu.add(v); if (eu) eu.add(v);
       bt();
-      b[r][c] = 0; ru.delete(v); cu.delete(v); gu.delete(v);
+      b[r][c] = 0; ru.delete(v); cu.delete(v); gu.delete(v); if (eu) eu.delete(v);
       if (solutions.length >= maxSolutions) return;
     }
   };
