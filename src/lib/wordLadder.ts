@@ -241,12 +241,15 @@ export function sudokuSolve(
     const [r, c] = e;
     const reg = regions[r][c];
     const ru = rowUsed[r], cu = colUsed[c], gu = regUsed.get(reg)!;
+    const er = extraAt(r, c);
+    const eu = er ? extraUsed.get(er)! : null;
     for (let v = 1; v <= 9; v++) {
       if (ru.has(v) || cu.has(v) || gu.has(v)) continue;
+      if (eu && eu.has(v)) continue;
       if (!checkExtra(r, c, v)) continue;
-      b[r][c] = v; ru.add(v); cu.add(v); gu.add(v);
+      b[r][c] = v; ru.add(v); cu.add(v); gu.add(v); if (eu) eu.add(v);
       bt();
-      b[r][c] = 0; ru.delete(v); cu.delete(v); gu.delete(v);
+      b[r][c] = 0; ru.delete(v); cu.delete(v); gu.delete(v); if (eu) eu.delete(v);
       if (solutions.length >= maxSolutions) return;
     }
   };
