@@ -565,6 +565,7 @@ function Index() {
         knight: sudokuVarKnight,
         diagonal: sudokuVarDiagonal,
         nonConsecutive: sudokuVarNonConsec,
+        extraRegions: sudokuVarWindoku ? WINDOKU_REGIONS : undefined,
       });
       if (res.length === 0) setError("No solutions found.");
       else setSudokuVarResults(res);
