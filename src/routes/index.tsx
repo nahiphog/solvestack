@@ -328,6 +328,7 @@ function Index() {
   const [sudokuVarKnight, setSudokuVarKnight] = useState(false);
   const [sudokuVarDiagonal, setSudokuVarDiagonal] = useState(false);
   const [sudokuVarNonConsec, setSudokuVarNonConsec] = useState(false);
+  const [sudokuVarWindoku, setSudokuVarWindoku] = useState(false);
   const [sudokuVarIrregular, setSudokuVarIrregular] = useState(false);
   const [sudokuVarRegions, setSudokuVarRegions] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
   const [sudokuVarPaintColor, setSudokuVarPaintColor] = useState<number>(1);
