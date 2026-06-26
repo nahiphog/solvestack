@@ -3625,8 +3625,13 @@ function Index() {
                               const regs = colored && sudokuVarIrregular ? sudokuVarRegions : SUDOKU_REGIONS;
                               const reg = regs[r][c];
                               const bg = colored ? (REGION_BG[reg] || "bg-muted") : "bg-background";
+                              let extra = "";
+                              if (!colored) {
+                                if (c === 2 || c === 5) extra += " border-r-[3px] border-r-black dark:border-r-white";
+                                if (r === 2 || r === 5) extra += " border-b-[3px] border-b-black dark:border-b-white";
+                              }
                               return (
-                                <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg} font-mono text-sm font-bold`}>
+                                <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg}${extra} font-mono text-sm font-bold`}>
                                   {cell}
                                 </div>
                               );
