@@ -260,14 +260,14 @@ function Index() {
   ]);
   const [marblessResults, setMarblessResults] = useState<MarblessSolution[] | null>(null);
   const [dodekuGrid, setDodekuGrid] = useState<string[][]>([
-    ["X", "X", "X", ""],
-    ["X", "", "", ""],
-    ["", "", "", "11"],
-    ["", "4", "1", ""],
+    ["", "", "", ""],
+    ["", "", "", ""],
+    ["", "", "", ""],
+    ["", "", "", ""],
   ]);
-  const [dodekuRowSums, setDodekuRowSums] = useState<string[]>(["5", "20", "35", ""]);
-  const [dodekuColSums, setDodekuColSums] = useState<string[]>(["8", "", "21", "32"]);
-  const [dodekuTiles, setDodekuTiles] = useState<string>("2,3,5,6,7,8,9,10,12");
+  const [dodekuRowSums, setDodekuRowSums] = useState<string[]>(["", "", "", ""]);
+  const [dodekuColSums, setDodekuColSums] = useState<string[]>(["", "", "", ""]);
+  const [dodekuDragSource, setDodekuDragSource] = useState<{ kind: "pile"; value: string } | { kind: "cell"; r: number; c: number } | null>(null);
   const [dodekuResult, setDodekuResult] = useState<DodekuCell[][][] | null>(null);
   const [pageDodeku, setPageDodeku] = useState(0);
   const [sdRegions, setSdRegions] = useState<number[][]>([
@@ -410,31 +410,37 @@ function Index() {
   const solveDodeku = () => {
     setError(null);
     setDodekuResult(null);
+    const flat = dodekuGrid.flat();
+    const xCount = flat.filter((v) => v === "X").length;
+    const numPlaced = flat.filter((v) => v !== "" && v !== "X").map((v) => parseInt(v, 10));
+    if (xCount !== 4) {
+      setError("Place all 4 X tiles into the grid.");
+      return;
+    }
+    if (numPlaced.length < 3) {
+      setError("Place at least 3 number tiles into the grid.");
+      return;
+    }
     const initial: DodekuCell[][] = dodekuGrid.map((row) =>
       row.map<DodekuCell>((v) => {
-        const s = v.trim();
-        if (s === "X" || s === "x") return "X";
-        if (s === "" || s === "0") return 0;
-        const n = parseInt(s, 10);
+        if (v === "X") return "X";
+        if (v === "") return 0;
+        const n = parseInt(v, 10);
         return Number.isFinite(n) ? n : 0;
       }),
     );
     const rs = dodekuRowSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
     const cs = dodekuColSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
-    if (rs.every((v) => v === null) && cs.every((v) => v === null)) {
-      setError("The row sums and column sums cannot be all empty");
+    if (rs.every((v) => v === null)) {
+      setError("Fill in at least one row sum.");
       return;
     }
-    const tiles = dodekuTiles
-      .split(/[\s,]+/)
-      .filter(Boolean)
-      .map((t) => parseInt(t, 10))
-      .filter((n) => Number.isFinite(n));
-    const emptyCount = initial.flat().filter((v) => v === 0).length;
-    if (tiles.length !== emptyCount) {
-      setError(`Number of tiles (${tiles.length}) must equal number of empty cells (${emptyCount}).`);
+    if (cs.every((v) => v === null)) {
+      setError("Fill in at least one column sum.");
       return;
     }
+    const allNumbers = [1,2,3,4,5,6,7,8,9,10,11,12];
+    const tiles = allNumbers.filter((n) => !numPlaced.includes(n));
     setSolving(true);
     setPageDodeku(0);
     setTimeout(() => {
@@ -2596,87 +2602,149 @@ function Index() {
           </div>
 
         ) : mode === "dodeku" ? (
-          <div className="space-y-4">
-            <div>
-              <div className="mb-1 text-sm font-medium">Grid (use "X" for blocked, blank for empty, or a fixed number)</div>
-              <div className="inline-block">
-                {[0, 1, 2, 3].map((r) => (
-                  <div key={r} className="mt-1.5 flex gap-1.5 first:mt-0">
-                    {[0, 1, 2, 3].map((c) => {
-                      const v = dodekuGrid[r][c];
-                      const isBlocked = v === "X" || v === "x";
+          (() => {
+            const flat = dodekuGrid.flat();
+            const xPlaced = flat.filter((v) => v === "X").length;
+            const numsPlaced = new Set(flat.filter((v) => v !== "" && v !== "X"));
+            const pile: string[] = [];
+            for (let i = xPlaced; i < 4; i++) pile.push("X");
+            for (const n of ["1","2","3","4","5","6","7","8","9","10","11","12"]) {
+              if (!numsPlaced.has(n)) pile.push(n);
+            }
+            const placeTile = (r: number, c: number, value: string) => {
+              setDodekuResult(null);
+              setDodekuGrid((prev) => prev.map((row, ri) => ri === r ? row.map((x, ci) => ci === c ? value : x) : row));
+            };
+            const clearCell = (r: number, c: number) => {
+              setDodekuResult(null);
+              setDodekuGrid((prev) => prev.map((row, ri) => ri === r ? row.map((x, ci) => ci === c ? "" : x) : row));
+            };
+            const onCellDrop = (r: number, c: number, e: React.DragEvent) => {
+              e.preventDefault();
+              if (!dodekuDragSource) return;
+              const existing = dodekuGrid[r][c];
+              if (dodekuDragSource.kind === "pile") {
+                if (existing !== "") return;
+                placeTile(r, c, dodekuDragSource.value);
+              } else {
+                const sr = dodekuDragSource.r, sc = dodekuDragSource.c;
+                if (sr === r && sc === c) return;
+                const moving = dodekuGrid[sr][sc];
+                setDodekuResult(null);
+                setDodekuGrid((prev) => prev.map((row, ri) => row.map((x, ci) => {
+                  if (ri === sr && ci === sc) return existing;
+                  if (ri === r && ci === c) return moving;
+                  return x;
+                })));
+              }
+              setDodekuDragSource(null);
+            };
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-1 text-sm font-medium">Tile pile (drag onto the grid)</div>
+                  <div
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (dodekuDragSource && dodekuDragSource.kind === "cell") {
+                        clearCell(dodekuDragSource.r, dodekuDragSource.c);
+                      }
+                      setDodekuDragSource(null);
+                    }}
+                    className="flex min-h-[3.5rem] flex-wrap gap-2 rounded-md border border-dashed border-border bg-muted/30 p-2"
+                  >
+                    {pile.length === 0 && <span className="text-xs text-muted-foreground">(empty)</span>}
+                    {pile.map((t, i) => {
+                      const isX = t === "X";
                       return (
-                        <input
-                          key={c}
-                          value={v}
-                          onChange={(e) => {
-                            const raw = e.target.value;
-                            const cleaned = /^[xX]$/.test(raw) ? "X" : raw.replace(/[^0-9]/g, "");
-                            setDodekuGrid((prev) =>
-                              prev.map((row, ri) => (ri === r ? row.map((x, ci) => (ci === c ? cleaned : x)) : row)),
-                            );
-                          }}
-                          className={`flex h-12 w-12 items-center justify-center rounded border-2 border-border text-center font-mono text-lg font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${isBlocked ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
-                          aria-label={`Cell row ${r + 1} col ${c + 1}`}
-                        />
+                        <div
+                          key={`${t}-${i}`}
+                          draggable
+                          onDragStart={() => setDodekuDragSource({ kind: "pile", value: t })}
+                          onDragEnd={() => setDodekuDragSource(null)}
+                          className={`flex h-10 w-10 cursor-grab items-center justify-center rounded border-2 border-border font-mono text-base font-bold ${isX ? "bg-foreground text-background" : "bg-background text-foreground"}`}
+                        >
+                          {t}
+                        </div>
                       );
                     })}
-                    <input
-                      value={dodekuRowSums[r]}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/[^0-9]/g, "");
-                        setDodekuRowSums((prev) => prev.map((x, i) => (i === r ? v : x)));
-                      }}
-                      placeholder="—"
-                      className="ml-1.5 h-12 w-12 rounded border border-input bg-background text-center font-mono text-sm"
-                      aria-label={`Row ${r + 1} sum`}
-                    />
                   </div>
-                ))}
-                <div className="mt-1.5 flex gap-1.5">
-                  {[0, 1, 2, 3].map((c) => (
-                    <input
-                      key={c}
-                      value={dodekuColSums[c]}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/[^0-9]/g, "");
-                        setDodekuColSums((prev) => prev.map((x, i) => (i === c ? v : x)));
-                      }}
-                      placeholder="—"
-                      className="h-9 w-12 rounded border border-input bg-background text-center font-mono text-sm"
-                      aria-label={`Column ${c + 1} sum`}
-                    />
-                  ))}
+                </div>
+                <div>
+                  <div className="mb-1 text-sm font-medium">Grid (drag tiles in; click a placed tile to remove)</div>
+                  <div className="inline-block">
+                    {[0, 1, 2, 3].map((r) => (
+                      <div key={r} className="mt-1.5 flex gap-1.5 first:mt-0">
+                        {[0, 1, 2, 3].map((c) => {
+                          const v = dodekuGrid[r][c];
+                          const isBlocked = v === "X";
+                          const isFilled = v !== "";
+                          return (
+                            <div
+                              key={c}
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={(e) => onCellDrop(r, c, e)}
+                              onClick={() => { if (isFilled) clearCell(r, c); }}
+                              draggable={isFilled}
+                              onDragStart={() => { if (isFilled) setDodekuDragSource({ kind: "cell", r, c }); }}
+                              onDragEnd={() => setDodekuDragSource(null)}
+                              className={`flex h-12 w-12 items-center justify-center rounded border-2 border-border text-center font-mono text-lg font-bold ${isFilled ? "cursor-grab" : ""} ${isBlocked ? "bg-foreground text-background" : isFilled ? "bg-background text-foreground" : "bg-muted text-muted-foreground"}`}
+                              aria-label={`Cell row ${r + 1} col ${c + 1}`}
+                            >
+                              {v}
+                            </div>
+                          );
+                        })}
+                        <input
+                          value={dodekuRowSums[r]}
+                          onChange={(e) => {
+                            const v = e.target.value.replace(/[^0-9]/g, "");
+                            setDodekuRowSums((prev) => prev.map((x, i) => (i === r ? v : x)));
+                          }}
+                          placeholder="—"
+                          className="ml-1.5 h-12 w-12 rounded border border-input bg-background text-center font-mono text-sm"
+                          aria-label={`Row ${r + 1} sum`}
+                        />
+                      </div>
+                    ))}
+                    <div className="mt-1.5 flex gap-1.5">
+                      {[0, 1, 2, 3].map((c) => (
+                        <input
+                          key={c}
+                          value={dodekuColSums[c]}
+                          onChange={(e) => {
+                            const v = e.target.value.replace(/[^0-9]/g, "");
+                            setDodekuColSums((prev) => prev.map((x, i) => (i === c ? v : x)));
+                          }}
+                          placeholder="—"
+                          className="h-9 w-12 rounded border border-input bg-background text-center font-mono text-sm"
+                          aria-label={`Column ${c + 1} sum`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    onClick={() => {
+                      setDodekuGrid([["","","",""],["","","",""],["","","",""],["","","",""]]);
+                      setDodekuRowSums(["","","",""]);
+                      setDodekuColSums(["","","",""]);
+                      setDodekuResult(null);
+                    }}
+                    variant="outline"
+                    size="lg"
+                  >
+                    Clear all
+                  </Button>
+                  <Button onClick={solveDodeku} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
                 </div>
               </div>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">Available tiles (comma-separated)</label>
-              <Input
-                value={dodekuTiles}
-                onChange={(e) => setDodekuTiles(e.target.value)}
-                className="font-mono"
-              />
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                onClick={() => {
-                  setDodekuGrid([["","","",""],["","","",""],["","","",""],["","","",""]]);
-                  setDodekuRowSums(["","","",""]);
-                  setDodekuColSums(["","","",""]);
-                  setDodekuTiles("");
-                  setDodekuResult(null);
-                }}
-                variant="outline"
-                size="lg"
-              >
-                Clear all
-              </Button>
-              <Button onClick={solveDodeku} disabled={solving} size="lg">
-                {solving ? "Solving..." : "Solve"}
-              </Button>
-            </div>
-          </div>
+            );
+          })()
 
         ) : mode === "sheetdoku" ? (
           (() => {
@@ -2842,7 +2910,7 @@ function Index() {
                       { state: sudokuVarKnight, set: setSudokuVarKnight, label: "Anti-knight", desc: "Cells separated by a chess knight's move cannot contain the same digit." },
                       { state: sudokuVarKing, set: setSudokuVarKing, label: "Anti-king", desc: "Cells separated by a chess king's move cannot contain the same digit." },
                       { state: sudokuVarDiagonal, set: setSudokuVarDiagonal, label: "Diagonal", desc: "The two main diagonals contain the digits 1 through 9 exactly once each." },
-                      { state: sudokuVarNonConsec, set: setSudokuVarNonConsec, label: "Non-consecutive", desc: "Consecutive digits may not be orthogonally adjacent to each other." },
+                      { state: sudokuVarNonConsec, set: setSudokuVarNonConsec, label: "Non-consecutive", desc: "Consecutive digits may not be orthogonally adjacent to each other.", beta: true },
                       { state: sudokuVarIrregular, set: setSudokuVarIrregular, label: "Irregular", desc: "Each colored region contains each digit from 1-9 exactly once." },
                     ].map((opt) => (
                       <label key={opt.label} className="flex items-start gap-2 cursor-pointer">
@@ -2858,7 +2926,7 @@ function Index() {
                           }}
                           className="mt-1"
                         />
-                        <span><span className="font-medium">{opt.label}:</span> <span className="text-muted-foreground">{opt.desc}</span></span>
+                        <span><span className="font-medium">{opt.label}:</span> <span className="text-muted-foreground">{opt.desc}</span>{(opt as { beta?: boolean }).beta && (<span title="This feature is experimental, it might cause your browser to lag. Proceed with caution." className="ml-1 cursor-help text-amber-600 font-semibold">(BETA)</span>)}</span>
                       </label>
                     ))}
                     {sudokuVarIrregular && (
@@ -2885,12 +2953,17 @@ function Index() {
                       <div key={r} className="flex">
                         {row.map((val, c) => {
                           const reg = regionsForCells[r][c];
-                          const bg = reg ? (REGION_BG[reg] || "bg-muted") : "bg-muted";
+                          const bg = isVar ? (reg ? (REGION_BG[reg] || "bg-muted") : "bg-muted") : "bg-background";
+                          let extra = "";
+                          if (!isVar) {
+                            if (c === 2 || c === 5) extra += " border-r-[3px] border-r-black dark:border-r-white";
+                            if (r === 2 || r === 5) extra += " border-b-[3px] border-b-black dark:border-b-white";
+                          }
                           return (
                             <div
                               key={c}
                               onClick={() => paintCell(r, c)}
-                              className={`flex h-10 w-10 items-center justify-center border border-border ${bg}`}
+                              className={`flex h-10 w-10 items-center justify-center border border-border ${bg}${extra}`}
                             >
                               <input
                                 value={val}
@@ -3620,8 +3693,13 @@ function Index() {
                               const regs = colored && sudokuVarIrregular ? sudokuVarRegions : SUDOKU_REGIONS;
                               const reg = regs[r][c];
                               const bg = colored ? (REGION_BG[reg] || "bg-muted") : "bg-background";
+                              let extra = "";
+                              if (!colored) {
+                                if (c === 2 || c === 5) extra += " border-r-[3px] border-r-black dark:border-r-white";
+                                if (r === 2 || r === 5) extra += " border-b-[3px] border-b-black dark:border-b-white";
+                              }
                               return (
-                                <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg} font-mono text-sm font-bold`}>
+                                <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg}${extra} font-mono text-sm font-bold`}>
                                   {cell}
                                 </div>
                               );
