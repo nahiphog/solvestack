@@ -410,31 +410,37 @@ function Index() {
   const solveDodeku = () => {
     setError(null);
     setDodekuResult(null);
+    const flat = dodekuGrid.flat();
+    const xCount = flat.filter((v) => v === "X").length;
+    const numPlaced = flat.filter((v) => v !== "" && v !== "X").map((v) => parseInt(v, 10));
+    if (xCount !== 4) {
+      setError("Place all 4 X tiles into the grid.");
+      return;
+    }
+    if (numPlaced.length < 3) {
+      setError("Place at least 3 number tiles into the grid.");
+      return;
+    }
     const initial: DodekuCell[][] = dodekuGrid.map((row) =>
       row.map<DodekuCell>((v) => {
-        const s = v.trim();
-        if (s === "X" || s === "x") return "X";
-        if (s === "" || s === "0") return 0;
-        const n = parseInt(s, 10);
+        if (v === "X") return "X";
+        if (v === "") return 0;
+        const n = parseInt(v, 10);
         return Number.isFinite(n) ? n : 0;
       }),
     );
     const rs = dodekuRowSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
     const cs = dodekuColSums.map((s) => (s.trim() === "" ? null : parseInt(s, 10)));
-    if (rs.every((v) => v === null) && cs.every((v) => v === null)) {
-      setError("The row sums and column sums cannot be all empty");
+    if (rs.every((v) => v === null)) {
+      setError("Fill in at least one row sum.");
       return;
     }
-    const tiles = dodekuTiles
-      .split(/[\s,]+/)
-      .filter(Boolean)
-      .map((t) => parseInt(t, 10))
-      .filter((n) => Number.isFinite(n));
-    const emptyCount = initial.flat().filter((v) => v === 0).length;
-    if (tiles.length !== emptyCount) {
-      setError(`Number of tiles (${tiles.length}) must equal number of empty cells (${emptyCount}).`);
+    if (cs.every((v) => v === null)) {
+      setError("Fill in at least one column sum.");
       return;
     }
+    const allNumbers = [1,2,3,4,5,6,7,8,9,10,11,12];
+    const tiles = allNumbers.filter((n) => !numPlaced.includes(n));
     setSolving(true);
     setPageDodeku(0);
     setTimeout(() => {
