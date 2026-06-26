@@ -209,10 +209,14 @@ export function sudokuSolve(
   for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
     const reg = regions[r][c];
     if (!regUsed.has(reg)) regUsed.set(reg, new Set());
+    const er = extraAt(r, c);
+    if (er && !extraUsed.has(er)) extraUsed.set(er, new Set());
     const v = b[r][c];
     if (v !== 0) {
       if (rowUsed[r].has(v) || colUsed[c].has(v) || regUsed.get(reg)!.has(v)) return [];
+      if (er && extraUsed.get(er)!.has(v)) return [];
       rowUsed[r].add(v); colUsed[c].add(v); regUsed.get(reg)!.add(v);
+      if (er) extraUsed.get(er)!.add(v);
     }
   }
   // Validate pre-filled against extras
