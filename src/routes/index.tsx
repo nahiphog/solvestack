@@ -260,14 +260,14 @@ function Index() {
   ]);
   const [marblessResults, setMarblessResults] = useState<MarblessSolution[] | null>(null);
   const [dodekuGrid, setDodekuGrid] = useState<string[][]>([
-    ["X", "X", "X", ""],
-    ["X", "", "", ""],
-    ["", "", "", "11"],
-    ["", "4", "1", ""],
+    ["", "", "", ""],
+    ["", "", "", ""],
+    ["", "", "", ""],
+    ["", "", "", ""],
   ]);
-  const [dodekuRowSums, setDodekuRowSums] = useState<string[]>(["5", "20", "35", ""]);
-  const [dodekuColSums, setDodekuColSums] = useState<string[]>(["8", "", "21", "32"]);
-  const [dodekuTiles, setDodekuTiles] = useState<string>("2,3,5,6,7,8,9,10,12");
+  const [dodekuRowSums, setDodekuRowSums] = useState<string[]>(["", "", "", ""]);
+  const [dodekuColSums, setDodekuColSums] = useState<string[]>(["", "", "", ""]);
+  const [dodekuDragSource, setDodekuDragSource] = useState<{ kind: "pile"; value: string } | { kind: "cell"; r: number; c: number } | null>(null);
   const [dodekuResult, setDodekuResult] = useState<DodekuCell[][][] | null>(null);
   const [pageDodeku, setPageDodeku] = useState(0);
   const [sdRegions, setSdRegions] = useState<number[][]>([
