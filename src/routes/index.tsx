@@ -2885,12 +2885,17 @@ function Index() {
                       <div key={r} className="flex">
                         {row.map((val, c) => {
                           const reg = regionsForCells[r][c];
-                          const bg = reg ? (REGION_BG[reg] || "bg-muted") : "bg-muted";
+                          const bg = isVar ? (reg ? (REGION_BG[reg] || "bg-muted") : "bg-muted") : "bg-background";
+                          let extra = "";
+                          if (!isVar) {
+                            if (c === 2 || c === 5) extra += " border-r-[3px] border-r-black dark:border-r-white";
+                            if (r === 2 || r === 5) extra += " border-b-[3px] border-b-black dark:border-b-white";
+                          }
                           return (
                             <div
                               key={c}
                               onClick={() => paintCell(r, c)}
-                              className={`flex h-10 w-10 items-center justify-center border border-border ${bg}`}
+                              className={`flex h-10 w-10 items-center justify-center border border-border ${bg}${extra}`}
                             >
                               <input
                                 value={val}
