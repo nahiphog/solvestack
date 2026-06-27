@@ -65,6 +65,38 @@ export async function isValidJeffGoldblumWord(w: string): Promise<boolean> {
   return words.includes(w.toUpperCase());
 }
 
+let _shuntleWordsCache: string[] | null = null;
+async function getShuntleWords(): Promise<string[]> {
+  if (_shuntleWordsCache) return _shuntleWordsCache;
+  const mod = await import("@/data/shuntleWords.json");
+  // Each entry is already exactly 7 characters with spaces as padding.
+  _shuntleWordsCache = (mod.default as string[]).map((w) => w.padEnd(7, " ").slice(0, 7));
+  return _shuntleWordsCache;
+}
+
+export async function isValidShuntleWord(w: string): Promise<boolean> {
+  const words = await getShuntleWords();
+  const padded = w.toUpperCase().padEnd(7, " ").slice(0, 7);
+  return words.includes(padded);
+}
+
+export async function shuntleSolve(
+  guesses: { word: string; pattern: WordleColor[] }[],
+): Promise<string[]> {
+  const words = await getShuntleWords();
+  const normGuesses = guesses.map((g) => ({
+    word: g.word.toUpperCase().padEnd(7, " ").slice(0, 7),
+    pattern: g.pattern,
+  }));
+  return words.filter((answer) =>
+    normGuesses.every((g) => {
+      const out = wordleOutput(g.word, answer);
+      for (let i = 0; i < out.length; i++) if (out[i] !== g.pattern[i]) return false;
+      return true;
+    }),
+  );
+}
+
 export async function jeffGoldblumLeSolve(
   guesses: { word: string; pattern: WordleColor[] }[],
 ): Promise<string[]> {
