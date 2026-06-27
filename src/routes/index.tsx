@@ -1685,8 +1685,23 @@ function Index() {
 
         {mode === "shuntle" && (
           <p className="mb-4 text-sm text-muted-foreground">
-            Wordle-style guess is 4-7 letters long, with spaces on the left and/or right.
+            Enter Wordle-style 4 to 7 letter guesses, with spaces on the left and/or right.
           </p>
+        )}
+
+        {mode === "shuntle" && (
+          <div className="mb-4 flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Optional input: Add</span>
+            <select
+              value={shuntleStartingWords}
+              onChange={(e) => applyShuntleStartingWords(Number(e.target.value) as 0 | 2)}
+              className="rounded border bg-background px-2 py-1 text-sm"
+            >
+              <option value={0}>0</option>
+              <option value={2}>2</option>
+            </select>
+            <span className="text-muted-foreground">strategic starting words.</span>
+          </div>
         )}
 
 
