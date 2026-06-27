@@ -414,6 +414,8 @@ function Index() {
     } else if (m === "jeffgoldblum") {
       setWordleGuesses([{ word: "JEFFGOLDBLUM", pattern: Array(12).fill("GREY") as WordleColor[] }]);
       setJgStartingWord(0);
+    } else if (m === "shuntle") {
+      setWordleGuesses([{ word: "       ", pattern: Array(7).fill("GREY") as WordleColor[] }]);
     }
     const d = DEFAULTS[String(m)];
     setStart(d.start);
