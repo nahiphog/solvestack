@@ -76,6 +76,14 @@ const WOR_STARTING_PAIRS: [string, string][] = [
   ["GUESTACK", "HYDROBIN"],
 ];
 
+const SHUNTLE_STARTING_PAIRS: [string, string][] = [
+  ["ABSENT ", "PROUDLY"],
+  [" ABSURD", "VIOLENT"],
+  [" FRINGE", "WOMBATS"],
+  ["FROZEN ", "QUICKLY"],
+  ["MINDFUL", "GROWTH "],
+];
+
 const FL_POTENTIAL_WORDS: string[] = [
   "TABLE","CHAIR","PHONE","BREAD","LIGHT","PLATE","KNIFE","CLOUD","STONE","PLANT",
   "EARTH","OCEAN","BEACH","FIELD","WRITE","DANCE","SPEAK","LAUGH","DRINK","DRIVE",
@@ -254,6 +262,21 @@ function Index() {
       setWorResults(null);
     }
   };
+
+  const [shuntleStartingWords, setShuntleStartingWords] = useState<0 | 2>(0);
+  const applyShuntleStartingWords = (count: 0 | 2) => {
+    setShuntleStartingWords(count);
+    if (count === 2) {
+      const pair = SHUNTLE_STARTING_PAIRS[Math.floor(Math.random() * SHUNTLE_STARTING_PAIRS.length)];
+      setWordleGuesses((prev) => [
+        ...prev,
+        { word: pair[0], pattern: Array(7).fill("GREY") as WordleColor[] },
+        { word: pair[1], pattern: Array(7).fill("GREY") as WordleColor[] },
+      ]);
+      setWordleResults(null);
+    }
+  };
+
 
   const [marblessColumns, setMarblessColumns] = useState<string[][]>([
     ["I", "G", "H", "Y", "R"],
@@ -1237,16 +1260,6 @@ function Index() {
               Jeff Goldblumle
             </button>
             <button
-              onClick={() => switchMode("worwordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "worwordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Worwordle
-            </button>
-            <button
               onClick={() => switchMode("shuntle")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "shuntle"
@@ -1255,6 +1268,16 @@ function Index() {
               }`}
             >
               Shuntle
+            </button>
+            <button
+              onClick={() => switchMode("worwordle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "worwordle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Worwordle
             </button>
           </div>
         )}
@@ -1662,8 +1685,23 @@ function Index() {
 
         {mode === "shuntle" && (
           <p className="mb-4 text-sm text-muted-foreground">
-            Wordle-style guess is 4-7 letters long, with spaces on the left and/or right.
+            Enter Wordle-style 4 to 7 letter guesses, with spaces on the left and/or right.
           </p>
+        )}
+
+        {mode === "shuntle" && (
+          <div className="mb-4 flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Optional input: Add</span>
+            <select
+              value={shuntleStartingWords}
+              onChange={(e) => applyShuntleStartingWords(Number(e.target.value) as 0 | 2)}
+              className="rounded border bg-background px-2 py-1 text-sm"
+            >
+              <option value={0}>0</option>
+              <option value={2}>2</option>
+            </select>
+            <span className="text-muted-foreground">strategic starting words.</span>
+          </div>
         )}
 
 
