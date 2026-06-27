@@ -722,12 +722,30 @@ function Index() {
 
 
 
-  const wordleTileLen = mode === "jeffgoldblum" ? 12 : 5;
+  const wordleTileLen = mode === "jeffgoldblum" ? 12 : mode === "shuntle" ? 7 : 5;
 
   const solveWordle = async () => {
     setError(null);
     setWordleResults(null);
     for (const g of wordleGuesses) {
+      if (mode === "shuntle") {
+        const padded = g.word.toUpperCase().padEnd(7, " ").slice(0, 7);
+        const letters = padded.replace(/ /g, "");
+        if (letters.length < 4 || letters.length > 7) {
+          setError("Each guess must be 4-7 letters long.");
+          return;
+        }
+        // Letters must be contiguous (no embedded spaces).
+        if (!/^ *[A-Z]+ *$/.test(padded)) {
+          setError(`"${padded.replace(/ /g, "·")}" has spaces between letters; spaces are only allowed at the left and/or right.`);
+          return;
+        }
+        if (!(await isValidShuntleWord(padded))) {
+          setError(`"${letters}" is not a valid Shuntle word.`);
+          return;
+        }
+        continue;
+      }
       const w = g.word.trim().toUpperCase();
       if (w.length !== wordleTileLen) {
         setError(`Each guess must be exactly ${wordleTileLen} letters.`);
@@ -748,6 +766,7 @@ function Index() {
     const result =
       mode === "fibble" ? await fibbleSolve(normalized)
       : mode === "jeffgoldblum" ? await jeffGoldblumLeSolve(normalized)
+      : mode === "shuntle" ? await shuntleSolve(normalized)
       : await wordleSolve(normalized);
     if (result.length === 0) setError("No words match these constraints.");
     else setWordleResults(result);
@@ -767,13 +786,16 @@ function Index() {
   };
 
   const setGuessLetter = (gi: number, ti: number, ch: string) => {
-    const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    const isSpace = ch === " ";
+    const c = isSpace ? " " : ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
     setWordleGuesses((prev) =>
       prev.map((g, i) => {
         if (i !== gi) return g;
         const padded = g.word.padEnd(wordleTileLen, " ").slice(0, wordleTileLen).split("");
         padded[ti] = c || " ";
-        return { ...g, word: padded.join("").replace(/ +$/, "") };
+        const joined = padded.join("");
+        // Preserve trailing spaces for shuntle so the user can mark space tiles.
+        return { ...g, word: mode === "shuntle" ? joined : joined.replace(/ +$/, "") };
       }),
     );
   };
@@ -786,7 +808,8 @@ function Index() {
   };
 
   const addGuessRow = () => {
-    setWordleGuesses((prev) => [...prev, { word: "", pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] }]);
+    const initialWord = mode === "shuntle" ? " ".repeat(7) : "";
+    setWordleGuesses((prev) => [...prev, { word: initialWord, pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] }]);
   };
 
 
