@@ -2679,11 +2679,12 @@ function Index() {
             const flat = dodekuGrid.flat();
             const xPlaced = flat.filter((v) => v === "X").length;
             const numsPlaced = new Set(flat.filter((v) => v !== "" && v !== "X"));
-            const pile: string[] = [];
-            for (let i = xPlaced; i < 4; i++) pile.push("X");
-            for (const n of ["1","2","3","4","5","6","7","8","9","10","11","12"]) {
-              if (!numsPlaced.has(n)) pile.push(n);
-            }
+            // Fixed 2x8 pile layout: row 0 = X,X,X,X,1,2,3,4 ; row 1 = 5..12
+            const pileLayout: string[] = ["X","X","X","X","1","2","3","4","5","6","7","8","9","10","11","12"];
+            const isSlotUsed = (idx: number, val: string) => {
+              if (val === "X") return idx < xPlaced; // first xPlaced X-slots are used
+              return numsPlaced.has(val);
+            };
             const placeTile = (r: number, c: number, value: string) => {
               setDodekuResult(null);
               setDodekuGrid((prev) => prev.map((row, ri) => ri === r ? row.map((x, ci) => ci === c ? value : x) : row));
@@ -2692,60 +2693,72 @@ function Index() {
               setDodekuResult(null);
               setDodekuGrid((prev) => prev.map((row, ri) => ri === r ? row.map((x, ci) => ci === c ? "" : x) : row));
             };
-            const onCellDrop = (r: number, c: number, e: React.DragEvent) => {
-              e.preventDefault();
-              if (!dodekuDragSource) return;
-              const existing = dodekuGrid[r][c];
-              if (dodekuDragSource.kind === "pile") {
-                if (existing !== "") return;
-                placeTile(r, c, dodekuDragSource.value);
+            const onPileClick = (val: string, used: boolean) => {
+              if (used) return;
+              if (dodekuSelected && dodekuSelected.kind === "pile" && dodekuSelected.value === val) {
+                setDodekuSelected(null);
               } else {
-                const sr = dodekuDragSource.r, sc = dodekuDragSource.c;
-                if (sr === r && sc === c) return;
-                const moving = dodekuGrid[sr][sc];
-                setDodekuResult(null);
-                setDodekuGrid((prev) => prev.map((row, ri) => row.map((x, ci) => {
-                  if (ri === sr && ci === sc) return existing;
-                  if (ri === r && ci === c) return moving;
-                  return x;
-                })));
+                setDodekuSelected({ kind: "pile", value: val });
               }
-              setDodekuDragSource(null);
+            };
+            const onCellClick = (r: number, c: number) => {
+              const existing = dodekuGrid[r][c];
+              if (dodekuSelected) {
+                if (dodekuSelected.kind === "pile") {
+                  if (existing !== "") {
+                    // Replace: clear existing then place
+                    placeTile(r, c, dodekuSelected.value);
+                  } else {
+                    placeTile(r, c, dodekuSelected.value);
+                  }
+                  setDodekuSelected(null);
+                } else {
+                  const sr = dodekuSelected.r, sc = dodekuSelected.c;
+                  if (sr === r && sc === c) {
+                    setDodekuSelected(null);
+                    return;
+                  }
+                  const moving = dodekuGrid[sr][sc];
+                  setDodekuResult(null);
+                  setDodekuGrid((prev) => prev.map((row, ri) => row.map((x, ci) => {
+                    if (ri === sr && ci === sc) return existing;
+                    if (ri === r && ci === c) return moving;
+                    return x;
+                  })));
+                  setDodekuSelected(null);
+                }
+              } else {
+                if (existing !== "") {
+                  setDodekuSelected({ kind: "cell", r, c });
+                }
+              }
             };
             return (
               <div className="space-y-4">
                 <div>
-                  <div className="mb-1 text-sm font-medium">Tile pile (drag onto the grid)</div>
-                  <div
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      if (dodekuDragSource && dodekuDragSource.kind === "cell") {
-                        clearCell(dodekuDragSource.r, dodekuDragSource.c);
-                      }
-                      setDodekuDragSource(null);
-                    }}
-                    className="flex min-h-[3.5rem] flex-wrap gap-2 rounded-md border border-dashed border-border bg-muted/30 p-2"
-                  >
-                    {pile.length === 0 && <span className="text-xs text-muted-foreground">(empty)</span>}
-                    {pile.map((t, i) => {
+                  <div className="mb-1 text-sm font-medium">Tile pile (click a tile, then click a cell)</div>
+                  <div className="inline-grid grid-cols-8 gap-1.5 rounded-md border border-dashed border-border bg-muted/30 p-2">
+                    {pileLayout.map((t, i) => {
+                      const used = isSlotUsed(i, t);
                       const isX = t === "X";
+                      const isSelected = !used && dodekuSelected?.kind === "pile" && dodekuSelected.value === t && (t !== "X" || i === xPlaced);
                       return (
-                        <div
-                          key={`${t}-${i}`}
-                          draggable
-                          onDragStart={() => setDodekuDragSource({ kind: "pile", value: t })}
-                          onDragEnd={() => setDodekuDragSource(null)}
-                          className={`flex h-10 w-10 cursor-grab items-center justify-center rounded border-2 border-border font-mono text-base font-bold ${isX ? "bg-foreground text-background" : "bg-background text-foreground"}`}
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => onPileClick(t, used || (t === "X" && i !== xPlaced))}
+                          disabled={used || (t === "X" && i !== xPlaced)}
+                          className={`flex h-10 w-10 items-center justify-center rounded border-2 font-mono text-base font-bold transition ${used ? "border-dashed border-border bg-transparent text-muted-foreground/30" : isX ? "bg-foreground text-background border-border" : "bg-background text-foreground border-border"} ${isSelected ? "ring-2 ring-ring" : ""} ${t === "X" && i !== xPlaced && !used ? "opacity-40" : ""}`}
+                          aria-label={`Pile tile ${t}`}
                         >
-                          {t}
-                        </div>
+                          {used ? "" : t}
+                        </button>
                       );
                     })}
                   </div>
                 </div>
                 <div>
-                  <div className="mb-1 text-sm font-medium">Grid (drag tiles in; click a placed tile to remove)</div>
+                  <div className="mb-1 text-sm font-medium">Grid (click a tile to select, click a cell to place)</div>
                   <div className="inline-block">
                     {[0, 1, 2, 3].map((r) => (
                       <div key={r} className="mt-1.5 flex gap-1.5 first:mt-0">
@@ -2753,16 +2766,13 @@ function Index() {
                           const v = dodekuGrid[r][c];
                           const isBlocked = v === "X";
                           const isFilled = v !== "";
+                          const isSelected = dodekuSelected?.kind === "cell" && dodekuSelected.r === r && dodekuSelected.c === c;
                           return (
                             <div
                               key={c}
-                              onDragOver={(e) => e.preventDefault()}
-                              onDrop={(e) => onCellDrop(r, c, e)}
-                              onClick={() => { if (isFilled) clearCell(r, c); }}
-                              draggable={isFilled}
-                              onDragStart={() => { if (isFilled) setDodekuDragSource({ kind: "cell", r, c }); }}
-                              onDragEnd={() => setDodekuDragSource(null)}
-                              className={`flex h-12 w-12 items-center justify-center rounded border-2 border-border text-center font-mono text-lg font-bold ${isFilled ? "cursor-grab" : ""} ${isBlocked ? "bg-foreground text-background" : isFilled ? "bg-background text-foreground" : "bg-muted text-muted-foreground"}`}
+                              onClick={() => onCellClick(r, c)}
+                              onContextMenu={(e) => { e.preventDefault(); if (isFilled) clearCell(r, c); }}
+                              className={`flex h-12 w-12 cursor-pointer items-center justify-center rounded border-2 border-border text-center font-mono text-lg font-bold ${isBlocked ? "bg-foreground text-background" : isFilled ? "bg-background text-foreground" : "bg-muted text-muted-foreground"} ${isSelected ? "ring-2 ring-ring" : ""}`}
                               aria-label={`Cell row ${r + 1} col ${c + 1}`}
                             >
                               {v}
@@ -2797,6 +2807,7 @@ function Index() {
                       ))}
                     </div>
                   </div>
+                  <p className="mt-2 text-xs text-muted-foreground">Tip: right-click a placed tile to remove it.</p>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Button
@@ -2805,6 +2816,7 @@ function Index() {
                       setDodekuRowSums(["","","",""]);
                       setDodekuColSums(["","","",""]);
                       setDodekuResult(null);
+                      setDodekuSelected(null);
                     }}
                     variant="outline"
                     size="lg"
