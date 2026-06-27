@@ -3352,7 +3352,13 @@ function Index() {
                     onClick={() => addWordleGuessFromAnswer(w)}
                     className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
                   >
-                    {w}
+                    {mode === "shuntle"
+                      ? w.split("").map((ch, i) => (
+                          <span key={i} className={ch === " " ? "text-muted-foreground/60" : ""}>
+                            {ch === " " ? "·" : ch}
+                          </span>
+                        ))
+                      : w}
                   </button>
                 ))}
               </div>
