@@ -2144,7 +2144,10 @@ function Index() {
               <div key={gi} className="flex items-center gap-3">
                 <div className="flex gap-1.5">
                   {Array.from({ length: wordleTileLen }).map((_, ti) => {
-                    const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
+                    const rawChar = g.word[ti] || "";
+                    const isSpaceTile = mode === "shuntle" && rawChar === " ";
+                    const letter = rawChar && rawChar !== " " ? rawChar : "";
+                    const displayValue = isSpaceTile ? "·" : letter;
                     const color = g.pattern[ti];
                     const colorClass =
                       color === "GREEN"
@@ -2153,6 +2156,7 @@ function Index() {
                           ? "bg-yellow-500 text-white border-yellow-500 caret-white"
                           : "bg-muted text-foreground border-border caret-foreground";
                     const tileSize = mode === "jeffgoldblum" ? "h-9 w-9 text-base" : "h-12 w-12 text-xl";
+                    const spaceClass = isSpaceTile ? " opacity-40" : "";
                     return (
                       <input
                         key={ti}
@@ -2160,8 +2164,8 @@ function Index() {
                         type="text"
                         inputMode="text"
                         autoComplete="off"
-                        value={letter}
-                        aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${color}`}
+                        value={displayValue}
+                        aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${color}${isSpaceTile ? " (space)" : ""}`}
                         onMouseDown={(e) => {
                           if (document.activeElement === e.currentTarget) {
                             e.preventDefault();
@@ -2180,7 +2184,7 @@ function Index() {
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Backspace") {
-                            if (!letter && ti > 0) {
+                            if (!letter && !isSpaceTile && ti > 0) {
                               e.preventDefault();
                               focusTile(gi, ti - 1);
                             }
@@ -2190,12 +2194,20 @@ function Index() {
                           } else if (e.key === "ArrowRight") {
                             e.preventDefault();
                             focusTile(gi, ti + 1);
-                          } else if (e.key === " " || e.key === "Enter") {
+                          } else if (e.key === " ") {
+                            e.preventDefault();
+                            if (mode === "shuntle") {
+                              setGuessLetter(gi, ti, " ");
+                              if (ti < wordleTileLen - 1) focusTile(gi, ti + 1);
+                            } else {
+                              cycleTile(gi, ti);
+                            }
+                          } else if (e.key === "Enter") {
                             e.preventDefault();
                             cycleTile(gi, ti);
                           }
                         }}
-                        className={`flex items-center justify-center rounded border-2 text-center font-mono font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${tileSize} ${colorClass}`}
+                        className={`flex items-center justify-center rounded border-2 text-center font-mono font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${tileSize} ${colorClass}${spaceClass}`}
                       />
                     );
                   })}
