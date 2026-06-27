@@ -1660,6 +1660,12 @@ function Index() {
           </p>
         )}
 
+        {mode === "shuntle" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Wordle-style guess is 4-7 letters long, with spaces on the left and/or right.
+          </p>
+        )}
+
 
         {mode === "spellingbee" && (
           <p className="mb-4 text-sm text-muted-foreground">
