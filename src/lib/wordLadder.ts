@@ -46,6 +46,8 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   jeffgoldblum: 12,
   sudoku: 0,
   sudokuvariation: 0,
+  shuntle: 7,
+  
   
 };
 
