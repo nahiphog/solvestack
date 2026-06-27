@@ -666,7 +666,8 @@ function Index() {
   };
 
   const addWordleGuessFromAnswer = (word: string) => {
-    setWordleGuesses((prev) => [...prev, { word: word.toUpperCase(), pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] }]);
+    const w = mode === "shuntle" ? word.toUpperCase().padEnd(7, " ").slice(0, 7) : word.toUpperCase();
+    setWordleGuesses((prev) => [...prev, { word: w, pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] }]);
     setWordleResults(null);
   };
 
