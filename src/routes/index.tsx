@@ -2091,7 +2091,7 @@ function Index() {
               </Button>
             </div>
           </div>
-        ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum") ? (
+        ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle") ? (
 
           <div className="space-y-4">
             {mode !== "jeffgoldblum" && (
