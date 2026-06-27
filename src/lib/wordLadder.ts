@@ -10,7 +10,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "shuntle";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -46,6 +46,8 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   jeffgoldblum: 12,
   sudoku: 0,
   sudokuvariation: 0,
+  shuntle: 7,
+  
   
 };
 
@@ -61,6 +63,38 @@ async function getJeffGoldblumWords(): Promise<string[]> {
 export async function isValidJeffGoldblumWord(w: string): Promise<boolean> {
   const words = await getJeffGoldblumWords();
   return words.includes(w.toUpperCase());
+}
+
+let _shuntleWordsCache: string[] | null = null;
+async function getShuntleWords(): Promise<string[]> {
+  if (_shuntleWordsCache) return _shuntleWordsCache;
+  const mod = await import("@/data/shuntleWords.json");
+  // Each entry is already exactly 7 characters with spaces as padding.
+  _shuntleWordsCache = (mod.default as string[]).map((w) => w.padEnd(7, " ").slice(0, 7));
+  return _shuntleWordsCache;
+}
+
+export async function isValidShuntleWord(w: string): Promise<boolean> {
+  const words = await getShuntleWords();
+  const padded = w.toUpperCase().padEnd(7, " ").slice(0, 7);
+  return words.includes(padded);
+}
+
+export async function shuntleSolve(
+  guesses: { word: string; pattern: WordleColor[] }[],
+): Promise<string[]> {
+  const words = await getShuntleWords();
+  const normGuesses = guesses.map((g) => ({
+    word: g.word.toUpperCase().padEnd(7, " ").slice(0, 7),
+    pattern: g.pattern,
+  }));
+  return words.filter((answer) =>
+    normGuesses.every((g) => {
+      const out = wordleOutput(g.word, answer);
+      for (let i = 0; i < out.length; i++) if (out[i] !== g.pattern[i]) return false;
+      return true;
+    }),
+  );
 }
 
 export async function jeffGoldblumLeSolve(
