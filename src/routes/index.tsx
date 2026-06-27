@@ -2113,7 +2113,7 @@ function Index() {
         ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle") ? (
 
           <div className="space-y-4">
-            {mode !== "jeffgoldblum" && (
+            {mode !== "jeffgoldblum" && mode !== "shuntle" && (
               <div className="flex items-center gap-2 text-sm">
                 <span>Optional input: Add</span>
                 <select
