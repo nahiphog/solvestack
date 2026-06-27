@@ -3821,7 +3821,7 @@ function Index() {
                         {colored && sudokuVarWindoku && (
                           <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 9 9">
                             {[[1,1],[1,5],[5,1],[5,5]].map(([rr, cc], i2) => (
-                              <rect key={i2} x={cc} y={rr} width={3} height={3} fill="none" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
+                              <rect key={i2} x={cc} y={rr} width={3} height={3} fill="none" stroke="currentColor" strokeDasharray="0.3 0.2" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
                             ))}
                           </svg>
                         )}
