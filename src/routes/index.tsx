@@ -263,6 +263,21 @@ function Index() {
     }
   };
 
+  const [shuntleStartingWords, setShuntleStartingWords] = useState<0 | 2>(0);
+  const applyShuntleStartingWords = (count: 0 | 2) => {
+    setShuntleStartingWords(count);
+    if (count === 2) {
+      const pair = SHUNTLE_STARTING_PAIRS[Math.floor(Math.random() * SHUNTLE_STARTING_PAIRS.length)];
+      setWordleGuesses((prev) => [
+        ...prev,
+        { word: pair[0], pattern: Array(7).fill("GREY") as WordleColor[] },
+        { word: pair[1], pattern: Array(7).fill("GREY") as WordleColor[] },
+      ]);
+      setWordleResults(null);
+    }
+  };
+
+
   const [marblessColumns, setMarblessColumns] = useState<string[][]>([
     ["I", "G", "H", "Y", "R"],
     ["B", "R", "N", "D", "O"],
