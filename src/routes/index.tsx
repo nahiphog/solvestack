@@ -76,6 +76,14 @@ const WOR_STARTING_PAIRS: [string, string][] = [
   ["GUESTACK", "HYDROBIN"],
 ];
 
+const SHUNTLE_STARTING_PAIRS: [string, string][] = [
+  ["ABSENT ", "PROUDLY"],
+  [" ABSURD", "VIOLENT"],
+  [" FRINGE", "WOMBATS"],
+  ["FROZEN ", "QUICKLY"],
+  ["MINDFUL", "GROWTH "],
+];
+
 const FL_POTENTIAL_WORDS: string[] = [
   "TABLE","CHAIR","PHONE","BREAD","LIGHT","PLATE","KNIFE","CLOUD","STONE","PLANT",
   "EARTH","OCEAN","BEACH","FIELD","WRITE","DANCE","SPEAK","LAUGH","DRINK","DRIVE",
