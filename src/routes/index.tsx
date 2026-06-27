@@ -3046,6 +3046,17 @@ function Index() {
                                   const cleaned = e.target.value.replace(/[^1-9]/g, "").slice(-1);
                                   setBoard((prev) => prev.map((rr, ri) => ri === r ? rr.map((x, ci) => ci === c ? cleaned : x) : rr));
                                   clearResults();
+                                  if (cleaned !== "") {
+                                    const next = r * 9 + c + 1;
+                                    if (next < 81) {
+                                      const nr = Math.floor(next / 9), nc = next % 9;
+                                      setTimeout(() => {
+                                        const el = document.querySelector(`input[aria-label="Cell row ${nr + 1} col ${nc + 1}"]`) as HTMLInputElement | null;
+                                        el?.focus();
+                                        el?.select();
+                                      }, 0);
+                                    }
+                                  }
                                 }}
                                 className="h-9 w-9 rounded bg-transparent text-center font-mono text-lg font-bold outline-none focus:ring-2 focus:ring-ring"
                                 aria-label={`Cell row ${r + 1} col ${c + 1}`}
