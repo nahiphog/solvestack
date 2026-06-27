@@ -1246,6 +1246,16 @@ function Index() {
             >
               Worwordle
             </button>
+            <button
+              onClick={() => switchMode("shuntle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "shuntle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Shuntle
+            </button>
           </div>
         )}
 
