@@ -1577,6 +1577,9 @@ function Index() {
           {mode === "jeffgoldblum" && (
             <a href="https://jeffgoldblumle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Jeff Goldblumle</a>
           )}
+          {mode === "shuntle" && (
+            <a href="https://shuntle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Shuntle</a>
+          )}
         </div>
 
 
