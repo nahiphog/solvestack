@@ -2226,6 +2226,8 @@ function Index() {
                   if (mode === "jeffgoldblum") {
                     setWordleGuesses([{ word: "JEFFGOLDBLUM", pattern: Array(12).fill("GREY") as WordleColor[] }]);
                     setJgStartingWord(0);
+                  } else if (mode === "shuntle") {
+                    setWordleGuesses([{ word: "       ", pattern: Array(7).fill("GREY") as WordleColor[] }]);
                   } else {
                     setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
                   }
