@@ -58,6 +58,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   jeffgoldblum: { start: "", goal: "" },
   sudoku: { start: "", goal: "" },
   sudokuvariation: { start: "", goal: "" },
+  shuntle: { start: "", goal: "" },
   
 
 };
