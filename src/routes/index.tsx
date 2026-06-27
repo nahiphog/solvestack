@@ -3084,7 +3084,7 @@ function Index() {
                         viewBox="0 0 9 9"
                       >
                         {[[1,1],[1,5],[5,1],[5,5]].map(([r, c], i) => (
-                          <rect key={i} x={c} y={r} width={3} height={3} fill="none" stroke="currentColor" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
+                          <rect key={i} x={c} y={r} width={3} height={3} fill="none" stroke="currentColor" strokeDasharray="0.3 0.2" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
                         ))}
                       </svg>
                     )}
