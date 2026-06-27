@@ -1260,16 +1260,6 @@ function Index() {
               Jeff Goldblumle
             </button>
             <button
-              onClick={() => switchMode("worwordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "worwordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Worwordle
-            </button>
-            <button
               onClick={() => switchMode("shuntle")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "shuntle"
@@ -1278,6 +1268,16 @@ function Index() {
               }`}
             >
               Shuntle
+            </button>
+            <button
+              onClick={() => switchMode("worwordle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "worwordle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Worwordle
             </button>
           </div>
         )}
