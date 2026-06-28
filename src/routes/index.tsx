@@ -786,6 +786,8 @@ function Index() {
   const solveWordle = async () => {
     setError(null);
     setWordleResults(null);
+    setSplitleResults(null);
+    setSplitleExpanded({});
     for (const g of wordleGuesses) {
       if (mode === "shuntle") {
         const padded = g.word.toUpperCase().padEnd(7, " ").slice(0, 7);
