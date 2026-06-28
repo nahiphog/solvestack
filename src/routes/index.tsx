@@ -2171,7 +2171,7 @@ function Index() {
                     if (!sheet || sheet.length === 0) return;
                     const row = sheet[Math.floor(Math.random() * sheet.length)];
                     const newGuesses = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] }));
-                    setWordleGuesses((prev) => [...prev, ...newGuesses]);
+                    setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), ...newGuesses]);
                     setWordleResults(null);
                   }}
                 >
