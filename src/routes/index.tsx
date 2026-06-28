@@ -1664,6 +1664,9 @@ function Index() {
           {mode === "shuntle" && (
             <a href="https://shuntle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Shuntle</a>
           )}
+          {mode === "splitle" && (
+            <a href="https://splitle.netlify.app/?daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Splitle</a>
+          )}
         </div>
 
 
