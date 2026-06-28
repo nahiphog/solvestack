@@ -94,6 +94,10 @@ const FL_POTENTIAL_WORDS: string[] = [
   "POWER","SOUND","VOICE","SMILE","FAITH",
 ];
 
+const isEmptyGuessWord = (w: string): boolean => (w || "").replace(/\s+/g, "").length === 0;
+
+
+
 
 function Paginator({ page, setPage, total, perPage = 50 }: { page: number; setPage: (n: number) => void; total: number; perPage?: number }) {
   const pages = Math.ceil(total / perPage);
@@ -140,7 +144,7 @@ function Index() {
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
   const [mastermindLen, setMastermindLen] = useState<4 | 5>(5);
   const [mastermindRows, setMastermindRows] = useState<{ word: string; greens: number; yellows: number }[]>([
-    { word: "WATER", greens: 4, yellows: 0 },
+    { word: "", greens: 0, yellows: 0 },
   ]);
   const [mastermindResults, setMastermindResults] = useState<string[] | null>(null);
   const [wordPeaksGuesses, setWordPeaksGuesses] = useState<{ word: string; pattern: WordPeaksDirection[] }[]>([
@@ -155,7 +159,7 @@ function Index() {
   ]);
   const [flResults, setFlResults] = useState<{ flippable: string[]; answers: string[] } | null>(null);
   const [pageFl, setPageFl] = useState(0);
-  const [flStartingWords, setFlStartingWords] = useState<0 | 1 | 2>(0);
+  const [flStartingWords, setFlStartingWords] = useState<0 | 1>(0);
   const [flLocked, setFlLocked] = useState<boolean>(false);
   const [jgStartingWord, setJgStartingWord] = useState<0 | 1>(0);
   
@@ -190,7 +194,7 @@ function Index() {
     return set;
   };
 
-  const applyFlStartingWords = (count: 0 | 1 | 2) => {
+  const applyFlStartingWords = (count: 0 | 1) => {
     setFlStartingWords(count);
     if (count === 0) {
       setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
@@ -237,6 +241,11 @@ function Index() {
         setError("The 10 letters must be distinct.");
         return;
       }
+      const hasFlippable = flLetters.some((l, i) => flRevealed[i] && !!FL_FLIP_MAP[(l || "").toUpperCase()]);
+      if (!hasFlippable) {
+        setError("Mark at least one tile as flippable before locking.");
+        return;
+      }
       setError(null);
       setFlLocked(true);
     }
@@ -255,7 +264,7 @@ function Index() {
     if (count === 2) {
       const pair = WOR_STARTING_PAIRS[Math.floor(Math.random() * WOR_STARTING_PAIRS.length)];
       setWorGuesses((prev) => [
-        ...prev,
+        ...prev.filter((g) => !isEmptyGuessWord(g.word)),
         { word: pair[0], pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
         { word: pair[1], pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
       ]);
@@ -269,7 +278,7 @@ function Index() {
     if (count === 2) {
       const pair = SHUNTLE_STARTING_PAIRS[Math.floor(Math.random() * SHUNTLE_STARTING_PAIRS.length)];
       setWordleGuesses((prev) => [
-        ...prev,
+        ...prev.filter((g) => !isEmptyGuessWord(g.word)),
         { word: pair[0], pattern: Array(7).fill("GREY") as WordleColor[] },
         { word: pair[1], pattern: Array(7).fill("GREY") as WordleColor[] },
       ]);
@@ -431,7 +440,7 @@ function Index() {
     setSudokuVarResults(null);
     setError(null);
     if (m === "fibble") {
-      setWordleGuesses([{ word: "CRANE", pattern: ["GREEN", "GREY", "YELLOW", "GREY", "GREY"] }]);
+      setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else if (m === "wordle") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else if (m === "jeffgoldblum") {
@@ -439,6 +448,9 @@ function Index() {
       setJgStartingWord(0);
     } else if (m === "shuntle") {
       setWordleGuesses([{ word: "       ", pattern: Array(7).fill("GREY") as WordleColor[] }]);
+    } else if (m === "mastermind") {
+      setMastermindLen(5);
+      setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
     }
     const d = DEFAULTS[String(m)];
     setStart(d.start);
@@ -1775,7 +1787,7 @@ function Index() {
               <li>n ↔ u</li>
               <li>m ↔ w</li>
             </ul>
-            <p>Then enter Wordle-style guesses (grey → yellow → green) to filter the flippable 5-letter words.</p>
+            <p>Then enter Wordle-style guesses to filter the flippable 5-letter words.</p>
           </div>
         )}
         {mode === "worwordle" && (
@@ -1890,8 +1902,8 @@ function Index() {
               <div className="grid grid-cols-5 gap-2 w-fit">
                 {Array.from({ length: 10 }).map((_, i) => {
                   const upper = (flLetters[i] || "").toUpperCase();
-                  const flip = FL_FLIP_MAP[upper] || "";
-                  const revealed = flRevealed[i];
+                  const canFlip = !!FL_FLIP_MAP[upper];
+                  const revealed = flRevealed[i] && canFlip;
                   return (
                     <div key={i} className="flex flex-col items-center gap-1">
                       <input
@@ -1912,16 +1924,12 @@ function Index() {
                         }}
                         onClick={() => {
                           if (flLocked) return;
+                          if (!canFlip) return;
                           setFlRevealed((prev) => { const n = [...prev]; n[i] = !n[i]; return n; });
                         }}
-                        className={`h-12 w-12 rounded border-2 border-yellow-500 bg-muted text-center font-mono text-xl font-bold lowercase outline-none focus:ring-2 focus:ring-ring ${flLocked ? "cursor-not-allowed opacity-90" : "cursor-pointer"}`}
+                        className={`h-12 w-12 rounded border-2 border-orange-500 text-center font-mono text-xl font-bold lowercase outline-none focus:ring-2 focus:ring-ring ${revealed ? "bg-blue-500 text-white caret-white" : "bg-muted text-foreground"} ${flLocked ? "cursor-not-allowed opacity-90" : canFlip ? "cursor-pointer" : ""}`}
                         aria-label={`Letter ${i + 1}`}
                       />
-                      <div className="h-5 text-xs font-mono text-muted-foreground">
-                        {revealed && upper
-                          ? (flip ? `↻ ${flip.toLowerCase()}` : "—")
-                          : ""}
-                      </div>
                     </div>
                   );
                 })}
@@ -1937,17 +1945,16 @@ function Index() {
             {flLocked && (
               <>
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span>Optional input: Place</span>
+                  <span>Optional input: Add</span>
                   <select
                     className="rounded border border-border bg-background px-2 py-1"
                     value={flStartingWords}
-                    onChange={(e) => applyFlStartingWords(parseInt(e.target.value, 10) as 0 | 1 | 2)}
+                    onChange={(e) => applyFlStartingWords(parseInt(e.target.value, 10) as 0 | 1)}
                   >
                     <option value="0">0</option>
                     <option value="1">1</option>
-                    <option value="2">2</option>
                   </select>
-                  <span>flippable word(s) into the input.</span>
+                  <span>strategic starting words.</span>
                 </div>
 
 
@@ -2164,7 +2171,7 @@ function Index() {
                     if (!sheet || sheet.length === 0) return;
                     const row = sheet[Math.floor(Math.random() * sheet.length)];
                     const newGuesses = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] }));
-                    setWordleGuesses((prev) => [...prev, ...newGuesses]);
+                    setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), ...newGuesses]);
                     setWordleResults(null);
                   }}
                 >
@@ -2186,7 +2193,7 @@ function Index() {
                     setJgStartingWord(v);
                     if (v === 1) {
                       const word = Math.random() < 0.5 ? "PRAISEWORTHY" : "WISECRACKING";
-                      setWordleGuesses((prev) => [...prev, { word, pattern: Array(12).fill("GREY") as WordleColor[] }]);
+                      setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), { word, pattern: Array(12).fill("GREY") as WordleColor[] }]);
                     }
                   }}
                   className="rounded border border-border bg-background px-2 py-1"
@@ -2451,7 +2458,7 @@ function Index() {
                     if (!sheet || sheet.length === 0) return;
                     const row = sheet[Math.floor(Math.random() * sheet.length)];
                     const additions = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), greens: 0, yellows: 0 }));
-                    setMastermindRows((prev) => [...prev, ...additions]);
+                    setMastermindRows((prev) => [...prev.filter((r) => !isEmptyGuessWord(r.word)), ...additions]);
                     setMastermindResults(null);
                   }}
                 >
@@ -2483,7 +2490,7 @@ function Index() {
                       ];
                       const pick = triplets[Math.floor(Math.random() * triplets.length)];
                       const additions = pick.map((w) => ({ word: w, greens: 0, yellows: 0 }));
-                      setMastermindRows((prev) => [...prev, ...additions]);
+                      setMastermindRows((prev) => [...prev.filter((r) => !isEmptyGuessWord(r.word)), ...additions]);
                       setMastermindResults(null);
                     }
                   }}
