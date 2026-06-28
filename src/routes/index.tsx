@@ -431,7 +431,7 @@ function Index() {
     setSudokuVarResults(null);
     setError(null);
     if (m === "fibble") {
-      setWordleGuesses([{ word: "CRANE", pattern: ["GREEN", "GREY", "YELLOW", "GREY", "GREY"] }]);
+      setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else if (m === "wordle") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else if (m === "jeffgoldblum") {
@@ -439,6 +439,9 @@ function Index() {
       setJgStartingWord(0);
     } else if (m === "shuntle") {
       setWordleGuesses([{ word: "       ", pattern: Array(7).fill("GREY") as WordleColor[] }]);
+    } else if (m === "mastermind") {
+      setMastermindLen(5);
+      setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
     }
     const d = DEFAULTS[String(m)];
     setStart(d.start);
