@@ -1897,8 +1897,8 @@ function Index() {
               <div className="grid grid-cols-5 gap-2 w-fit">
                 {Array.from({ length: 10 }).map((_, i) => {
                   const upper = (flLetters[i] || "").toUpperCase();
-                  const flip = FL_FLIP_MAP[upper] || "";
-                  const revealed = flRevealed[i];
+                  const canFlip = !!FL_FLIP_MAP[upper];
+                  const revealed = flRevealed[i] && canFlip;
                   return (
                     <div key={i} className="flex flex-col items-center gap-1">
                       <input
@@ -1919,16 +1919,12 @@ function Index() {
                         }}
                         onClick={() => {
                           if (flLocked) return;
+                          if (!canFlip) return;
                           setFlRevealed((prev) => { const n = [...prev]; n[i] = !n[i]; return n; });
                         }}
-                        className={`h-12 w-12 rounded border-2 border-yellow-500 bg-muted text-center font-mono text-xl font-bold lowercase outline-none focus:ring-2 focus:ring-ring ${flLocked ? "cursor-not-allowed opacity-90" : "cursor-pointer"}`}
+                        className={`h-12 w-12 rounded border-2 border-orange-500 text-center font-mono text-xl font-bold lowercase outline-none focus:ring-2 focus:ring-ring ${revealed ? "bg-blue-500 text-white caret-white" : "bg-muted text-foreground"} ${flLocked ? "cursor-not-allowed opacity-90" : canFlip ? "cursor-pointer" : ""}`}
                         aria-label={`Letter ${i + 1}`}
                       />
-                      <div className="h-5 text-xs font-mono text-muted-foreground">
-                        {revealed && upper
-                          ? (flip ? `↻ ${flip.toLowerCase()}` : "—")
-                          : ""}
-                      </div>
                     </div>
                   );
                 })}
