@@ -159,7 +159,7 @@ function Index() {
   ]);
   const [flResults, setFlResults] = useState<{ flippable: string[]; answers: string[] } | null>(null);
   const [pageFl, setPageFl] = useState(0);
-  const [flStartingWords, setFlStartingWords] = useState<0 | 1 | 2>(0);
+  const [flStartingWords, setFlStartingWords] = useState<0 | 1>(0);
   const [flLocked, setFlLocked] = useState<boolean>(false);
   const [jgStartingWord, setJgStartingWord] = useState<0 | 1>(0);
   
