@@ -194,7 +194,7 @@ function Index() {
     return set;
   };
 
-  const applyFlStartingWords = (count: 0 | 1 | 2) => {
+  const applyFlStartingWords = (count: 0 | 1) => {
     setFlStartingWords(count);
     if (count === 0) {
       setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
