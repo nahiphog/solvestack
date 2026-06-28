@@ -290,6 +290,20 @@ function Index() {
     }
   };
 
+  const applySplitleStartingWords = async (count: 0 | 3) => {
+    setSplitleStartingWords(count);
+    if (count === 3) {
+      const strategic = await getSplitleStrategicWords();
+      if (strategic.length === 0) return;
+      const triplet = strategic[Math.floor(Math.random() * strategic.length)];
+      setWordleGuesses((prev) => [
+        ...prev.filter((g) => !isEmptyGuessWord(g.word)),
+        ...triplet.map((w) => ({ word: w.toUpperCase(), pattern: Array(5).fill("GREY") as WordleColor[] })),
+      ]);
+      setSplitleResults(null);
+    }
+  };
+
 
   const [marblessColumns, setMarblessColumns] = useState<string[][]>([
     ["I", "G", "H", "Y", "R"],
