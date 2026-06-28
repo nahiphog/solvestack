@@ -94,6 +94,10 @@ const FL_POTENTIAL_WORDS: string[] = [
   "POWER","SOUND","VOICE","SMILE","FAITH",
 ];
 
+const isEmptyGuessWord = (w: string): boolean => (w || "").replace(/\s+/g, "").length === 0;
+
+
+
 
 function Paginator({ page, setPage, total, perPage = 50 }: { page: number; setPage: (n: number) => void; total: number; perPage?: number }) {
   const pages = Math.ceil(total / perPage);
