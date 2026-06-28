@@ -967,10 +967,12 @@ function Index() {
       setError("The 10 letters must be distinct.");
       return;
     }
-    const flips = letters.map((l) => FL_FLIP_MAP[l] || "");
-    void flips;
-    const allowed = [...letters];
-    const bankSet = new Set(letters);
+    const allowedSet = new Set<string>(letters);
+    flLetters.forEach((l, i) => {
+      const u = (l || "").trim().toUpperCase();
+      if (u && flRevealed[i] && FL_FLIP_MAP[u]) allowedSet.add(FL_FLIP_MAP[u]);
+    });
+    const allowed = Array.from(allowedSet);
     for (const g of flGuesses) {
       const w = g.word.trim().toUpperCase();
       if (w.length !== 5) {
@@ -978,8 +980,8 @@ function Index() {
         return;
       }
       for (const ch of w) {
-        if (!bankSet.has(ch)) {
-          setError(`"${w}" uses "${ch.toLowerCase()}" which is not in the letter bank.`);
+        if (!allowedSet.has(ch)) {
+          setError(`"${w}" uses "${ch.toLowerCase()}" which is not in the (expanded) letter bank.`);
           return;
         }
       }
