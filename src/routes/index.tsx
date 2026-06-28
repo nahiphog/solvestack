@@ -2458,7 +2458,7 @@ function Index() {
                     if (!sheet || sheet.length === 0) return;
                     const row = sheet[Math.floor(Math.random() * sheet.length)];
                     const additions = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), greens: 0, yellows: 0 }));
-                    setMastermindRows((prev) => [...prev, ...additions]);
+                    setMastermindRows((prev) => [...prev.filter((r) => !isEmptyGuessWord(r.word)), ...additions]);
                     setMastermindResults(null);
                   }}
                 >
