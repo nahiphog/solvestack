@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useState } from "react";
-import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, spellingBeeSolve, sudokuSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, spellingBeeSolve, splitleSolve, sudokuSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   sudoku: { start: "", goal: "" },
   sudokuvariation: { start: "", goal: "" },
   shuntle: { start: "", goal: "" },
+  splitle: { start: "", goal: "" },
   
 
 };
@@ -139,6 +140,9 @@ function Index() {
     { word: "SLATE", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
+  const [splitleResults, setSplitleResults] = useState<[string, string[]][] | null>(null);
+  const [splitleStartingWords, setSplitleStartingWords] = useState<0 | 3>(0);
+  const [splitleExpanded, setSplitleExpanded] = useState<Record<string, boolean>>({});
   const [spellingBeeMiddle, setSpellingBeeMiddle] = useState("T");
   const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
@@ -286,6 +290,20 @@ function Index() {
     }
   };
 
+  const applySplitleStartingWords = async (count: 0 | 3) => {
+    setSplitleStartingWords(count);
+    if (count === 3) {
+      const strategic = await getSplitleStrategicWords();
+      if (strategic.length === 0) return;
+      const triplet = strategic[Math.floor(Math.random() * strategic.length)];
+      setWordleGuesses((prev) => [
+        ...prev.filter((g) => !isEmptyGuessWord(g.word)),
+        ...triplet.map((w) => ({ word: w.toUpperCase(), pattern: Array(5).fill("GREY") as WordleColor[] })),
+      ]);
+      setSplitleResults(null);
+    }
+  };
+
 
   const [marblessColumns, setMarblessColumns] = useState<string[][]>([
     ["I", "G", "H", "Y", "R"],
@@ -427,6 +445,8 @@ function Index() {
     setPaths(null);
     setWordiplyResults(null);
     setWordleResults(null);
+    setSplitleResults(null);
+    setSplitleExpanded({});
     setSpellingBeeResults(null);
     setMastermindResults(null);
     setWordPeaksResults(null);
@@ -448,6 +468,9 @@ function Index() {
       setJgStartingWord(0);
     } else if (m === "shuntle") {
       setWordleGuesses([{ word: "       ", pattern: Array(7).fill("GREY") as WordleColor[] }]);
+    } else if (m === "splitle") {
+      setWordleGuesses([{ word: "", pattern: Array(5).fill("GREY") as WordleColor[] }]);
+      setSplitleStartingWords(0);
     } else if (m === "mastermind") {
       setMastermindLen(5);
       setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
@@ -763,6 +786,8 @@ function Index() {
   const solveWordle = async () => {
     setError(null);
     setWordleResults(null);
+    setSplitleResults(null);
+    setSplitleExpanded({});
     for (const g of wordleGuesses) {
       if (mode === "shuntle") {
         const padded = g.word.toUpperCase().padEnd(7, " ").slice(0, 7);
@@ -792,6 +817,11 @@ function Index() {
           setError(`"${w}" is not a valid 12-letter English word.`);
           return;
         }
+      } else if (mode === "splitle") {
+        if (!(await isValidSplitleHalf(w))) {
+          setError(`"${w}" is not a valid Splitle half (must match the first or last 5 letters of some 10-letter English word).`);
+          return;
+        }
       } else if (!(await isValid5LetterWord(w))) {
         setError(`"${w}" is not a valid 5-letter English word.`);
         return;
@@ -799,6 +829,13 @@ function Index() {
     }
     setSolving(true);
     const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
+    if (mode === "splitle") {
+      const sres = await splitleSolve(normalized);
+      if (sres.length === 0) setError("No words match these constraints.");
+      else setSplitleResults(sres);
+      setSolving(false);
+      return;
+    }
     const result =
       mode === "fibble" ? await fibbleSolve(normalized)
       : mode === "jeffgoldblum" ? await jeffGoldblumLeSolve(normalized)
@@ -967,10 +1004,12 @@ function Index() {
       setError("The 10 letters must be distinct.");
       return;
     }
-    const flips = letters.map((l) => FL_FLIP_MAP[l] || "");
-    void flips;
-    const allowed = [...letters];
-    const bankSet = new Set(letters);
+    const allowedSet = new Set<string>(letters);
+    flLetters.forEach((l, i) => {
+      const u = (l || "").trim().toUpperCase();
+      if (u && flRevealed[i] && FL_FLIP_MAP[u]) allowedSet.add(FL_FLIP_MAP[u]);
+    });
+    const allowed = Array.from(allowedSet);
     for (const g of flGuesses) {
       const w = g.word.trim().toUpperCase();
       if (w.length !== 5) {
@@ -978,8 +1017,8 @@ function Index() {
         return;
       }
       for (const ch of w) {
-        if (!bankSet.has(ch)) {
-          setError(`"${w}" uses "${ch.toLowerCase()}" which is not in the letter bank.`);
+        if (!allowedSet.has(ch)) {
+          setError(`"${w}" uses "${ch.toLowerCase()}" which is not in the (expanded) letter bank.`);
           return;
         }
       }
@@ -1151,7 +1190,7 @@ function Index() {
         <div ref={topPillRef} className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku";
-            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle";
+            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation";
             const inLadder = !isMath && !inSearch && !inLogic;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : s.id === "logic" ? inLogic : inLadder;
@@ -1203,12 +1242,12 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle") && (
+        {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle") && (
           <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
-                  ? mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle"
+                  ? mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle"
                   : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind";
 
               return (
@@ -1229,7 +1268,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle") && (
+        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("wordle")}
@@ -1280,6 +1319,16 @@ function Index() {
               }`}
             >
               Shuntle
+            </button>
+            <button
+              onClick={() => switchMode("splitle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "splitle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Splitle
             </button>
             <button
               onClick={() => switchMode("worwordle")}
@@ -1615,6 +1664,9 @@ function Index() {
           {mode === "shuntle" && (
             <a href="https://shuntle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Shuntle</a>
           )}
+          {mode === "splitle" && (
+            <a href="https://splitle.netlify.app/?daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Splitle</a>
+          )}
         </div>
 
 
@@ -1711,6 +1763,33 @@ function Index() {
             >
               <option value={0}>0</option>
               <option value={2}>2</option>
+            </select>
+            <span className="text-muted-foreground">strategic starting words.</span>
+          </div>
+        )}
+
+        {mode === "splitle" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Enter 5-letter Wordle-style guesses that match either half of a 10-letter English word.</p>
+            <p>Examples:</p>
+            <ul className="list-disc pl-5">
+              <li>"NALLY" from "DIAGONALLY"</li>
+              <li>"MENTS" from "AGREEMENTS"</li>
+            </ul>
+            <p>Remember: This solver only solves one half of the 10-letter word, so once you've found the first half of the word, you need to reset the solver to solve for the other half.</p>
+          </div>
+        )}
+
+        {mode === "splitle" && (
+          <div className="mb-4 flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Optional input: Add</span>
+            <select
+              value={splitleStartingWords}
+              onChange={(e) => applySplitleStartingWords(Number(e.target.value) as 0 | 3)}
+              className="rounded border bg-background px-2 py-1 text-sm"
+            >
+              <option value={0}>0</option>
+              <option value={3}>3</option>
             </select>
             <span className="text-muted-foreground">strategic starting words.</span>
           </div>
@@ -2155,10 +2234,10 @@ function Index() {
               </Button>
             </div>
           </div>
-        ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle") ? (
+        ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle") ? (
 
           <div className="space-y-4">
-            {mode !== "jeffgoldblum" && mode !== "shuntle" && (
+            {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && (
               <div className="flex items-center gap-2 text-sm">
                 <span>Optional input: Add</span>
                 <select
@@ -3432,6 +3511,63 @@ function Index() {
               </div>
             </div>
             <Paginator page={pageWordle} setPage={setPageWordle} total={wordleResults.length} />
+          </section>
+        )}
+
+        {splitleResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {splitleResults.length} possible {splitleResults.length === 1 ? "half" : "halves"}
+              </h2>
+              <button
+                onClick={() => {
+                  const lines = splitleResults
+                    .map(([k, ws]) => `${k} | ${ws.length} | ${ws.join(", ")}`)
+                    .join("\n");
+                  copyText(`${splitleResults.length} possible ${splitleResults.length === 1 ? "half" : "halves"}:\n${lines}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all halves"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <div className="rounded-lg border bg-card divide-y">
+              {splitleResults.map(([key, words]) => {
+                const open = !!splitleExpanded[key];
+                return (
+                  <div key={key} className="p-3 font-mono text-sm">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => addWordleGuessFromAnswer(key)}
+                        className="rounded bg-muted px-2 py-1 font-bold tracking-widest hover:bg-accent hover:text-accent-foreground"
+                      >
+                        {key}
+                      </button>
+                      <span className="text-muted-foreground">|</span>
+                      <span>{words.length} {words.length === 1 ? "word" : "words"}</span>
+                      <span className="text-muted-foreground">|</span>
+                      <button
+                        type="button"
+                        onClick={() => setSplitleExpanded((p) => ({ ...p, [key]: !p[key] }))}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {open ? "Hide" : "Show all such 10-letter words"}
+                      </button>
+                    </div>
+                    {open && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {words.map((w) => (
+                          <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </section>
         )}
 

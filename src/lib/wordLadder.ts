@@ -10,7 +10,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "shuntle";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "shuntle" | "splitle";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -47,6 +47,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   sudoku: 0,
   sudokuvariation: 0,
   shuntle: 7,
+  splitle: 5,
   
   
 };
@@ -732,4 +733,39 @@ export function findAllShortestPaths(
   };
   build(g, []);
   return paths;
+}
+
+
+let _splitleCache: { map: Record<string, string[]>; strategic: string[][] } | null = null;
+async function getSplitleData(): Promise<{ map: Record<string, string[]>; strategic: string[][] }> {
+  if (_splitleCache) return _splitleCache;
+  const mod = await import("@/data/splitleWords.json");
+  _splitleCache = mod.default as { map: Record<string, string[]>; strategic: string[][] };
+  return _splitleCache;
+}
+
+export async function isValidSplitleHalf(word: string): Promise<boolean> {
+  const data = await getSplitleData();
+  return Object.prototype.hasOwnProperty.call(data.map, word.toUpperCase());
+}
+
+export async function getSplitleStrategicWords(): Promise<string[][]> {
+  const data = await getSplitleData();
+  return data.strategic;
+}
+
+export async function splitleSolve(
+  guesses: { word: string; pattern: WordleColor[] }[],
+): Promise<[string, string[]][]> {
+  const data = await getSplitleData();
+  const keys = Object.keys(data.map);
+  const matching = keys.filter((key) =>
+    guesses.every((g) => {
+      const out = wordleOutput(g.word.toUpperCase(), key);
+      for (let i = 0; i < out.length; i++) if (out[i] !== g.pattern[i]) return false;
+      return true;
+    }),
+  );
+  matching.sort();
+  return matching.map((k) => [k, data.map[k]]);
 }
