@@ -2490,7 +2490,7 @@ function Index() {
                       ];
                       const pick = triplets[Math.floor(Math.random() * triplets.length)];
                       const additions = pick.map((w) => ({ word: w, greens: 0, yellows: 0 }));
-                      setMastermindRows((prev) => [...prev, ...additions]);
+                      setMastermindRows((prev) => [...prev.filter((r) => !isEmptyGuessWord(r.word)), ...additions]);
                       setMastermindResults(null);
                     }
                   }}
