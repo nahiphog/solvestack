@@ -1940,17 +1940,16 @@ function Index() {
             {flLocked && (
               <>
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span>Optional input: Place</span>
+                  <span>Optional input: Add</span>
                   <select
                     className="rounded border border-border bg-background px-2 py-1"
                     value={flStartingWords}
-                    onChange={(e) => applyFlStartingWords(parseInt(e.target.value, 10) as 0 | 1 | 2)}
+                    onChange={(e) => applyFlStartingWords(parseInt(e.target.value, 10) as 0 | 1)}
                   >
                     <option value="0">0</option>
                     <option value="1">1</option>
-                    <option value="2">2</option>
                   </select>
-                  <span>flippable word(s) into the input.</span>
+                  <span>strategic starting words.</span>
                 </div>
 
 
