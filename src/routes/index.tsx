@@ -1782,7 +1782,7 @@ function Index() {
               <li>n ↔ u</li>
               <li>m ↔ w</li>
             </ul>
-            <p>Then enter Wordle-style guesses (grey → yellow → green) to filter the flippable 5-letter words.</p>
+            <p>Then enter Wordle-style guesses to filter the flippable 5-letter words.</p>
           </div>
         )}
         {mode === "worwordle" && (
