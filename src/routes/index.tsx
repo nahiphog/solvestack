@@ -2193,7 +2193,7 @@ function Index() {
                     setJgStartingWord(v);
                     if (v === 1) {
                       const word = Math.random() < 0.5 ? "PRAISEWORTHY" : "WISECRACKING";
-                      setWordleGuesses((prev) => [...prev, { word, pattern: Array(12).fill("GREY") as WordleColor[] }]);
+                      setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), { word, pattern: Array(12).fill("GREY") as WordleColor[] }]);
                     }
                   }}
                   className="rounded border border-border bg-background px-2 py-1"
