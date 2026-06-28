@@ -445,6 +445,8 @@ function Index() {
     setPaths(null);
     setWordiplyResults(null);
     setWordleResults(null);
+    setSplitleResults(null);
+    setSplitleExpanded({});
     setSpellingBeeResults(null);
     setMastermindResults(null);
     setWordPeaksResults(null);
