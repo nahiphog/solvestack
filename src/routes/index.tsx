@@ -2234,10 +2234,10 @@ function Index() {
               </Button>
             </div>
           </div>
-        ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle") ? (
+        ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle") ? (
 
           <div className="space-y-4">
-            {mode !== "jeffgoldblum" && mode !== "shuntle" && (
+            {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && (
               <div className="flex items-center gap-2 text-sm">
                 <span>Optional input: Add</span>
                 <select
