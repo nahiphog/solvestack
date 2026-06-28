@@ -273,7 +273,7 @@ function Index() {
     if (count === 2) {
       const pair = SHUNTLE_STARTING_PAIRS[Math.floor(Math.random() * SHUNTLE_STARTING_PAIRS.length)];
       setWordleGuesses((prev) => [
-        ...prev,
+        ...prev.filter((g) => !isEmptyGuessWord(g.word)),
         { word: pair[0], pattern: Array(7).fill("GREY") as WordleColor[] },
         { word: pair[1], pattern: Array(7).fill("GREY") as WordleColor[] },
       ]);
