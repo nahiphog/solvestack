@@ -259,7 +259,7 @@ function Index() {
     if (count === 2) {
       const pair = WOR_STARTING_PAIRS[Math.floor(Math.random() * WOR_STARTING_PAIRS.length)];
       setWorGuesses((prev) => [
-        ...prev,
+        ...prev.filter((g) => !isEmptyGuessWord(g.word)),
         { word: pair[0], pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
         { word: pair[1], pattern: ["GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY", "GREY"] },
       ]);
