@@ -140,6 +140,9 @@ function Index() {
     { word: "SLATE", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
+  const [splitleResults, setSplitleResults] = useState<[string, string[]][] | null>(null);
+  const [splitleStartingWords, setSplitleStartingWords] = useState<0 | 3>(0);
+  const [splitleExpanded, setSplitleExpanded] = useState<Record<string, boolean>>({});
   const [spellingBeeMiddle, setSpellingBeeMiddle] = useState("T");
   const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
