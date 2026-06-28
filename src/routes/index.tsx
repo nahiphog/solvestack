@@ -468,6 +468,9 @@ function Index() {
       setJgStartingWord(0);
     } else if (m === "shuntle") {
       setWordleGuesses([{ word: "       ", pattern: Array(7).fill("GREY") as WordleColor[] }]);
+    } else if (m === "splitle") {
+      setWordleGuesses([{ word: "", pattern: Array(5).fill("GREY") as WordleColor[] }]);
+      setSplitleStartingWords(0);
     } else if (m === "mastermind") {
       setMastermindLen(5);
       setMastermindRows([{ word: "", greens: 0, yellows: 0 }]);
