@@ -793,6 +793,11 @@ function Index() {
           setError(`"${w}" is not a valid 12-letter English word.`);
           return;
         }
+      } else if (mode === "splitle") {
+        if (!(await isValidSplitleHalf(w))) {
+          setError(`"${w}" is not a valid Splitle half (must match the first or last 5 letters of some 10-letter English word).`);
+          return;
+        }
       } else if (!(await isValid5LetterWord(w))) {
         setError(`"${w}" is not a valid 5-letter English word.`);
         return;
@@ -800,6 +805,13 @@ function Index() {
     }
     setSolving(true);
     const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
+    if (mode === "splitle") {
+      const sres = await splitleSolve(normalized);
+      if (sres.length === 0) setError("No words match these constraints.");
+      else setSplitleResults(sres);
+      setSolving(false);
+      return;
+    }
     const result =
       mode === "fibble" ? await fibbleSolve(normalized)
       : mode === "jeffgoldblum" ? await jeffGoldblumLeSolve(normalized)
