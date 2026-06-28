@@ -1768,6 +1768,33 @@ function Index() {
           </div>
         )}
 
+        {mode === "splitle" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Enter 5-letter Wordle-style guesses that match either half of a 10-letter English word.</p>
+            <p>Examples:</p>
+            <ul className="list-disc pl-5">
+              <li>"NALLY" from "DIAGONALLY"</li>
+              <li>"MENTS" from "AGREEMENTS"</li>
+            </ul>
+            <p>Remember: This solver only solves one half of the 10-letter word, so once you've found the first half of the word, you need to reset the solver to solve for the other half.</p>
+          </div>
+        )}
+
+        {mode === "splitle" && (
+          <div className="mb-4 flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Optional input: Add</span>
+            <select
+              value={splitleStartingWords}
+              onChange={(e) => applySplitleStartingWords(Number(e.target.value) as 0 | 3)}
+              className="rounded border bg-background px-2 py-1 text-sm"
+            >
+              <option value={0}>0</option>
+              <option value={3}>3</option>
+            </select>
+            <span className="text-muted-foreground">strategic starting words.</span>
+          </div>
+        )}
+
 
         {mode === "spellingbee" && (
           <p className="mb-4 text-sm text-muted-foreground">
