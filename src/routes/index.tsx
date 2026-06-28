@@ -140,7 +140,7 @@ function Index() {
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
   const [mastermindLen, setMastermindLen] = useState<4 | 5>(5);
   const [mastermindRows, setMastermindRows] = useState<{ word: string; greens: number; yellows: number }[]>([
-    { word: "WATER", greens: 4, yellows: 0 },
+    { word: "", greens: 0, yellows: 0 },
   ]);
   const [mastermindResults, setMastermindResults] = useState<string[] | null>(null);
   const [wordPeaksGuesses, setWordPeaksGuesses] = useState<{ word: string; pattern: WordPeaksDirection[] }[]>([
