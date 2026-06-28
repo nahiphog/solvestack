@@ -59,6 +59,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   sudoku: { start: "", goal: "" },
   sudokuvariation: { start: "", goal: "" },
   shuntle: { start: "", goal: "" },
+  splitle: { start: "", goal: "" },
   
 
 };
