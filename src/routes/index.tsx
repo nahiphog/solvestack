@@ -241,6 +241,11 @@ function Index() {
         setError("The 10 letters must be distinct.");
         return;
       }
+      const hasFlippable = flLetters.some((l, i) => flRevealed[i] && !!FL_FLIP_MAP[(l || "").toUpperCase()]);
+      if (!hasFlippable) {
+        setError("Mark at least one tile as flippable before locking.");
+        return;
+      }
       setError(null);
       setFlLocked(true);
     }
