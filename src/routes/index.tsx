@@ -1777,7 +1777,7 @@ function Index() {
             <p>Enter 5-letter Wordle-style guesses that match either half of a 10-letter English word.</p>
             <p>Examples:</p>
             <ul className="list-disc pl-5">
-              <li>"NALLY" from "DIAGONALLY"</li>
+              <li>"BLACK" from "BLACKSMITH"</li>
               <li>"MENTS" from "AGREEMENTS"</li>
             </ul>
             <p>Remember: This solver only solves one half of the 10-letter word, so once you've found the first half of the word, you need to reset the solver to solve for the other half.</p>
