@@ -1624,7 +1624,11 @@ function Index() {
             </div>
           )}
           {mode === "spellingbee" && (
-            <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
+            <>
+              <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
+              <span> · </span>
+              <a href="https://www.bostonglobe.com/games/word-flower/?p1=BGMenu_Sections" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Boston Globe</a>
+            </>
           )}
           {mode === "craftwords" && (
             <a href="https://craftword.game/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Craft Words</a>
