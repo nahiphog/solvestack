@@ -1838,6 +1838,14 @@ function Index() {
               <a href="https://www.nytimes.com/puzzles/sudoku" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">New York Times</a>
               {" · "}
               <a href="https://www.netflix.com/tudum/puzzled/sudoku/daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Netflix</a>
+              {" · "}
+              <a href="https://www.bostonglobe.com/games/sudoku/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Boston Globe</a>
+              {" · "}
+              <a href="https://play.usatoday.com/sudoku/archive" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">USA today</a>
+              {" · "}
+              <a href="https://www.washingtonpost.com/games/sudoku/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">The Washington Post</a>
+              {" · "}
+              <a href="https://fun.chicagotribune.com/category/sudoku" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Chicago Tribune</a>
             </p>
             <p>Fill the 9×9 grid so each row, column, and 3×3 region contains 1–9 exactly once.</p>
             <p>Enter any pre-filled cell values inside the grid, then click Solve.</p>
