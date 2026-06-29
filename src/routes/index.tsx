@@ -3609,7 +3609,7 @@ function Index() {
                 </button>
               </div>
               <div className="space-y-4">
-                {sliceGroups(spellingBeeResults, pageBee).map(([score, words]) => (
+                {spellingBeeResults.map(([score, words]) => (
                   <div key={score} className="rounded-lg border bg-card p-4">
                     <div className="mb-2 text-sm font-semibold text-muted-foreground">
                       {score} {score === 1 ? "point" : "points"} · {words.length} {words.length === 1 ? "word" : "words"}
@@ -3627,7 +3627,6 @@ function Index() {
                   </div>
                 ))}
               </div>
-              <Paginator page={pageBee} setPage={setPageBee} total={spellingBeeResults.reduce((n, [, ws]) => n + ws.length, 0)} />
             </section>
           );
         })()}
