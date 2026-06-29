@@ -1624,7 +1624,11 @@ function Index() {
             </div>
           )}
           {mode === "spellingbee" && (
-            <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
+            <>
+              <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
+              <span> · </span>
+              <a href="https://www.bostonglobe.com/games/word-flower/?p1=BGMenu_Sections" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Boston Globe</a>
+            </>
           )}
           {mode === "craftwords" && (
             <a href="https://craftword.game/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Craft Words</a>
@@ -1773,7 +1777,7 @@ function Index() {
             <p>Enter 5-letter Wordle-style guesses that match either half of a 10-letter English word.</p>
             <p>Examples:</p>
             <ul className="list-disc pl-5">
-              <li>"NALLY" from "DIAGONALLY"</li>
+              <li>"BLACK" from "BLACKSMITH"</li>
               <li>"MENTS" from "AGREEMENTS"</li>
             </ul>
             <p>Remember: This solver only solves one half of the 10-letter word, so once you've found the first half of the word, you need to reset the solver to solve for the other half.</p>
@@ -1834,6 +1838,14 @@ function Index() {
               <a href="https://www.nytimes.com/puzzles/sudoku" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">New York Times</a>
               {" · "}
               <a href="https://www.netflix.com/tudum/puzzled/sudoku/daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Netflix</a>
+              {" · "}
+              <a href="https://www.bostonglobe.com/games/sudoku/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Boston Globe</a>
+              {" · "}
+              <a href="https://play.usatoday.com/sudoku/archive" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">USA today</a>
+              {" · "}
+              <a href="https://www.washingtonpost.com/games/sudoku/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">The Washington Post</a>
+              {" · "}
+              <a href="https://fun.chicagotribune.com/category/sudoku" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Chicago Tribune</a>
             </p>
             <p>Fill the 9×9 grid so each row, column, and 3×3 region contains 1–9 exactly once.</p>
             <p>Enter any pre-filled cell values inside the grid, then click Solve.</p>
@@ -3597,7 +3609,7 @@ function Index() {
                 </button>
               </div>
               <div className="space-y-4">
-                {sliceGroups(spellingBeeResults, pageBee).map(([score, words]) => (
+                {spellingBeeResults.map(([score, words]) => (
                   <div key={score} className="rounded-lg border bg-card p-4">
                     <div className="mb-2 text-sm font-semibold text-muted-foreground">
                       {score} {score === 1 ? "point" : "points"} · {words.length} {words.length === 1 ? "word" : "words"}
@@ -3615,7 +3627,6 @@ function Index() {
                   </div>
                 ))}
               </div>
-              <Paginator page={pageBee} setPage={setPageBee} total={spellingBeeResults.reduce((n, [, ws]) => n + ws.length, 0)} />
             </section>
           );
         })()}

@@ -70,6 +70,10 @@ function FaqPage() {
                 ["Clever Goat", "https://clevergoat.com/"],
                 ["Coffee First", "https://coffeefirst.games/"],
                 ["Dles", "https://dles.gg"],
+                ["USA today", "https://play.usatoday.com/"],
+                ["The Washington Post", "https://www.washingtonpost.com/games/"],
+                ["Chicago Tribune", "https://fun.chicagotribune.com/"],
+                ["The Independent", "https://puzzles.independent.co.uk/"],
               ];
               return (
                 <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-3">
