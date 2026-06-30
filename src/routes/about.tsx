@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import qrAsset from "@/assets/solve-stack-qrcode.png.asset.json";
+import qrAsset from "@/assets/solver-sanctuary-qrcode.png.asset.json";
 import { submitFeedback } from "@/lib/feedback.functions";
 
 export const Route = createFileRoute("/about")({
