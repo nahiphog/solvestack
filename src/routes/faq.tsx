@@ -3,10 +3,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "FAQ — Solve Stack" },
-      { name: "description", content: "Frequently asked questions about Solve Stack." },
-      { property: "og:title", content: "FAQ — Solve Stack" },
-      { property: "og:description", content: "Frequently asked questions about Solve Stack." },
+      { title: "FAQ — Solver Sanctuary" },
+      { name: "description", content: "Frequently asked questions about Solver Sanctuary." },
+      { property: "og:title", content: "FAQ — Solver Sanctuary" },
+      { property: "og:description", content: "Frequently asked questions about Solver Sanctuary." },
     ],
   }),
   component: FaqPage,

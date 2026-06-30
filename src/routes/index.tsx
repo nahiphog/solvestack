@@ -6,11 +6,12 @@ import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon, ChevronDown, ChevronUp } from "lucide-react";
+import { SudokuCopyBoard } from "@/components/sudoku-copy-controls";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Solve Stack" },
+      { title: "Solver Sanctuary" },
       { name: "description", content: "Find all shortest word ladders between two words." },
     ],
   }),
@@ -1158,9 +1159,9 @@ function Index() {
       <div className="mx-auto max-w-3xl px-6 py-16">
         <header className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Solve Stack</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Solver Sanctuary</h1>
             <p className="mt-2 text-muted-foreground">
-              Building solvers, one puzzle at a time.
+              Solvers built, puzzles beat.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -3254,6 +3255,7 @@ function Index() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3">
+                  <SudokuCopyBoard board={board} />
                   <Button
                     onClick={() => {
                       setBoard(Array.from({ length: 9 }, () => Array(9).fill("")));
