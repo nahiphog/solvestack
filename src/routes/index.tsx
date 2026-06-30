@@ -10,7 +10,7 @@ import { Copy, Check, Sun, Moon, ChevronDown, ChevronUp } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Solve Stack" },
+      { title: "Solver Sanctuary" },
       { name: "description", content: "Find all shortest word ladders between two words." },
     ],
   }),
