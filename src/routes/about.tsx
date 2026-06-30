@@ -4,10 +4,10 @@ import qrAsset from "@/assets/solve-stack-qrcode.png.asset.json";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About — Solve Stack" },
-      { name: "description", content: "About Solve Stack — why it was built, inspirations, and how to support the project." },
-      { property: "og:title", content: "About — Solve Stack" },
-      { property: "og:description", content: "About Solve Stack — why it was built, inspirations, and how to support the project." },
+      { title: "About — Solver Sanctuary" },
+      { name: "description", content: "About Solver Sanctuary — why it was built, inspirations, and how to support the project." },
+      { property: "og:title", content: "About — Solver Sanctuary" },
+      { property: "og:description", content: "About Solver Sanctuary — why it was built, inspirations, and how to support the project." },
     ],
   }),
   component: AboutPage,
@@ -59,7 +59,7 @@ function AboutPage() {
         <div className="mt-10 flex justify-center">
           <img
             src={qrAsset.url}
-            alt="QR code linking to Solve Stack"
+            alt="QR code linking to Solver Sanctuary"
             className="w-64 h-auto rounded-md border bg-white p-2"
           />
         </div>
