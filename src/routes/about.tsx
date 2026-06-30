@@ -98,58 +98,58 @@ function AboutPage() {
               <span className="font-semibold">4.</span> Your feedback helps us improve. Kindly fill out the form below.
             </p>
             <form onSubmit={onSubmit} className="mt-4 space-y-3 rounded-md border p-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium">Name (optional)</label>
+              <div className="flex items-center gap-3">
+                <label className="w-32 shrink-0 text-sm font-medium">Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   maxLength={100}
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
                 />
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Email (optional)</label>
+              <div className="flex items-center gap-3">
+                <label className="w-32 shrink-0 text-sm font-medium">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   maxLength={255}
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
                 />
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Feedback type</label>
+              <div className="flex items-center gap-3">
+                <label className="w-32 shrink-0 text-sm font-medium">Feedback type</label>
                 <select
                   value={feedbackType}
                   onChange={(e) => setFeedbackType(e.target.value as typeof feedbackType)}
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
                 >
                   <option>Bug report</option>
                   <option>Suggestion</option>
-                  <option>General</option>
+                  <option>Others</option>
                 </select>
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Subject</label>
+              <div className="flex items-center gap-3">
+                <label className="w-32 shrink-0 text-sm font-medium">Subject</label>
                 <input
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   maxLength={200}
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
                 />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium">Description</label>
                 <textarea
                   value={description}
-                  onChange={(e) => setDescription(e.target.value.slice(0, 1000))}
-                  maxLength={1000}
+                  onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+                  maxLength={500}
                   rows={5}
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm"
                 />
-                <div className="mt-1 text-right text-xs text-muted-foreground">{description.length}/1000</div>
+                <div className="mt-1 text-right text-xs text-muted-foreground">{description.length}/500</div>
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               {status === "sent" && <p className="text-sm text-emerald-600">Thanks! Your feedback has been sent.</p>}
