@@ -2,11 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const FeedbackSchema = z.object({
-  name: z.string().trim().max(100).optional().default(""),
-  email: z.string().trim().max(255).optional().default(""),
-  feedbackType: z.enum(["Bug report", "Suggestion", "General"]),
-  subject: z.string().trim().max(200).optional().default(""),
-  description: z.string().trim().min(1, "Description is required").max(1000),
+  name: z.string().trim().min(1, "Name is required").max(100),
+  email: z.string().trim().email("Invalid email").max(255),
+  feedbackType: z.enum(["Bug report", "Suggestion", "Others"]),
+  subject: z.string().trim().min(1, "Subject is required").max(200),
+  description: z.string().trim().min(1, "Description is required").max(500),
 });
 
 export type FeedbackInput = z.infer<typeof FeedbackSchema>;
