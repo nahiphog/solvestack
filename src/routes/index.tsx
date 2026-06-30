@@ -1158,9 +1158,9 @@ function Index() {
       <div className="mx-auto max-w-3xl px-6 py-16">
         <header className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Solve Stack</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Solver Sanctuary</h1>
             <p className="mt-2 text-muted-foreground">
-              Building solvers, one puzzle at a time.
+              Solvers built, puzzles beat.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
