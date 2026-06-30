@@ -20,7 +20,7 @@ function AboutPage() {
   const send = useServerFn(submitFeedback);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [feedbackType, setFeedbackType] = useState<"Bug report" | "Suggestion" | "General">("General");
+  const [feedbackType, setFeedbackType] = useState<"Bug report" | "Suggestion" | "Others">("Others");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -28,8 +28,8 @@ function AboutPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description.trim()) {
-      setError("Description cannot be empty.");
+    if (!name.trim() || !email.trim() || !subject.trim() || !description.trim()) {
+      setError("All fields are required.");
       return;
     }
     setError(null);
@@ -37,7 +37,7 @@ function AboutPage() {
     try {
       await send({ data: { name, email, feedbackType, subject, description } });
       setStatus("sent");
-      setName(""); setEmail(""); setSubject(""); setDescription(""); setFeedbackType("General");
+      setName(""); setEmail(""); setSubject(""); setDescription(""); setFeedbackType("Others");
     } catch (err) {
       setStatus("idle");
       setError(err instanceof Error ? err.message : "Failed to send feedback.");
