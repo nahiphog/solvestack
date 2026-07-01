@@ -2699,31 +2699,51 @@ function Index() {
                       <p className="text-xs text-red-600">{splitleP2Error}</p>
                     )}
                     {splitleP2Results && (
-                      <div className="pt-2">
-                        <p className="text-sm font-medium mb-2">
-                          {splitleP2Results.length} possible {splitleP2Results.length === 1 ? "solution" : "solutions"}
-                        </p>
+                      <section className="mt-4">
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                          <h2 className="text-base font-semibold">
+                            {splitleP2Results.length} possible {splitleP2Results.length === 1 ? "solution" : "solutions"}
+                          </h2>
+                          {splitleP2Results.length > 0 && (
+                            <button
+                              onClick={() => {
+                                const lines = splitleP2Results.map(([h, f]) => `${h} | ${f}`).join("\n");
+                                copyText(`${splitleP2Results.length} possible ${splitleP2Results.length === 1 ? "solution" : "solutions"}:\n${lines}\n\nSolved via ${window.location.href}.`);
+                              }}
+                              className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                              aria-label="Copy all solutions"
+                            >
+                              {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                            </button>
+                          )}
+                        </div>
                         {splitleP2Results.length > 0 && (
-                          <div className="overflow-x-auto">
-                            <table className="text-sm border-collapse">
-                              <thead>
-                                <tr>
-                                  <th className="border border-border px-3 py-1 text-left font-medium">The other half</th>
-                                  <th className="border border-border px-3 py-1 text-left font-medium">Full 10-letter word</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {splitleP2Results.map(([half, full]) => (
-                                  <tr key={half}>
-                                    <td className="border border-border px-3 py-1 font-mono">{half}</td>
-                                    <td className="border border-border px-3 py-1 font-mono">{full}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                          <div className="rounded-lg border bg-card divide-y">
+                            {splitleP2Results.map(([half, full]) => (
+                              <div key={half + full} className="p-3 font-mono text-sm">
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSplitleP2Guesses((prev) => {
+                                        const kept = prev.filter((g) => g.word.length > 0);
+                                        return [...kept, { word: half.toUpperCase(), pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] }];
+                                      });
+                                      setSplitleP2Results(null);
+                                      setSplitleP2Error(null);
+                                    }}
+                                    className="rounded bg-muted px-2 py-1 font-bold tracking-widest hover:bg-accent hover:text-accent-foreground"
+                                  >
+                                    {half}
+                                  </button>
+                                  <span className="text-muted-foreground">|</span>
+                                  <span className="tracking-widest">{full}</span>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         )}
-                      </div>
+                      </section>
                     )}
                   </div>
                 )}
