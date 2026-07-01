@@ -1322,7 +1322,6 @@ function Index() {
             >
               Shuntle
             </button>
-{/* Temporarily hidden - Splitle
             <button
               onClick={() => switchMode("splitle")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1333,7 +1332,7 @@ function Index() {
             >
               Splitle
             </button>
-            */}
+
             <button
               onClick={() => switchMode("worwordle")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
