@@ -769,3 +769,33 @@ export async function splitleSolve(
   matching.sort();
   return matching.map((k) => [k, data.map[k]]);
 }
+
+export async function getSplitleOtherHalves(givenHalf: string): Promise<Record<string, string>> {
+  const data = await getSplitleData();
+  const half = givenHalf.toUpperCase();
+  const words = data.map[half] || [];
+  const out: Record<string, string> = {};
+  for (const w of words) {
+    const idx = w.indexOf(half);
+    const other = idx === 0 ? w.slice(5) : w.slice(0, 5);
+    out[other] = w;
+  }
+  return out;
+}
+
+export async function splitleP2Solve(
+  givenHalf: string,
+  guesses: { word: string; pattern: WordleColor[] }[],
+): Promise<[string, string][]> {
+  const map = await getSplitleOtherHalves(givenHalf);
+  const others = Object.keys(map);
+  const matching = others.filter((other) =>
+    guesses.every((g) => {
+      const out = wordleOutput(g.word.toUpperCase(), other);
+      for (let i = 0; i < out.length; i++) if (out[i] !== g.pattern[i]) return false;
+      return true;
+    }),
+  );
+  matching.sort();
+  return matching.map((k) => [k, map[k]]);
+}
