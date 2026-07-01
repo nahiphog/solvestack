@@ -153,6 +153,18 @@ function Index() {
   const [splitleP2Results, setSplitleP2Results] = useState<[string, string][] | null>(null);
   const [splitleP2Solving, setSplitleP2Solving] = useState(false);
   const [splitleP2Error, setSplitleP2Error] = useState<string | null>(null);
+  const [splitleP2Allowed, setSplitleP2Allowed] = useState<string[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (splitleP2Valid && splitleP2Word.length === 5) {
+      getSplitleOtherHalves(splitleP2Word).then((m) => {
+        if (!cancelled) setSplitleP2Allowed(Object.keys(m).map((k) => k.toUpperCase()));
+      });
+    } else {
+      setSplitleP2Allowed(null);
+    }
+    return () => { cancelled = true; };
+  }, [splitleP2Valid, splitleP2Word]);
   const [spellingBeeMiddle, setSpellingBeeMiddle] = useState("T");
   const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
