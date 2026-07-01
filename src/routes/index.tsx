@@ -2438,6 +2438,63 @@ function Index() {
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
+            {mode === "splitle" && splitleResults && (() => {
+              const sorted = [...splitleResults].sort((a, b) => b[1].length - a[1].length);
+              return (
+                <section className="mt-6">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <h2 className="text-base font-semibold">
+                      {sorted.length} possible {sorted.length === 1 ? "half" : "halves"}
+                    </h2>
+                    <button
+                      onClick={() => {
+                        const lines = sorted.map(([k, ws]) => `${k} | ${ws.length} | ${ws.join(", ")}`).join("\n");
+                        copyText(`${sorted.length} possible ${sorted.length === 1 ? "half" : "halves"}:\n${lines}\n\nSolved via ${window.location.href}.`);
+                      }}
+                      className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                      aria-label="Copy all halves"
+                    >
+                      {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                    </button>
+                  </div>
+                  <div className="rounded-lg border bg-card divide-y">
+                    {sorted.map(([key, words]) => {
+                      const open = !!splitleExpanded[key];
+                      return (
+                        <div key={key} className="p-3 font-mono text-sm">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => addWordleGuessFromAnswer(key)}
+                              className="rounded bg-muted px-2 py-1 font-bold tracking-widest hover:bg-accent hover:text-accent-foreground"
+                            >
+                              {key}
+                            </button>
+                            <span className="text-muted-foreground">|</span>
+                            <span>{words.length} {words.length === 1 ? "word" : "words"}</span>
+                            <span className="text-muted-foreground">|</span>
+                            <button
+                              type="button"
+                              onClick={() => setSplitleExpanded((p) => ({ ...p, [key]: !p[key] }))}
+                              className="text-blue-600 hover:underline"
+                            >
+                              {open ? "Hide" : "Show all such 10-letter words"}
+                            </button>
+                          </div>
+                          {open && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {words.map((w) => (
+                                <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })()}
           </div>
           {mode === "splitle" && (
             <div className="mt-6">
@@ -2591,7 +2648,7 @@ function Index() {
                       </div>
                       );
                     })}
-                    <p className="text-xs text-muted-foreground">Tip: click a tile to cycle its color (grey → yellow → green).</p>
+                    
                     <div className="flex flex-wrap gap-3">
                       <Button
                         onClick={() => {
@@ -2642,31 +2699,51 @@ function Index() {
                       <p className="text-xs text-red-600">{splitleP2Error}</p>
                     )}
                     {splitleP2Results && (
-                      <div className="pt-2">
-                        <p className="text-sm font-medium mb-2">
-                          {splitleP2Results.length} possible {splitleP2Results.length === 1 ? "solution" : "solutions"}
-                        </p>
+                      <section className="mt-4">
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                          <h2 className="text-base font-semibold">
+                            {splitleP2Results.length} possible {splitleP2Results.length === 1 ? "solution" : "solutions"}
+                          </h2>
+                          {splitleP2Results.length > 0 && (
+                            <button
+                              onClick={() => {
+                                const lines = splitleP2Results.map(([h, f]) => `${h} | ${f}`).join("\n");
+                                copyText(`${splitleP2Results.length} possible ${splitleP2Results.length === 1 ? "solution" : "solutions"}:\n${lines}\n\nSolved via ${window.location.href}.`);
+                              }}
+                              className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                              aria-label="Copy all solutions"
+                            >
+                              {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                            </button>
+                          )}
+                        </div>
                         {splitleP2Results.length > 0 && (
-                          <div className="overflow-x-auto">
-                            <table className="text-sm border-collapse">
-                              <thead>
-                                <tr>
-                                  <th className="border border-border px-3 py-1 text-left font-medium">The other half</th>
-                                  <th className="border border-border px-3 py-1 text-left font-medium">Full 10-letter word</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {splitleP2Results.map(([half, full]) => (
-                                  <tr key={half}>
-                                    <td className="border border-border px-3 py-1 font-mono">{half}</td>
-                                    <td className="border border-border px-3 py-1 font-mono">{full}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                          <div className="rounded-lg border bg-card divide-y">
+                            {splitleP2Results.map(([half, full]) => (
+                              <div key={half + full} className="p-3 font-mono text-sm">
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSplitleP2Guesses((prev) => {
+                                        const kept = prev.filter((g) => g.word.length > 0);
+                                        return [...kept, { word: half.toUpperCase(), pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] }];
+                                      });
+                                      setSplitleP2Results(null);
+                                      setSplitleP2Error(null);
+                                    }}
+                                    className="rounded bg-muted px-2 py-1 font-bold tracking-widest hover:bg-accent hover:text-accent-foreground"
+                                  >
+                                    {half}
+                                  </button>
+                                  <span className="text-muted-foreground">|</span>
+                                  <span className="tracking-widest">{full}</span>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         )}
-                      </div>
+                      </section>
                     )}
                   </div>
                 )}
@@ -3790,63 +3867,6 @@ function Index() {
               </div>
             </div>
             <Paginator page={pageWordle} setPage={setPageWordle} total={wordleResults.length} />
-          </section>
-        )}
-
-        {splitleResults && (
-          <section className="mt-10">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold">
-                {splitleResults.length} possible {splitleResults.length === 1 ? "half" : "halves"}
-              </h2>
-              <button
-                onClick={() => {
-                  const lines = splitleResults
-                    .map(([k, ws]) => `${k} | ${ws.length} | ${ws.join(", ")}`)
-                    .join("\n");
-                  copyText(`${splitleResults.length} possible ${splitleResults.length === 1 ? "half" : "halves"}:\n${lines}\n\nSolved via ${window.location.href}.`);
-                }}
-                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-                aria-label="Copy all halves"
-              >
-                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
-              </button>
-            </div>
-            <div className="rounded-lg border bg-card divide-y">
-              {splitleResults.map(([key, words]) => {
-                const open = !!splitleExpanded[key];
-                return (
-                  <div key={key} className="p-3 font-mono text-sm">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => addWordleGuessFromAnswer(key)}
-                        className="rounded bg-muted px-2 py-1 font-bold tracking-widest hover:bg-accent hover:text-accent-foreground"
-                      >
-                        {key}
-                      </button>
-                      <span className="text-muted-foreground">|</span>
-                      <span>{words.length} {words.length === 1 ? "word" : "words"}</span>
-                      <span className="text-muted-foreground">|</span>
-                      <button
-                        type="button"
-                        onClick={() => setSplitleExpanded((p) => ({ ...p, [key]: !p[key] }))}
-                        className="text-blue-600 hover:underline"
-                      >
-                        {open ? "Hide" : "Show all such 10-letter words"}
-                      </button>
-                    </div>
-                    {open && (
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {words.map((w) => (
-                          <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
           </section>
         )}
 
