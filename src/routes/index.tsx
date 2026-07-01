@@ -2478,7 +2478,7 @@ function Index() {
                               onClick={() => setSplitleExpanded((p) => ({ ...p, [key]: !p[key] }))}
                               className="text-blue-600 hover:underline"
                             >
-                              {open ? "Hide" : "Show all such 10-letter words"}
+                              {open ? "Hide" : "Show all such words"}
                             </button>
                           </div>
                           {open && (
@@ -2570,7 +2570,7 @@ function Index() {
                 )}
                 {splitleP2Valid && (
                   <div className="pt-3 border-t border-border space-y-3">
-                    <p className="text-sm font-medium">Solve the other half:</p>
+                    <p className="text-sm font-medium">Solve for the other half (empty rows are ignored):</p>
                     {splitleP2Guesses.map((g, gi) => {
                       const rowInvalid = g.word.length === 5 && splitleP2Allowed !== null && !splitleP2Allowed.includes(g.word.toUpperCase());
                       return (
@@ -2582,50 +2582,56 @@ function Index() {
                             const color = g.pattern[i];
                             const bg = color === "GREEN" ? "bg-green-600 border-green-600" : color === "YELLOW" ? "bg-yellow-500 border-yellow-500" : "bg-gray-500 border-gray-500";
                             const borderInvalid = rowInvalid ? "ring-2 ring-red-500" : "";
+                            const cycle = () => {
+                              const order: WordleColor[] = ["GREY", "YELLOW", "GREEN"];
+                              const nextC = order[(order.indexOf(color) + 1) % 3];
+                              const nextP = [...g.pattern];
+                              nextP[i] = nextC;
+                              const next = [...splitleP2Guesses];
+                              next[gi] = { ...g, pattern: nextP };
+                              setSplitleP2Guesses(next);
+                            };
                             return (
-                              <div key={i} className="relative">
-                                <input
-                                  id={`splitle-p2-solve-${gi}-${i}`}
-                                  value={ch}
-                                  onChange={(e) => {
-                                    const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
-                                    const arr = (g.word.padEnd(5, " ").split(""));
-                                    arr[i] = c || " ";
-                                    const nextWord = arr.join("").replace(/ +$/, "");
-                                    const next = [...splitleP2Guesses];
-                                    next[gi] = { ...g, word: nextWord };
-                                    setSplitleP2Guesses(next);
-                                    setSplitleP2Error(null);
-                                    if (c && i < 4) {
-                                      const el = document.getElementById(`splitle-p2-solve-${gi}-${i + 1}`) as HTMLInputElement | null;
-                                      el?.focus();
-                                      el?.select();
-                                    }
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Backspace" && !ch && i > 0) {
-                                      const el = document.getElementById(`splitle-p2-solve-${gi}-${i - 1}`) as HTMLInputElement | null;
-                                      el?.focus();
-                                    }
-                                  }}
-                                  maxLength={1}
-                                  className={`h-12 w-12 rounded border-2 text-center text-lg font-bold uppercase text-white ${bg} ${borderInvalid} focus:outline-none focus:ring-2 focus:ring-blue-400`}
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const order: WordleColor[] = ["GREY", "YELLOW", "GREEN"];
-                                    const nextC = order[(order.indexOf(color) + 1) % 3];
-                                    const nextP = [...g.pattern];
-                                    nextP[i] = nextC;
-                                    const next = [...splitleP2Guesses];
-                                    next[gi] = { ...g, pattern: nextP };
-                                    setSplitleP2Guesses(next);
-                                  }}
-                                  className="absolute inset-0 opacity-0"
-                                  aria-label="cycle color"
-                                />
-                              </div>
+                              <input
+                                key={i}
+                                id={`splitle-p2-solve-${gi}-${i}`}
+                                type="text"
+                                autoComplete="off"
+                                value={ch}
+                                onMouseDown={(e) => {
+                                  if (document.activeElement === e.currentTarget) {
+                                    e.preventDefault();
+                                    cycle();
+                                  }
+                                }}
+                                onFocus={(e) => e.currentTarget.select()}
+                                onChange={(e) => {
+                                  const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+                                  const arr = (g.word.padEnd(5, " ").split(""));
+                                  arr[i] = c || " ";
+                                  const nextWord = arr.join("").replace(/ +$/, "");
+                                  const next = [...splitleP2Guesses];
+                                  next[gi] = { ...g, word: nextWord };
+                                  setSplitleP2Guesses(next);
+                                  setSplitleP2Error(null);
+                                  if (c && i < 4) {
+                                    const el = document.getElementById(`splitle-p2-solve-${gi}-${i + 1}`) as HTMLInputElement | null;
+                                    el?.focus();
+                                    el?.select();
+                                  }
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Backspace" && !ch && i > 0) {
+                                    const el = document.getElementById(`splitle-p2-solve-${gi}-${i - 1}`) as HTMLInputElement | null;
+                                    el?.focus();
+                                  } else if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    cycle();
+                                  }
+                                }}
+                                maxLength={1}
+                                className={`h-12 w-12 rounded border-2 text-center text-lg font-bold uppercase text-white outline-none ${bg} ${borderInvalid} focus:ring-2 focus:ring-blue-400`}
+                              />
                             );
                           })}
                         </div>
@@ -2660,6 +2666,9 @@ function Index() {
                       </Button>
                       <Button
                         onClick={() => {
+                          setSplitleP2Word("");
+                          setSplitleP2Colors(["GREY","GREY","GREY","GREY","GREY"]);
+                          setSplitleP2Valid(null);
                           setSplitleP2Guesses([{ word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }]);
                           setSplitleP2Results(null);
                           setSplitleP2Error(null);
