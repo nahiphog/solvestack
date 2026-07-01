@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useState } from "react";
-import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, spellingBeeSolve, splitleP2Solve, splitleSolve, sudokuSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, spellingBeeSolve, splitleP2Solve, splitleSolve, sudokuSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -153,6 +153,18 @@ function Index() {
   const [splitleP2Results, setSplitleP2Results] = useState<[string, string][] | null>(null);
   const [splitleP2Solving, setSplitleP2Solving] = useState(false);
   const [splitleP2Error, setSplitleP2Error] = useState<string | null>(null);
+  const [splitleP2Allowed, setSplitleP2Allowed] = useState<string[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (splitleP2Valid && splitleP2Word.length === 5) {
+      getSplitleOtherHalves(splitleP2Word).then((m) => {
+        if (!cancelled) setSplitleP2Allowed(Object.keys(m).map((k) => k.toUpperCase()));
+      });
+    } else {
+      setSplitleP2Allowed(null);
+    }
+    return () => { cancelled = true; };
+  }, [splitleP2Valid, splitleP2Word]);
   const [spellingBeeMiddle, setSpellingBeeMiddle] = useState("T");
   const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
@@ -2502,13 +2514,17 @@ function Index() {
                 {splitleP2Valid && (
                   <div className="pt-3 border-t border-border space-y-3">
                     <p className="text-sm font-medium">Solve the other half:</p>
-                    {splitleP2Guesses.map((g, gi) => (
-                      <div key={gi} className="flex items-center gap-2">
+                    {splitleP2Guesses.map((g, gi) => {
+                      const rowInvalid = g.word.length === 5 && splitleP2Allowed !== null && !splitleP2Allowed.includes(g.word.toUpperCase());
+                      return (
+                      <div key={gi} className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
                         <div className="flex gap-1.5">
                           {[0,1,2,3,4].map((i) => {
                             const ch = g.word[i] || "";
                             const color = g.pattern[i];
                             const bg = color === "GREEN" ? "bg-green-600 border-green-600" : color === "YELLOW" ? "bg-yellow-500 border-yellow-500" : "bg-gray-500 border-gray-500";
+                            const borderInvalid = rowInvalid ? "ring-2 ring-red-500" : "";
                             return (
                               <div key={i} className="relative">
                                 <input
@@ -2536,7 +2552,7 @@ function Index() {
                                     }
                                   }}
                                   maxLength={1}
-                                  className={`h-12 w-12 rounded border-2 text-center text-lg font-bold uppercase text-white ${bg} focus:outline-none focus:ring-2 focus:ring-blue-400`}
+                                  className={`h-12 w-12 rounded border-2 text-center text-lg font-bold uppercase text-white ${bg} ${borderInvalid} focus:outline-none focus:ring-2 focus:ring-blue-400`}
                                 />
                                 <button
                                   type="button"
@@ -2568,8 +2584,13 @@ function Index() {
                             ×
                           </Button>
                         )}
+                        </div>
+                        {rowInvalid && (
+                          <p className="text-xs text-red-600">"{g.word}" is not a valid other half for "{splitleP2Word}".</p>
+                        )}
                       </div>
-                    ))}
+                      );
+                    })}
                     <p className="text-xs text-muted-foreground">Tip: click a tile to cycle its color (grey → yellow → green).</p>
                     <div className="flex flex-wrap gap-3">
                       <Button
