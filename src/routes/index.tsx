@@ -1783,22 +1783,11 @@ function Index() {
               <li>"BLACK" from "BLACKSMITH"</li>
               <li>"MENTS" from "AGREEMENTS"</li>
             </ul>
-            <p>Remember: This solver only solves one half of the 10-letter word, so once you've found the first half of the word, you need to reset the solver to solve for the other half.</p>
-          </div>
-        )}
-
-        {mode === "splitle" && (
-          <div className="mb-4 flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Optional input: Add</span>
-            <select
-              value={splitleStartingWords}
-              onChange={(e) => applySplitleStartingWords(Number(e.target.value) as 0 | 3)}
-              className="rounded border bg-background px-2 py-1 text-sm"
-            >
-              <option value={0}>0</option>
-              <option value={3}>3</option>
-            </select>
-            <span className="text-muted-foreground">strategic starting words.</span>
+            <p>Note that this solver consists of two parts:</p>
+            <ul className="list-disc pl-5">
+              <li>Part 1: Find one half of the 10-letter word.</li>
+              <li>Part 2: After finding the first half, find the other half.</li>
+            </ul>
           </div>
         )}
 
@@ -2251,7 +2240,25 @@ function Index() {
           </div>
         ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle") ? (
 
-          <div className="space-y-4">
+          <>
+          {mode === "splitle" && (
+            <p className="text-sm font-medium mb-2">Part 1: Find one half of the 10-letter word.</p>
+          )}
+          <div className={mode === "splitle" ? "space-y-4 border-2 border-border rounded-lg p-4" : "space-y-4"}>
+            {mode === "splitle" && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Optional input: Add</span>
+                <select
+                  value={splitleStartingWords}
+                  onChange={(e) => applySplitleStartingWords(Number(e.target.value) as 0 | 3)}
+                  className="rounded border bg-background px-2 py-1 text-sm"
+                >
+                  <option value={0}>0</option>
+                  <option value={3}>3</option>
+                </select>
+                <span className="text-muted-foreground">strategic starting words.</span>
+              </div>
+            )}
             {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && (
               <div className="flex items-center gap-2 text-sm">
                 <span>Optional input: Add</span>
@@ -2411,6 +2418,19 @@ function Index() {
               </Button>
             </div>
           </div>
+          {mode === "splitle" && (
+            <div className="mt-6">
+              <p className="text-sm font-medium mb-2">Part 2: After finding the first half, find the other half.</p>
+              <div className="border-2 border-border rounded-lg p-4">
+                <div className="flex gap-1.5">
+                  {[0,1,2,3,4].map((i) => (
+                    <div key={i} className="h-12 w-12 rounded border-2 bg-green-600 border-green-600" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          </>
 
         ) : mode === "spellingbee" ? (
           <div className="flex flex-col items-start gap-4">
