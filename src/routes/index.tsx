@@ -2418,6 +2418,19 @@ function Index() {
               </Button>
             </div>
           </div>
+          {mode === "splitle" && (
+            <div className="mt-6">
+              <p className="text-sm font-medium mb-2">Part 2: After finding the first half, find the other half.</p>
+              <div className="border-2 border-border rounded-lg p-4">
+                <div className="flex gap-1.5">
+                  {[0,1,2,3,4].map((i) => (
+                    <div key={i} className="h-12 w-12 rounded border-2 bg-green-600 border-green-600" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          </>
 
         ) : mode === "spellingbee" ? (
           <div className="flex flex-col items-start gap-4">
