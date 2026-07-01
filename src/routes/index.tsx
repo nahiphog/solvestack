@@ -2514,13 +2514,17 @@ function Index() {
                 {splitleP2Valid && (
                   <div className="pt-3 border-t border-border space-y-3">
                     <p className="text-sm font-medium">Solve the other half:</p>
-                    {splitleP2Guesses.map((g, gi) => (
-                      <div key={gi} className="flex items-center gap-2">
+                    {splitleP2Guesses.map((g, gi) => {
+                      const rowInvalid = g.word.length === 5 && splitleP2Allowed !== null && !splitleP2Allowed.includes(g.word.toUpperCase());
+                      return (
+                      <div key={gi} className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
                         <div className="flex gap-1.5">
                           {[0,1,2,3,4].map((i) => {
                             const ch = g.word[i] || "";
                             const color = g.pattern[i];
                             const bg = color === "GREEN" ? "bg-green-600 border-green-600" : color === "YELLOW" ? "bg-yellow-500 border-yellow-500" : "bg-gray-500 border-gray-500";
+                            const borderInvalid = rowInvalid ? "ring-2 ring-red-500" : "";
                             return (
                               <div key={i} className="relative">
                                 <input
@@ -2548,7 +2552,7 @@ function Index() {
                                     }
                                   }}
                                   maxLength={1}
-                                  className={`h-12 w-12 rounded border-2 text-center text-lg font-bold uppercase text-white ${bg} focus:outline-none focus:ring-2 focus:ring-blue-400`}
+                                  className={`h-12 w-12 rounded border-2 text-center text-lg font-bold uppercase text-white ${bg} ${borderInvalid} focus:outline-none focus:ring-2 focus:ring-blue-400`}
                                 />
                                 <button
                                   type="button"
@@ -2580,8 +2584,13 @@ function Index() {
                             ×
                           </Button>
                         )}
+                        </div>
+                        {rowInvalid && (
+                          <p className="text-xs text-red-600">"{g.word}" is not a valid other half for "{splitleP2Word}".</p>
+                        )}
                       </div>
-                    ))}
+                      );
+                    })}
                     <p className="text-xs text-muted-foreground">Tip: click a tile to cycle its color (grey → yellow → green).</p>
                     <div className="flex flex-wrap gap-3">
                       <Button
