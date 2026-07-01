@@ -1291,7 +1291,6 @@ function Index() {
             >
               Fibble
             </button>
-{/* Temporarily hidden - Flipping Letters
             <button
               onClick={() => switchMode("flippingletters")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1302,7 +1301,7 @@ function Index() {
             >
               Flipping Letters
             </button>
-            */}
+
             <button
               onClick={() => switchMode("jeffgoldblum")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
