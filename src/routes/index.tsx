@@ -2499,6 +2499,154 @@ function Index() {
                 {splitleP2Valid === false && (
                   <p className="text-xs text-red-600">Not a valid Splitle half.</p>
                 )}
+                {splitleP2Valid && (
+                  <div className="pt-3 border-t border-border space-y-3">
+                    <p className="text-sm font-medium">Solve the other half:</p>
+                    {splitleP2Guesses.map((g, gi) => (
+                      <div key={gi} className="flex items-center gap-2">
+                        <div className="flex gap-1.5">
+                          {[0,1,2,3,4].map((i) => {
+                            const ch = g.word[i] || "";
+                            const color = g.pattern[i];
+                            const bg = color === "GREEN" ? "bg-green-600 border-green-600" : color === "YELLOW" ? "bg-yellow-500 border-yellow-500" : "bg-gray-500 border-gray-500";
+                            return (
+                              <div key={i} className="relative">
+                                <input
+                                  id={`splitle-p2-solve-${gi}-${i}`}
+                                  value={ch}
+                                  onChange={(e) => {
+                                    const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+                                    const arr = (g.word.padEnd(5, " ").split(""));
+                                    arr[i] = c || " ";
+                                    const nextWord = arr.join("").replace(/ +$/, "");
+                                    const next = [...splitleP2Guesses];
+                                    next[gi] = { ...g, word: nextWord };
+                                    setSplitleP2Guesses(next);
+                                    setSplitleP2Error(null);
+                                    if (c && i < 4) {
+                                      const el = document.getElementById(`splitle-p2-solve-${gi}-${i + 1}`) as HTMLInputElement | null;
+                                      el?.focus();
+                                      el?.select();
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Backspace" && !ch && i > 0) {
+                                      const el = document.getElementById(`splitle-p2-solve-${gi}-${i - 1}`) as HTMLInputElement | null;
+                                      el?.focus();
+                                    }
+                                  }}
+                                  maxLength={1}
+                                  className={`h-12 w-12 rounded border-2 text-center text-lg font-bold uppercase text-white ${bg} focus:outline-none focus:ring-2 focus:ring-blue-400`}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const order: WordleColor[] = ["GREY", "YELLOW", "GREEN"];
+                                    const nextC = order[(order.indexOf(color) + 1) % 3];
+                                    const nextP = [...g.pattern];
+                                    nextP[i] = nextC;
+                                    const next = [...splitleP2Guesses];
+                                    next[gi] = { ...g, pattern: nextP };
+                                    setSplitleP2Guesses(next);
+                                  }}
+                                  className="absolute inset-0 opacity-0"
+                                  aria-label="cycle color"
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {splitleP2Guesses.length > 1 && (
+                          <Button
+                            onClick={() => {
+                              setSplitleP2Guesses(splitleP2Guesses.filter((_, i) => i !== gi));
+                              setSplitleP2Results(null);
+                            }}
+                            variant="outline"
+                            size="sm"
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <p className="text-xs text-muted-foreground">Tip: click a tile to cycle its color (grey → yellow → green).</p>
+                    <div className="flex flex-wrap gap-3">
+                      <Button
+                        onClick={() => {
+                          setSplitleP2Guesses([...splitleP2Guesses, { word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }]);
+                        }}
+                        variant="outline"
+                      >
+                        Add guess
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setSplitleP2Guesses([{ word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }]);
+                          setSplitleP2Results(null);
+                          setSplitleP2Error(null);
+                        }}
+                        variant="outline"
+                      >
+                        Reset
+                      </Button>
+                      <Button
+                        onClick={async () => {
+                          setSplitleP2Error(null);
+                          const allowed = await import("@/lib/wordLadder").then((m) => m.getSplitleOtherHalves(splitleP2Word));
+                          const allowedKeys = Object.keys(allowed);
+                          const normalized = splitleP2Guesses.filter((g) => g.word.length > 0);
+                          for (const g of normalized) {
+                            if (g.word.length !== 5 || !allowedKeys.includes(g.word.toUpperCase())) {
+                              setSplitleP2Error(`"${g.word}" is not a valid other half for "${splitleP2Word}".`);
+                              return;
+                            }
+                          }
+                          setSplitleP2Solving(true);
+                          try {
+                            const res = await splitleP2Solve(splitleP2Word, normalized);
+                            setSplitleP2Results(res);
+                          } finally {
+                            setSplitleP2Solving(false);
+                          }
+                        }}
+                        disabled={splitleP2Solving}
+                      >
+                        {splitleP2Solving ? "Solving..." : "Solve"}
+                      </Button>
+                    </div>
+                    {splitleP2Error && (
+                      <p className="text-xs text-red-600">{splitleP2Error}</p>
+                    )}
+                    {splitleP2Results && (
+                      <div className="pt-2">
+                        <p className="text-sm font-medium mb-2">
+                          {splitleP2Results.length} possible {splitleP2Results.length === 1 ? "solution" : "solutions"}
+                        </p>
+                        {splitleP2Results.length > 0 && (
+                          <div className="overflow-x-auto">
+                            <table className="text-sm border-collapse">
+                              <thead>
+                                <tr>
+                                  <th className="border border-border px-3 py-1 text-left font-medium">The other half</th>
+                                  <th className="border border-border px-3 py-1 text-left font-medium">Full 10-letter word</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {splitleP2Results.map(([half, full]) => (
+                                  <tr key={half}>
+                                    <td className="border border-border px-3 py-1 font-mono">{half}</td>
+                                    <td className="border border-border px-3 py-1 font-mono">{full}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
