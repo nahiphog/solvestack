@@ -2424,12 +2424,72 @@ function Index() {
           {mode === "splitle" && (
             <div className="mt-6">
               <p className="text-sm font-medium mb-2">Part 2: After finding the first half, find the other half.</p>
-              <div className="border-2 border-border rounded-lg p-4">
+              <div className="border-2 border-border rounded-lg p-4 space-y-3">
+                <p className="text-sm font-medium">Input one half of the 10-letter word.</p>
                 <div className="flex gap-1.5">
-                  {[0,1,2,3,4].map((i) => (
-                    <div key={i} className="h-12 w-12 rounded border-2 bg-green-600 border-green-600" />
-                  ))}
+                  {[0,1,2,3,4].map((i) => {
+                    const ch = splitleP2Word[i] || "";
+                    const invalid = splitleP2Valid === false;
+                    return (
+                      <input
+                        key={i}
+                        id={`splitle-p2-green-${i}`}
+                        value={ch}
+                        onChange={(e) => {
+                          const c = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+                          const arr = splitleP2Word.padEnd(5, " ").split("");
+                          arr[i] = c || " ";
+                          const next = arr.join("").replace(/ +$/, "");
+                          setSplitleP2Word(next);
+                          if (c && i < 4) {
+                            const el = document.getElementById(`splitle-p2-green-${i + 1}`) as HTMLInputElement | null;
+                            el?.focus();
+                            el?.select();
+                          }
+                          if (next.length === 5 && next.indexOf(" ") === -1) {
+                            isValidSplitleHalf(next).then((ok) => setSplitleP2Valid(ok));
+                          } else {
+                            setSplitleP2Valid(null);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Backspace" && !ch && i > 0) {
+                            const el = document.getElementById(`splitle-p2-green-${i - 1}`) as HTMLInputElement | null;
+                            el?.focus();
+                          }
+                        }}
+                        maxLength={1}
+                        className={`h-12 w-12 rounded border-2 text-center text-lg font-bold uppercase text-white bg-green-600 ${invalid ? "border-red-500" : "border-green-600"} focus:outline-none focus:ring-2 focus:ring-green-400`}
+                      />
+                    );
+                  })}
                 </div>
+                <div className="flex gap-1.5">
+                  {[0,1,2,3,4].map((i) => {
+                    const ch = splitleP2Word[i] || "";
+                    const color = splitleP2Colors[i];
+                    const bg = color === "GREEN" ? "bg-green-600 border-green-600" : color === "YELLOW" ? "bg-yellow-500 border-yellow-500" : "bg-gray-500 border-gray-500";
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          const order: WordleColor[] = ["GREY", "YELLOW", "GREEN"];
+                          const nextC = order[(order.indexOf(color) + 1) % 3];
+                          const arr = [...splitleP2Colors];
+                          arr[i] = nextC;
+                          setSplitleP2Colors(arr);
+                        }}
+                        className={`h-12 w-12 rounded border-2 text-center text-lg font-bold uppercase text-white ${bg}`}
+                      >
+                        {ch}
+                      </button>
+                    );
+                  })}
+                </div>
+                {splitleP2Valid === false && (
+                  <p className="text-xs text-red-600">Not a valid Splitle half.</p>
+                )}
               </div>
             </div>
           )}
