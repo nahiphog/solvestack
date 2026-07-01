@@ -2648,7 +2648,7 @@ function Index() {
                       </div>
                       );
                     })}
-                    <p className="text-xs text-muted-foreground">Tip: click a tile to cycle its color (grey → yellow → green).</p>
+                    
                     <div className="flex flex-wrap gap-3">
                       <Button
                         onClick={() => {
