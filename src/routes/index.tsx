@@ -2624,12 +2624,14 @@ function Index() {
                             }
                           }
                           setSplitleP2Solving(true);
-                          try {
-                            const res = await splitleP2Solve(splitleP2Word, normalized);
-                            setSplitleP2Results(res);
-                          } finally {
-                            setSplitleP2Solving(false);
-                          }
+                           try {
+                             const mirrored = { word: splitleP2Word.toUpperCase(), pattern: splitleP2Colors };
+                             const allGuesses = [mirrored, ...normalized];
+                             const res = await splitleP2Solve(splitleP2Word, allGuesses);
+                             setSplitleP2Results(res);
+                           } finally {
+                             setSplitleP2Solving(false);
+                           }
                         }}
                         disabled={splitleP2Solving}
                       >
