@@ -2447,6 +2447,9 @@ function Index() {
                           arr[i] = c || " ";
                           const next = arr.join("").replace(/ +$/, "");
                           setSplitleP2Word(next);
+                          setSplitleP2Guesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                          setSplitleP2Results(null);
+                          setSplitleP2Error(null);
                           if (c && i < 4) {
                             const el = document.getElementById(`splitle-p2-green-${i + 1}`) as HTMLInputElement | null;
                             el?.focus();
