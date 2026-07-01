@@ -147,6 +147,12 @@ function Index() {
   const [splitleP2Word, setSplitleP2Word] = useState<string>("");
   const [splitleP2Colors, setSplitleP2Colors] = useState<WordleColor[]>(["GREY","GREY","GREY","GREY","GREY"]);
   const [splitleP2Valid, setSplitleP2Valid] = useState<boolean | null>(null);
+  const [splitleP2Guesses, setSplitleP2Guesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
+    { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
+  ]);
+  const [splitleP2Results, setSplitleP2Results] = useState<[string, string][] | null>(null);
+  const [splitleP2Solving, setSplitleP2Solving] = useState(false);
+  const [splitleP2Error, setSplitleP2Error] = useState<string | null>(null);
   const [spellingBeeMiddle, setSpellingBeeMiddle] = useState("T");
   const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
