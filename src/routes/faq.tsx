@@ -1,5 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import faqRepositories from "@/data/faqRepositories.json";
+import { useEffect, useState } from "react";
+
+const FAQ_REPOS_URL =
+  "https://raw.githubusercontent.com/nahiphog/BigBigSolver/refs/heads/main/repositories_FAQ.json";
+
+type FaqRepo = { Name: string; Hyperlink: string };
 
 
 export const Route = createFileRoute("/faq")({
@@ -15,6 +20,19 @@ export const Route = createFileRoute("/faq")({
 });
 
 function FaqPage() {
+  const [repos, setRepos] = useState<FaqRepo[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(FAQ_REPOS_URL)
+      .then((r) => r.json())
+      .then((data: FaqRepo[]) => {
+        if (!cancelled && Array.isArray(data)) setRepos(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-3xl px-6 py-16">
@@ -57,7 +75,7 @@ function FaqPage() {
             <p className="font-semibold">Where do you find such puzzles? What other repositories of puzzles do you recommend?</p>
             <p className="mt-1">I found them on specific Discord servers, and some bingeworthy instagram profiles. The repositories (in no particular order) are:</p>
             {(() => {
-              const items = faqRepositories as { Name: string; Hyperlink: string }[];
+              const items = repos;
               return (
                 <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-3">
                   {items.map(({ Name, Hyperlink }) => (
