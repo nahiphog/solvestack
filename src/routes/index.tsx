@@ -2063,8 +2063,6 @@ function Index() {
                 if (flRevealed[i] && FL_FLIP_MAP[u]) extras.push(FL_FLIP_MAP[u].toLowerCase());
               });
               const all = Array.from(new Set([...bank, ...extras]));
-              return (
-              const all = Array.from(new Set([...bank, ...extras]));
               const allUpper = all.map((c) => c.toUpperCase());
               const allowedSet = new Set(allUpper);
               const StartingFlippableWords = (flippableCommonWords as string[]).filter((w) =>
