@@ -495,6 +495,8 @@ function Index() {
     setSudokuVarResults(null);
     setBwResult(null);
     setError(null);
+    setSplitleP1Error(null);
+
     if (m === "fibble") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else if (m === "wordle") {
