@@ -3763,11 +3763,28 @@ function Index() {
                           {bwResult.length} possible {bwResult.length === 1 ? "answer" : "answers"}
                         </h2>
                         {bwResult.length > 0 ? (
-                          <ul className="grid grid-cols-2 gap-2 max-w-md text-sm font-mono">
-                            {bwResult.map((w) => (
-                              <li key={w} className="rounded border bg-card px-3 py-1.5">{w}</li>
+                          <p className="text-sm font-mono break-words">
+                            {bwResult.map((w, idx) => (
+                              <span key={w}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setBwGuesses((prev) => {
+                                      const targetIdx = prev.findIndex((r) => !r.word);
+                                      if (targetIdx === -1) return prev;
+                                      return prev.map((r, i) =>
+                                        i === targetIdx ? { ...r, word: w } : r,
+                                      );
+                                    });
+                                  }}
+                                  className="text-primary underline hover:opacity-80"
+                                >
+                                  {w}
+                                </button>
+                                {idx < bwResult.length - 1 ? ", " : ""}
+                              </span>
                             ))}
-                          </ul>
+                          </p>
                         ) : (
                           <p className="text-sm text-muted-foreground">No words match those constraints.</p>
                         )}
