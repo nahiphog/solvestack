@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import faqRepositories from "@/data/faqRepositories.json";
+
 
 export const Route = createFileRoute("/faq")({
   head: () => ({
