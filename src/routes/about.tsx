@@ -115,29 +115,29 @@ function AboutPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   maxLength={255}
-                  className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
+                  className="min-w-0 flex-1 rounded-md border bg-background px-3 py-2 text-sm"
                 />
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <label className="w-32 shrink-0 text-sm font-medium">Feedback type</label>
                 <select
                   value={feedbackType}
                   onChange={(e) => setFeedbackType(e.target.value as typeof feedbackType)}
-                  className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
+                  className="min-w-0 flex-1 rounded-md border bg-background px-3 py-2 text-sm"
                 >
                   <option>Bug report</option>
                   <option>Suggestion</option>
                   <option>Others</option>
                 </select>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <label className="w-32 shrink-0 text-sm font-medium">Subject</label>
                 <input
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   maxLength={200}
-                  className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
+                  className="min-w-0 flex-1 rounded-md border bg-background px-3 py-2 text-sm"
                 />
               </div>
               <div>
@@ -164,6 +164,11 @@ function AboutPage() {
               </div>
             </form>
           </div>
+
+          <p>
+            <span className="font-semibold">5.</span> See{" "}
+            <Link to="/changelog" className="text-primary underline">Changelog</Link>.
+          </p>
         </div>
       </div>
     </div>
