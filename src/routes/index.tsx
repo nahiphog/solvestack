@@ -2070,8 +2070,9 @@ function Index() {
               );
               return (
                 <div className="space-y-4">
-                  {StartingFlippableWords.length > 0 && (
+                  {(
                     <div className="space-y-4 rounded-lg border bg-card p-4">
+                      {StartingFlippableWords.length > 0 && (
                       <div className="flex flex-wrap items-center gap-2 text-sm">
                         <span>Optional input: Add</span>
                         <select
@@ -2095,6 +2096,7 @@ function Index() {
                         </select>
                         <span>strategic starting words.</span>
                       </div>
+                      )}
                       {flGuesses.map((g, gi) => (
                         <div key={gi} className="flex items-center gap-3">
                           <div className="flex gap-1.5">
