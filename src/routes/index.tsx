@@ -2129,7 +2129,7 @@ function Index() {
                                     if (!v) { setFlLetter(gi, ti, ""); return; }
                                     const c = v.slice(-1);
                                     if (!allowedSet.has(c)) {
-                                      setError(`"${c.toLowerCase()}" is not in AllAllowedLetters.`);
+                                      setError(`"${c.toLowerCase()}" is not a valid letter input.`);
                                       return;
                                     }
                                     setError(null);
