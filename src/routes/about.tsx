@@ -97,18 +97,18 @@ function AboutPage() {
             <p>
               <span className="font-semibold">4.</span> Your feedback helps us improve. Kindly fill out the form below.
             </p>
-            <form onSubmit={onSubmit} className="mt-4 space-y-3 rounded-md border p-4">
-              <div className="flex items-center gap-3">
+            <form onSubmit={onSubmit} className="mt-4 space-y-3 rounded-md border p-4 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <label className="w-32 shrink-0 text-sm font-medium">Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   maxLength={100}
-                  className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
+                  className="min-w-0 flex-1 rounded-md border bg-background px-3 py-2 text-sm"
                 />
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <label className="w-32 shrink-0 text-sm font-medium">Email</label>
                 <input
                   type="email"
