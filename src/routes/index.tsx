@@ -3586,13 +3586,57 @@ function Index() {
               );
               setBwResult(filtered);
             };
+            const chooseStrategicPair = (): [string, string] | null => {
+              let maxLetters = 0;
+              let bestPairs: [string, string][] = [];
+              for (let i = 0; i < cleanWords.length; i++) {
+                for (let j = i + 1; j < cleanWords.length; j++) {
+                  const a = cleanWords[i], b = cleanWords[j];
+                  const size = new Set((a + b).split("")).size;
+                  if (size > maxLetters) {
+                    maxLetters = size;
+                    bestPairs = [[a, b]];
+                  } else if (size === maxLetters) {
+                    bestPairs.push([a, b]);
+                  }
+                }
+              }
+              if (bestPairs.length === 0) return null;
+              return bestPairs[Math.floor(Math.random() * bestPairs.length)];
+            };
+            const applyStartingWords = (n: 0 | 2) => {
+              setBwStartingWords(n);
+              if (n === 0) {
+                resetBw();
+                return;
+              }
+              const pair = chooseStrategicPair();
+              const base = [
+                { word: "", tally: "-" },
+                { word: "", tally: "-" },
+                { word: "", tally: "-" },
+                { word: "", tally: "-" },
+              ];
+              if (pair) {
+                base[0] = { word: pair[0], tally: "-" };
+                base[1] = { word: pair[1], tally: "-" };
+              }
+              setBwGuesses(base);
+              setBwResult(null);
+            };
             return (
               <div className="space-y-6">
-                {!bwLocked && (
-                  <div>
-                    <div className="mb-2 text-sm font-medium">Insert the 16 seven-letter words</div>
-                    <div className="grid grid-cols-2 gap-2 max-w-md">
-                      {bwWords.map((w, i) => (
+                <div>
+                  <div className="mb-2 text-sm font-medium">
+                    {bwLocked ? "Locked words" : "Insert the 16 seven-letter words"}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 max-w-[14rem]">
+                    {bwWords.map((w, i) => (
+                      bwLocked ? (
+                        <div key={i} className="rounded border bg-muted px-3 py-1.5 text-sm font-mono">
+                          {cleanWords[i] ?? ""}
+                        </div>
+                      ) : (
                         <Input
                           key={i}
                           value={w}
@@ -3602,59 +3646,71 @@ function Index() {
                             const v = e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 7);
                             setBwWords((prev) => prev.map((x, idx) => (idx === i ? v : x)));
                           }}
-                          className="font-mono uppercase"
+                          className="font-mono uppercase placeholder:normal-case"
                         />
-                      ))}
-                    </div>
-                    <div className="mt-3">
-                      <Button
-                        size="lg"
-                        disabled={!canLock}
-                        onClick={() => {
+                      )
+                    ))}
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      size="lg"
+                      disabled={!bwLocked && !canLock}
+                      onClick={() => {
+                        if (bwLocked) {
+                          setBwLocked(false);
+                          setBwResult(null);
+                          setBwStartingWords(0);
+                        } else {
                           setBwLocked(true);
                           resetBw();
-                        }}
+                          setBwStartingWords(0);
+                        }
+                      }}
+                    >
+                      {bwLocked ? "Unlock these words" : "Lock these words"}
+                    </Button>
+                    {!bwLocked && (
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={() => setBwWords(Array(16).fill(""))}
                       >
-                        Lock these words
+                        Clear all
                       </Button>
-                      {!canLock && (
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          Enter 16 distinct 7-letter words to lock.
-                        </p>
-                      )}
-                    </div>
+                    )}
                   </div>
-                )}
+                  {!bwLocked && !canLock && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Enter 16 distinct 7-letter words to lock.
+                    </p>
+                  )}
+                </div>
 
                 {bwLocked && (
                   <>
-                    <div>
-                      <div className="mb-2 flex items-center justify-between">
-                        <div className="text-sm font-medium">Locked words</div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setBwLocked(false);
-                            setBwResult(null);
-                          }}
-                        >
-                          Unlock these words
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 max-w-md text-sm font-mono">
-                        {cleanWords.map((w, i) => (
-                          <div key={i} className="rounded border bg-muted px-3 py-1.5">{w}</div>
-                        ))}
-                      </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Optional input: Choose</span>
+                      <select
+                        value={bwStartingWords}
+                        onChange={(e) => applyStartingWords(Number(e.target.value) as 0 | 2)}
+                        className="rounded border bg-background px-2 py-1 text-sm"
+                      >
+                        <option value={0}>0</option>
+                        <option value={2}>2</option>
+                      </select>
+                      <span className="text-muted-foreground">strategic starting words.</span>
                     </div>
 
                     <div>
                       <table className="w-full max-w-md border-collapse text-sm">
+                        <colgroup>
+                          <col style={{ width: "35%" }} />
+                          <col style={{ width: "25%" }} />
+                        </colgroup>
                         <thead>
                           <tr className="border-b">
                             <th className="p-2 text-left font-medium">Chosen word</th>
-                            <th className="p-2 text-left font-medium">Correct places</th>
+                            <th className="p-2 text-center font-medium">Correct places</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -3676,7 +3732,7 @@ function Index() {
                                   ))}
                                 </select>
                               </td>
-                              <td className="p-2">
+                              <td className="p-2 text-center">
                                 <select
                                   value={g.tally}
                                   onChange={(e) =>
@@ -3684,7 +3740,7 @@ function Index() {
                                       prev.map((x, idx) => (idx === i ? { ...x, tally: e.target.value } : x)),
                                     )
                                   }
-                                  className="w-full rounded border bg-background px-2 py-1"
+                                  className="w-full rounded border bg-background px-2 py-1 text-center"
                                 >
                                   {["-", "0", "1", "2", "3", "4", "5", "6", "7"].map((t) => (
                                     <option key={t} value={t}>{t}</option>
@@ -3722,6 +3778,8 @@ function Index() {
               </div>
             );
           })()
+
+
 
         ) : (mode === "sudoku" || mode === "sudokuvariation") ? (
           (() => {
