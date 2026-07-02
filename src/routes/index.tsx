@@ -821,45 +821,47 @@ function Index() {
 
   const solveWordle = async () => {
     setError(null);
+    setSplitleP1Error(null);
     setWordleResults(null);
     setSplitleResults(null);
     setSplitleExpanded({});
+    const errFn = mode === "splitle" ? setSplitleP1Error : setError;
     for (const g of wordleGuesses) {
       if (mode === "shuntle") {
         const padded = g.word.toUpperCase().padEnd(7, " ").slice(0, 7);
         const letters = padded.replace(/ /g, "");
         if (letters.length < 4 || letters.length > 7) {
-          setError("Each guess must be 4-7 letters long.");
+          errFn("Each guess must be 4-7 letters long.");
           return;
         }
         // Letters must be contiguous (no embedded spaces).
         if (!/^ *[A-Z]+ *$/.test(padded)) {
-          setError(`"${padded.replace(/ /g, "·")}" has spaces between letters; spaces are only allowed at the left and/or right.`);
+          errFn(`"${padded.replace(/ /g, "·")}" has spaces between letters; spaces are only allowed at the left and/or right.`);
           return;
         }
         if (!(await isValidShuntleWord(padded))) {
-          setError(`"${letters}" is not a valid Shuntle word.`);
+          errFn(`"${letters}" is not a valid Shuntle word.`);
           return;
         }
         continue;
       }
       const w = g.word.trim().toUpperCase();
       if (w.length !== wordleTileLen) {
-        setError(`Each guess must be exactly ${wordleTileLen} letters.`);
+        errFn(`Each guess must be exactly ${wordleTileLen} letters.`);
         return;
       }
       if (mode === "jeffgoldblum") {
         if (!(await isValidJeffGoldblumWord(w))) {
-          setError(`"${w}" is not a valid 12-letter English word.`);
+          errFn(`"${w}" is not a valid 12-letter English word.`);
           return;
         }
       } else if (mode === "splitle") {
         if (!(await isValidSplitleHalf(w))) {
-          setError(`"${w}" is not a valid Splitle half (must match the first or last 5 letters of some 10-letter English word).`);
+          errFn(`"${w}" is not a valid Splitle half (must match the first or last 5 letters of some 10-letter English word).`);
           return;
         }
       } else if (!(await isValid5LetterWord(w))) {
-        setError(`"${w}" is not a valid 5-letter English word.`);
+        errFn(`"${w}" is not a valid 5-letter English word.`);
         return;
       }
     }
@@ -867,11 +869,12 @@ function Index() {
     const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
     if (mode === "splitle") {
       const sres = await splitleSolve(normalized);
-      if (sres.length === 0) setError("No words match these constraints.");
+      if (sres.length === 0) setSplitleP1Error("No words match these constraints.");
       else setSplitleResults(sres);
       setSolving(false);
       return;
     }
+
     const result =
       mode === "fibble" ? await fibbleSolve(normalized)
       : mode === "jeffgoldblum" ? await jeffGoldblumLeSolve(normalized)
