@@ -2827,8 +2827,22 @@ function Index() {
                     padded[idx] = c || " ";
                     setSpellingBeeOthers(padded.join("").replace(/ +$/, ""));
                   }
-                  if (c && i < 6) {
-                    const next = document.getElementById(`bee-tile-${i + 1}`) as HTMLInputElement | null;
+                  if (c && !isMiddle) {
+                    // Clockwise outer order: 0(top), 1(UR), 2(LR), 4(bottom), 5(LL), 6(UL)
+                    const cwOrder = [0, 1, 2, 4, 5, 6];
+                    const pos = cwOrder.indexOf(i);
+                    const othersArr = spellingBeeOthers.padEnd(6, " ").split("");
+                    const idxNow = i < 3 ? i : i - 1;
+                    othersArr[idxNow] = c;
+                    // find next empty in clockwise order
+                    let target: number | null = null;
+                    for (let step = 1; step <= cwOrder.length; step++) {
+                      const cand = cwOrder[(pos + step) % cwOrder.length];
+                      const candIdx = cand < 3 ? cand : cand - 1;
+                      if (!othersArr[candIdx] || othersArr[candIdx] === " ") { target = cand; break; }
+                    }
+                    if (target === null) target = 3; // middle
+                    const next = document.getElementById(`bee-tile-${target}`) as HTMLInputElement | null;
                     next?.focus();
                     next?.select();
                   }
