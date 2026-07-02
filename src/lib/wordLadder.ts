@@ -48,6 +48,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   sudokuvariation: 0,
   shuntle: 7,
   splitle: 5,
+  blunderwall: 7,
   
   
 };
