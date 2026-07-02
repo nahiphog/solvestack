@@ -20,6 +20,19 @@ export const Route = createFileRoute("/faq")({
 });
 
 function FaqPage() {
+  const [repos, setRepos] = useState<FaqRepo[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(FAQ_REPOS_URL)
+      .then((r) => r.json())
+      .then((data: FaqRepo[]) => {
+        if (!cancelled && Array.isArray(data)) setRepos(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-3xl px-6 py-16">
