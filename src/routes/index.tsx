@@ -2070,29 +2070,31 @@ function Index() {
               );
               return (
                 <div className="space-y-4">
-                  <div className="rounded-lg border bg-card p-4 text-sm">
-                    <div className="mb-2 font-medium">AllAllowedLetters ({all.length}):</div>
-                    <div className="flex flex-wrap gap-2 font-mono">
-                      {all.map((c) => (
-                        <span key={c} className="rounded bg-muted px-2 py-1 tracking-widest">{c}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="rounded-lg border bg-card p-4 text-sm">
-                    <div className="mb-2 font-medium">StartingFlippableWords ({StartingFlippableWords.length}):</div>
-                    {StartingFlippableWords.length > 0 ? (
-                      <div className="flex flex-wrap gap-2 font-mono">
-                        {StartingFlippableWords.map((w) => (
-                          <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-muted-foreground">No common flippable words match.</div>
-                    )}
-                  </div>
                   {StartingFlippableWords.length > 0 && (
                     <div className="space-y-4 rounded-lg border bg-card p-4">
-                      <div className="text-sm">Optional input: Add (0,1) strategic starting words.</div>
+                      <div className="flex flex-wrap items-center gap-2 text-sm">
+                        <span>Optional input: Add</span>
+                        <select
+                          value={flStartingWords}
+                          onChange={(e) => {
+                            const n = Number(e.target.value) as 0 | 1;
+                            setFlStartingWords(n);
+                            if (n === 1) {
+                              const pick = StartingFlippableWords[Math.floor(Math.random() * StartingFlippableWords.length)];
+                              setFlGuesses([{ word: pick.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                            } else {
+                              setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                            }
+                            setFlResults(null);
+                            setError(null);
+                          }}
+                          className="rounded border border-border bg-background px-2 py-1 text-sm"
+                        >
+                          <option value={0}>0</option>
+                          <option value={1}>1</option>
+                        </select>
+                        <span>strategic starting words.</span>
+                      </div>
                       {flGuesses.map((g, gi) => (
                         <div key={gi} className="flex items-center gap-3">
                           <div className="flex gap-1.5">
@@ -2127,7 +2129,7 @@ function Index() {
                                     if (!v) { setFlLetter(gi, ti, ""); return; }
                                     const c = v.slice(-1);
                                     if (!allowedSet.has(c)) {
-                                      setError(`"${c.toLowerCase()}" is not in AllAllowedLetters.`);
+                                      setError(`"${c.toLowerCase()}" is not a valid letter input.`);
                                       return;
                                     }
                                     setError(null);
