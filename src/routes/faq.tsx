@@ -75,7 +75,7 @@ function FaqPage() {
             <p className="font-semibold">Where do you find such puzzles? What other repositories of puzzles do you recommend?</p>
             <p className="mt-1">I found them on specific Discord servers, and some bingeworthy instagram profiles. The repositories (in no particular order) are:</p>
             {(() => {
-              const items = faqRepositories as { Name: string; Hyperlink: string }[];
+              const items = repos;
               return (
                 <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-3">
                   {items.map(({ Name, Hyperlink }) => (
