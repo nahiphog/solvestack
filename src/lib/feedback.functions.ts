@@ -14,25 +14,38 @@ export type FeedbackInput = z.infer<typeof FeedbackSchema>;
 export const submitFeedback = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => FeedbackSchema.parse(data))
   .handler(async ({ data }) => {
-    const recipient = process.env.FEEDBACK_EMAIL;
-    if (!recipient) {
+    const webhook = process.env.DISCORD_FEEDBACK_WEBHOOK_URL;
+    if (!webhook) {
       throw new Error("Feedback channel not configured.");
     }
 
-    const formData = new FormData();
-    formData.append("name", data.name || "Anonymous");
-    formData.append("email", data.email || "no-reply@solversanctuary.local");
-    formData.append("_subject", `[${data.feedbackType}] ${data.subject || "(no subject)"}`);
-    formData.append("Feedback Type", data.feedbackType);
-    formData.append("Subject", data.subject || "");
-    formData.append("Description", data.description);
-    formData.append("_template", "table");
-    formData.append("_captcha", "false");
+    const colorMap: Record<string, number> = {
+      "Bug report": 0xef4444,
+      Suggestion: 0x3b82f6,
+      Others: 0x9ca3af,
+    };
 
-    const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(recipient)}`, {
+    const payload = {
+      username: "Solver Sanctuary Feedback",
+      embeds: [
+        {
+          title: `[${data.feedbackType}] ${data.subject}`,
+          description: data.description,
+          color: colorMap[data.feedbackType] ?? 0x9ca3af,
+          fields: [
+            { name: "Name", value: data.name, inline: true },
+            { name: "Email", value: data.email, inline: true },
+            { name: "Type", value: data.feedbackType, inline: true },
+          ],
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    };
+
+    const res = await fetch(webhook, {
       method: "POST",
-      headers: { Accept: "application/json" },
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
