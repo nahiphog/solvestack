@@ -1862,6 +1862,12 @@ function Index() {
             Fill empty cells with the available tiles so that each given row and column sum matches. Use "X" for blocked cells, leave empties blank, or enter a fixed number.
           </p>
         )}
+        {mode === "blunderwall" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>There are sixteen 7-letter words. Find the secret word within 4 tries.</p>
+            <p>Each try tells us how many letters of our guess are in the correct place within the secret word.</p>
+          </div>
+        )}
         {mode === "sheetdoku" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p><a href="https://www.sheetdoku.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Sheetdoku</a></p>
