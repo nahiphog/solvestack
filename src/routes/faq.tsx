@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import faqRepositories from "@/data/faqRepositories.json";
+
 
 export const Route = createFileRoute("/faq")({
   head: () => ({
@@ -55,42 +57,24 @@ function FaqPage() {
             <p className="font-semibold">Where do you find such puzzles? What other repositories of puzzles do you recommend?</p>
             <p className="mt-1">I found them on specific Discord servers, and some bingeworthy instagram profiles. The repositories (in no particular order) are:</p>
             {(() => {
-              const items: [string, string][] = [
-                ["Playlin", "https://playlin.io/"],
-                ["New York Times", "https://www.nytco.com/games/"],
-                ["Boston Globe", "https://www.bostonglobe.com/games/"],
-                ["The Atlantic", "https://www.theatlantic.com/games/"],
-                ["OneLook", "https://onelook.com/games"],
-                ["Netflix", "https://www.netflix.com/tudum/games"],
-                ["PuzzMallow", "https://puzzmallow.com/"],
-                ["Kelly Dornhaus", "https://kellydornhaus.com/"],
-                ["Merriam Webster", "https://www.merriam-webster.com/games/"],
-                ["Reddit games", "https://www.reddit.com/r/GamesOnReddit/"],
-                ["By Thomas", "https://bythomas.co.uk/"],
-                ["Clever Goat", "https://clevergoat.com/"],
-                ["Coffee First", "https://coffeefirst.games/"],
-                ["Dles", "https://dles.gg"],
-                ["USA today", "https://play.usatoday.com/"],
-                ["The Washington Post", "https://www.washingtonpost.com/games/"],
-                ["Chicago Tribune", "https://fun.chicagotribune.com/"],
-                ["The Independent", "https://puzzles.independent.co.uk/"],
-              ];
+              const items = faqRepositories as { Name: string; Hyperlink: string }[];
               return (
                 <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-3">
-                  {items.map(([label, href]) => (
+                  {items.map(({ Name, Hyperlink }) => (
                     <a
-                      key={href}
+                      key={Hyperlink}
                       className="text-primary underline"
-                      href={href}
+                      href={Hyperlink}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {label}
+                      {Name}
                     </a>
                   ))}
                 </div>
               );
             })()}
+
           </div>
         </div>
       </div>

@@ -146,6 +146,8 @@ function Index() {
   const [splitleResults, setSplitleResults] = useState<[string, string[]][] | null>(null);
   const [splitleStartingWords, setSplitleStartingWords] = useState<0 | 3>(0);
   const [splitleExpanded, setSplitleExpanded] = useState<Record<string, boolean>>({});
+  const [splitleP1Error, setSplitleP1Error] = useState<string | null>(null);
+
   const [splitleP2Word, setSplitleP2Word] = useState<string>("");
   const [splitleP2Colors, setSplitleP2Colors] = useState<WordleColor[]>(["GREY","GREY","GREY","GREY","GREY"]);
   const [splitleP2Valid, setSplitleP2Valid] = useState<boolean | null>(null);
@@ -354,6 +356,8 @@ function Index() {
     { word: "", tally: "-" },
   ]);
   const [bwResult, setBwResult] = useState<string[] | null>(null);
+  const [bwStartingWords, setBwStartingWords] = useState<0 | 2>(0);
+
   const [sdRegions, setSdRegions] = useState<number[][]>([
     [1,1,2,2,3],
     [1,1,2,2,3],
@@ -493,6 +497,8 @@ function Index() {
     setSudokuVarResults(null);
     setBwResult(null);
     setError(null);
+    setSplitleP1Error(null);
+
     if (m === "fibble") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else if (m === "wordle") {
@@ -819,45 +825,47 @@ function Index() {
 
   const solveWordle = async () => {
     setError(null);
+    setSplitleP1Error(null);
     setWordleResults(null);
     setSplitleResults(null);
     setSplitleExpanded({});
+    const errFn = mode === "splitle" ? setSplitleP1Error : setError;
     for (const g of wordleGuesses) {
       if (mode === "shuntle") {
         const padded = g.word.toUpperCase().padEnd(7, " ").slice(0, 7);
         const letters = padded.replace(/ /g, "");
         if (letters.length < 4 || letters.length > 7) {
-          setError("Each guess must be 4-7 letters long.");
+          errFn("Each guess must be 4-7 letters long.");
           return;
         }
         // Letters must be contiguous (no embedded spaces).
         if (!/^ *[A-Z]+ *$/.test(padded)) {
-          setError(`"${padded.replace(/ /g, "·")}" has spaces between letters; spaces are only allowed at the left and/or right.`);
+          errFn(`"${padded.replace(/ /g, "·")}" has spaces between letters; spaces are only allowed at the left and/or right.`);
           return;
         }
         if (!(await isValidShuntleWord(padded))) {
-          setError(`"${letters}" is not a valid Shuntle word.`);
+          errFn(`"${letters}" is not a valid Shuntle word.`);
           return;
         }
         continue;
       }
       const w = g.word.trim().toUpperCase();
       if (w.length !== wordleTileLen) {
-        setError(`Each guess must be exactly ${wordleTileLen} letters.`);
+        errFn(`Each guess must be exactly ${wordleTileLen} letters.`);
         return;
       }
       if (mode === "jeffgoldblum") {
         if (!(await isValidJeffGoldblumWord(w))) {
-          setError(`"${w}" is not a valid 12-letter English word.`);
+          errFn(`"${w}" is not a valid 12-letter English word.`);
           return;
         }
       } else if (mode === "splitle") {
         if (!(await isValidSplitleHalf(w))) {
-          setError(`"${w}" is not a valid Splitle half (must match the first or last 5 letters of some 10-letter English word).`);
+          errFn(`"${w}" is not a valid Splitle half (must match the first or last 5 letters of some 10-letter English word).`);
           return;
         }
       } else if (!(await isValid5LetterWord(w))) {
-        setError(`"${w}" is not a valid 5-letter English word.`);
+        errFn(`"${w}" is not a valid 5-letter English word.`);
         return;
       }
     }
@@ -865,11 +873,12 @@ function Index() {
     const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
     if (mode === "splitle") {
       const sres = await splitleSolve(normalized);
-      if (sres.length === 0) setError("No words match these constraints.");
+      if (sres.length === 0) setSplitleP1Error("No words match these constraints.");
       else setSplitleResults(sres);
       setSolving(false);
       return;
     }
+
     const result =
       mode === "fibble" ? await fibbleSolve(normalized)
       : mode === "jeffgoldblum" ? await jeffGoldblumLeSolve(normalized)
@@ -2515,7 +2524,13 @@ function Index() {
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
+            {mode === "splitle" && splitleP1Error && (
+              <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {splitleP1Error}
+              </div>
+            )}
             {mode === "splitle" && splitleResults && (() => {
+
               const sorted = [...splitleResults].sort((a, b) => b[1].length - a[1].length);
               return (
                 <section className="mt-6">
@@ -3571,13 +3586,57 @@ function Index() {
               );
               setBwResult(filtered);
             };
+            const chooseStrategicPair = (): [string, string] | null => {
+              let maxLetters = 0;
+              let bestPairs: [string, string][] = [];
+              for (let i = 0; i < cleanWords.length; i++) {
+                for (let j = i + 1; j < cleanWords.length; j++) {
+                  const a = cleanWords[i], b = cleanWords[j];
+                  const size = new Set((a + b).split("")).size;
+                  if (size > maxLetters) {
+                    maxLetters = size;
+                    bestPairs = [[a, b]];
+                  } else if (size === maxLetters) {
+                    bestPairs.push([a, b]);
+                  }
+                }
+              }
+              if (bestPairs.length === 0) return null;
+              return bestPairs[Math.floor(Math.random() * bestPairs.length)];
+            };
+            const applyStartingWords = (n: 0 | 2) => {
+              setBwStartingWords(n);
+              if (n === 0) {
+                resetBw();
+                return;
+              }
+              const pair = chooseStrategicPair();
+              const base = [
+                { word: "", tally: "-" },
+                { word: "", tally: "-" },
+                { word: "", tally: "-" },
+                { word: "", tally: "-" },
+              ];
+              if (pair) {
+                base[0] = { word: pair[0], tally: "-" };
+                base[1] = { word: pair[1], tally: "-" };
+              }
+              setBwGuesses(base);
+              setBwResult(null);
+            };
             return (
               <div className="space-y-6">
-                {!bwLocked && (
-                  <div>
-                    <div className="mb-2 text-sm font-medium">Insert the 16 seven-letter words</div>
-                    <div className="grid grid-cols-2 gap-2 max-w-md">
-                      {bwWords.map((w, i) => (
+                <div>
+                  <div className="mb-2 text-sm font-medium">
+                    {bwLocked ? "Locked words" : "Insert the 16 seven-letter words"}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 max-w-[14rem]">
+                    {bwWords.map((w, i) => (
+                      bwLocked ? (
+                        <div key={i} className="rounded border bg-muted px-3 py-1.5 text-sm font-mono">
+                          {cleanWords[i] ?? ""}
+                        </div>
+                      ) : (
                         <Input
                           key={i}
                           value={w}
@@ -3587,59 +3646,71 @@ function Index() {
                             const v = e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 7);
                             setBwWords((prev) => prev.map((x, idx) => (idx === i ? v : x)));
                           }}
-                          className="font-mono uppercase"
+                          className="font-mono uppercase placeholder:normal-case"
                         />
-                      ))}
-                    </div>
-                    <div className="mt-3">
-                      <Button
-                        size="lg"
-                        disabled={!canLock}
-                        onClick={() => {
+                      )
+                    ))}
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      size="lg"
+                      disabled={!bwLocked && !canLock}
+                      onClick={() => {
+                        if (bwLocked) {
+                          setBwLocked(false);
+                          setBwResult(null);
+                          setBwStartingWords(0);
+                        } else {
                           setBwLocked(true);
                           resetBw();
-                        }}
+                          setBwStartingWords(0);
+                        }
+                      }}
+                    >
+                      {bwLocked ? "Unlock these words" : "Lock these words"}
+                    </Button>
+                    {!bwLocked && (
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={() => setBwWords(Array(16).fill(""))}
                       >
-                        Lock these words
+                        Clear all
                       </Button>
-                      {!canLock && (
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          Enter 16 distinct 7-letter words to lock.
-                        </p>
-                      )}
-                    </div>
+                    )}
                   </div>
-                )}
+                  {!bwLocked && !canLock && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Enter 16 distinct 7-letter words to lock.
+                    </p>
+                  )}
+                </div>
 
                 {bwLocked && (
                   <>
-                    <div>
-                      <div className="mb-2 flex items-center justify-between">
-                        <div className="text-sm font-medium">Locked words</div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setBwLocked(false);
-                            setBwResult(null);
-                          }}
-                        >
-                          Unlock these words
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 max-w-md text-sm font-mono">
-                        {cleanWords.map((w, i) => (
-                          <div key={i} className="rounded border bg-muted px-3 py-1.5">{w}</div>
-                        ))}
-                      </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Optional input: Choose</span>
+                      <select
+                        value={bwStartingWords}
+                        onChange={(e) => applyStartingWords(Number(e.target.value) as 0 | 2)}
+                        className="rounded border bg-background px-2 py-1 text-sm"
+                      >
+                        <option value={0}>0</option>
+                        <option value={2}>2</option>
+                      </select>
+                      <span className="text-muted-foreground">strategic starting words.</span>
                     </div>
 
                     <div>
                       <table className="w-full max-w-md border-collapse text-sm">
+                        <colgroup>
+                          <col style={{ width: "35%" }} />
+                          <col style={{ width: "25%" }} />
+                        </colgroup>
                         <thead>
                           <tr className="border-b">
                             <th className="p-2 text-left font-medium">Chosen word</th>
-                            <th className="p-2 text-left font-medium">Correct places</th>
+                            <th className="p-2 text-center font-medium">Correct places</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -3661,7 +3732,7 @@ function Index() {
                                   ))}
                                 </select>
                               </td>
-                              <td className="p-2">
+                              <td className="p-2 text-center">
                                 <select
                                   value={g.tally}
                                   onChange={(e) =>
@@ -3669,7 +3740,7 @@ function Index() {
                                       prev.map((x, idx) => (idx === i ? { ...x, tally: e.target.value } : x)),
                                     )
                                   }
-                                  className="w-full rounded border bg-background px-2 py-1"
+                                  className="w-full rounded border bg-background px-2 py-1 text-center"
                                 >
                                   {["-", "0", "1", "2", "3", "4", "5", "6", "7"].map((t) => (
                                     <option key={t} value={t}>{t}</option>
@@ -3707,6 +3778,8 @@ function Index() {
               </div>
             );
           })()
+
+
 
         ) : (mode === "sudoku" || mode === "sudokuvariation") ? (
           (() => {
@@ -3960,7 +4033,7 @@ function Index() {
           </div>
         )}
 
-        {error && (
+        {error && mode !== "splitle" && (
           <div className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {error}
           </div>
