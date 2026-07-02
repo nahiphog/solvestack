@@ -3542,6 +3542,172 @@ function Index() {
             );
           })()
 
+        ) : mode === "blunderwall" ? (
+          (() => {
+            const cleanWords = bwWords.map((w) => w.trim().toUpperCase()).filter((w) => w.length === 7);
+            const canLock = cleanWords.length === 16 && new Set(cleanWords).size === 16;
+            const wordOptionLabels = ["First word", "Second word", "Third word", "Fourth word"];
+            const compareTwo = (a: string, b: string) =>
+              a.split("").reduce((acc, ch, i) => acc + (ch === b[i] ? 1 : 0), 0);
+            const resetBw = () => {
+              setBwGuesses([
+                { word: "", tally: "-" },
+                { word: "", tally: "-" },
+                { word: "", tally: "-" },
+                { word: "", tally: "-" },
+              ]);
+              setBwResult(null);
+            };
+            const solveBw = () => {
+              setError(null);
+              const dict: Record<string, number> = {};
+              for (const g of bwGuesses) {
+                if (g.word && g.tally !== "-") {
+                  dict[g.word] = parseInt(g.tally, 10);
+                }
+              }
+              const filtered = cleanWords.filter((w) =>
+                Object.entries(dict).every(([dw, t]) => compareTwo(w, dw) === t),
+              );
+              setBwResult(filtered);
+            };
+            return (
+              <div className="space-y-6">
+                {!bwLocked && (
+                  <div>
+                    <div className="mb-2 text-sm font-medium">Insert the 16 seven-letter words</div>
+                    <div className="grid grid-cols-2 gap-2 max-w-md">
+                      {bwWords.map((w, i) => (
+                        <Input
+                          key={i}
+                          value={w}
+                          maxLength={7}
+                          placeholder={`Word ${i + 1}`}
+                          onChange={(e) => {
+                            const v = e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 7);
+                            setBwWords((prev) => prev.map((x, idx) => (idx === i ? v : x)));
+                          }}
+                          className="font-mono uppercase"
+                        />
+                      ))}
+                    </div>
+                    <div className="mt-3">
+                      <Button
+                        size="lg"
+                        disabled={!canLock}
+                        onClick={() => {
+                          setBwLocked(true);
+                          resetBw();
+                        }}
+                      >
+                        Lock these words
+                      </Button>
+                      {!canLock && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Enter 16 distinct 7-letter words to lock.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {bwLocked && (
+                  <>
+                    <div>
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="text-sm font-medium">Locked words</div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setBwLocked(false);
+                            setBwResult(null);
+                          }}
+                        >
+                          Unlock these words
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 max-w-md text-sm font-mono">
+                        {cleanWords.map((w, i) => (
+                          <div key={i} className="rounded border bg-muted px-3 py-1.5">{w}</div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <table className="w-full max-w-md border-collapse text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="p-2 text-left font-medium">Chosen word</th>
+                            <th className="p-2 text-left font-medium">Correct places</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {bwGuesses.map((g, i) => (
+                            <tr key={i} className="border-b">
+                              <td className="p-2">
+                                <select
+                                  value={g.word}
+                                  onChange={(e) =>
+                                    setBwGuesses((prev) =>
+                                      prev.map((x, idx) => (idx === i ? { ...x, word: e.target.value } : x)),
+                                    )
+                                  }
+                                  className="w-full rounded border bg-background px-2 py-1"
+                                >
+                                  <option value="">{wordOptionLabels[i]}</option>
+                                  {cleanWords.map((w) => (
+                                    <option key={w} value={w}>{w}</option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td className="p-2">
+                                <select
+                                  value={g.tally}
+                                  onChange={(e) =>
+                                    setBwGuesses((prev) =>
+                                      prev.map((x, idx) => (idx === i ? { ...x, tally: e.target.value } : x)),
+                                    )
+                                  }
+                                  className="w-full rounded border bg-background px-2 py-1"
+                                >
+                                  {["-", "0", "1", "2", "3", "4", "5", "6", "7"].map((t) => (
+                                    <option key={t} value={t}>{t}</option>
+                                  ))}
+                                </select>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <div className="mt-3 flex gap-2">
+                        <Button variant="outline" onClick={resetBw}>Reset</Button>
+                        <Button onClick={solveBw}>Solve</Button>
+                      </div>
+                    </div>
+
+                    {bwResult && (
+                      <div>
+                        <h2 className="mb-2 text-lg font-semibold">
+                          {bwResult.length} possible {bwResult.length === 1 ? "answer" : "answers"}
+                        </h2>
+                        {bwResult.length > 0 ? (
+                          <ul className="grid grid-cols-2 gap-2 max-w-md text-sm font-mono">
+                            {bwResult.map((w) => (
+                              <li key={w} className="rounded border bg-card px-3 py-1.5">{w}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">No words match those constraints.</p>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })()
+
         ) : (mode === "sudoku" || mode === "sudokuvariation") ? (
           (() => {
             const isVar = mode === "sudokuvariation";
