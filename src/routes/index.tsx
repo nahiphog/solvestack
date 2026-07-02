@@ -2002,19 +2002,21 @@ function Index() {
         ) : mode === "flippingletters" ? (
           <div className="space-y-6">
             <div>
-              <div className="mb-2 text-sm font-medium">Letter bank (10 distinct letters; click a tile if it is flippable)</div>
+              <div className="mb-2 text-sm font-medium">
+                Insert 10 distinct letters into the letter bank. Click a tile if it is flippable.
+              </div>
               <div className="grid grid-cols-5 gap-2 w-fit">
                 {Array.from({ length: 10 }).map((_, i) => {
                   const upper = (flLetters[i] || "").toUpperCase();
                   const canFlip = !!FL_FLIP_MAP[upper];
                   const revealed = flRevealed[i] && canFlip;
                   return (
-                    <div key={i} className="flex flex-col items-center gap-1">
+                    <div key={i} className="relative">
                       <input
                         id={`fl-bank-${i}`}
                         type="text"
                         value={(flLetters[i] || "").toLowerCase()}
-                        disabled={flLocked}
+                        readOnly={flLocked}
                         onFocus={(e) => e.currentTarget.select()}
                         onChange={(e) => {
                           if (flLocked) return;
@@ -2031,9 +2033,15 @@ function Index() {
                           if (!canFlip) return;
                           setFlRevealed((prev) => { const n = [...prev]; n[i] = !n[i]; return n; });
                         }}
-                        className={`h-12 w-12 rounded border-2 border-orange-500 text-center font-mono text-xl font-bold lowercase outline-none focus:ring-2 focus:ring-ring ${revealed ? "bg-blue-500 text-white caret-white" : "bg-muted text-foreground"} ${flLocked ? "cursor-not-allowed opacity-90" : canFlip ? "cursor-pointer" : ""}`}
+                        className={`h-12 w-12 rounded border-2 border-border bg-white text-center font-mono text-xl font-bold lowercase text-black outline-none focus:ring-2 focus:ring-ring ${canFlip && !flLocked ? "cursor-pointer" : ""}`}
                         aria-label={`Letter ${i + 1}`}
                       />
+                      {revealed && (
+                        <span
+                          className="pointer-events-none absolute -right-1 -top-1 h-3 w-3 rounded-full bg-blue-500 ring-2 ring-white"
+                          aria-label="flippable"
+                        />
+                      )}
                     </div>
                   );
                 })}
@@ -2046,94 +2054,25 @@ function Index() {
               </Button>
             </div>
 
-            {flLocked && (
-              <>
-                <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span>Optional input: Add</span>
-                  <select
-                    className="rounded border border-border bg-background px-2 py-1"
-                    value={flStartingWords}
-                    onChange={(e) => applyFlStartingWords(parseInt(e.target.value, 10) as 0 | 1)}
-                  >
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                  </select>
-                  <span>strategic starting words.</span>
-                </div>
-
-
-                {flGuesses.map((g, gi) => (
-                  <div key={gi} className="flex items-center gap-3">
-                    <div className="flex gap-1.5">
-                      {Array.from({ length: 5 }).map((_, ti) => {
-                        const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
-                        const color = g.pattern[ti];
-                        const colorClass =
-                          color === "GREEN"
-                            ? "bg-green-600 text-white border-green-600 caret-white"
-                            : color === "YELLOW"
-                              ? "bg-yellow-500 text-white border-yellow-500 caret-white"
-                              : "bg-muted text-foreground border-border caret-foreground";
-                        return (
-                          <input
-                            key={ti}
-                            id={`fl-tile-${gi}-${ti}`}
-                            type="text"
-                            inputMode="text"
-                            autoComplete="off"
-                            value={letter.toLowerCase()}
-                            aria-label={`Guess ${gi + 1} tile ${ti + 1}: ${color}`}
-                            onMouseDown={(e) => {
-                              if (document.activeElement === e.currentTarget) {
-                                e.preventDefault();
-                                cycleFlTile(gi, ti);
-                              }
-                            }}
-                            onFocus={(e) => e.currentTarget.select()}
-                            onChange={(e) => {
-                              const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
-                              if (!v) { setFlLetter(gi, ti, ""); return; }
-                              const bankSet = new Set(flLetters.map((l) => (l || "").toUpperCase()).filter(Boolean));
-                              const ch = v.slice(-1);
-                              if (!bankSet.has(ch)) return;
-                              setFlLetter(gi, ti, ch);
-                              if (ti < 4) focusFlTile(gi, ti + 1);
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === "Backspace") {
-                                if (!letter && ti > 0) { e.preventDefault(); focusFlTile(gi, ti - 1); }
-                              } else if (e.key === "ArrowLeft") { e.preventDefault(); focusFlTile(gi, ti - 1); }
-                              else if (e.key === "ArrowRight") { e.preventDefault(); focusFlTile(gi, ti + 1); }
-                              else if (e.key === " " || e.key === "Enter") { e.preventDefault(); cycleFlTile(gi, ti); }
-                            }}
-                            className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold lowercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
-                          />
-                        );
-                      })}
-                    </div>
-                    {flGuesses.length > 1 && (
-                      <Button onClick={() => removeFlRow(gi)} variant="outline" size="sm">×</Button>
-                    )}
+            {flLocked && (() => {
+              const bank = flLetters.map((l) => (l || "").toLowerCase()).filter(Boolean);
+              const extras: string[] = [];
+              flLetters.forEach((l, i) => {
+                const u = (l || "").toUpperCase();
+                if (flRevealed[i] && FL_FLIP_MAP[u]) extras.push(FL_FLIP_MAP[u].toLowerCase());
+              });
+              const all = Array.from(new Set([...bank, ...extras]));
+              return (
+                <div className="rounded-lg border bg-card p-4 text-sm">
+                  <div className="mb-2 font-medium">AllAllowedLetters ({all.length}):</div>
+                  <div className="flex flex-wrap gap-2 font-mono">
+                    {all.map((c) => (
+                      <span key={c} className="rounded bg-muted px-2 py-1 tracking-widest">{c}</span>
+                    ))}
                   </div>
-                ))}
-                <div className="flex flex-wrap gap-3">
-                  <Button onClick={addFlRow} variant="outline" size="lg">Add guess</Button>
-                  <Button
-                    onClick={() => {
-                      setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
-                      setFlResults(null);
-                    }}
-                    variant="outline"
-                    size="lg"
-                  >
-                    Reset
-                  </Button>
-                  <Button onClick={solveFlippingLetters} disabled={solving} size="lg">
-                    {solving ? "Solving..." : "Solve"}
-                  </Button>
                 </div>
-              </>
-            )}
+              );
+            })()}
           </div>
         ) : mode === "wordpeaks" ? (
           <div className="space-y-4">
