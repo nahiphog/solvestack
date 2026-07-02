@@ -1696,6 +1696,9 @@ function Index() {
           {mode === "dodeku" && (
             <a href="https://dodeku.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Dodeku</a>
           )}
+          {mode === "blunderwall" && (
+            <a href="https://bythomas.co.uk/blunderwall/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Blunderwall</a>
+          )}
           {mode === "wordpeaks" && (
             <a href="https://vegeta897.github.io/word-peaks/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Peaks</a>
           )}
