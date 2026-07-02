@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { useState } from "react";
 import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, spellingBeeSolve, splitleP2Solve, splitleSolve, sudokuSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
+import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon, ChevronDown, ChevronUp } from "lucide-react";
@@ -2062,13 +2063,32 @@ function Index() {
                 if (flRevealed[i] && FL_FLIP_MAP[u]) extras.push(FL_FLIP_MAP[u].toLowerCase());
               });
               const all = Array.from(new Set([...bank, ...extras]));
+              const allUpper = all.map((c) => c.toUpperCase());
+              const allowedSet = new Set(allUpper);
+              const StartingFlippableWords = (flippableCommonWords as string[]).filter((w) =>
+                w.split("").every((ch) => allowedSet.has(ch))
+              );
               return (
-                <div className="rounded-lg border bg-card p-4 text-sm">
-                  <div className="mb-2 font-medium">AllAllowedLetters ({all.length}):</div>
-                  <div className="flex flex-wrap gap-2 font-mono">
-                    {all.map((c) => (
-                      <span key={c} className="rounded bg-muted px-2 py-1 tracking-widest">{c}</span>
-                    ))}
+                <div className="space-y-4">
+                  <div className="rounded-lg border bg-card p-4 text-sm">
+                    <div className="mb-2 font-medium">AllAllowedLetters ({all.length}):</div>
+                    <div className="flex flex-wrap gap-2 font-mono">
+                      {all.map((c) => (
+                        <span key={c} className="rounded bg-muted px-2 py-1 tracking-widest">{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border bg-card p-4 text-sm">
+                    <div className="mb-2 font-medium">StartingFlippableWords ({StartingFlippableWords.length}):</div>
+                    {StartingFlippableWords.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 font-mono">
+                        {StartingFlippableWords.map((w) => (
+                          <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-muted-foreground">No common flippable words match.</div>
+                    )}
                   </div>
                 </div>
               );
