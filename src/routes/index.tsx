@@ -2520,7 +2520,13 @@ function Index() {
                 {solving ? "Solving..." : "Solve"}
               </Button>
             </div>
+            {mode === "splitle" && splitleP1Error && (
+              <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {splitleP1Error}
+              </div>
+            )}
             {mode === "splitle" && splitleResults && (() => {
+
               const sorted = [...splitleResults].sort((a, b) => b[1].length - a[1].length);
               return (
                 <section className="mt-6">
