@@ -3652,6 +3652,15 @@ function Index() {
                     ))}
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
+                    {!bwLocked && (
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={() => setBwWords(Array(16).fill(""))}
+                      >
+                        Clear all
+                      </Button>
+                    )}
                     <Button
                       size="lg"
                       disabled={!bwLocked && !canLock}
@@ -3669,15 +3678,6 @@ function Index() {
                     >
                       {bwLocked ? "Unlock these words" : "Lock these words"}
                     </Button>
-                    {!bwLocked && (
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        onClick={() => setBwWords(Array(16).fill(""))}
-                      >
-                        Clear all
-                      </Button>
-                    )}
                   </div>
                   {!bwLocked && !canLock && (
                     <p className="mt-2 text-xs text-muted-foreground">
