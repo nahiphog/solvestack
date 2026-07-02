@@ -2064,12 +2064,33 @@ function Index() {
               });
               const all = Array.from(new Set([...bank, ...extras]));
               return (
-                <div className="rounded-lg border bg-card p-4 text-sm">
-                  <div className="mb-2 font-medium">AllAllowedLetters ({all.length}):</div>
-                  <div className="flex flex-wrap gap-2 font-mono">
-                    {all.map((c) => (
-                      <span key={c} className="rounded bg-muted px-2 py-1 tracking-widest">{c}</span>
-                    ))}
+              const all = Array.from(new Set([...bank, ...extras]));
+              const allUpper = all.map((c) => c.toUpperCase());
+              const allowedSet = new Set(allUpper);
+              const StartingFlippableWords = (flippableCommonWords as string[]).filter((w) =>
+                w.split("").every((ch) => allowedSet.has(ch))
+              );
+              return (
+                <div className="space-y-4">
+                  <div className="rounded-lg border bg-card p-4 text-sm">
+                    <div className="mb-2 font-medium">AllAllowedLetters ({all.length}):</div>
+                    <div className="flex flex-wrap gap-2 font-mono">
+                      {all.map((c) => (
+                        <span key={c} className="rounded bg-muted px-2 py-1 tracking-widest">{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border bg-card p-4 text-sm">
+                    <div className="mb-2 font-medium">StartingFlippableWords ({StartingFlippableWords.length}):</div>
+                    {StartingFlippableWords.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 font-mono">
+                        {StartingFlippableWords.map((w) => (
+                          <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-muted-foreground">No common flippable words match.</div>
+                    )}
                   </div>
                 </div>
               );
