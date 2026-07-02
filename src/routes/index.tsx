@@ -345,6 +345,15 @@ function Index() {
   const [dodekuSelected, setDodekuSelected] = useState<{ kind: "pile"; value: string } | { kind: "cell"; r: number; c: number } | null>(null);
   const [dodekuResult, setDodekuResult] = useState<DodekuCell[][][] | null>(null);
   const [pageDodeku, setPageDodeku] = useState(0);
+  const [bwWords, setBwWords] = useState<string[]>(Array(16).fill(""));
+  const [bwLocked, setBwLocked] = useState(false);
+  const [bwGuesses, setBwGuesses] = useState<{ word: string; tally: string }[]>([
+    { word: "", tally: "-" },
+    { word: "", tally: "-" },
+    { word: "", tally: "-" },
+    { word: "", tally: "-" },
+  ]);
+  const [bwResult, setBwResult] = useState<string[] | null>(null);
   const [sdRegions, setSdRegions] = useState<number[][]>([
     [1,1,2,2,3],
     [1,1,2,2,3],
