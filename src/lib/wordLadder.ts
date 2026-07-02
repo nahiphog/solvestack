@@ -10,7 +10,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "shuntle" | "splitle";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "shuntle" | "splitle" | "blunderwall";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -48,6 +48,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   sudokuvariation: 0,
   shuntle: 7,
   splitle: 5,
+  blunderwall: 7,
   
   
 };
