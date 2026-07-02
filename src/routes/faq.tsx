@@ -1,5 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import faqRepositories from "@/data/faqRepositories.json";
+import { useEffect, useState } from "react";
+
+const FAQ_REPOS_URL =
+  "https://raw.githubusercontent.com/nahiphog/BigBigSolver/refs/heads/main/repositories_FAQ.json";
+
+type FaqRepo = { Name: string; Hyperlink: string };
 
 
 export const Route = createFileRoute("/faq")({
