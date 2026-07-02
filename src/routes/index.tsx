@@ -356,6 +356,8 @@ function Index() {
     { word: "", tally: "-" },
   ]);
   const [bwResult, setBwResult] = useState<string[] | null>(null);
+  const [bwStartingWords, setBwStartingWords] = useState<0 | 2>(0);
+
   const [sdRegions, setSdRegions] = useState<number[][]>([
     [1,1,2,2,3],
     [1,1,2,2,3],
