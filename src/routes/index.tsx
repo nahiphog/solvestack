@@ -2096,6 +2096,7 @@ function Index() {
                         </select>
                         <span>strategic starting words.</span>
                       </div>
+                      )}
                       {flGuesses.map((g, gi) => (
                         <div key={gi} className="flex items-center gap-3">
                           <div className="flex gap-1.5">
