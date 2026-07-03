@@ -1238,7 +1238,7 @@ function Index() {
         <div ref={topPillRef} className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall";
-            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle";
+            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation";
             const inLadder = !isMath && !inSearch && !inLogic;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : s.id === "logic" ? inLogic : inLadder;
