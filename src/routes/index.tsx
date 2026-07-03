@@ -1390,6 +1390,16 @@ function Index() {
             >
               Worwordle
             </button>
+            <button
+              onClick={() => switchMode("doubledabble")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "doubledabble"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Double Dabble
+            </button>
           </div>
         )}
 
