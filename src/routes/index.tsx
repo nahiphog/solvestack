@@ -2373,6 +2373,107 @@ function Index() {
               </Button>
             </div>
           </div>
+        ) : mode === "doubledabble" ? (
+          (() => {
+            const DISABLED = new Set([10, 14]);
+            const parseCell = (v: string) => v.toLowerCase().replace(/[^a-z]/g, "").slice(0, 2);
+            const tryLock = () => {
+              const cells = ddKeys.map((v, i) => (DISABLED.has(i) ? "" : parseCell(v)));
+              for (let i = 0; i < 15; i++) {
+                if (DISABLED.has(i)) continue;
+                const c = cells[i];
+                if (c.length !== 2) {
+                  setDdError("Every key must contain exactly 2 letters.");
+                  return;
+                }
+                if (c[0] === c[1]) {
+                  setDdError("The two letters in a key must be distinct.");
+                  return;
+                }
+              }
+              const all = cells.filter(Boolean).join("");
+              if (new Set(all).size !== 26 || all.length !== 26) {
+                setDdError("All 26 letters must appear exactly once across the 13 keys.");
+                return;
+              }
+              setDdError(null);
+              setDdLocked(true);
+            };
+            return (
+              <div className="space-y-4">
+                <div className="text-sm font-medium">
+                  Part 1: Enter the 13 keys. Each key holds 2 distinct letters. All 26 letters must be used exactly once.
+                </div>
+                <div className="grid w-fit grid-cols-5 gap-2">
+                  {Array.from({ length: 15 }).map((_, i) => {
+                    const disabled = DISABLED.has(i);
+                    if (disabled) {
+                      return (
+                        <div
+                          key={i}
+                          className="h-14 w-20 rounded border-2 border-dashed border-border bg-muted/40 opacity-40"
+                          aria-hidden
+                        />
+                      );
+                    }
+                    return (
+                      <input
+                        key={i}
+                        id={`dd-key-${i}`}
+                        type="text"
+                        value={ddKeys[i] || ""}
+                        readOnly={ddLocked}
+                        maxLength={2}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onChange={(e) => {
+                          if (ddLocked) return;
+                          const v = parseCell(e.target.value);
+                          setDdKeys((prev) => {
+                            const n = [...prev];
+                            n[i] = v;
+                            return n;
+                          });
+                          setDdError(null);
+                        }}
+                        placeholder="ab"
+                        aria-label={`Key ${i + 1}`}
+                        className="h-14 w-20 rounded border-2 border-border bg-white text-center font-mono text-xl font-bold lowercase text-black outline-none placeholder:font-normal placeholder:text-gray-300 focus:ring-2 focus:ring-ring"
+                      />
+                    );
+                  })}
+                </div>
+                {ddError && <p className="text-sm text-red-600">{ddError}</p>}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => {
+                      if (ddLocked) {
+                        setDdLocked(false);
+                        setDdError(null);
+                      } else {
+                        tryLock();
+                      }
+                    }}
+                    variant={ddLocked ? "outline" : "default"}
+                    size="lg"
+                  >
+                    {ddLocked ? "Unlock these keys" : "Lock these keys"}
+                  </Button>
+                  {!ddLocked && (
+                    <Button
+                      onClick={() => {
+                        setDdKeys(Array(15).fill(""));
+                        setDdError(null);
+                      }}
+                      variant="outline"
+                      size="lg"
+                    >
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })()
         ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle") ? (
 
           <>
