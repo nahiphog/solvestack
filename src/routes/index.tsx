@@ -2655,13 +2655,20 @@ function Index() {
                         {ddGuesses.length > 1 && (
                           <Button onClick={() => setDdGuesses((prev) => prev.filter((_, i) => i !== gi))} variant="outline" size="sm">×</Button>
                         )}
-                        {ddPerRowResults && ddPerRowResults[gi] && (
-                          <div className="font-mono text-sm text-muted-foreground">
-                            {ddPerRowResults[gi].length === 0
-                              ? "{ no matches }"
-                              : `{ ${ddPerRowResults[gi].join(", ")} }`}
-                          </div>
-                        )}
+                        {(() => {
+                          const wordUp = g.word.toUpperCase();
+                          if (wordUp.length !== 5 || !ddWordMap) return null;
+                          const ks = wordToKeys(wordUp, ddPartitionedKeys);
+                          if (!ks) return null;
+                          const matches = ddWordMap[ks.join(",")] || [];
+                          return (
+                            <div className="font-mono text-sm text-muted-foreground">
+                              {matches.length === 0
+                                ? "{ no matches }"
+                                : `{ ${matches.join(", ")} }`}
+                            </div>
+                          );
+                        })()}
                       </div>
                     ))}
                     <div className="flex flex-wrap gap-3">
