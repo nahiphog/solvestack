@@ -203,6 +203,7 @@ function Index() {
     { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
   const [ddResults, setDdResults] = useState<Array<[string, string[]]> | null>(null);
+  const [ddPerRowResults, setDdPerRowResults] = useState<string[][] | null>(null);
   const [ddSolveError, setDdSolveError] = useState<string | null>(null);
 
   const [jgStartingWord, setJgStartingWord] = useState<0 | 1>(0);
