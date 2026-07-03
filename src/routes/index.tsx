@@ -2585,6 +2585,8 @@ function Index() {
                           setDdError(null);
                           setDdResults(null);
                           setDdSolveError(null);
+                          setDdGuesses([{ word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }]);
+                          setDdPerRowResults(null);
                         } else {
                           void tryLock();
                         }
