@@ -2704,7 +2704,7 @@ function Index() {
                             <tbody className="divide-y">
                               {ddResults.map(([tuple, words]) => {
                                 const keys = tuple.split(",");
-                                const formatted = `{ ${keys.map((k) => `[${k}]`).join(",")} }`;
+                                const formatted = `[${keys.join(", ")}]`;
                                 const addAsGuess = () => {
                                   const w = words[0];
                                   setDdGuesses((prev) => {
@@ -2720,7 +2720,7 @@ function Index() {
                                       <button
                                         type="button"
                                         onClick={addAsGuess}
-                                        className="text-left text-blue-600 hover:underline"
+                                        className="inline-block rounded-md border-2 border-blue-500 bg-blue-50 px-3 py-1.5 text-left text-blue-700 transition hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-300 dark:hover:bg-blue-900"
                                         title={`Add ${words[0]} as a guess`}
                                       >
                                         {formatted}
