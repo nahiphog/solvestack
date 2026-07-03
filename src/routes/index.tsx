@@ -2655,13 +2655,20 @@ function Index() {
                         {ddGuesses.length > 1 && (
                           <Button onClick={() => setDdGuesses((prev) => prev.filter((_, i) => i !== gi))} variant="outline" size="sm">×</Button>
                         )}
-                        {ddPerRowResults && ddPerRowResults[gi] && (
-                          <div className="font-mono text-sm text-muted-foreground">
-                            {ddPerRowResults[gi].length === 0
-                              ? "{ no matches }"
-                              : `{ ${ddPerRowResults[gi].join(", ")} }`}
-                          </div>
-                        )}
+                        {(() => {
+                          const wordUp = g.word.toUpperCase();
+                          if (wordUp.length !== 5 || !ddWordMap) return null;
+                          const ks = wordToKeys(wordUp, ddPartitionedKeys);
+                          if (!ks) return null;
+                          const matches = ddWordMap[ks.join(",")] || [];
+                          return (
+                            <div className="font-mono text-sm text-muted-foreground">
+                              {matches.length === 0
+                                ? "{ no matches }"
+                                : `{ ${matches.join(", ")} }`}
+                            </div>
+                          );
+                        })()}
                       </div>
                     ))}
                     <div className="flex flex-wrap gap-3">
@@ -2697,7 +2704,7 @@ function Index() {
                             <tbody className="divide-y">
                               {ddResults.map(([tuple, words]) => {
                                 const keys = tuple.split(",");
-                                const formatted = `{ ${keys.map((k) => `[${k}]`).join(",")} }`;
+                                const formatted = `[${keys.join(", ")}]`;
                                 const addAsGuess = () => {
                                   const w = words[0];
                                   setDdGuesses((prev) => {
@@ -2713,7 +2720,7 @@ function Index() {
                                       <button
                                         type="button"
                                         onClick={addAsGuess}
-                                        className="text-left text-blue-600 hover:underline"
+                                        className="inline-block rounded-md border-2 border-blue-500 bg-blue-50 px-3 py-1.5 text-left text-blue-700 transition hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-300 dark:hover:bg-blue-900"
                                         title={`Add ${words[0]} as a guess`}
                                       >
                                         {formatted}
