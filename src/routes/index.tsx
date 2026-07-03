@@ -1744,6 +1744,9 @@ function Index() {
           {mode === "splitle" && (
             <a href="https://splitle.netlify.app/?daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Splitle</a>
           )}
+          {mode === "doubledabble" && (
+            <a href="https://double-dabble.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Double Dabble</a>
+          )}
         </div>
 
 
