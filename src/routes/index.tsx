@@ -2503,6 +2503,8 @@ function Index() {
                 padded[ti] = c || " ";
                 return { ...g, word: padded.join("").replace(/ +$/, "") };
               }));
+              setDdResults(null);
+              setDdPerRowResults(null);
             };
             const cycleDdTile = (gi: number, ti: number) => {
               setDdGuesses((prev) => prev.map((g, i) => {
@@ -2512,7 +2514,10 @@ function Index() {
                 next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % 3];
                 return { ...g, pattern: next };
               }));
+              setDdResults(null);
+              setDdPerRowResults(null);
             };
+
             return (
               <div className="space-y-6">
                 <div className="space-y-4">
