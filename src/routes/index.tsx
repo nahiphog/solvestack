@@ -1340,6 +1340,16 @@ function Index() {
               (Original)
             </button>
             <button
+              onClick={() => switchMode("doubledabble")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "doubledabble"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Double Dabble
+            </button>
+            <button
               onClick={() => switchMode("fibble")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "fibble"
@@ -1359,7 +1369,6 @@ function Index() {
             >
               Flipping Letters
             </button>
-
             <button
               onClick={() => switchMode("jeffgoldblum")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1390,7 +1399,6 @@ function Index() {
             >
               Splitle
             </button>
-
             <button
               onClick={() => switchMode("worwordle")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1400,16 +1408,6 @@ function Index() {
               }`}
             >
               Worwordle
-            </button>
-            <button
-              onClick={() => switchMode("doubledabble")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "doubledabble"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Double Dabble
             </button>
           </div>
         )}
@@ -2585,6 +2583,8 @@ function Index() {
                           setDdError(null);
                           setDdResults(null);
                           setDdSolveError(null);
+                          setDdGuesses([{ word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }]);
+                          setDdPerRowResults(null);
                         } else {
                           void tryLock();
                         }
@@ -2647,7 +2647,7 @@ function Index() {
                                     cycleDdTile(gi, ti);
                                   }
                                 }}
-                                className={`flex h-12 w-16 items-center justify-center rounded border-2 text-center font-mono text-lg font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                                className={`flex h-16 w-16 items-center justify-center rounded border-2 text-center font-mono text-lg font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
                               />
                             );
                           })}
@@ -2662,10 +2662,10 @@ function Index() {
                           if (!ks) return null;
                           const matches = ddWordMap[ks.join(",")] || [];
                           return (
-                            <div className="font-mono text-sm text-muted-foreground">
+                            <div className="flex flex-col font-mono text-sm text-muted-foreground">
                               {matches.length === 0
-                                ? "{ no matches }"
-                                : `{ ${matches.join(", ")} }`}
+                                ? <span>no matches</span>
+                                : matches.map((m) => <span key={m}>{m}</span>)}
                             </div>
                           );
                         })()}
@@ -4760,12 +4760,23 @@ function Index() {
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
                 {flResults.answers.slice(pageFl * 50, pageFl * 50 + 50).map((w) => (
-                  <span
+                  <button
                     key={w}
-                    className="rounded bg-muted px-2 py-1 tracking-widest"
+                    type="button"
+                    onClick={() => {
+                      const up = w.toUpperCase();
+                      setFlGuesses((prev) => {
+                        const emptyIdx = prev.findIndex((g) => !g.word.trim());
+                        const row = { word: up, pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] };
+                        if (emptyIdx !== -1) return prev.map((g, i) => (i === emptyIdx ? row : g));
+                        return [...prev, row];
+                      });
+                    }}
+                    className="rounded bg-muted px-2 py-1 tracking-widest transition hover:bg-accent hover:text-accent-foreground"
+                    title={`Add ${w.toUpperCase()} as a guess`}
                   >
                     {w.toLowerCase()}
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
