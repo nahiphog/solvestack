@@ -2456,6 +2456,7 @@ function Index() {
             const solve = () => {
               setDdSolveError(null);
               setDdResults(null);
+              setDdPerRowResults(null);
               if (!ddWordMap) { setDdSolveError("Word list not loaded yet."); return; }
               const normalized: { keys: string[]; pattern: WordleColor[] }[] = [];
               for (const g of ddGuesses) {
@@ -2476,6 +2477,23 @@ function Index() {
                 if (ok) matches.push([tuple, words]);
               }
               matches.sort((a, b) => b[1].length - a[1].length);
+              // Per-row cumulative matches
+              const perRow: string[][] = [];
+              for (let ri = 0; ri < normalized.length; ri++) {
+                const subset = normalized.slice(0, ri + 1);
+                const rowWords: string[] = [];
+                for (const [tuple, words] of Object.entries(ddWordMap)) {
+                  const secretKeys = tuple.split(",");
+                  let ok = true;
+                  for (const g of subset) {
+                    const p = computePattern(g.keys, secretKeys);
+                    if (p.some((c, i) => c !== g.pattern[i])) { ok = false; break; }
+                  }
+                  if (ok) rowWords.push(...words);
+                }
+                perRow.push(rowWords);
+              }
+              setDdPerRowResults(perRow);
               if (matches.length === 0) setDdSolveError("No words match these constraints.");
               else setDdResults(matches);
             };
