@@ -2658,7 +2658,7 @@ function Index() {
                           })}
                         </div>
                         {ddGuesses.length > 1 && (
-                          <Button onClick={() => setDdGuesses((prev) => prev.filter((_, i) => i !== gi))} variant="outline" size="sm">×</Button>
+                          <Button onClick={() => { setDdGuesses((prev) => prev.filter((_, i) => i !== gi)); setDdResults(null); setDdPerRowResults(null); }} variant="outline" size="sm">×</Button>
                         )}
                         {(() => {
                           const wordUp = g.word.toUpperCase();
