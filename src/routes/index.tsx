@@ -1952,6 +1952,16 @@ function Index() {
             <p>Then enter Wordle-style guesses to filter the flippable 5-letter words.</p>
           </div>
         )}
+        {mode === "doubledabble" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Instead of having 26 keys, we are only given 13 keys, where each letter is bound to another letter.</p>
+            <p>For example,</p>
+            <ul className="list-disc pl-5">
+              <li>[DV,CR,AW,IY,NO] could form the word DRAIN.</li>
+              <li>[KS,EM,BT,JU,LP] could form the word SETUP.</li>
+            </ul>
+          </div>
+        )}
         {mode === "worwordle" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p>Enter Wordle-style 8-letter guesses.</p>
