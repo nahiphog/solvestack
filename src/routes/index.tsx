@@ -4108,8 +4108,9 @@ function Index() {
                         </colgroup>
                         <thead>
                           <tr className="border-b">
-                            <th className="p-2 text-left font-medium">Chosen word</th>
+                            <th className="p-2 text-center font-medium">Chosen word</th>
                             <th className="p-2 text-center font-medium">Correct places</th>
+
                           </tr>
                         </thead>
                         <tbody>
