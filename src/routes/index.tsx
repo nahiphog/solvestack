@@ -2725,7 +2725,7 @@ function Index() {
                                       <button
                                         type="button"
                                         onClick={addAsGuess}
-                                        className="inline-block rounded-md border-2 border-blue-500 bg-blue-50 px-3 py-1.5 text-left text-blue-700 transition hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-300 dark:hover:bg-blue-900"
+                                        className="inline-block rounded-md border-2 border-gray-400 bg-gray-100 px-3 py-1.5 text-left text-gray-800 transition hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
                                         title={`Add ${words[0]} as a guess`}
                                       >
                                         {formatted}
