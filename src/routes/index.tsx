@@ -196,6 +196,15 @@ function Index() {
   const [ddKeys, setDdKeys] = useState<string[]>(Array(15).fill(""));
   const [ddLocked, setDdLocked] = useState<boolean>(false);
   const [ddError, setDdError] = useState<string | null>(null);
+  const [ddPartitionedKeys, setDdPartitionedKeys] = useState<string[]>([]);
+  const [ddWordMap, setDdWordMap] = useState<Record<string, string[]> | null>(null);
+  const [ddLoadingWords, setDdLoadingWords] = useState<boolean>(false);
+  const [ddGuesses, setDdGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
+    { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
+  ]);
+  const [ddResults, setDdResults] = useState<Array<[string, string[]]> | null>(null);
+  const [ddSolveError, setDdSolveError] = useState<string | null>(null);
+
   const [jgStartingWord, setJgStartingWord] = useState<0 | 1>(0);
   
 
