@@ -63,6 +63,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   shuntle: { start: "", goal: "" },
   splitle: { start: "", goal: "" },
   blunderwall: { start: "", goal: "" },
+  doubledabble: { start: "", goal: "" },
   
 
 };
