@@ -2664,10 +2664,10 @@ function Index() {
                           if (!ks) return null;
                           const matches = ddWordMap[ks.join(",")] || [];
                           return (
-                            <div className="font-mono text-sm text-muted-foreground">
+                            <div className="flex flex-col font-mono text-sm text-muted-foreground">
                               {matches.length === 0
-                                ? "{ no matches }"
-                                : `{ ${matches.join(", ")} }`}
+                                ? <span>no matches</span>
+                                : matches.map((m) => <span key={m}>{m}</span>)}
                             </div>
                           );
                         })()}
