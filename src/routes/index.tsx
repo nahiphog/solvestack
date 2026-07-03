@@ -4116,15 +4116,16 @@ function Index() {
                         <tbody>
                           {bwGuesses.map((g, i) => (
                             <tr key={i} className="border-b">
-                              <td className="p-2">
+                              <td className="p-2 text-center">
                                 <select
                                   value={g.word}
-                                  onChange={(e) =>
+                                  onChange={(e) => {
                                     setBwGuesses((prev) =>
                                       prev.map((x, idx) => (idx === i ? { ...x, word: e.target.value } : x)),
-                                    )
-                                  }
-                                  className="w-full rounded border bg-background px-2 py-1"
+                                    );
+                                    setBwResult(null);
+                                  }}
+                                  className="w-full rounded border bg-background px-2 py-1 text-center"
                                 >
                                   <option value="">{wordOptionLabels[i]}</option>
                                   {cleanWords.map((w) => (
@@ -4135,11 +4136,12 @@ function Index() {
                               <td className="p-2 text-center">
                                 <select
                                   value={g.tally}
-                                  onChange={(e) =>
+                                  onChange={(e) => {
                                     setBwGuesses((prev) =>
                                       prev.map((x, idx) => (idx === i ? { ...x, tally: e.target.value } : x)),
-                                    )
-                                  }
+                                    );
+                                    setBwResult(null);
+                                  }}
                                   className="w-full rounded border bg-background px-2 py-1 text-center"
                                 >
                                   {["-", "0", "1", "2", "3", "4", "5", "6", "7"].map((t) => (
@@ -4149,6 +4151,7 @@ function Index() {
                               </td>
                             </tr>
                           ))}
+
                         </tbody>
                       </table>
                       <div className="mt-3 flex gap-2">
