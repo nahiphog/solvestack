@@ -203,6 +203,7 @@ function Index() {
     { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
   const [ddResults, setDdResults] = useState<Array<[string, string[]]> | null>(null);
+  const [ddPerRowResults, setDdPerRowResults] = useState<string[][] | null>(null);
   const [ddSolveError, setDdSolveError] = useState<string | null>(null);
 
   const [jgStartingWord, setJgStartingWord] = useState<0 | 1>(0);
@@ -2455,6 +2456,7 @@ function Index() {
             const solve = () => {
               setDdSolveError(null);
               setDdResults(null);
+              setDdPerRowResults(null);
               if (!ddWordMap) { setDdSolveError("Word list not loaded yet."); return; }
               const normalized: { keys: string[]; pattern: WordleColor[] }[] = [];
               for (const g of ddGuesses) {
@@ -2475,6 +2477,23 @@ function Index() {
                 if (ok) matches.push([tuple, words]);
               }
               matches.sort((a, b) => b[1].length - a[1].length);
+              // Per-row cumulative matches
+              const perRow: string[][] = [];
+              for (let ri = 0; ri < normalized.length; ri++) {
+                const subset = normalized.slice(0, ri + 1);
+                const rowWords: string[] = [];
+                for (const [tuple, words] of Object.entries(ddWordMap)) {
+                  const secretKeys = tuple.split(",");
+                  let ok = true;
+                  for (const g of subset) {
+                    const p = computePattern(g.keys, secretKeys);
+                    if (p.some((c, i) => c !== g.pattern[i])) { ok = false; break; }
+                  }
+                  if (ok) rowWords.push(...words);
+                }
+                perRow.push(rowWords);
+              }
+              setDdPerRowResults(perRow);
               if (matches.length === 0) setDdSolveError("No words match these constraints.");
               else setDdResults(matches);
             };
@@ -2528,6 +2547,18 @@ function Index() {
                             const v = parseCell(e.target.value);
                             setDdKeys((prev) => { const n = [...prev]; n[i] = v; return n; });
                             setDdError(null);
+                            if (v.length === 2) {
+                              const order = [0,1,2,3,4,5,6,7,8,9,11,12,13];
+                              const pos = order.indexOf(i);
+                              const nxt = order[pos + 1];
+                              if (nxt !== undefined) {
+                                setTimeout(() => {
+                                  const el = document.getElementById(`dd-key-${nxt}`) as HTMLInputElement | null;
+                                  el?.focus();
+                                  el?.select();
+                                }, 0);
+                              }
+                            }
                           }}
                           placeholder="?"
                           aria-label={`Key ${i + 1}`}
@@ -2573,10 +2604,11 @@ function Index() {
                       {ddLoadingWords && <span className="ml-2 text-muted-foreground">Loading word list…</span>}
                     </div>
                     {ddGuesses.map((g, gi) => (
-                      <div key={gi} className="flex items-center gap-3">
+                      <div key={gi} className="flex flex-wrap items-center gap-3">
                         <div className="flex gap-1.5">
                           {Array.from({ length: 5 }).map((_, ti) => {
                             const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
+                            const keyStr = letter ? (ddPartitionedKeys.find((k) => k.includes(letter)) || letter) : "";
                             const color = g.pattern[ti];
                             const colorClass =
                               color === "GREEN" ? "bg-green-600 text-white border-green-600 caret-white"
@@ -2587,7 +2619,7 @@ function Index() {
                                 key={ti}
                                 id={`dd-tile-${gi}-${ti}`}
                                 type="text"
-                                value={letter}
+                                value={keyStr}
                                 onMouseDown={(e) => {
                                   if (document.activeElement === e.currentTarget) {
                                     e.preventDefault();
@@ -2598,7 +2630,12 @@ function Index() {
                                 onChange={(e) => {
                                   const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
                                   if (!v) { setDdGuessLetter(gi, ti, ""); return; }
-                                  setDdGuessLetter(gi, ti, v.slice(-1));
+                                  // Take the last typed letter that isn't already part of the current key
+                                  let picked = v.slice(-1);
+                                  for (let k = v.length - 1; k >= 0; k--) {
+                                    if (!keyStr.includes(v[k])) { picked = v[k]; break; }
+                                  }
+                                  setDdGuessLetter(gi, ti, picked);
                                   if (ti < 4) document.getElementById(`dd-tile-${gi}-${ti + 1}`)?.focus();
                                 }}
                                 onKeyDown={(e) => {
@@ -2610,7 +2647,7 @@ function Index() {
                                     cycleDdTile(gi, ti);
                                   }
                                 }}
-                                className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                                className={`flex h-12 w-16 items-center justify-center rounded border-2 text-center font-mono text-lg font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
                               />
                             );
                           })}
@@ -2618,17 +2655,24 @@ function Index() {
                         {ddGuesses.length > 1 && (
                           <Button onClick={() => setDdGuesses((prev) => prev.filter((_, i) => i !== gi))} variant="outline" size="sm">×</Button>
                         )}
+                        {ddPerRowResults && ddPerRowResults[gi] && (
+                          <div className="font-mono text-sm text-muted-foreground">
+                            {ddPerRowResults[gi].length === 0
+                              ? "{ no matches }"
+                              : `{ ${ddPerRowResults[gi].join(", ")} }`}
+                          </div>
+                        )}
                       </div>
                     ))}
                     <div className="flex flex-wrap gap-3">
                       <Button
-                        onClick={() => setDdGuesses((prev) => [...prev, { word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }])}
+                        onClick={() => { setDdGuesses((prev) => [...prev, { word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }]); setDdPerRowResults(null); setDdResults(null); }}
                         variant="outline" size="lg"
                       >
                         Add guess
                       </Button>
                       <Button
-                        onClick={() => { setDdGuesses([{ word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }]); setDdResults(null); setDdSolveError(null); }}
+                        onClick={() => { setDdGuesses([{ word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }]); setDdResults(null); setDdPerRowResults(null); setDdSolveError(null); }}
                         variant="outline" size="lg"
                       >
                         Reset
@@ -2651,12 +2695,34 @@ function Index() {
                               </tr>
                             </thead>
                             <tbody className="divide-y">
-                              {ddResults.map(([tuple, words]) => (
-                                <tr key={tuple}>
-                                  <td className="px-3 py-2 font-mono">{tuple.split(",").join(" ")}</td>
-                                  <td className="px-3 py-2 font-mono">{words.join(", ")}</td>
-                                </tr>
-                              ))}
+                              {ddResults.map(([tuple, words]) => {
+                                const keys = tuple.split(",");
+                                const formatted = `{ ${keys.map((k) => `[${k}]`).join(",")} }`;
+                                const addAsGuess = () => {
+                                  const w = words[0];
+                                  setDdGuesses((prev) => {
+                                    const emptyIdx = prev.findIndex((g) => !g.word.trim());
+                                    const newRow = { word: w, pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] };
+                                    if (emptyIdx !== -1) return prev.map((g, i) => (i === emptyIdx ? newRow : g));
+                                    return [...prev, newRow];
+                                  });
+                                };
+                                return (
+                                  <tr key={tuple}>
+                                    <td className="px-3 py-2 font-mono">
+                                      <button
+                                        type="button"
+                                        onClick={addAsGuess}
+                                        className="text-left text-blue-600 hover:underline"
+                                        title={`Add ${words[0]} as a guess`}
+                                      >
+                                        {formatted}
+                                      </button>
+                                    </td>
+                                    <td className="px-3 py-2 font-mono">{words.join(", ")}</td>
+                                  </tr>
+                                );
+                              })}
                             </tbody>
                           </table>
                         </div>
