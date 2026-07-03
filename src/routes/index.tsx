@@ -4762,12 +4762,23 @@ function Index() {
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
                 {flResults.answers.slice(pageFl * 50, pageFl * 50 + 50).map((w) => (
-                  <span
+                  <button
                     key={w}
-                    className="rounded bg-muted px-2 py-1 tracking-widest"
+                    type="button"
+                    onClick={() => {
+                      const up = w.toUpperCase();
+                      setFlGuesses((prev) => {
+                        const emptyIdx = prev.findIndex((g) => !g.word.trim());
+                        const row = { word: up, pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] };
+                        if (emptyIdx !== -1) return prev.map((g, i) => (i === emptyIdx ? row : g));
+                        return [...prev, row];
+                      });
+                    }}
+                    className="rounded bg-muted px-2 py-1 tracking-widest transition hover:bg-accent hover:text-accent-foreground"
+                    title={`Add ${w.toUpperCase()} as a guess`}
                   >
                     {w.toLowerCase()}
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
