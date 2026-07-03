@@ -3962,7 +3962,7 @@ function Index() {
           (() => {
             const cleanWords = bwWords.map((w) => w.trim().toUpperCase()).filter((w) => w.length === 7);
             const canLock = cleanWords.length === 16 && new Set(cleanWords).size === 16;
-            const wordOptionLabels = ["First word", "Second word", "Third word", "Fourth word"];
+            const wordOptionLabels = ["(First word)", "(Second word)", "(Third word)", "(Fourth word)"];
             const compareTwo = (a: string, b: string) =>
               a.split("").reduce((acc, ch, i) => acc + (ch === b[i] ? 1 : 0), 0);
             const resetBw = () => {
