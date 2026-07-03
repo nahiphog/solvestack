@@ -196,6 +196,15 @@ function Index() {
   const [ddKeys, setDdKeys] = useState<string[]>(Array(15).fill(""));
   const [ddLocked, setDdLocked] = useState<boolean>(false);
   const [ddError, setDdError] = useState<string | null>(null);
+  const [ddPartitionedKeys, setDdPartitionedKeys] = useState<string[]>([]);
+  const [ddWordMap, setDdWordMap] = useState<Record<string, string[]> | null>(null);
+  const [ddLoadingWords, setDdLoadingWords] = useState<boolean>(false);
+  const [ddGuesses, setDdGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
+    { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
+  ]);
+  const [ddResults, setDdResults] = useState<Array<[string, string[]]> | null>(null);
+  const [ddSolveError, setDdSolveError] = useState<string | null>(null);
+
   const [jgStartingWord, setJgStartingWord] = useState<0 | 1>(0);
   
 
@@ -2378,103 +2387,287 @@ function Index() {
           (() => {
             const DISABLED = new Set([10, 14]);
             const parseCell = (v: string) => v.toLowerCase().replace(/[^a-z]/g, "").slice(0, 2);
-            const tryLock = () => {
+            const wordToKeys = (word: string, keys: string[]): string[] | null => {
+              const out: string[] = [];
+              for (const ch of word.toUpperCase()) {
+                const k = keys.find((kk) => kk.includes(ch));
+                if (!k) return null;
+                out.push(k);
+              }
+              return out;
+            };
+            const computePattern = (guessKeys: string[], secretKeys: string[]): WordleColor[] => {
+              const n = guessKeys.length;
+              const res: WordleColor[] = Array(n).fill("GREY") as WordleColor[];
+              const remaining: (string | null)[] = [...secretKeys];
+              for (let i = 0; i < n; i++) {
+                if (guessKeys[i] === secretKeys[i]) {
+                  res[i] = "GREEN";
+                  remaining[i] = null;
+                }
+              }
+              for (let i = 0; i < n; i++) {
+                if (res[i] === "GREEN") continue;
+                const idx = remaining.indexOf(guessKeys[i]);
+                if (idx !== -1) {
+                  res[i] = "YELLOW";
+                  remaining[idx] = null;
+                }
+              }
+              return res;
+            };
+            const tryLock = async () => {
               const cells = ddKeys.map((v, i) => (DISABLED.has(i) ? "" : parseCell(v)));
               for (let i = 0; i < 15; i++) {
                 if (DISABLED.has(i)) continue;
                 const c = cells[i];
-                if (c.length !== 2) {
-                  setDdError("Every key must contain exactly 2 letters.");
-                  return;
-                }
-                if (c[0] === c[1]) {
-                  setDdError("The two letters in a key must be distinct.");
-                  return;
-                }
+                if (c.length !== 2) { setDdError("Every key must contain exactly 2 letters."); return; }
+                if (c[0] === c[1]) { setDdError("The two letters in a key must be distinct."); return; }
               }
               const all = cells.filter(Boolean).join("");
               if (new Set(all).size !== 26 || all.length !== 26) {
                 setDdError("All 26 letters must appear exactly once across the 13 keys.");
                 return;
               }
+              const partitioned = cells.filter(Boolean).map((c) => c.toUpperCase());
+              setDdPartitionedKeys(partitioned);
               setDdError(null);
               setDdLocked(true);
+              setDdLoadingWords(true);
+              try {
+                const res = await fetch("https://raw.githubusercontent.com/nahiphog/BigBigSolver/refs/heads/main/all_5_letter_words.txt");
+                const text = await res.text();
+                const words = text.split(/\r?\n/).map((w) => w.trim().toUpperCase()).filter((w) => w.length === 5 && /^[A-Z]+$/.test(w));
+                const map: Record<string, string[]> = {};
+                for (const w of words) {
+                  const keys = wordToKeys(w, partitioned);
+                  if (!keys) continue;
+                  const tuple = keys.join(",");
+                  (map[tuple] ||= []).push(w);
+                }
+                setDdWordMap(map);
+              } catch {
+                setDdSolveError("Failed to load 5-letter word list.");
+              } finally {
+                setDdLoadingWords(false);
+              }
+            };
+            const solve = () => {
+              setDdSolveError(null);
+              setDdResults(null);
+              if (!ddWordMap) { setDdSolveError("Word list not loaded yet."); return; }
+              const normalized: { keys: string[]; pattern: WordleColor[] }[] = [];
+              for (const g of ddGuesses) {
+                const w = g.word.trim().toUpperCase();
+                if (w.length !== 5) { setDdSolveError("Each guess must be exactly 5 letters."); return; }
+                const keys = wordToKeys(w, ddPartitionedKeys);
+                if (!keys) { setDdSolveError(`"${w}" contains letters outside the locked keys.`); return; }
+                normalized.push({ keys, pattern: g.pattern });
+              }
+              const matches: Array<[string, string[]]> = [];
+              for (const [tuple, words] of Object.entries(ddWordMap)) {
+                const secretKeys = tuple.split(",");
+                let ok = true;
+                for (const g of normalized) {
+                  const p = computePattern(g.keys, secretKeys);
+                  if (p.some((c, i) => c !== g.pattern[i])) { ok = false; break; }
+                }
+                if (ok) matches.push([tuple, words]);
+              }
+              matches.sort((a, b) => b[1].length - a[1].length);
+              if (matches.length === 0) setDdSolveError("No words match these constraints.");
+              else setDdResults(matches);
+            };
+            const setDdGuessLetter = (gi: number, ti: number, ch: string) => {
+              const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+              setDdGuesses((prev) => prev.map((g, i) => {
+                if (i !== gi) return g;
+                const padded = g.word.padEnd(5, " ").slice(0, 5).split("");
+                padded[ti] = c || " ";
+                return { ...g, word: padded.join("").replace(/ +$/, "") };
+              }));
+            };
+            const cycleDdTile = (gi: number, ti: number) => {
+              setDdGuesses((prev) => prev.map((g, i) => {
+                if (i !== gi) return g;
+                const order: WordleColor[] = ["GREY", "YELLOW", "GREEN"];
+                const next = [...g.pattern];
+                next[ti] = order[(order.indexOf(g.pattern[ti]) + 1) % 3];
+                return { ...g, pattern: next };
+              }));
             };
             return (
-              <div className="space-y-4">
-                <div className="text-sm font-medium">
-                  Part 1: Enter the 13 keys. Each key holds 2 distinct letters. All 26 letters must be used exactly once.
-                </div>
-                <div className="grid w-fit grid-cols-5 gap-2">
-                  {Array.from({ length: 15 }).map((_, i) => {
-                    const disabled = DISABLED.has(i);
-                    if (disabled) {
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="text-sm font-medium">
+                    Part 1: Enter the 13 keys. Each key holds 2 distinct letters. All 26 letters must be used exactly once.
+                  </div>
+                  <div className="grid w-fit grid-cols-5 gap-2">
+                    {Array.from({ length: 15 }).map((_, i) => {
+                      const disabled = DISABLED.has(i);
+                      if (disabled) {
+                        return (
+                          <div
+                            key={i}
+                            className="h-16 w-16 rounded border-2 border-dashed border-border bg-muted/40 opacity-40"
+                            aria-hidden
+                          />
+                        );
+                      }
                       return (
-                        <div
+                        <input
                           key={i}
-                          className="h-14 w-20 rounded border-2 border-dashed border-border bg-muted/40 opacity-40"
-                          aria-hidden
+                          id={`dd-key-${i}`}
+                          type="text"
+                          value={ddKeys[i] || ""}
+                          readOnly={ddLocked}
+                          maxLength={2}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onChange={(e) => {
+                            if (ddLocked) return;
+                            const v = parseCell(e.target.value);
+                            setDdKeys((prev) => { const n = [...prev]; n[i] = v; return n; });
+                            setDdError(null);
+                          }}
+                          placeholder="?"
+                          aria-label={`Key ${i + 1}`}
+                          className="h-16 w-16 rounded border-2 border-border bg-white text-center font-mono text-xl font-bold lowercase text-black outline-none placeholder:font-normal placeholder:text-gray-300 focus:ring-2 focus:ring-ring"
                         />
                       );
-                    }
-                    return (
-                      <input
-                        key={i}
-                        id={`dd-key-${i}`}
-                        type="text"
-                        value={ddKeys[i] || ""}
-                        readOnly={ddLocked}
-                        maxLength={2}
-                        onFocus={(e) => e.currentTarget.select()}
-                        onChange={(e) => {
-                          if (ddLocked) return;
-                          const v = parseCell(e.target.value);
-                          setDdKeys((prev) => {
-                            const n = [...prev];
-                            n[i] = v;
-                            return n;
-                          });
-                          setDdError(null);
-                        }}
-                        placeholder="ab"
-                        aria-label={`Key ${i + 1}`}
-                        className="h-14 w-20 rounded border-2 border-border bg-white text-center font-mono text-xl font-bold lowercase text-black outline-none placeholder:font-normal placeholder:text-gray-300 focus:ring-2 focus:ring-ring"
-                      />
-                    );
-                  })}
-                </div>
-                {ddError && <p className="text-sm text-red-600">{ddError}</p>}
-                <div className="flex gap-3">
-                  <Button
-                    onClick={() => {
-                      if (ddLocked) {
-                        setDdLocked(false);
-                        setDdError(null);
-                      } else {
-                        tryLock();
-                      }
-                    }}
-                    variant={ddLocked ? "outline" : "default"}
-                    size="lg"
-                  >
-                    {ddLocked ? "Unlock these keys" : "Lock these keys"}
-                  </Button>
-                  {!ddLocked && (
+                    })}
+                  </div>
+                  {ddError && <p className="text-sm text-red-600">{ddError}</p>}
+                  <div className="flex gap-3">
+                    {!ddLocked && (
+                      <Button
+                        onClick={() => { setDdKeys(Array(15).fill("")); setDdError(null); }}
+                        variant="outline"
+                        size="lg"
+                      >
+                        Clear all
+                      </Button>
+                    )}
                     <Button
                       onClick={() => {
-                        setDdKeys(Array(15).fill(""));
-                        setDdError(null);
+                        if (ddLocked) {
+                          setDdLocked(false);
+                          setDdError(null);
+                          setDdResults(null);
+                          setDdSolveError(null);
+                        } else {
+                          void tryLock();
+                        }
                       }}
-                      variant="outline"
+                      variant={ddLocked ? "outline" : "default"}
                       size="lg"
                     >
-                      Clear all
+                      {ddLocked ? "Unlock these keys" : "Lock these keys"}
                     </Button>
-                  )}
+                  </div>
                 </div>
+
+                {ddLocked && (
+                  <div className="space-y-4 border-t pt-4">
+                    <div className="text-sm font-medium">
+                      Part 2: Enter Wordle-style guesses. Feedback colors apply to the keys used.
+                      {ddLoadingWords && <span className="ml-2 text-muted-foreground">Loading word list…</span>}
+                    </div>
+                    {ddGuesses.map((g, gi) => (
+                      <div key={gi} className="flex items-center gap-3">
+                        <div className="flex gap-1.5">
+                          {Array.from({ length: 5 }).map((_, ti) => {
+                            const letter = g.word[ti] && g.word[ti] !== " " ? g.word[ti] : "";
+                            const color = g.pattern[ti];
+                            const colorClass =
+                              color === "GREEN" ? "bg-green-600 text-white border-green-600 caret-white"
+                              : color === "YELLOW" ? "bg-yellow-500 text-white border-yellow-500 caret-white"
+                              : "bg-muted text-foreground border-border caret-foreground";
+                            return (
+                              <input
+                                key={ti}
+                                id={`dd-tile-${gi}-${ti}`}
+                                type="text"
+                                value={letter}
+                                onMouseDown={(e) => {
+                                  if (document.activeElement === e.currentTarget) {
+                                    e.preventDefault();
+                                    cycleDdTile(gi, ti);
+                                  }
+                                }}
+                                onFocus={(e) => e.currentTarget.select()}
+                                onChange={(e) => {
+                                  const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                                  if (!v) { setDdGuessLetter(gi, ti, ""); return; }
+                                  setDdGuessLetter(gi, ti, v.slice(-1));
+                                  if (ti < 4) document.getElementById(`dd-tile-${gi}-${ti + 1}`)?.focus();
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Backspace" && !letter && ti > 0) {
+                                    e.preventDefault();
+                                    document.getElementById(`dd-tile-${gi}-${ti - 1}`)?.focus();
+                                  } else if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    cycleDdTile(gi, ti);
+                                  }
+                                }}
+                                className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                              />
+                            );
+                          })}
+                        </div>
+                        {ddGuesses.length > 1 && (
+                          <Button onClick={() => setDdGuesses((prev) => prev.filter((_, i) => i !== gi))} variant="outline" size="sm">×</Button>
+                        )}
+                      </div>
+                    ))}
+                    <div className="flex flex-wrap gap-3">
+                      <Button
+                        onClick={() => setDdGuesses((prev) => [...prev, { word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }])}
+                        variant="outline" size="lg"
+                      >
+                        Add guess
+                      </Button>
+                      <Button
+                        onClick={() => { setDdGuesses([{ word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }]); setDdResults(null); setDdSolveError(null); }}
+                        variant="outline" size="lg"
+                      >
+                        Reset
+                      </Button>
+                      <Button onClick={solve} disabled={ddLoadingWords} size="lg">Solve</Button>
+                    </div>
+                    {ddSolveError && <p className="text-sm text-red-600">{ddSolveError}</p>}
+                    {ddResults && (
+                      <section className="mt-4">
+                        <h2 className="mb-2 text-base font-semibold">
+                          {ddResults.reduce((s, [, ws]) => s + ws.length, 0)} possible {ddResults.reduce((s, [, ws]) => s + ws.length, 0) === 1 ? "word" : "words"}
+                          {" "}across {ddResults.length} keystroke {ddResults.length === 1 ? "pattern" : "patterns"}
+                        </h2>
+                        <div className="overflow-hidden rounded-lg border bg-card">
+                          <table className="w-full text-sm">
+                            <thead className="bg-muted/50 text-left">
+                              <tr>
+                                <th className="w-1/2 px-3 py-2 font-semibold">Exact keystrokes</th>
+                                <th className="px-3 py-2 font-semibold">All such words</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y">
+                              {ddResults.map(([tuple, words]) => (
+                                <tr key={tuple}>
+                                  <td className="px-3 py-2 font-mono">{tuple.split(",").join(" ")}</td>
+                                  <td className="px-3 py-2 font-mono">{words.join(", ")}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </section>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })()
+
         ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle") ? (
 
           <>
