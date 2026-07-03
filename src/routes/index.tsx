@@ -4161,38 +4161,38 @@ function Index() {
                     </div>
 
                     {bwResult && (
-                      <div>
+                      <div className="rounded-lg border-2 border-border p-4">
                         <h2 className="mb-2 text-lg font-semibold">
                           {bwResult.length} possible {bwResult.length === 1 ? "answer" : "answers"}
                         </h2>
                         {bwResult.length > 0 ? (
-                          <p className="text-sm font-mono break-words">
-                            {bwResult.map((w, idx) => (
-                              <span key={w}>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setBwGuesses((prev) => {
-                                      const targetIdx = prev.findIndex((r) => !r.word);
-                                      if (targetIdx === -1) return prev;
-                                      return prev.map((r, i) =>
-                                        i === targetIdx ? { ...r, word: w } : r,
-                                      );
-                                    });
-                                  }}
-                                  className="text-primary underline hover:opacity-80"
-                                >
-                                  {w}
-                                </button>
-                                {idx < bwResult.length - 1 ? ", " : ""}
-                              </span>
+                          <div className="flex flex-wrap gap-2">
+                            {bwResult.map((w) => (
+                              <button
+                                key={w}
+                                type="button"
+                                onClick={() => {
+                                  setBwGuesses((prev) => {
+                                    const targetIdx = prev.findIndex((r) => !r.word);
+                                    if (targetIdx === -1) return prev;
+                                    return prev.map((r, i) =>
+                                      i === targetIdx ? { ...r, word: w } : r,
+                                    );
+                                  });
+                                  setBwResult(null);
+                                }}
+                                className="inline-block rounded-md border-2 border-gray-400 bg-gray-100 px-3 py-1.5 font-mono text-sm text-gray-800 transition hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                              >
+                                {w}
+                              </button>
                             ))}
-                          </p>
+                          </div>
                         ) : (
                           <p className="text-sm text-muted-foreground">No words match those constraints.</p>
                         )}
                       </div>
                     )}
+
                   </>
                 )}
               </div>
