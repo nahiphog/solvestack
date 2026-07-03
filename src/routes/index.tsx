@@ -2649,7 +2649,7 @@ function Index() {
                                     cycleDdTile(gi, ti);
                                   }
                                 }}
-                                className={`flex h-12 w-16 items-center justify-center rounded border-2 text-center font-mono text-lg font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
+                                className={`flex h-16 w-16 items-center justify-center rounded border-2 text-center font-mono text-lg font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring ${colorClass}`}
                               />
                             );
                           })}
