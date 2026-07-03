@@ -1,4 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+
+const CHANGELOG_URL =
+  "https://raw.githubusercontent.com/nahiphog/BigBigSolver/refs/heads/main/changelog.txt";
 
 export const Route = createFileRoute("/changelog")({
   head: () => ({
@@ -12,27 +16,24 @@ export const Route = createFileRoute("/changelog")({
   component: ChangelogPage,
 });
 
-type Entry = { heading: string; items: string[] };
-
-function parseChangelog(text: string): Entry[] {
-  const entries: Entry[] = [];
-  let current: Entry | null = null;
-  for (const raw of text.split(/\r?\n/)) {
-    const line = raw.trim();
-    if (!line) continue;
-    if (/^\d+\./.test(line)) {
-      if (current) current.items.push(line.replace(/^\d+\.\s*/, ""));
-    } else if (line.endsWith(":")) {
-      if (current) entries.push(current);
-      current = { heading: line.replace(/:$/, ""), items: [] };
-    }
-  }
-  if (current) entries.push(current);
-  return entries;
-}
-
 function ChangelogPage() {
-  const entries = parseChangelog(RAW);
+  const [text, setText] = useState<string>("Loading…");
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${CHANGELOG_URL}?t=${Date.now()}`, { cache: "no-store" })
+      .then((r) => r.text())
+      .then((t) => {
+        if (!cancelled) setText(t);
+      })
+      .catch((e) => {
+        if (!cancelled) setText(`Failed to load changelog: ${String(e)}`);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-3xl px-6 py-16">
@@ -45,34 +46,8 @@ function ChangelogPage() {
             ← About
           </Link>
         </header>
-
-        <div className="space-y-6">
-          {entries.map((entry) => (
-            <div key={entry.heading} className="rounded-lg border bg-card p-5 shadow-sm">
-              <h2 className="text-lg font-semibold">{entry.heading}</h2>
-              <ul className="mt-2 list-disc space-y-1 pl-6 text-base leading-relaxed">
-                {entry.items.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+        <pre className="whitespace-pre-wrap font-sans text-base leading-relaxed">{text}</pre>
       </div>
     </div>
   );
 }
-
-const RAW = `July 02 2026:
-1. Rectified and reuploaded the solvers "Flipping letters" and "Splitle".
-2. Fixed the feedback form bug.
-3. Added a changelog page.
-
-June 30 2026:
-1. Changed the title of this website to "Solver Sanctuary", as per the suggestion from a YouTube user.
-
-June 01 2026 to June 29 2026:
-1. Created this page.
-2. Added over 15 solvers into the site.
-3. Added the About page and the FAQ page.
-`;
