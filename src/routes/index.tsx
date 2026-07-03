@@ -2695,12 +2695,34 @@ function Index() {
                               </tr>
                             </thead>
                             <tbody className="divide-y">
-                              {ddResults.map(([tuple, words]) => (
-                                <tr key={tuple}>
-                                  <td className="px-3 py-2 font-mono">{tuple.split(",").join(" ")}</td>
-                                  <td className="px-3 py-2 font-mono">{words.join(", ")}</td>
-                                </tr>
-                              ))}
+                              {ddResults.map(([tuple, words]) => {
+                                const keys = tuple.split(",");
+                                const formatted = `{ ${keys.map((k) => `[${k}]`).join(",")} }`;
+                                const addAsGuess = () => {
+                                  const w = words[0];
+                                  setDdGuesses((prev) => {
+                                    const emptyIdx = prev.findIndex((g) => !g.word.trim());
+                                    const newRow = { word: w, pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] };
+                                    if (emptyIdx !== -1) return prev.map((g, i) => (i === emptyIdx ? newRow : g));
+                                    return [...prev, newRow];
+                                  });
+                                };
+                                return (
+                                  <tr key={tuple}>
+                                    <td className="px-3 py-2 font-mono">
+                                      <button
+                                        type="button"
+                                        onClick={addAsGuess}
+                                        className="text-left text-blue-600 hover:underline"
+                                        title={`Add ${words[0]} as a guess`}
+                                      >
+                                        {formatted}
+                                      </button>
+                                    </td>
+                                    <td className="px-3 py-2 font-mono">{words.join(", ")}</td>
+                                  </tr>
+                                );
+                              })}
                             </tbody>
                           </table>
                         </div>
