@@ -1340,6 +1340,16 @@ function Index() {
               (Original)
             </button>
             <button
+              onClick={() => switchMode("doubledabble")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "doubledabble"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Double Dabble
+            </button>
+            <button
               onClick={() => switchMode("fibble")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "fibble"
@@ -1359,7 +1369,6 @@ function Index() {
             >
               Flipping Letters
             </button>
-
             <button
               onClick={() => switchMode("jeffgoldblum")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1390,7 +1399,6 @@ function Index() {
             >
               Splitle
             </button>
-
             <button
               onClick={() => switchMode("worwordle")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1400,16 +1408,6 @@ function Index() {
               }`}
             >
               Worwordle
-            </button>
-            <button
-              onClick={() => switchMode("doubledabble")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "doubledabble"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Double Dabble
             </button>
           </div>
         )}
