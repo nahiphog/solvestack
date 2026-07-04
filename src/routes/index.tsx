@@ -866,6 +866,7 @@ function Index() {
     setError(null);
     setSplitleP1Error(null);
     setWordleResults(null);
+    setWrdlResults(null);
     setSplitleResults(null);
     setSplitleExpanded({});
     const errFn = mode === "splitle" ? setSplitleP1Error : setError;
