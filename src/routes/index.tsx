@@ -1446,6 +1446,16 @@ function Index() {
             >
               Worwordle
             </button>
+            <button
+              onClick={() => switchMode("wrdl")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wrdl"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Wrdl
+            </button>
           </div>
         )}
 
