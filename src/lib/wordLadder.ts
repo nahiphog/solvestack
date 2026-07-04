@@ -207,9 +207,20 @@ export function sudokuSolve(
   const rowUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const colUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const regUsed: Map<number, Set<number>> = new Map();
-  const extraUsed: Map<number, Set<number>> = new Map();
   const { king, knight, diagonal, nonConsecutive, extraRegions } = variations;
-  const extraAt = (r: number, c: number): number => (extraRegions ? extraRegions[r][c] : 0);
+  // Normalize extraRegions into an array of grids
+  const extraLayers: number[][][] = (() => {
+    if (!extraRegions) return [];
+    const arr = extraRegions as unknown as (number[][] | number[][][]);
+    if (arr.length === 0) return [];
+    const first = arr[0] as unknown;
+    if (Array.isArray(first) && Array.isArray((first as unknown[])[0])) {
+      return arr as number[][][];
+    }
+    return [arr as number[][]];
+  })();
+  const extraUsedLayers: Map<number, Set<number>>[] = extraLayers.map(() => new Map());
+  const extraAt = (layerIdx: number, r: number, c: number): number => extraLayers[layerIdx][r][c] || 0;
 
   const inBounds = (r: number, c: number) => r >= 0 && r < N && c >= 0 && c < N;
   const checkExtra = (r: number, c: number, v: number): boolean => {
