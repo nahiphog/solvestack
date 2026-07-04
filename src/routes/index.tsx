@@ -2729,12 +2729,14 @@ function Index() {
                                 const formatted = `[${keys.join(", ")}]`;
                                 const addAsGuess = () => {
                                   const w = words[0];
+                                  const newRow = { word: w, pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] };
                                   setDdGuesses((prev) => {
                                     const emptyIdx = prev.findIndex((g) => !g.word.trim());
-                                    const newRow = { word: w, pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] };
                                     if (emptyIdx !== -1) return prev.map((g, i) => (i === emptyIdx ? newRow : g));
                                     return [...prev, newRow];
                                   });
+                                  setDdResults(null);
+                                  setDdPerRowResults(null);
                                 };
                                 return (
                                   <tr key={tuple}>
