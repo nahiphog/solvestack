@@ -534,7 +534,7 @@ function Index() {
 
     if (m === "fibble") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
-    } else if (m === "wordle") {
+    } else if (m === "wordle" || m === "wrdl") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else if (m === "jeffgoldblum") {
       setWordleGuesses([{ word: "JEFFGOLDBLUM", pattern: Array(12).fill("GREY") as WordleColor[] }]);
