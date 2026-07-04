@@ -2809,7 +2809,7 @@ function Index() {
             );
           })()
 
-        ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle") ? (
+        ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "wrdl") ? (
 
           <>
           {mode === "splitle" && (
