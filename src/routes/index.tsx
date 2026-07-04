@@ -1803,6 +1803,9 @@ function Index() {
           {mode === "doubledabble" && (
             <a href="https://double-dabble.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Double Dabble</a>
           )}
+          {mode === "wrdl" && (
+            <a href="https://wrdl-abae.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wrdl</a>
+          )}
         </div>
 
 
