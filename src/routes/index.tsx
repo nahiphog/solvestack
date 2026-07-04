@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useState } from "react";
-import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, spellingBeeSolve, splitleP2Solve, splitleSolve, sudokuSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, spellingBeeSolve, splitleP2Solve, splitleSolve, sudokuSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   splitle: { start: "", goal: "" },
   blunderwall: { start: "", goal: "" },
   doubledabble: { start: "", goal: "" },
+  wrdl: { start: "", goal: "" },
   
 
 };
@@ -144,6 +145,8 @@ function Index() {
     { word: "SLATE", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
+  const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
+  const [pageWrdl, setPageWrdl] = useState(0);
   const [splitleResults, setSplitleResults] = useState<[string, string[]][] | null>(null);
   const [splitleStartingWords, setSplitleStartingWords] = useState<0 | 3>(0);
   const [splitleExpanded, setSplitleExpanded] = useState<Record<string, boolean>>({});
@@ -479,6 +482,7 @@ function Index() {
   const [selectedPaths, setSelectedPaths] = useState<Set<number>>(new Set());
   useEffect(() => { setPagePaths(0); setSelectedPaths(new Set()); }, [paths]);
   useEffect(() => { setPageWordle(0); }, [wordleResults]);
+  useEffect(() => { setPageWrdl(0); }, [wrdlResults]);
   useEffect(() => { setPageMM(0); }, [mastermindResults]);
   useEffect(() => { setPageWP(0); }, [wordPeaksResults]);
 
@@ -509,6 +513,7 @@ function Index() {
     setPaths(null);
     setWordiplyResults(null);
     setWordleResults(null);
+    setWrdlResults(null);
     setSplitleResults(null);
     setSplitleExpanded({});
     setSpellingBeeResults(null);
@@ -529,7 +534,7 @@ function Index() {
 
     if (m === "fibble") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
-    } else if (m === "wordle") {
+    } else if (m === "wordle" || m === "wrdl") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else if (m === "jeffgoldblum") {
       setWordleGuesses([{ word: "JEFFGOLDBLUM", pattern: Array(12).fill("GREY") as WordleColor[] }]);
@@ -800,6 +805,7 @@ function Index() {
     const w = mode === "shuntle" ? word.toUpperCase().padEnd(7, " ").slice(0, 7) : word.toUpperCase();
     setWordleGuesses((prev) => [...prev, { word: w, pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] }]);
     setWordleResults(null);
+    setWrdlResults(null);
   };
 
   const addWordPeaksGuessFromAnswer = (word: string) => {
@@ -860,6 +866,7 @@ function Index() {
     setError(null);
     setSplitleP1Error(null);
     setWordleResults(null);
+    setWrdlResults(null);
     setSplitleResults(null);
     setSplitleExpanded({});
     const errFn = mode === "splitle" ? setSplitleP1Error : setError;
@@ -897,6 +904,11 @@ function Index() {
           errFn(`"${w}" is not a valid Splitle half (must match the first or last 5 letters of some 10-letter English word).`);
           return;
         }
+      } else if (mode === "wrdl") {
+        if (!(await isValidWrdlKey(w))) {
+          errFn(`"${w}" is not a valid Wrdl word.`);
+          return;
+        }
       } else if (!(await isValid5LetterWord(w))) {
         errFn(`"${w}" is not a valid 5-letter English word.`);
         return;
@@ -908,6 +920,14 @@ function Index() {
       const sres = await splitleSolve(normalized);
       if (sres.length === 0) setSplitleP1Error("No words match these constraints.");
       else setSplitleResults(sres);
+      setSolving(false);
+      return;
+    }
+
+    if (mode === "wrdl") {
+      const wres = await wrdlSolve(normalized);
+      if (wres.length === 0) setError("No words match these constraints.");
+      else setWrdlResults(wres);
       setSolving(false);
       return;
     }
@@ -1266,7 +1286,7 @@ function Index() {
         <div ref={topPillRef} className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall";
-            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble";
+            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation";
             const inLadder = !isMath && !inSearch && !inLogic;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : s.id === "logic" ? inLogic : inLadder;
@@ -1318,12 +1338,12 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble") && (
+        {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl") && (
           <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
-                  ? mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble"
+                  ? mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl"
                   : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind";
 
               return (
@@ -1344,7 +1364,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble") && (
+        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("wordle")}
@@ -1425,6 +1445,16 @@ function Index() {
               }`}
             >
               Worwordle
+            </button>
+            <button
+              onClick={() => switchMode("wrdl")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "wrdl"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Wrdl
             </button>
           </div>
         )}
@@ -1773,6 +1803,9 @@ function Index() {
           {mode === "doubledabble" && (
             <a href="https://double-dabble.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Double Dabble</a>
           )}
+          {mode === "wrdl" && (
+            <a href="https://wrdl-abae.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wrdl</a>
+          )}
         </div>
 
 
@@ -1845,6 +1878,17 @@ function Index() {
           <p className="mb-4 text-sm text-muted-foreground">
             Just like Wordle, but it lies to you once every row.
           </p>
+        )}
+
+        {mode === "wrdl" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Just like Wordle, but all the words are 5-letters long after getting rid of their vowels.</p>
+            <p>For example,</p>
+            <ul className="list-disc pl-5">
+              <li>CRMBL comes from CRUMBLE.</li>
+              <li>NSGHT comes from INSIGHT.</li>
+            </ul>
+          </div>
         )}
 
         {mode === "jeffgoldblum" && (
@@ -2765,7 +2809,7 @@ function Index() {
             );
           })()
 
-        ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle") ? (
+        ) : (mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "wrdl") ? (
 
           <>
           {mode === "splitle" && (
@@ -2786,7 +2830,7 @@ function Index() {
                 <span className="text-muted-foreground">strategic starting words.</span>
               </div>
             )}
-            {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && (
+            {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && mode !== "wrdl" && (
               <div className="flex items-center gap-2 text-sm">
                 <span>Optional input: Add</span>
                 <select
@@ -4646,6 +4690,59 @@ function Index() {
               </div>
             </div>
             <Paginator page={pageWordle} setPage={setPageWordle} total={wordleResults.length} />
+          </section>
+        )}
+
+        {wrdlResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {wrdlResults.length} possible {wrdlResults.length === 1 ? "answer" : "answers"}
+              </h2>
+              <button
+                onClick={() => {
+                  const lines = wrdlResults.map(([k, ws]) => `${k} | ${ws.join(", ")}`).join("\n");
+                  copyText(`${wrdlResults.length} possible ${wrdlResults.length === 1 ? "answer" : "answers"}:\n${lines}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all answers"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <div className="overflow-hidden rounded-lg border bg-card">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-semibold">Wrdl word</th>
+                    <th className="px-4 py-2 text-left font-semibold">Its original word</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {wrdlResults.slice(pageWrdl * 50, pageWrdl * 50 + 50).map(([key, words]) => (
+                    <tr key={key} className="font-mono">
+                      <td className="px-4 py-2 align-top">
+                        <button
+                          type="button"
+                          onClick={() => addWordleGuessFromAnswer(key)}
+                          className="rounded bg-muted px-2 py-1 font-bold tracking-widest hover:bg-accent hover:text-accent-foreground"
+                        >
+                          {key}
+                        </button>
+                      </td>
+                      <td className="px-4 py-2 align-top">
+                        <div className="flex flex-wrap gap-2">
+                          {words.map((w) => (
+                            <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Paginator page={pageWrdl} setPage={setPageWrdl} total={wrdlResults.length} />
           </section>
         )}
 

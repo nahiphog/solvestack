@@ -10,7 +10,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "shuntle" | "splitle" | "blunderwall" | "doubledabble";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "shuntle" | "splitle" | "blunderwall" | "doubledabble" | "wrdl";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -50,6 +50,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   splitle: 5,
   blunderwall: 7,
   doubledabble: 5,
+  wrdl: 5,
   
   
 };
@@ -501,6 +502,36 @@ export async function wordleSolve(
     }),
   );
 }
+
+let _wrdlWordsCache: Record<string, string[]> | null = null;
+async function getWrdlWords(): Promise<Record<string, string[]>> {
+  if (_wrdlWordsCache) return _wrdlWordsCache;
+  const mod = await import("@/data/wrdlWords.json");
+  _wrdlWordsCache = mod.default as Record<string, string[]>;
+  return _wrdlWordsCache;
+}
+
+export async function isValidWrdlKey(w: string): Promise<boolean> {
+  const map = await getWrdlWords();
+  return Object.prototype.hasOwnProperty.call(map, w.toUpperCase());
+}
+
+export async function wrdlSolve(
+  guesses: { word: string; pattern: WordleColor[] }[],
+): Promise<[string, string[]][]> {
+  const map = await getWrdlWords();
+  const keys = Object.keys(map);
+  const matched = keys.filter((answer) =>
+    guesses.every((g) => {
+      const out = wordleOutput(g.word, answer);
+      for (let i = 0; i < out.length; i++) if (out[i] !== g.pattern[i]) return false;
+      return true;
+    }),
+  );
+  return matched.map((k) => [k, map[k]]);
+}
+
+
 
 export async function fibbleSolve(
   guesses: { word: string; pattern: WordleColor[] }[],
