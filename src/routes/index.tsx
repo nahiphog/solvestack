@@ -4419,7 +4419,7 @@ function Index() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <SudokuCopyBoard board={board} />
+
                   <Button
                     onClick={() => {
                       setBoard(Array.from({ length: 9 }, () => Array(9).fill("")));
