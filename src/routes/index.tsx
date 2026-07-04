@@ -924,6 +924,14 @@ function Index() {
       return;
     }
 
+    if (mode === "wrdl") {
+      const wres = await wrdlSolve(normalized);
+      if (wres.length === 0) setError("No words match these constraints.");
+      else setWrdlResults(wres);
+      setSolving(false);
+      return;
+    }
+
     const result =
       mode === "fibble" ? await fibbleSolve(normalized)
       : mode === "jeffgoldblum" ? await jeffGoldblumLeSolve(normalized)
