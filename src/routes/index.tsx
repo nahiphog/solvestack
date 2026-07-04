@@ -1487,6 +1487,16 @@ function Index() {
         {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             <button
+              onClick={() => switchMode("blunderwall")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "blunderwall"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Blunderwall
+            </button>
+            <button
               onClick={() => switchMode("dodeku")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "dodeku"
@@ -1505,16 +1515,6 @@ function Index() {
               }`}
             >
               Sheetdoku
-            </button>
-            <button
-              onClick={() => switchMode("blunderwall")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "blunderwall"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Blunderwall
             </button>
           </div>
         )}
