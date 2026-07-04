@@ -4294,13 +4294,13 @@ function Index() {
                 {isVar && (
                   <div className="space-y-2 text-sm">
                     {[
-                      { state: sudokuVarKnight, set: setSudokuVarKnight, label: "Anti-knight", desc: "Cells separated by a chess knight's move cannot contain the same digit." },
                       { state: sudokuVarKing, set: setSudokuVarKing, label: "Anti-king", desc: "Cells separated by a chess king's move cannot contain the same digit." },
+                      { state: sudokuVarKnight, set: setSudokuVarKnight, label: "Anti-knight", desc: "Cells separated by a chess knight's move cannot contain the same digit." },
                       { state: sudokuVarDiagonal, set: setSudokuVarDiagonal, label: "Diagonal", desc: "The two main diagonals contain the digits 1 through 9 exactly once each." },
+                      { state: sudokuVarDisjoint, set: setSudokuVarDisjoint, label: "Disjoint groups", desc: "Digits cannot repeat relative to their respective positions in the 3×3 boxes." },
+                      { state: sudokuVarIrregular, set: setSudokuVarIrregular, label: "Irregular", desc: "Each colored region contains each digit from 1-9 exactly once." },
                       { state: sudokuVarNonConsec, set: setSudokuVarNonConsec, label: "Non-consecutive", desc: "Consecutive digits may not be orthogonally adjacent to each other.", beta: true },
                       { state: sudokuVarWindoku, set: setSudokuVarWindoku, label: "Windoku", desc: "In addition to normal Sudoku rules. The digits 1 through 9 must each appear exactly once in each of the four additional boxes." },
-                      { state: sudokuVarIrregular, set: setSudokuVarIrregular, label: "Irregular", desc: "Each colored region contains each digit from 1-9 exactly once." },
-                      { state: sudokuVarDisjoint, set: setSudokuVarDisjoint, label: "Disjoint groups", desc: "Digits cannot repeat relative to their respective positions in the 9×3×3 boxes." },
                     ].map((opt) => (
                       <label key={opt.label} className="flex items-start gap-2 cursor-pointer">
                         <input
