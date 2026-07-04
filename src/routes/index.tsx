@@ -513,6 +513,7 @@ function Index() {
     setPaths(null);
     setWordiplyResults(null);
     setWordleResults(null);
+    setWrdlResults(null);
     setSplitleResults(null);
     setSplitleExpanded({});
     setSpellingBeeResults(null);
