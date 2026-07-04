@@ -1880,6 +1880,17 @@ function Index() {
           </p>
         )}
 
+        {mode === "wrdl" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Just like Wordle, but all the words are 5-letters long after getting rid of their vowels.</p>
+            <p>For example,</p>
+            <ul className="list-disc pl-5">
+              <li>CRMBL comes from CRUMBLE.</li>
+              <li>NSGHT comes from INSIGHT.</li>
+            </ul>
+          </div>
+        )}
+
         {mode === "jeffgoldblum" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Enter Wordle-style 12-letter guesses, but you only have 3 tries, and it also accepts "JEFFGOLDBLUM".
