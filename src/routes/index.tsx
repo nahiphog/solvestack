@@ -334,6 +334,20 @@ function Index() {
     }
   };
 
+  const [wrdlStartingWords, setWrdlStartingWords] = useState<0 | 2 | 3>(0);
+  const applyWrdlStartingWords = (count: 0 | 2 | 3) => {
+    setWrdlStartingWords(count);
+    const words = count === 2 ? ["CHRSM", "WLKNG"] : count === 3 ? ["BSHNG", "MPLFR", "DJCTV"] : [];
+    if (words.length > 0) {
+      setWordleGuesses((prev) => [
+        ...prev.filter((g) => !isEmptyGuessWord(g.word)),
+        ...words.map((w) => ({ word: w, pattern: Array(5).fill("GREY") as WordleColor[] })),
+      ]);
+      setWordleResults(null);
+      setWrdlResults(null);
+    }
+  };
+
   const applySplitleStartingWords = async (count: 0 | 3) => {
     setSplitleStartingWords(count);
     if (count === 3) {
@@ -1625,6 +1639,8 @@ function Index() {
               <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Poople</a>
               <span>·</span>
               <a href="https://wordchains.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Chains</a>
+              <span>·</span>
+              <a href="https://www.wrdlink.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wrd Link</a>
             </div>
             <div className="mb-4 flex items-center gap-2 text-sm">
               <label htmlFor="word-length-select" className="text-muted-foreground">Word length:</label>
@@ -2953,6 +2969,21 @@ function Index() {
                 )}
               </div>
             ))}
+            {mode === "wrdl" && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Optional input: Add</span>
+                <select
+                  value={wrdlStartingWords}
+                  onChange={(e) => applyWrdlStartingWords(Number(e.target.value) as 0 | 2 | 3)}
+                  className="rounded border bg-background px-2 py-1 text-sm"
+                >
+                  <option value={0}>0</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                </select>
+                <span className="text-muted-foreground">strategic starting words.</span>
+              </div>
+            )}
             <div className="flex flex-wrap gap-3">
               <Button onClick={addGuessRow} variant="outline" size="lg">
                 Add guess
@@ -4294,13 +4325,13 @@ function Index() {
                 {isVar && (
                   <div className="space-y-2 text-sm">
                     {[
-                      { state: sudokuVarKnight, set: setSudokuVarKnight, label: "Anti-knight", desc: "Cells separated by a chess knight's move cannot contain the same digit." },
                       { state: sudokuVarKing, set: setSudokuVarKing, label: "Anti-king", desc: "Cells separated by a chess king's move cannot contain the same digit." },
+                      { state: sudokuVarKnight, set: setSudokuVarKnight, label: "Anti-knight", desc: "Cells separated by a chess knight's move cannot contain the same digit." },
                       { state: sudokuVarDiagonal, set: setSudokuVarDiagonal, label: "Diagonal", desc: "The two main diagonals contain the digits 1 through 9 exactly once each." },
+                      { state: sudokuVarDisjoint, set: setSudokuVarDisjoint, label: "Disjoint groups", desc: "Digits cannot repeat relative to their respective positions in the 3×3 boxes." },
+                      { state: sudokuVarIrregular, set: setSudokuVarIrregular, label: "Irregular", desc: "Each colored region contains each digit from 1-9 exactly once." },
                       { state: sudokuVarNonConsec, set: setSudokuVarNonConsec, label: "Non-consecutive", desc: "Consecutive digits may not be orthogonally adjacent to each other.", beta: true },
                       { state: sudokuVarWindoku, set: setSudokuVarWindoku, label: "Windoku", desc: "In addition to normal Sudoku rules. The digits 1 through 9 must each appear exactly once in each of the four additional boxes." },
-                      { state: sudokuVarIrregular, set: setSudokuVarIrregular, label: "Irregular", desc: "Each colored region contains each digit from 1-9 exactly once." },
-                      { state: sudokuVarDisjoint, set: setSudokuVarDisjoint, label: "Disjoint groups", desc: "Digits cannot repeat relative to their respective positions in the 9×3×3 boxes." },
                     ].map((opt) => (
                       <label key={opt.label} className="flex items-start gap-2 cursor-pointer">
                         <input
@@ -4336,6 +4367,9 @@ function Index() {
                   </div>
                 )}
                 <div>
+                  <div className="mb-2 flex flex-wrap gap-3">
+                    <SudokuCopyBoard board={board} />
+                  </div>
                   <div className="mb-2 text-sm font-medium">Grid (type 1–9; leave blank for empty){isVar && sudokuVarIrregular ? " · click cells to paint" : ""}</div>
                   <div className="relative inline-block border-[3px] border-black dark:border-white">
                     {board.map((row, r) => (
@@ -4416,7 +4450,7 @@ function Index() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <SudokuCopyBoard board={board} />
+
                   <Button
                     onClick={() => {
                       setBoard(Array.from({ length: 9 }, () => Array(9).fill("")));
