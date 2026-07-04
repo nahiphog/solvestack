@@ -1625,6 +1625,8 @@ function Index() {
               <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Poople</a>
               <span>·</span>
               <a href="https://wordchains.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Chains</a>
+              <span>·</span>
+              <a href="https://www.wrdlink.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wrd Link</a>
             </div>
             <div className="mb-4 flex items-center gap-2 text-sm">
               <label htmlFor="word-length-select" className="text-muted-foreground">Word length:</label>
