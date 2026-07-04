@@ -455,6 +455,7 @@ function Index() {
   const [sudokuVarNonConsec, setSudokuVarNonConsec] = useState(false);
   const [sudokuVarWindoku, setSudokuVarWindoku] = useState(false);
   const [sudokuVarIrregular, setSudokuVarIrregular] = useState(false);
+  const [sudokuVarDisjoint, setSudokuVarDisjoint] = useState(false);
   const [sudokuVarRegions, setSudokuVarRegions] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
   const [sudokuVarPaintColor, setSudokuVarPaintColor] = useState<number>(1);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
