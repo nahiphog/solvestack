@@ -694,7 +694,12 @@ function Index() {
         knight: sudokuVarKnight,
         diagonal: sudokuVarDiagonal,
         nonConsecutive: sudokuVarNonConsec,
-        extraRegions: sudokuVarWindoku ? WINDOKU_REGIONS : undefined,
+        extraRegions: (() => {
+          const layers: number[][][] = [];
+          if (sudokuVarWindoku) layers.push(WINDOKU_REGIONS);
+          if (sudokuVarDisjoint) layers.push(DISJOINT_REGIONS);
+          return layers.length ? layers : undefined;
+        })(),
       });
       if (res.length === 0) setError("No solutions found.");
       else setSudokuVarResults(res);
