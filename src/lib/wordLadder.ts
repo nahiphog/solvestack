@@ -193,7 +193,7 @@ export interface SudokuVariations {
   knight?: boolean;
   diagonal?: boolean;
   nonConsecutive?: boolean;
-  extraRegions?: number[][]; // 0 = no extra region; non-zero values group cells that must each be unique
+  extraRegions?: number[][] | number[][][]; // 0 = no extra region; non-zero values group cells that must each be unique. May be a single grid or an array of grids.
 }
 
 export function sudokuSolve(
@@ -207,9 +207,20 @@ export function sudokuSolve(
   const rowUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const colUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const regUsed: Map<number, Set<number>> = new Map();
-  const extraUsed: Map<number, Set<number>> = new Map();
   const { king, knight, diagonal, nonConsecutive, extraRegions } = variations;
-  const extraAt = (r: number, c: number): number => (extraRegions ? extraRegions[r][c] : 0);
+  // Normalize extraRegions into an array of grids
+  const extraLayers: number[][][] = (() => {
+    if (!extraRegions) return [];
+    const arr = extraRegions as unknown as (number[][] | number[][][]);
+    if (arr.length === 0) return [];
+    const first = arr[0] as unknown;
+    if (Array.isArray(first) && Array.isArray((first as unknown[])[0])) {
+      return arr as number[][][];
+    }
+    return [arr as number[][]];
+  })();
+  const extraUsedLayers: Map<number, Set<number>>[] = extraLayers.map(() => new Map());
+  const extraAt = (layerIdx: number, r: number, c: number): number => extraLayers[layerIdx][r][c] || 0;
 
   const inBounds = (r: number, c: number) => r >= 0 && r < N && c >= 0 && c < N;
   const checkExtra = (r: number, c: number, v: number): boolean => {
@@ -246,14 +257,22 @@ export function sudokuSolve(
   for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
     const reg = regions[r][c];
     if (!regUsed.has(reg)) regUsed.set(reg, new Set());
-    const er = extraAt(r, c);
-    if (er && !extraUsed.has(er)) extraUsed.set(er, new Set());
+    for (let li = 0; li < extraLayers.length; li++) {
+      const er = extraAt(li, r, c);
+      if (er && !extraUsedLayers[li].has(er)) extraUsedLayers[li].set(er, new Set());
+    }
     const v = b[r][c];
     if (v !== 0) {
       if (rowUsed[r].has(v) || colUsed[c].has(v) || regUsed.get(reg)!.has(v)) return [];
-      if (er && extraUsed.get(er)!.has(v)) return [];
+      for (let li = 0; li < extraLayers.length; li++) {
+        const er = extraAt(li, r, c);
+        if (er && extraUsedLayers[li].get(er)!.has(v)) return [];
+      }
       rowUsed[r].add(v); colUsed[c].add(v); regUsed.get(reg)!.add(v);
-      if (er) extraUsed.get(er)!.add(v);
+      for (let li = 0; li < extraLayers.length; li++) {
+        const er = extraAt(li, r, c);
+        if (er) extraUsedLayers[li].get(er)!.add(v);
+      }
     }
   }
   // Validate pre-filled against extras
@@ -278,15 +297,20 @@ export function sudokuSolve(
     const [r, c] = e;
     const reg = regions[r][c];
     const ru = rowUsed[r], cu = colUsed[c], gu = regUsed.get(reg)!;
-    const er = extraAt(r, c);
-    const eu = er ? extraUsed.get(er)! : null;
+    const eus: Set<number>[] = [];
+    for (let li = 0; li < extraLayers.length; li++) {
+      const er = extraAt(li, r, c);
+      if (er) eus.push(extraUsedLayers[li].get(er)!);
+    }
     for (let v = 1; v <= 9; v++) {
       if (ru.has(v) || cu.has(v) || gu.has(v)) continue;
-      if (eu && eu.has(v)) continue;
+      let blocked = false;
+      for (const eu of eus) if (eu.has(v)) { blocked = true; break; }
+      if (blocked) continue;
       if (!checkExtra(r, c, v)) continue;
-      b[r][c] = v; ru.add(v); cu.add(v); gu.add(v); if (eu) eu.add(v);
+      b[r][c] = v; ru.add(v); cu.add(v); gu.add(v); for (const eu of eus) eu.add(v);
       bt();
-      b[r][c] = 0; ru.delete(v); cu.delete(v); gu.delete(v); if (eu) eu.delete(v);
+      b[r][c] = 0; ru.delete(v); cu.delete(v); gu.delete(v); for (const eu of eus) eu.delete(v);
       if (solutions.length >= maxSolutions) return;
     }
   };

@@ -420,6 +420,17 @@ function Index() {
     [9,4,4,4,9,5,5,5,9],
     [1,6,6,6,1,7,7,7,1],
   ];
+  const DISJOINT_REGIONS: number[][] = [
+    [1,2,3,1,2,3,1,2,3],
+    [4,5,6,4,5,6,4,5,6],
+    [7,8,9,7,8,9,7,8,9],
+    [1,2,3,1,2,3,1,2,3],
+    [4,5,6,4,5,6,4,5,6],
+    [7,8,9,7,8,9,7,8,9],
+    [1,2,3,1,2,3,1,2,3],
+    [4,5,6,4,5,6,4,5,6],
+    [7,8,9,7,8,9,7,8,9],
+  ];
   const SUDOKU_DEFAULT: string[][] = [
     ["8","","","","","","","",""],
     ["","","3","6","","","","",""],
@@ -444,6 +455,7 @@ function Index() {
   const [sudokuVarNonConsec, setSudokuVarNonConsec] = useState(false);
   const [sudokuVarWindoku, setSudokuVarWindoku] = useState(false);
   const [sudokuVarIrregular, setSudokuVarIrregular] = useState(false);
+  const [sudokuVarDisjoint, setSudokuVarDisjoint] = useState(false);
   const [sudokuVarRegions, setSudokuVarRegions] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
   const [sudokuVarPaintColor, setSudokuVarPaintColor] = useState<number>(1);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
@@ -682,7 +694,12 @@ function Index() {
         knight: sudokuVarKnight,
         diagonal: sudokuVarDiagonal,
         nonConsecutive: sudokuVarNonConsec,
-        extraRegions: sudokuVarWindoku ? WINDOKU_REGIONS : undefined,
+        extraRegions: (() => {
+          const layers: number[][][] = [];
+          if (sudokuVarWindoku) layers.push(WINDOKU_REGIONS);
+          if (sudokuVarDisjoint) layers.push(DISJOINT_REGIONS);
+          return layers.length ? layers : undefined;
+        })(),
       });
       if (res.length === 0) setError("No solutions found.");
       else setSudokuVarResults(res);
@@ -1470,6 +1487,16 @@ function Index() {
         {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             <button
+              onClick={() => switchMode("blunderwall")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "blunderwall"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Blunderwall
+            </button>
+            <button
               onClick={() => switchMode("dodeku")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "dodeku"
@@ -1488,16 +1515,6 @@ function Index() {
               }`}
             >
               Sheetdoku
-            </button>
-            <button
-              onClick={() => switchMode("blunderwall")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "blunderwall"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Blunderwall
             </button>
           </div>
         )}
@@ -2712,12 +2729,14 @@ function Index() {
                                 const formatted = `[${keys.join(", ")}]`;
                                 const addAsGuess = () => {
                                   const w = words[0];
+                                  const newRow = { word: w, pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] };
                                   setDdGuesses((prev) => {
                                     const emptyIdx = prev.findIndex((g) => !g.word.trim());
-                                    const newRow = { word: w, pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] };
                                     if (emptyIdx !== -1) return prev.map((g, i) => (i === emptyIdx ? newRow : g));
                                     return [...prev, newRow];
                                   });
+                                  setDdResults(null);
+                                  setDdPerRowResults(null);
                                 };
                                 return (
                                   <tr key={tuple}>
@@ -4237,6 +4256,7 @@ function Index() {
                       { state: sudokuVarNonConsec, set: setSudokuVarNonConsec, label: "Non-consecutive", desc: "Consecutive digits may not be orthogonally adjacent to each other.", beta: true },
                       { state: sudokuVarWindoku, set: setSudokuVarWindoku, label: "Windoku", desc: "In addition to normal Sudoku rules. The digits 1 through 9 must each appear exactly once in each of the four additional boxes." },
                       { state: sudokuVarIrregular, set: setSudokuVarIrregular, label: "Irregular", desc: "Each colored region contains each digit from 1-9 exactly once." },
+                      { state: sudokuVarDisjoint, set: setSudokuVarDisjoint, label: "Disjoint groups", desc: "Digits cannot repeat relative to their respective positions in the 9×3×3 boxes." },
                     ].map((opt) => (
                       <label key={opt.label} className="flex items-start gap-2 cursor-pointer">
                         <input
