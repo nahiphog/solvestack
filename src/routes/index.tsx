@@ -2969,6 +2969,21 @@ function Index() {
                 )}
               </div>
             ))}
+            {mode === "wrdl" && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Optional input: Add</span>
+                <select
+                  value={wrdlStartingWords}
+                  onChange={(e) => applyWrdlStartingWords(Number(e.target.value) as 0 | 2 | 3)}
+                  className="rounded border bg-background px-2 py-1 text-sm"
+                >
+                  <option value={0}>0</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                </select>
+                <span className="text-muted-foreground">strategic starting words.</span>
+              </div>
+            )}
             <div className="flex flex-wrap gap-3">
               <Button onClick={addGuessRow} variant="outline" size="lg">
                 Add guess
