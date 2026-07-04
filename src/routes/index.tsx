@@ -4693,6 +4693,59 @@ function Index() {
           </section>
         )}
 
+        {wrdlResults && (
+          <section className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {wrdlResults.length} possible {wrdlResults.length === 1 ? "answer" : "answers"}
+              </h2>
+              <button
+                onClick={() => {
+                  const lines = wrdlResults.map(([k, ws]) => `${k} | ${ws.join(", ")}`).join("\n");
+                  copyText(`${wrdlResults.length} possible ${wrdlResults.length === 1 ? "answer" : "answers"}:\n${lines}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all answers"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
+            </div>
+            <div className="overflow-hidden rounded-lg border bg-card">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-semibold">Wrdl word</th>
+                    <th className="px-4 py-2 text-left font-semibold">Its original word</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {wrdlResults.slice(pageWrdl * 50, pageWrdl * 50 + 50).map(([key, words]) => (
+                    <tr key={key} className="font-mono">
+                      <td className="px-4 py-2 align-top">
+                        <button
+                          type="button"
+                          onClick={() => addWordleGuessFromAnswer(key)}
+                          className="rounded bg-muted px-2 py-1 font-bold tracking-widest hover:bg-accent hover:text-accent-foreground"
+                        >
+                          {key}
+                        </button>
+                      </td>
+                      <td className="px-4 py-2 align-top">
+                        <div className="flex flex-wrap gap-2">
+                          {words.map((w) => (
+                            <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Paginator page={pageWrdl} setPage={setPageWrdl} total={wrdlResults.length} />
+          </section>
+        )}
+
         {spellingBeeResults && (() => {
           const totalWords = spellingBeeResults.reduce((n, [, ws]) => n + ws.length, 0);
           const totalScore = spellingBeeResults.reduce((n, [score, ws]) => n + score * ws.length, 0);
