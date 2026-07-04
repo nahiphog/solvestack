@@ -2830,7 +2830,7 @@ function Index() {
                 <span className="text-muted-foreground">strategic starting words.</span>
               </div>
             )}
-            {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && (
+            {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && mode !== "wrdl" && (
               <div className="flex items-center gap-2 text-sm">
                 <span>Optional input: Add</span>
                 <select
