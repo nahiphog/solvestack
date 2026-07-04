@@ -50,6 +50,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   splitle: 5,
   blunderwall: 7,
   doubledabble: 5,
+  wrdl: 5,
   
   
 };
