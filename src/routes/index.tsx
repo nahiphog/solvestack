@@ -64,6 +64,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   splitle: { start: "", goal: "" },
   blunderwall: { start: "", goal: "" },
   doubledabble: { start: "", goal: "" },
+  wrdl: { start: "", goal: "" },
   
 
 };
