@@ -506,8 +506,8 @@ export async function wordleSolve(
 let _wrdlWordsCache: Record<string, string[]> | null = null;
 async function getWrdlWords(): Promise<Record<string, string[]>> {
   if (_wrdlWordsCache) return _wrdlWordsCache;
-  const mod = await import("@/data/wrdlWords.json");
-  _wrdlWordsCache = mod.default as Record<string, string[]>;
+  const res = await fetch("/wrdlWords.json");
+  _wrdlWordsCache = (await res.json()) as Record<string, string[]>;
   return _wrdlWordsCache;
 }
 
