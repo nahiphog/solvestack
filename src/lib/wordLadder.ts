@@ -193,7 +193,7 @@ export interface SudokuVariations {
   knight?: boolean;
   diagonal?: boolean;
   nonConsecutive?: boolean;
-  extraRegions?: number[][]; // 0 = no extra region; non-zero values group cells that must each be unique
+  extraRegions?: number[][] | number[][][]; // 0 = no extra region; non-zero values group cells that must each be unique. May be a single grid or an array of grids.
 }
 
 export function sudokuSolve(
