@@ -529,6 +529,9 @@ export async function wrdlSolve(
     }),
   );
   return matched.map((k) => [k, map[k]]);
+}
+
+
 
 export async function fibbleSolve(
   guesses: { word: string; pattern: WordleColor[] }[],
