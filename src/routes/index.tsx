@@ -334,6 +334,20 @@ function Index() {
     }
   };
 
+  const [wrdlStartingWords, setWrdlStartingWords] = useState<0 | 2 | 3>(0);
+  const applyWrdlStartingWords = (count: 0 | 2 | 3) => {
+    setWrdlStartingWords(count);
+    const words = count === 2 ? ["CHRSM", "WLKNG"] : count === 3 ? ["BSHNG", "MPLFR", "DJCTV"] : [];
+    if (words.length > 0) {
+      setWordleGuesses((prev) => [
+        ...prev.filter((g) => !isEmptyGuessWord(g.word)),
+        ...words.map((w) => ({ word: w, pattern: Array(5).fill("GREY") as WordleColor[] })),
+      ]);
+      setWordleResults(null);
+      setWrdlResults(null);
+    }
+  };
+
   const applySplitleStartingWords = async (count: 0 | 3) => {
     setSplitleStartingWords(count);
     if (count === 3) {
