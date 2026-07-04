@@ -4336,6 +4336,9 @@ function Index() {
                   </div>
                 )}
                 <div>
+                  <div className="mb-2 flex flex-wrap gap-3">
+                    <SudokuCopyBoard board={board} />
+                  </div>
                   <div className="mb-2 text-sm font-medium">Grid (type 1–9; leave blank for empty){isVar && sudokuVarIrregular ? " · click cells to paint" : ""}</div>
                   <div className="relative inline-block border-[3px] border-black dark:border-white">
                     {board.map((row, r) => (
