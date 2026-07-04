@@ -904,6 +904,11 @@ function Index() {
           errFn(`"${w}" is not a valid Splitle half (must match the first or last 5 letters of some 10-letter English word).`);
           return;
         }
+      } else if (mode === "wrdl") {
+        if (!(await isValidWrdlKey(w))) {
+          errFn(`"${w}" is not a valid Wrdl word.`);
+          return;
+        }
       } else if (!(await isValid5LetterWord(w))) {
         errFn(`"${w}" is not a valid 5-letter English word.`);
         return;
