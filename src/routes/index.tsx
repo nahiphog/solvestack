@@ -4756,7 +4756,7 @@ function Index() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {wrdlResults.slice(pageWrdl * 50, pageWrdl * 50 + 50).map(([key, words]) => (
+                  {[...wrdlResults].sort((a, b) => b[1].length - a[1].length).slice(pageWrdl * 50, pageWrdl * 50 + 50).map(([key, words]) => (
                     <tr key={key} className="font-mono">
                       <td className="px-4 py-2 align-top">
                         <button
@@ -4767,13 +4767,7 @@ function Index() {
                           {key}
                         </button>
                       </td>
-                      <td className="px-4 py-2 align-top">
-                        <div className="flex flex-wrap gap-2">
-                          {words.map((w) => (
-                            <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
-                          ))}
-                        </div>
-                      </td>
+                      <td className="px-4 py-2 align-top">{words.join(", ")}</td>
                     </tr>
                   ))}
                 </tbody>
