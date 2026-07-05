@@ -147,6 +147,16 @@ function Index() {
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
+  const [wrdlWordMap, setWrdlWordMap] = useState<Record<string, string[]> | null>(null);
+  useEffect(() => {
+    if (wrdlWordMap) return;
+    let cancelled = false;
+    fetch("/wrdlWords.json")
+      .then((r) => r.json())
+      .then((m: Record<string, string[]>) => { if (!cancelled) setWrdlWordMap(m); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [wrdlWordMap]);
   const [splitleResults, setSplitleResults] = useState<[string, string[]][] | null>(null);
   const [splitleStartingWords, setSplitleStartingWords] = useState<0 | 3>(0);
   const [splitleExpanded, setSplitleExpanded] = useState<Record<string, boolean>>({});
@@ -1898,7 +1908,7 @@ function Index() {
 
         {mode === "wrdl" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
-            <p>Just like Wordle, but all the words are 5-letters long after getting rid of their vowels.</p>
+            <p>Just like Wordle, but all the words are 5-letters long after getting rid of their vowels. For this puzzle, "Y" is always considered a vowel.</p>
             <p>For example,</p>
             <ul className="list-disc pl-5">
               <li>CRMBL comes from CRUMBLE.</li>
