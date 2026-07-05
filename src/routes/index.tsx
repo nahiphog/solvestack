@@ -4738,7 +4738,7 @@ function Index() {
               </h2>
               <button
                 onClick={() => {
-                  const lines = wrdlResults.map(([k, ws]) => `${k} | ${ws.join(", ")}`).join("\n");
+                  const lines = [...wrdlResults].sort((a, b) => b[1].length - a[1].length).map(([k, ws]) => `${k} | ${ws.join(", ")}`).join("\n");
                   copyText(`${wrdlResults.length} possible ${wrdlResults.length === 1 ? "answer" : "answers"}:\n${lines}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
