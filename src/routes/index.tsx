@@ -3056,7 +3056,7 @@ function Index() {
                     </h2>
                     <button
                       onClick={() => {
-                        const lines = sorted.map(([k, ws]) => `${k} | ${ws.length} | ${ws.join(", ")}`).join("\n");
+                        const lines = sorted.map(([k, ws]) => `${k} | ${ws.join(", ")}`).join("\n");
                         copyText(`${sorted.length} possible ${sorted.length === 1 ? "half" : "halves"}:\n${lines}\n\nSolved via ${window.location.href}.`);
                       }}
                       className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
@@ -3066,39 +3066,21 @@ function Index() {
                     </button>
                   </div>
                   <div className="rounded-lg border bg-card divide-y">
-                    {sorted.map(([key, words]) => {
-                      const open = !!splitleExpanded[key];
-                      return (
-                        <div key={key} className="p-3 font-mono text-sm">
-                          <div className="flex flex-wrap items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => addWordleGuessFromAnswer(key)}
-                              className="rounded bg-muted px-2 py-1 font-bold tracking-widest hover:bg-accent hover:text-accent-foreground"
-                            >
-                              {key}
-                            </button>
-                            <span className="text-muted-foreground">|</span>
-                            <span>{words.length} {words.length === 1 ? "word" : "words"}</span>
-                            <span className="text-muted-foreground">|</span>
-                            <button
-                              type="button"
-                              onClick={() => setSplitleExpanded((p) => ({ ...p, [key]: !p[key] }))}
-                              className="text-blue-600 hover:underline"
-                            >
-                              {open ? "Hide" : "Show all such words"}
-                            </button>
-                          </div>
-                          {open && (
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {words.map((w) => (
-                                <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
-                              ))}
-                            </div>
-                          )}
+                    {sorted.map(([key, words]) => (
+                      <div key={key} className="p-3 font-mono text-sm">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => addWordleGuessFromAnswer(key)}
+                            className="rounded bg-muted px-2 py-1 font-bold tracking-widest hover:bg-accent hover:text-accent-foreground"
+                          >
+                            {key}
+                          </button>
+                          <span className="text-muted-foreground">|</span>
+                          <span>{words.join(", ")}</span>
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 </section>
               );
