@@ -2902,8 +2902,23 @@ function Index() {
                 <span className="text-muted-foreground">word into the solver.</span>
               </div>
             )}
+            {mode === "wrdl" && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Optional input: Add</span>
+                <select
+                  value={wrdlStartingWords}
+                  onChange={(e) => applyWrdlStartingWords(Number(e.target.value) as 0 | 2 | 3)}
+                  className="rounded border bg-background px-2 py-1 text-sm"
+                >
+                  <option value={0}>0</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                </select>
+                <span className="text-muted-foreground">strategic starting words.</span>
+              </div>
+            )}
             {wordleGuesses.map((g, gi) => (
-              <div key={gi} className="flex items-center gap-3">
+              <div key={gi} className="flex flex-wrap items-center gap-3">
                 <div className="flex gap-1.5">
                   {Array.from({ length: wordleTileLen }).map((_, ti) => {
                     const rawChar = g.word[ti] || "";
@@ -2977,23 +2992,19 @@ function Index() {
                 {wordleGuesses.length > 1 && (
                   <Button onClick={() => removeGuessRow(gi)} variant="outline" size="sm">×</Button>
                 )}
+                {mode === "wrdl" && (() => {
+                  const wordUp = g.word.toUpperCase();
+                  if (wordUp.length !== 5 || !wrdlWordMap) return null;
+                  const matches = wrdlWordMap[wordUp];
+                  if (!matches) return <span className="font-mono text-sm text-muted-foreground">no matches</span>;
+                  return (
+                    <div className="flex flex-col font-mono text-sm text-muted-foreground">
+                      {matches.map((m) => <span key={m}>{m}</span>)}
+                    </div>
+                  );
+                })()}
               </div>
             ))}
-            {mode === "wrdl" && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Optional input: Add</span>
-                <select
-                  value={wrdlStartingWords}
-                  onChange={(e) => applyWrdlStartingWords(Number(e.target.value) as 0 | 2 | 3)}
-                  className="rounded border bg-background px-2 py-1 text-sm"
-                >
-                  <option value={0}>0</option>
-                  <option value={2}>2</option>
-                  <option value={3}>3</option>
-                </select>
-                <span className="text-muted-foreground">strategic starting words.</span>
-              </div>
-            )}
             <div className="flex flex-wrap gap-3">
               <Button onClick={addGuessRow} variant="outline" size="lg">
                 Add guess
