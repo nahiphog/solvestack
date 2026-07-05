@@ -147,6 +147,16 @@ function Index() {
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
+  const [wrdlWordMap, setWrdlWordMap] = useState<Record<string, string[]> | null>(null);
+  useEffect(() => {
+    if (wrdlWordMap) return;
+    let cancelled = false;
+    fetch("/wrdlWords.json")
+      .then((r) => r.json())
+      .then((m: Record<string, string[]>) => { if (!cancelled) setWrdlWordMap(m); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [wrdlWordMap]);
   const [splitleResults, setSplitleResults] = useState<[string, string[]][] | null>(null);
   const [splitleStartingWords, setSplitleStartingWords] = useState<0 | 3>(0);
   const [splitleExpanded, setSplitleExpanded] = useState<Record<string, boolean>>({});
@@ -1898,7 +1908,7 @@ function Index() {
 
         {mode === "wrdl" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
-            <p>Just like Wordle, but all the words are 5-letters long after getting rid of their vowels.</p>
+            <p>Just like Wordle, but all the words are 5-letters long after getting rid of their vowels. For this puzzle, "Y" is always considered a vowel.</p>
             <p>For example,</p>
             <ul className="list-disc pl-5">
               <li>CRMBL comes from CRUMBLE.</li>
@@ -2892,8 +2902,23 @@ function Index() {
                 <span className="text-muted-foreground">word into the solver.</span>
               </div>
             )}
+            {mode === "wrdl" && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Optional input: Add</span>
+                <select
+                  value={wrdlStartingWords}
+                  onChange={(e) => applyWrdlStartingWords(Number(e.target.value) as 0 | 2 | 3)}
+                  className="rounded border bg-background px-2 py-1 text-sm"
+                >
+                  <option value={0}>0</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                </select>
+                <span className="text-muted-foreground">strategic starting words.</span>
+              </div>
+            )}
             {wordleGuesses.map((g, gi) => (
-              <div key={gi} className="flex items-center gap-3">
+              <div key={gi} className="flex flex-wrap items-center gap-3">
                 <div className="flex gap-1.5">
                   {Array.from({ length: wordleTileLen }).map((_, ti) => {
                     const rawChar = g.word[ti] || "";
@@ -2967,23 +2992,19 @@ function Index() {
                 {wordleGuesses.length > 1 && (
                   <Button onClick={() => removeGuessRow(gi)} variant="outline" size="sm">×</Button>
                 )}
+                {mode === "wrdl" && (() => {
+                  const wordUp = g.word.toUpperCase();
+                  if (wordUp.length !== 5 || !wrdlWordMap) return null;
+                  const matches = wrdlWordMap[wordUp];
+                  if (!matches) return <span className="font-mono text-sm text-muted-foreground">no matches</span>;
+                  return (
+                    <div className="flex flex-col font-mono text-sm text-muted-foreground">
+                      {matches.map((m) => <span key={m}>{m}</span>)}
+                    </div>
+                  );
+                })()}
               </div>
             ))}
-            {mode === "wrdl" && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Optional input: Add</span>
-                <select
-                  value={wrdlStartingWords}
-                  onChange={(e) => applyWrdlStartingWords(Number(e.target.value) as 0 | 2 | 3)}
-                  className="rounded border bg-background px-2 py-1 text-sm"
-                >
-                  <option value={0}>0</option>
-                  <option value={2}>2</option>
-                  <option value={3}>3</option>
-                </select>
-                <span className="text-muted-foreground">strategic starting words.</span>
-              </div>
-            )}
             <div className="flex flex-wrap gap-3">
               <Button onClick={addGuessRow} variant="outline" size="lg">
                 Add guess
@@ -3035,7 +3056,7 @@ function Index() {
                     </h2>
                     <button
                       onClick={() => {
-                        const lines = sorted.map(([k, ws]) => `${k} | ${ws.length} | ${ws.join(", ")}`).join("\n");
+                        const lines = sorted.map(([k, ws]) => `${k} | ${ws.join(", ")}`).join("\n");
                         copyText(`${sorted.length} possible ${sorted.length === 1 ? "half" : "halves"}:\n${lines}\n\nSolved via ${window.location.href}.`);
                       }}
                       className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
@@ -3045,39 +3066,21 @@ function Index() {
                     </button>
                   </div>
                   <div className="rounded-lg border bg-card divide-y">
-                    {sorted.map(([key, words]) => {
-                      const open = !!splitleExpanded[key];
-                      return (
-                        <div key={key} className="p-3 font-mono text-sm">
-                          <div className="flex flex-wrap items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => addWordleGuessFromAnswer(key)}
-                              className="rounded bg-muted px-2 py-1 font-bold tracking-widest hover:bg-accent hover:text-accent-foreground"
-                            >
-                              {key}
-                            </button>
-                            <span className="text-muted-foreground">|</span>
-                            <span>{words.length} {words.length === 1 ? "word" : "words"}</span>
-                            <span className="text-muted-foreground">|</span>
-                            <button
-                              type="button"
-                              onClick={() => setSplitleExpanded((p) => ({ ...p, [key]: !p[key] }))}
-                              className="text-blue-600 hover:underline"
-                            >
-                              {open ? "Hide" : "Show all such words"}
-                            </button>
-                          </div>
-                          {open && (
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {words.map((w) => (
-                                <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
-                              ))}
-                            </div>
-                          )}
+                    {sorted.map(([key, words]) => (
+                      <div key={key} className="p-3 font-mono text-sm">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => addWordleGuessFromAnswer(key)}
+                            className="rounded bg-muted px-2 py-1 font-bold tracking-widest hover:bg-accent hover:text-accent-foreground"
+                          >
+                            {key}
+                          </button>
+                          <span className="text-muted-foreground">|</span>
+                          <span>{words.join(", ")}</span>
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 </section>
               );
@@ -4735,7 +4738,7 @@ function Index() {
               </h2>
               <button
                 onClick={() => {
-                  const lines = wrdlResults.map(([k, ws]) => `${k} | ${ws.join(", ")}`).join("\n");
+                  const lines = [...wrdlResults].sort((a, b) => b[1].length - a[1].length).map(([k, ws]) => `${k} | ${ws.join(", ")}`).join("\n");
                   copyText(`${wrdlResults.length} possible ${wrdlResults.length === 1 ? "answer" : "answers"}:\n${lines}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
@@ -4753,7 +4756,7 @@ function Index() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {wrdlResults.slice(pageWrdl * 50, pageWrdl * 50 + 50).map(([key, words]) => (
+                  {[...wrdlResults].sort((a, b) => b[1].length - a[1].length).slice(pageWrdl * 50, pageWrdl * 50 + 50).map(([key, words]) => (
                     <tr key={key} className="font-mono">
                       <td className="px-4 py-2 align-top">
                         <button
@@ -4764,13 +4767,7 @@ function Index() {
                           {key}
                         </button>
                       </td>
-                      <td className="px-4 py-2 align-top">
-                        <div className="flex flex-wrap gap-2">
-                          {words.map((w) => (
-                            <span key={w} className="rounded bg-muted px-2 py-1 tracking-widest">{w}</span>
-                          ))}
-                        </div>
-                      </td>
+                      <td className="px-4 py-2 align-top">{words.join(", ")}</td>
                     </tr>
                   ))}
                 </tbody>
