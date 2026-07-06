@@ -3298,6 +3298,7 @@ function Index() {
                       <Button
                         onClick={() => {
                           setSplitleP2Guesses([...splitleP2Guesses, { word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }]);
+                          setSplitleP2Results(null);
                         }}
                         variant="outline"
                       >
