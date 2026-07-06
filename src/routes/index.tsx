@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useState } from "react";
-import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, spellingBeeSolve, splitleP2Solve, splitleSolve, sudokuSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, spellingBeeSolve, splitleP2Solve, splitleSolve, sudokuSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   blunderwall: { start: "", goal: "" },
   doubledabble: { start: "", goal: "" },
   wrdl: { start: "", goal: "" },
+  threepeat: { start: "", goal: "" },
   
 
 };
@@ -148,6 +149,10 @@ function Index() {
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
   const [wrdlWordMap, setWrdlWordMap] = useState<Record<string, string[]> | null>(null);
+  const [threepeatWords, setThreepeatWords] = useState<[string, string, string]>(["", "", ""]);
+  const [threepeatResults, setThreepeatResults] = useState<ThreepeatSolution[] | null>(null);
+  const [threepeatError, setThreepeatError] = useState<string | null>(null);
+  const [threepeatSolving, setThreepeatSolving] = useState(false);
   useEffect(() => {
     if (wrdlWordMap) return;
     let cancelled = false;
@@ -555,6 +560,8 @@ function Index() {
     setError(null);
     setSplitleP1Error(null);
     setDdError(null);
+    setThreepeatResults(null);
+    setThreepeatError(null);
 
     if (m === "fibble") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
@@ -976,6 +983,7 @@ function Index() {
         return { ...g, pattern: next };
       }),
     );
+    setSplitleResults(null);
   };
 
   const setGuessLetter = (gi: number, ti: number, ch: string) => {
@@ -991,6 +999,7 @@ function Index() {
         return { ...g, word: mode === "shuntle" ? joined : joined.replace(/ +$/, "") };
       }),
     );
+    setSplitleResults(null);
   };
 
   const focusTile = (gi: number, ti: number) => {
@@ -1003,6 +1012,7 @@ function Index() {
   const addGuessRow = () => {
     const initialWord = mode === "shuntle" ? " ".repeat(7) : "";
     setWordleGuesses((prev) => [...prev, { word: initialWord, pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] }]);
+    setSplitleResults(null);
   };
 
 
@@ -1087,6 +1097,7 @@ function Index() {
         return { ...g, pattern: next };
       }),
     );
+    setFlResults(null);
   };
   const setFlLetter = (gi: number, ti: number, ch: string) => {
     const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
@@ -1098,6 +1109,7 @@ function Index() {
         return { ...g, word: padded.join("").replace(/ +$/, "") };
       }),
     );
+    setFlResults(null);
   };
   const focusFlTile = (gi: number, ti: number) => {
     if (ti < 0 || ti > 4) return;
@@ -1107,9 +1119,11 @@ function Index() {
   };
   const addFlRow = () => {
     setFlGuesses((prev) => [...prev, { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    setFlResults(null);
   };
   const removeFlRow = (gi: number) => {
     setFlGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
+    setFlResults(null);
   };
 
   const solveFlippingLetters = async () => {
@@ -1310,7 +1324,7 @@ function Index() {
         <div ref={topPillRef} className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall";
-            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl";
+            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "threepeat";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation";
             const inLadder = !isMath && !inSearch && !inLogic;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : s.id === "logic" ? inLogic : inLadder;
@@ -1362,13 +1376,13 @@ function Index() {
           </div>
         )}
 
-        {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl") && (
+        {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "threepeat") && (
           <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
             {SEARCH_MODES.map((m) => {
               const isActive =
                 m.id === "wordle"
                   ? mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl"
-                  : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind";
+                  : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind" || mode === "threepeat";
 
               return (
                 <button
@@ -1483,7 +1497,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind") && (
+        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind" || mode === "threepeat") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("marbless")}
@@ -1514,6 +1528,16 @@ function Index() {
               }`}
             >
               Spelling Bee
+            </button>
+            <button
+              onClick={() => switchMode("threepeat")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "threepeat"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Threepeat
             </button>
             <button
               onClick={() => switchMode("wordpeaks")}
@@ -1832,6 +1856,9 @@ function Index() {
           {mode === "wrdl" && (
             <a href="https://wrdl-abae.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wrdl</a>
           )}
+          {mode === "threepeat" && (
+            <a href="https://onelook.com/threepeat" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Threepeat</a>
+          )}
         </div>
 
 
@@ -1915,6 +1942,12 @@ function Index() {
               <li>NSGHT comes from INSIGHT.</li>
             </ul>
           </div>
+        )}
+
+        {mode === "threepeat" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Type the same letters for all three words.
+          </p>
         )}
 
         {mode === "jeffgoldblum" && (
@@ -2212,7 +2245,20 @@ function Index() {
               </div>
             </div>
 
-            <div>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={() => {
+                  setFlLetters(["", "", "", "", "", "", "", "", "", ""]);
+                  setFlRevealed([false, false, false, false, false, false, false, false, false, false]);
+                  setFlResults(null);
+                  setError(null);
+                }}
+                variant="outline"
+                size="lg"
+                disabled={flLocked}
+              >
+                Clear all
+              </Button>
               <Button onClick={toggleFlLock} variant={flLocked ? "outline" : "default"} size="lg">
                 {flLocked ? "Unlock these letters" : "Lock these letters"}
               </Button>
@@ -3147,6 +3193,7 @@ function Index() {
                           const arr = [...splitleP2Colors];
                           arr[i] = nextC;
                           setSplitleP2Colors(arr);
+                          setSplitleP2Results(null);
                         }}
                         className={`h-12 w-12 rounded border-2 text-center text-lg font-bold uppercase text-white ${bg}`}
                       >
@@ -3180,6 +3227,7 @@ function Index() {
                               const next = [...splitleP2Guesses];
                               next[gi] = { ...g, pattern: nextP };
                               setSplitleP2Guesses(next);
+                              setSplitleP2Results(null);
                             };
                             return (
                               <input
@@ -3203,6 +3251,7 @@ function Index() {
                                   const next = [...splitleP2Guesses];
                                   next[gi] = { ...g, word: nextWord };
                                   setSplitleP2Guesses(next);
+                                  setSplitleP2Results(null);
                                   setSplitleP2Error(null);
                                   if (c && i < 4) {
                                     const el = document.getElementById(`splitle-p2-solve-${gi}-${i + 1}`) as HTMLInputElement | null;
@@ -3249,6 +3298,7 @@ function Index() {
                       <Button
                         onClick={() => {
                           setSplitleP2Guesses([...splitleP2Guesses, { word: "", pattern: ["GREY","GREY","GREY","GREY","GREY"] }]);
+                          setSplitleP2Results(null);
                         }}
                         variant="outline"
                       >
@@ -4477,6 +4527,116 @@ function Index() {
           })()
 
 
+        ) : mode === "threepeat" ? (
+          <div className="space-y-4">
+            <p className="text-sm font-medium">Enter three words (space to leave it blank):</p>
+            {[0, 1, 2].map((idx) => {
+              const word = threepeatWords[idx];
+              return (
+                <div key={idx} className="flex flex-wrap items-center gap-3">
+                  <span className="font-mono text-sm text-muted-foreground w-6">{idx + 1}.</span>
+                  <Input
+                    value={word}
+                    onChange={(e) => {
+                      const v = e.target.value.toUpperCase().replace(/[^A-Z ]/g, "");
+                      setThreepeatWords((prev) => {
+                        const next = [...prev] as [string, string, string];
+                        next[idx] = v;
+                        return next;
+                      });
+                      setThreepeatResults(null);
+                      setThreepeatError(null);
+                    }}
+                    className="font-mono text-lg uppercase tracking-widest w-[24ch]"
+                    placeholder="e.g. __IND"
+                  />
+                  <div className="flex flex-wrap gap-1">
+                    {word.split("").map((ch, i) => (
+                      <div
+                        key={i}
+                        className="flex h-10 w-10 items-center justify-center rounded border-2 border-border bg-muted font-mono text-lg font-bold uppercase"
+                      >
+                        {ch === " " ? "" : ch}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={() => {
+                  setThreepeatWords(["", "", ""]);
+                  setThreepeatResults(null);
+                  setThreepeatError(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button
+                onClick={async () => {
+                  setThreepeatError(null);
+                  setThreepeatResults(null);
+                  const [w1, w2, w3] = threepeatWords;
+                  if (!w1.length || !w2.length || !w3.length) {
+                    setThreepeatError("Please enter all three words.");
+                    return;
+                  }
+                  setThreepeatSolving(true);
+                  try {
+                    const res = await threepeatSolve(w1, w2, w3);
+                    if (res.length === 0) setThreepeatError("No solutions found.");
+                    else setThreepeatResults(res);
+                  } catch (e) {
+                    setThreepeatError(e instanceof Error ? e.message : String(e));
+                  } finally {
+                    setThreepeatSolving(false);
+                  }
+                }}
+                disabled={threepeatSolving}
+                size="lg"
+              >
+                {threepeatSolving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+            {threepeatError && (
+              <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {threepeatError}
+              </div>
+            )}
+            {threepeatResults && threepeatResults.length > 0 && (
+              <section className="mt-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h2 className="text-base font-semibold">
+                    {threepeatResults.length} possible {threepeatResults.length === 1 ? "solution" : "solutions"}
+                  </h2>
+                  <button
+                    onClick={() => {
+                      const lines = threepeatResults.map(([f, a, b, c]) => `${f} | ${a}, ${b}, ${c}`).join("\n");
+                      copyText(`${threepeatResults.length} possible ${threepeatResults.length === 1 ? "solution" : "solutions"}:\n${lines}\n\nSolved via ${window.location.href}.`);
+                    }}
+                    className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                    aria-label="Copy all solutions"
+                  >
+                    {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                  </button>
+                </div>
+                <div className="rounded-lg border bg-card divide-y">
+                  {threepeatResults.map(([fill, a, b, c]) => (
+                    <div key={fill} className="p-3 font-mono text-sm">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="rounded bg-muted px-2 py-1 font-bold tracking-widest">{fill}</span>
+                        <span className="text-muted-foreground">|</span>
+                        <span className="tracking-widest">{a}, {b}, {c}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
         ) : mode === "wordiply" ? (
 
 

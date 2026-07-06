@@ -10,7 +10,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "shuntle" | "splitle" | "blunderwall" | "doubledabble" | "wrdl";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "shuntle" | "splitle" | "blunderwall" | "doubledabble" | "wrdl" | "threepeat";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -51,6 +51,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   blunderwall: 7,
   doubledabble: 5,
   wrdl: 5,
+  threepeat: 0,
   
   
 };
@@ -855,4 +856,54 @@ export async function splitleP2Solve(
   );
   matching.sort();
   return matching.map((k) => [k, map[k]]);
+}
+
+export type ThreepeatSolution = [string, string, string, string];
+
+export async function threepeatSolve(
+  word1: string,
+  word2: string,
+  word3: string,
+): Promise<ThreepeatSolution[]> {
+  const norm = (w: string) =>
+    w.toUpperCase().split("").map((c) => (c === " " ? "_" : c)).join("");
+  const w1 = norm(word1);
+  const w2 = norm(word2);
+  const w3 = norm(word3);
+  const countBlanks = (s: string) => (s.match(/_/g) || []).length;
+  if (
+    countBlanks(w1) !== countBlanks(w2) ||
+    countBlanks(w2) !== countBlanks(w3)
+  ) {
+    throw new Error("The number of blanks in each of the three words are not equal.");
+  }
+  const words = await getAllEnglishWords();
+  const findFills = (pattern: string): Map<string, string> => {
+    const len = pattern.length;
+    const map = new Map<string, string>();
+    for (const raw of words) {
+      const w = raw.toUpperCase();
+      if (w.length !== len) continue;
+      let ok = true;
+      let fill = "";
+      for (let i = 0; i < len; i++) {
+        const p = pattern[i];
+        if (p === "_") fill += w[i];
+        else if (p !== w[i]) { ok = false; break; }
+      }
+      if (ok && !map.has(fill)) map.set(fill, w);
+    }
+    return map;
+  };
+  const m1 = findFills(w1);
+  const m2 = findFills(w2);
+  const m3 = findFills(w3);
+  const results: ThreepeatSolution[] = [];
+  for (const [fill, wA] of m1) {
+    const wB = m2.get(fill);
+    const wC = m3.get(fill);
+    if (wB && wC) results.push([fill, wA, wB, wC]);
+  }
+  results.sort((a, b) => a[0].localeCompare(b[0]));
+  return results;
 }
