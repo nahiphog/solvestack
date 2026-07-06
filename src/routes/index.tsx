@@ -2245,7 +2245,20 @@ function Index() {
               </div>
             </div>
 
-            <div>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={() => {
+                  setFlLetters(["", "", "", "", "", "", "", "", "", ""]);
+                  setFlRevealed([false, false, false, false, false, false, false, false, false, false]);
+                  setFlResults(null);
+                  setError(null);
+                }}
+                variant="outline"
+                size="lg"
+                disabled={flLocked}
+              >
+                Clear all
+              </Button>
               <Button onClick={toggleFlLock} variant={flLocked ? "outline" : "default"} size="lg">
                 {flLocked ? "Unlock these letters" : "Lock these letters"}
               </Button>
