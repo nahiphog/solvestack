@@ -3227,6 +3227,7 @@ function Index() {
                               const next = [...splitleP2Guesses];
                               next[gi] = { ...g, pattern: nextP };
                               setSplitleP2Guesses(next);
+                              setSplitleP2Results(null);
                             };
                             return (
                               <input
