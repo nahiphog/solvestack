@@ -1097,6 +1097,7 @@ function Index() {
         return { ...g, pattern: next };
       }),
     );
+    setFlResults(null);
   };
   const setFlLetter = (gi: number, ti: number, ch: string) => {
     const c = ch.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
@@ -1108,6 +1109,7 @@ function Index() {
         return { ...g, word: padded.join("").replace(/ +$/, "") };
       }),
     );
+    setFlResults(null);
   };
   const focusFlTile = (gi: number, ti: number) => {
     if (ti < 0 || ti > 4) return;
@@ -1117,9 +1119,11 @@ function Index() {
   };
   const addFlRow = () => {
     setFlGuesses((prev) => [...prev, { word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+    setFlResults(null);
   };
   const removeFlRow = (gi: number) => {
     setFlGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
+    setFlResults(null);
   };
 
   const solveFlippingLetters = async () => {
