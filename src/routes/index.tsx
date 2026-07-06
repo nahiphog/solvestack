@@ -4510,6 +4510,116 @@ function Index() {
           })()
 
 
+        ) : mode === "threepeat" ? (
+          <div className="space-y-4">
+            <p className="text-sm font-medium">Enter three words (space to leave it blank):</p>
+            {[0, 1, 2].map((idx) => {
+              const word = threepeatWords[idx];
+              return (
+                <div key={idx} className="flex flex-wrap items-center gap-3">
+                  <span className="font-mono text-sm text-muted-foreground w-6">{idx + 1}.</span>
+                  <Input
+                    value={word}
+                    onChange={(e) => {
+                      const v = e.target.value.toUpperCase().replace(/[^A-Z ]/g, "");
+                      setThreepeatWords((prev) => {
+                        const next = [...prev] as [string, string, string];
+                        next[idx] = v;
+                        return next;
+                      });
+                      setThreepeatResults(null);
+                      setThreepeatError(null);
+                    }}
+                    className="font-mono text-lg uppercase tracking-widest w-[24ch]"
+                    placeholder="e.g. __IND"
+                  />
+                  <div className="flex flex-wrap gap-1">
+                    {word.split("").map((ch, i) => (
+                      <div
+                        key={i}
+                        className="flex h-10 w-10 items-center justify-center rounded border-2 border-border bg-muted font-mono text-lg font-bold uppercase"
+                      >
+                        {ch === " " ? "" : ch}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={() => {
+                  setThreepeatWords(["", "", ""]);
+                  setThreepeatResults(null);
+                  setThreepeatError(null);
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Reset
+              </Button>
+              <Button
+                onClick={async () => {
+                  setThreepeatError(null);
+                  setThreepeatResults(null);
+                  const [w1, w2, w3] = threepeatWords;
+                  if (!w1.length || !w2.length || !w3.length) {
+                    setThreepeatError("Please enter all three words.");
+                    return;
+                  }
+                  setThreepeatSolving(true);
+                  try {
+                    const res = await threepeatSolve(w1, w2, w3);
+                    if (res.length === 0) setThreepeatError("No solutions found.");
+                    else setThreepeatResults(res);
+                  } catch (e) {
+                    setThreepeatError(e instanceof Error ? e.message : String(e));
+                  } finally {
+                    setThreepeatSolving(false);
+                  }
+                }}
+                disabled={threepeatSolving}
+                size="lg"
+              >
+                {threepeatSolving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+            {threepeatError && (
+              <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {threepeatError}
+              </div>
+            )}
+            {threepeatResults && threepeatResults.length > 0 && (
+              <section className="mt-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h2 className="text-base font-semibold">
+                    {threepeatResults.length} possible {threepeatResults.length === 1 ? "solution" : "solutions"}
+                  </h2>
+                  <button
+                    onClick={() => {
+                      const lines = threepeatResults.map(([f, a, b, c]) => `${f} | ${a}, ${b}, ${c}`).join("\n");
+                      copyText(`${threepeatResults.length} possible ${threepeatResults.length === 1 ? "solution" : "solutions"}:\n${lines}\n\nSolved via ${window.location.href}.`);
+                    }}
+                    className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                    aria-label="Copy all solutions"
+                  >
+                    {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                  </button>
+                </div>
+                <div className="rounded-lg border bg-card divide-y">
+                  {threepeatResults.map(([fill, a, b, c]) => (
+                    <div key={fill} className="p-3 font-mono text-sm">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="rounded bg-muted px-2 py-1 font-bold tracking-widest">{fill}</span>
+                        <span className="text-muted-foreground">|</span>
+                        <span className="tracking-widest">{a}, {b}, {c}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
         ) : mode === "wordiply" ? (
 
 
