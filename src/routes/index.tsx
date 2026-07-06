@@ -983,6 +983,7 @@ function Index() {
         return { ...g, pattern: next };
       }),
     );
+    setSplitleResults(null);
   };
 
   const setGuessLetter = (gi: number, ti: number, ch: string) => {
@@ -998,6 +999,7 @@ function Index() {
         return { ...g, word: mode === "shuntle" ? joined : joined.replace(/ +$/, "") };
       }),
     );
+    setSplitleResults(null);
   };
 
   const focusTile = (gi: number, ti: number) => {
@@ -1010,6 +1012,7 @@ function Index() {
   const addGuessRow = () => {
     const initialWord = mode === "shuntle" ? " ".repeat(7) : "";
     setWordleGuesses((prev) => [...prev, { word: initialWord, pattern: Array(wordleTileLen).fill("GREY") as WordleColor[] }]);
+    setSplitleResults(null);
   };
 
 
