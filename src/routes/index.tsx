@@ -1530,6 +1530,16 @@ function Index() {
               Spelling Bee
             </button>
             <button
+              onClick={() => switchMode("threepeat")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "threepeat"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Threepeat
+            </button>
+            <button
               onClick={() => switchMode("wordpeaks")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "wordpeaks"
