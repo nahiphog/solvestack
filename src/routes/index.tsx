@@ -149,6 +149,10 @@ function Index() {
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
   const [wrdlWordMap, setWrdlWordMap] = useState<Record<string, string[]> | null>(null);
+  const [threepeatWords, setThreepeatWords] = useState<[string, string, string]>(["", "", ""]);
+  const [threepeatResults, setThreepeatResults] = useState<ThreepeatSolution[] | null>(null);
+  const [threepeatError, setThreepeatError] = useState<string | null>(null);
+  const [threepeatSolving, setThreepeatSolving] = useState(false);
   useEffect(() => {
     if (wrdlWordMap) return;
     let cancelled = false;
