@@ -1856,6 +1856,9 @@ function Index() {
           {mode === "wrdl" && (
             <a href="https://wrdl-abae.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wrdl</a>
           )}
+          {mode === "threepeat" && (
+            <a href="https://onelook.com/threepeat" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Threepeat</a>
+          )}
         </div>
 
 
