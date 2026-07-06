@@ -51,6 +51,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   blunderwall: 7,
   doubledabble: 5,
   wrdl: 5,
+  threepeat: 0,
   
   
 };
