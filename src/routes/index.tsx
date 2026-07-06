@@ -3193,6 +3193,7 @@ function Index() {
                           const arr = [...splitleP2Colors];
                           arr[i] = nextC;
                           setSplitleP2Colors(arr);
+                          setSplitleP2Results(null);
                         }}
                         className={`h-12 w-12 rounded border-2 text-center text-lg font-bold uppercase text-white ${bg}`}
                       >
