@@ -1944,6 +1944,12 @@ function Index() {
           </div>
         )}
 
+        {mode === "threepeat" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Type the same letters for all three words.
+          </p>
+        )}
+
         {mode === "jeffgoldblum" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Enter Wordle-style 12-letter guesses, but you only have 3 tries, and it also accepts "JEFFGOLDBLUM".
