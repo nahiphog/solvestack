@@ -560,6 +560,8 @@ function Index() {
     setError(null);
     setSplitleP1Error(null);
     setDdError(null);
+    setThreepeatResults(null);
+    setThreepeatError(null);
 
     if (m === "fibble") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
