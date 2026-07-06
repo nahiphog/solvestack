@@ -65,6 +65,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   blunderwall: { start: "", goal: "" },
   doubledabble: { start: "", goal: "" },
   wrdl: { start: "", goal: "" },
+  threepeat: { start: "", goal: "" },
   
 
 };
