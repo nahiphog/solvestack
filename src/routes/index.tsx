@@ -3251,6 +3251,7 @@ function Index() {
                                   const next = [...splitleP2Guesses];
                                   next[gi] = { ...g, word: nextWord };
                                   setSplitleP2Guesses(next);
+                                  setSplitleP2Results(null);
                                   setSplitleP2Error(null);
                                   if (c && i < 4) {
                                     const el = document.getElementById(`splitle-p2-solve-${gi}-${i + 1}`) as HTMLInputElement | null;
