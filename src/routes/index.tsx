@@ -4616,33 +4616,26 @@ function Index() {
             <p className="text-sm font-medium">Enter three words (space to leave it blank):</p>
             {[0, 1, 2].map((idx) => {
               const word = threepeatWords[idx];
+              const tiles = [...word.split(""), ""];
               return (
                 <div key={idx} className="flex flex-wrap items-center gap-3">
                   <span className="font-mono text-sm text-muted-foreground w-6">{idx + 1}.</span>
-                  <Input
-                    value={word}
-                    onChange={(e) => {
-                      const v = e.target.value.toUpperCase().replace(/[^A-Z ]/g, "");
-                      setThreepeatWords((prev) => {
-                        const next = [...prev] as [string, string, string];
-                        next[idx] = v;
-                        return next;
-                      });
-                      setThreepeatResults(null);
-                      setThreepeatError(null);
-                    }}
-                    className="font-mono text-lg uppercase tracking-widest w-[24ch]"
-                    placeholder="e.g. __IND"
-                  />
                   <div className="flex flex-wrap gap-1">
-                    {word.split("").map((ch, i) => (
-                      <div
-                        key={i}
-                        className="flex h-10 w-10 items-center justify-center rounded border-2 border-border bg-muted font-mono text-lg font-bold uppercase"
-                      >
-                        {ch === " " ? "" : ch}
-                      </div>
-                    ))}
+                    {tiles.map((ch, i) => {
+                      const isBlank = !ch || ch === " ";
+                      return (
+                        <input
+                          key={i}
+                          id={`threepeat-${idx}-${i}`}
+                          type="text"
+                          maxLength={1}
+                          value={isBlank ? "" : ch}
+                          onChange={(e) => setThreepeatChar(idx, i, e.target.value)}
+                          onKeyDown={(e) => handleThreepeatKeyDown(idx, i, e)}
+                          className="flex h-10 w-10 items-center justify-center rounded border-2 border-border bg-muted text-center font-mono text-lg font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring"
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               );
