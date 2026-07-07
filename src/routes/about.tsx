@@ -37,7 +37,7 @@ function AboutPage() {
     try {
       await send({ data: { name, email, feedbackType, subject, description } });
       setStatus("sent");
-      setName(""); setEmail(""); setSubject(""); setDescription(""); setFeedbackType("Others");
+      setName(""); setEmail(""); setSubject(""); setDescription(""); setFeedbackType("General note");
     } catch (err) {
       setStatus("idle");
       setError(err instanceof Error ? err.message : "Failed to send feedback.");
