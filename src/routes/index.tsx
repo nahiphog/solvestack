@@ -1020,6 +1020,90 @@ function Index() {
     setWordleGuesses((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== gi) : prev));
   };
 
+  const setThreepeatChar = (rowIdx: number, tileIdx: number, raw: string) => {
+    const letter = raw.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+    const isSpace = raw === " ";
+    const isEmpty = raw === "";
+    const word = threepeatWords[rowIdx];
+    let nextWord = word;
+    let changed = false;
+    if (letter) {
+      if (tileIdx < word.length) {
+        nextWord = word.slice(0, tileIdx) + letter + word.slice(tileIdx + 1);
+      } else {
+        nextWord = word + letter;
+      }
+      changed = true;
+    } else if (isSpace) {
+      if (tileIdx < word.length) {
+        if (word[tileIdx] !== " ") {
+          nextWord = word.slice(0, tileIdx) + " " + word.slice(tileIdx + 1);
+          changed = true;
+        }
+      } else {
+        nextWord = word + " ";
+        changed = true;
+      }
+    } else if (isEmpty && tileIdx < word.length && word[tileIdx] !== " ") {
+      nextWord = word.slice(0, tileIdx) + " " + word.slice(tileIdx + 1);
+      changed = true;
+    }
+    if (!changed) return;
+    setThreepeatWords((prev) => {
+      const next = [...prev] as [string, string, string];
+      next[rowIdx] = nextWord;
+      return next;
+    });
+    setThreepeatResults(null);
+    setThreepeatError(null);
+    setTimeout(() => {
+      const el = document.getElementById(`threepeat-${rowIdx}-${tileIdx + 1}`) as HTMLInputElement | null;
+      if (el) el.focus();
+    }, 0);
+  };
+
+  const handleThreepeatKeyDown = (rowIdx: number, tileIdx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    const word = threepeatWords[rowIdx];
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      if (tileIdx === word.length) {
+        if (word.length === 0) return;
+        const nextWord = word.slice(0, -1);
+        setThreepeatWords((prev) => {
+          const next = [...prev] as [string, string, string];
+          next[rowIdx] = nextWord;
+          return next;
+        });
+        setThreepeatResults(null);
+        setThreepeatError(null);
+        setTimeout(() => {
+          const el = document.getElementById(`threepeat-${rowIdx}-${Math.max(0, word.length - 1)}`) as HTMLInputElement | null;
+          if (el) el.focus();
+        }, 0);
+      } else {
+        if (word[tileIdx] && word[tileIdx] !== " ") {
+          const nextWord = word.slice(0, tileIdx) + " " + word.slice(tileIdx + 1);
+          setThreepeatWords((prev) => {
+            const next = [...prev] as [string, string, string];
+            next[rowIdx] = nextWord;
+            return next;
+          });
+          setThreepeatResults(null);
+          setThreepeatError(null);
+        }
+        if (tileIdx > 0) {
+          setTimeout(() => {
+            const el = document.getElementById(`threepeat-${rowIdx}-${tileIdx - 1}`) as HTMLInputElement | null;
+            if (el) el.focus();
+          }, 0);
+        }
+      }
+    } else if (e.key === " ") {
+      e.preventDefault();
+      setThreepeatChar(rowIdx, tileIdx, " ");
+    }
+  };
+
   const solveWordPeaks = async () => {
     setError(null);
     setWordPeaksResults(null);
