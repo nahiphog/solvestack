@@ -4,7 +4,7 @@ import { z } from "zod";
 const FeedbackSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
   email: z.string().trim().email("Invalid email").max(255),
-  feedbackType: z.enum(["Bug report", "Suggestion", "Others"]),
+  feedbackType: z.enum(["General note", "Bug report", "Accessibility", "Press & partnership"]),
   subject: z.string().trim().min(1, "Subject is required").max(200),
   description: z.string().trim().min(1, "Description is required").max(500),
 });
@@ -20,9 +20,10 @@ export const submitFeedback = createServerFn({ method: "POST" })
     }
 
     const colorMap: Record<string, number> = {
+      "General note": 0x9ca3af,
       "Bug report": 0xef4444,
-      Suggestion: 0x3b82f6,
-      Others: 0x9ca3af,
+      Accessibility: 0x22c55e,
+      "Press & partnership": 0x3b82f6,
     };
 
     const payload = {

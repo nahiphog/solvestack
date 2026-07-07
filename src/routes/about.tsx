@@ -20,7 +20,7 @@ function AboutPage() {
   const send = useServerFn(submitFeedback);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [feedbackType, setFeedbackType] = useState<"Bug report" | "Suggestion" | "Others">("Others");
+  const [feedbackType, setFeedbackType] = useState<"General note" | "Bug report" | "Accessibility" | "Press & partnership">("General note");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -125,9 +125,10 @@ function AboutPage() {
                   onChange={(e) => setFeedbackType(e.target.value as typeof feedbackType)}
                   className="min-w-0 flex-1 rounded-md border bg-background px-3 py-2 text-sm"
                 >
+                  <option>General note</option>
                   <option>Bug report</option>
-                  <option>Suggestion</option>
-                  <option>Others</option>
+                  <option>Accessibility</option>
+                  <option>Press & partnership</option>
                 </select>
               </div>
               <div className="flex items-center gap-3 min-w-0">
