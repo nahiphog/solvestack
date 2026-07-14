@@ -146,6 +146,7 @@ function Index() {
     { word: "SLATE", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
+  const [wordleAcceptAllValid, setWordleAcceptAllValid] = useState(false);
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
   const [wrdlWordMap, setWrdlWordMap] = useState<Record<string, string[]> | null>(null);
