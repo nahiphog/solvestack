@@ -4684,64 +4684,34 @@ function Index() {
               return (
                 <div key={idx} className="flex flex-wrap items-center gap-3">
                   <span className="font-mono text-sm text-muted-foreground w-6">{idx + 1}.</span>
-                  <div className="relative flex flex-wrap gap-1 min-h-[40px]">
-                    <input
-                      id={`threepeat-${idx}-tail`}
-                      type="text"
-                      inputMode="text"
-                      maxLength={1}
-                      defaultValue=""
-                      onChange={(e) => {
-                        const raw = e.target.value;
-                        const letter = raw.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
-                        if (letter || raw === " ") {
-                          setThreepeatChar(idx, word.length, raw);
-                        }
-                        e.target.value = "";
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Backspace") {
-                          e.preventDefault();
-                          if (word.length > 0) {
-                            setThreepeatWords((prev) => {
-                              const next = [...prev] as [string, string, string];
-                              next[idx] = word.slice(0, -1);
-                              return next;
-                            });
-                            setThreepeatResults(null);
-                            setThreepeatError(null);
-                            setTimeout(() => {
-                              const lastIdx = Math.max(0, word.length - 2);
-                              const el = document.getElementById(`threepeat-${idx}-${lastIdx}`) as HTMLInputElement | null;
-                              if (el) el.focus();
-                            }, 0);
-                          }
-                        } else if (e.key === " ") {
-                          e.preventDefault();
-                          setThreepeatChar(idx, word.length, " ");
-                        }
-                      }}
-                      className="absolute inset-0 z-0 h-10 w-full opacity-0 cursor-text"
-                      aria-label="Add tile"
-                    />
-                    <div className="relative z-10 flex flex-wrap gap-1 pointer-events-none">
-                      {chars.map((ch, i) => {
-                        const isBlank = ch === " ";
-                        return (
-                          <input
-                            key={i}
-                            id={`threepeat-${idx}-${i}`}
-                            type="text"
-                            maxLength={1}
-                            value={isBlank ? "" : ch}
-                            placeholder={isBlank ? " " : undefined}
-                            onChange={(e) => setThreepeatChar(idx, i, e.target.value)}
-                            onKeyDown={(e) => handleThreepeatKeyDown(idx, i, e)}
-                            className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded border-2 border-border bg-muted text-center font-mono text-lg font-bold uppercase outline-none transition focus:ring-2 focus:ring-ring"
-                          />
-                        );
-                      })}
-                    </div>
+                  <input
+                    type="text"
+                    value={word}
+                    onChange={(e) => {
+                      const v = e.target.value.toUpperCase().replace(/[^A-Z ]/g, "");
+                      setThreepeatWords((prev) => {
+                        const next = [...prev] as [string, string, string];
+                        next[idx] = v;
+                        return next;
+                      });
+                      setThreepeatResults(null);
+                      setThreepeatError(null);
+                    }}
+                    placeholder="e.g. C T"
+                    className="flex-1 min-w-[8rem] rounded border-2 border-border bg-background px-3 py-2 font-mono text-lg uppercase outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <div className="flex flex-wrap gap-1">
+                    {chars.map((ch, i) => {
+                      const isBlank = ch === " ";
+                      return (
+                        <div
+                          key={i}
+                          className="flex h-10 w-10 items-center justify-center rounded border-2 border-border bg-muted text-center font-mono text-lg font-bold uppercase"
+                        >
+                          {isBlank ? "" : ch}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
