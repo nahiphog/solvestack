@@ -1878,6 +1878,8 @@ function Index() {
                         <a href="https://wordlein2.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word-in-two</a>
                         <span> · </span>
                         <a href="https://cludl.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Cludl</a>
+                        <span> · </span>
+                        <a href="https://wordle-in-one.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wordle in one</a>
                       </td>
                     </tr>
                     <tr>
