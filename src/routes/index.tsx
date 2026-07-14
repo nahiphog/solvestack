@@ -902,6 +902,7 @@ function Index() {
     setSplitleResults(null);
     setSplitleExpanded({});
     const errFn = mode === "splitle" ? setSplitleP1Error : setError;
+    const invalid5: string[] = [];
     for (const g of wordleGuesses) {
       if (mode === "shuntle") {
         const padded = g.word.toUpperCase().padEnd(7, " ").slice(0, 7);
@@ -941,10 +942,30 @@ function Index() {
           errFn(`"${w}" is not a valid Wrdl word.`);
           return;
         }
-      } else if (!(await isValid5LetterWord(w))) {
-        errFn(`"${w}" is not a valid 5-letter English word.`);
-        return;
+      } else {
+        if (mode === "wordle" && wordleAcceptAllValid) continue;
+        if (!(await isValid5LetterWord(w))) {
+          if (mode === "wordle") {
+            invalid5.push(w);
+          } else {
+            errFn(`"${w}" is not a valid 5-letter English word.`);
+            return;
+          }
+        }
       }
+    }
+    if (invalid5.length === 1) {
+      errFn(`"${invalid5[0]}" is not a valid 5-letter English word.`);
+      return;
+    }
+    if (invalid5.length >= 2) {
+      const quoted = invalid5.map((w) => `"${w}"`);
+      const joined =
+        quoted.length === 2
+          ? `${quoted[0]} and ${quoted[1]}`
+          : `${quoted.slice(0, -1).join(", ")} and ${quoted[quoted.length - 1]}`;
+      errFn(`${joined} are not valid 5-letter English words.`);
+      return;
     }
     setSolving(true);
     const normalized = wordleGuesses.map((g) => ({ word: g.word.toUpperCase(), pattern: g.pattern }));
