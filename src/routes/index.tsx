@@ -3013,29 +3013,65 @@ function Index() {
               </div>
             )}
             {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && mode !== "wrdl" && (
-              <div className="flex items-center gap-2 text-sm">
-                <span>Optional input: Add</span>
-                <select
-                  className="rounded border border-border bg-background px-2 py-1"
-                  defaultValue="0"
-                  onChange={(e) => {
-                    const n = parseInt(e.target.value, 10);
-                    if (n === 0) return;
-                    const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
-                    if (!sheet || sheet.length === 0) return;
-                    const row = sheet[Math.floor(Math.random() * sheet.length)];
-                    const newGuesses = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] }));
-                    setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), ...newGuesses]);
-                    setWordleResults(null);
-                  }}
-                >
-                  <option value="0">0</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                </select>
-                <span>strategic starting words.</span>
-              </div>
+              mode === "wordle" ? (
+                <div className="rounded-lg border border-border p-3 space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span>Optional input: Add</span>
+                    <select
+                      className="rounded border border-border bg-background px-2 py-1"
+                      defaultValue="0"
+                      onChange={(e) => {
+                        const n = parseInt(e.target.value, 10);
+                        if (n === 0) return;
+                        const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
+                        if (!sheet || sheet.length === 0) return;
+                        const row = sheet[Math.floor(Math.random() * sheet.length)];
+                        const newGuesses = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] }));
+                        setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), ...newGuesses]);
+                        setWordleResults(null);
+                      }}
+                    >
+                      <option value="0">0</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                    </select>
+                    <span>strategic starting words.</span>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={wordleAcceptAllValid}
+                      onChange={(e) => setWordleAcceptAllValid(e.target.checked)}
+                    />
+                    <span>Accept all input as valid.</span>
+                  </label>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm">
+                  <span>Optional input: Add</span>
+                  <select
+                    className="rounded border border-border bg-background px-2 py-1"
+                    defaultValue="0"
+                    onChange={(e) => {
+                      const n = parseInt(e.target.value, 10);
+                      if (n === 0) return;
+                      const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
+                      if (!sheet || sheet.length === 0) return;
+                      const row = sheet[Math.floor(Math.random() * sheet.length)];
+                      const newGuesses = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] }));
+                      setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), ...newGuesses]);
+                      setWordleResults(null);
+                    }}
+                  >
+                    <option value="0">0</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                  </select>
+                  <span>strategic starting words.</span>
+                </div>
+              )
             )}
             {mode === "jeffgoldblum" && (
               <div className="flex items-center gap-2 text-sm">
