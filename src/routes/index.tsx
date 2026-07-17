@@ -518,6 +518,7 @@ function Index() {
   const [selectedPaths, setSelectedPaths] = useState<Set<number>>(new Set());
   useEffect(() => { setPagePaths(0); setSelectedPaths(new Set()); }, [paths]);
   useEffect(() => { setPageWordle(0); }, [wordleResults, wordleSortMode]);
+  useEffect(() => { if (wordleResults) setWordleSortMode("frequency"); }, [wordleResults]);
   useEffect(() => { setPageWrdl(0); }, [wrdlResults]);
   useEffect(() => { setPageMM(0); }, [mastermindResults]);
   useEffect(() => { setPageWP(0); }, [wordPeaksResults]);
