@@ -5016,24 +5016,26 @@ function Index() {
                 {wordleSortedResults.length} possible {wordleSortedResults.length === 1 ? "answer" : "answers"}
               </h2>
               <div className="flex items-center gap-2">
-                <div className="inline-flex rounded-md border p-1 text-xs font-medium">
-                  <button
-                    type="button"
-                    onClick={() => setWordleSortMode("frequency")}
-                    className={`rounded px-2 py-1 transition ${wordleSortMode === "frequency" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
-                    aria-pressed={wordleSortMode === "frequency"}
-                  >
-                    Frequency
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setWordleSortMode("alphabetical")}
-                    className={`rounded px-2 py-1 transition ${wordleSortMode === "alphabetical" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
-                    aria-pressed={wordleSortMode === "alphabetical"}
-                  >
-                    Alphabetical
-                  </button>
-                </div>
+                {mode === "wordle" && (
+                  <div className="inline-flex rounded-md border p-1 text-xs font-medium">
+                    <button
+                      type="button"
+                      onClick={() => setWordleSortMode("frequency")}
+                      className={`rounded px-2 py-1 transition ${wordleSortMode === "frequency" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                      aria-pressed={wordleSortMode === "frequency"}
+                    >
+                      Frequency
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWordleSortMode("alphabetical")}
+                      className={`rounded px-2 py-1 transition ${wordleSortMode === "alphabetical" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                      aria-pressed={wordleSortMode === "alphabetical"}
+                    >
+                      Alphabetical
+                    </button>
+                  </div>
+                )}
                 <button
                   onClick={() => {
                     copyText(`${wordleSortedResults.length} possible ${wordleSortedResults.length === 1 ? "answer" : "answers"}:\n${wordleSortedResults.join(", ")}\n\nSolved via ${window.location.href}.`);
