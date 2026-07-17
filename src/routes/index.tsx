@@ -5008,25 +5008,45 @@ function Index() {
           );
         })()}
 
-        {wordleResults && (
+        {wordleSortedResults && (
           <section className="mt-10">
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {wordleResults.length} possible {wordleResults.length === 1 ? "answer" : "answers"}
+                {wordleSortedResults.length} possible {wordleSortedResults.length === 1 ? "answer" : "answers"}
               </h2>
-              <button
-                onClick={() => {
-                  copyText(`${wordleResults.length} possible ${wordleResults.length === 1 ? "answer" : "answers"}:\n${wordleResults.join(", ")}\n\nSolved via ${window.location.href}.`);
-                }}
-                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-                aria-label="Copy all answers"
-              >
-                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="inline-flex rounded-md border p-1 text-xs font-medium">
+                  <button
+                    type="button"
+                    onClick={() => setWordleSortMode("frequency")}
+                    className={`rounded px-2 py-1 transition ${wordleSortMode === "frequency" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                    aria-pressed={wordleSortMode === "frequency"}
+                  >
+                    Frequency
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWordleSortMode("alphabetical")}
+                    className={`rounded px-2 py-1 transition ${wordleSortMode === "alphabetical" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                    aria-pressed={wordleSortMode === "alphabetical"}
+                  >
+                    Alphabetical
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    copyText(`${wordleSortedResults.length} possible ${wordleSortedResults.length === 1 ? "answer" : "answers"}:\n${wordleSortedResults.join(", ")}\n\nSolved via ${window.location.href}.`);
+                  }}
+                  className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                  aria-label="Copy all answers"
+                >
+                  {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                </button>
+              </div>
             </div>
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {wordleResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
+                {wordleSortedResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
                   <button
                     key={w}
                     type="button"
@@ -5044,7 +5064,7 @@ function Index() {
                 ))}
               </div>
             </div>
-            <Paginator page={pageWordle} setPage={setPageWordle} total={wordleResults.length} />
+            <Paginator page={pageWordle} setPage={setPageWordle} total={wordleSortedResults.length} />
           </section>
         )}
 
