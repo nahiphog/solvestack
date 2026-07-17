@@ -149,8 +149,9 @@ function Index() {
   const [wordleSortMode, setWordleSortMode] = useState<"frequency" | "alphabetical">("frequency");
   const wordleSortedResults = useMemo(() => {
     if (!wordleResults) return null;
+    if (mode !== "wordle") return wordleResults;
     return wordleSortMode === "frequency" ? sortWordsByFrequency(wordleResults) : [...wordleResults].sort();
-  }, [wordleResults, wordleSortMode]);
+  }, [wordleResults, wordleSortMode, mode]);
   const [wordleAcceptAllValid, setWordleAcceptAllValid] = useState(false);
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
