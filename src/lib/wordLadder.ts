@@ -5,6 +5,7 @@ import graphSplice from "@/data/wordSplice.json";
 import graphWeaverX from "@/data/wordWeaverX.json";
 import graphPivots from "@/data/wordPivots.json";
 import graphCraftWords from "@/data/wordCraftWords.json";
+import wordFrequencies from "@/data/wordFrequencies.json";
 
 
 
@@ -675,6 +676,29 @@ async function getFiveLetterWords(): Promise<string[]> {
   const all = await getAllEnglishWords();
   _fiveLetterWordsCache = all.filter((w) => w.length === 5);
   return _fiveLetterWordsCache;
+}
+
+const frequencyMap: Record<string, number> = wordFrequencies;
+
+export function getWordFrequency(word: string): number {
+  return frequencyMap[word.toUpperCase()] ?? 0;
+}
+
+export function sortWordsByFrequency(words: string[], mostCommonFirst = true): string[] {
+  const groups = new Map<number, string[]>();
+  for (const w of words) {
+    const f = getWordFrequency(w);
+    if (!groups.has(f)) groups.set(f, []);
+    groups.get(f)!.push(w);
+  }
+  const entries = Array.from(groups.entries());
+  entries.sort((a, b) => (mostCommonFirst ? b[0] - a[0] : a[0] - b[0]));
+  const result: string[] = [];
+  for (const [, ws] of entries) {
+    ws.sort();
+    result.push(...ws);
+  }
+  return result;
 }
 
 export async function wordiplySearch(substring: string): Promise<[number, string[]][]> {

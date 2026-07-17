@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useState } from "react";
-import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, spellingBeeSolve, splitleP2Solve, splitleSolve, sudokuSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, sudokuSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
@@ -146,6 +146,12 @@ function Index() {
     { word: "SLATE", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
+  const [wordleSortMode, setWordleSortMode] = useState<"frequency" | "alphabetical">("frequency");
+  const wordleSortedResults = useMemo(() => {
+    if (!wordleResults) return null;
+    if (mode !== "wordle") return wordleResults;
+    return wordleSortMode === "frequency" ? sortWordsByFrequency(wordleResults) : [...wordleResults].sort();
+  }, [wordleResults, wordleSortMode, mode]);
   const [wordleAcceptAllValid, setWordleAcceptAllValid] = useState(false);
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
@@ -511,7 +517,8 @@ function Index() {
   }, [dark]);
   const [selectedPaths, setSelectedPaths] = useState<Set<number>>(new Set());
   useEffect(() => { setPagePaths(0); setSelectedPaths(new Set()); }, [paths]);
-  useEffect(() => { setPageWordle(0); }, [wordleResults]);
+  useEffect(() => { setPageWordle(0); }, [wordleResults, wordleSortMode]);
+  useEffect(() => { if (wordleResults) setWordleSortMode("frequency"); }, [wordleResults]);
   useEffect(() => { setPageWrdl(0); }, [wrdlResults]);
   useEffect(() => { setPageMM(0); }, [mastermindResults]);
   useEffect(() => { setPageWP(0); }, [wordPeaksResults]);
@@ -5003,25 +5010,47 @@ function Index() {
           );
         })()}
 
-        {wordleResults && (
+        {wordleSortedResults && (
           <section className="mt-10">
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {wordleResults.length} possible {wordleResults.length === 1 ? "answer" : "answers"}
+                {wordleSortedResults.length} possible {wordleSortedResults.length === 1 ? "answer" : "answers"}
               </h2>
-              <button
-                onClick={() => {
-                  copyText(`${wordleResults.length} possible ${wordleResults.length === 1 ? "answer" : "answers"}:\n${wordleResults.join(", ")}\n\nSolved via ${window.location.href}.`);
-                }}
-                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-                aria-label="Copy all answers"
-              >
-                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
-              </button>
+              <div className="flex items-center gap-2">
+                {mode === "wordle" && (
+                  <div className="inline-flex rounded-md border p-1 text-xs font-medium">
+                    <button
+                      type="button"
+                      onClick={() => setWordleSortMode("frequency")}
+                      className={`rounded px-2 py-1 transition ${wordleSortMode === "frequency" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                      aria-pressed={wordleSortMode === "frequency"}
+                    >
+                      Frequency
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWordleSortMode("alphabetical")}
+                      className={`rounded px-2 py-1 transition ${wordleSortMode === "alphabetical" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                      aria-pressed={wordleSortMode === "alphabetical"}
+                    >
+                      Alphabetical
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    copyText(`${wordleSortedResults.length} possible ${wordleSortedResults.length === 1 ? "answer" : "answers"}:\n${wordleSortedResults.join(", ")}\n\nSolved via ${window.location.href}.`);
+                  }}
+                  className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                  aria-label="Copy all answers"
+                >
+                  {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                </button>
+              </div>
             </div>
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {wordleResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
+                {wordleSortedResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
                   <button
                     key={w}
                     type="button"
@@ -5039,7 +5068,7 @@ function Index() {
                 ))}
               </div>
             </div>
-            <Paginator page={pageWordle} setPage={setPageWordle} total={wordleResults.length} />
+            <Paginator page={pageWordle} setPage={setPageWordle} total={wordleSortedResults.length} />
           </section>
         )}
 
