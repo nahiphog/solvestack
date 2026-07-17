@@ -146,6 +146,11 @@ function Index() {
     { word: "SLATE", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
+  const [wordleSortMode, setWordleSortMode] = useState<"frequency" | "alphabetical">("frequency");
+  const wordleSortedResults = useMemo(() => {
+    if (!wordleResults) return null;
+    return wordleSortMode === "frequency" ? sortWordsByFrequency(wordleResults) : [...wordleResults].sort();
+  }, [wordleResults, wordleSortMode]);
   const [wordleAcceptAllValid, setWordleAcceptAllValid] = useState(false);
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
