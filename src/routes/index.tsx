@@ -165,6 +165,40 @@ function sliceGroups(groups: [number, string[]][], page: number, perPage = 50): 
   return out;
 }
 
+const MODE_URL_MAP: Record<string, string> = {
+  wordle: "/word_search/wordle/original",
+  doubledabble: "/word_search/wordle/Double_Dabble",
+  fibble: "/word_search/wordle/Fibble",
+  flippingletters: "/word_search/wordle/Flipping_Letters",
+  jeffgoldblum: "/word_search/wordle/Jeff_Goldblumle",
+  shuntle: "/word_search/wordle/Shuntle",
+  splitle: "/word_search/wordle/Splitle",
+  worwordle: "/word_search/wordle/Wor_Wordle",
+  wrdl: "/word_search/wordle/Wrdl",
+  marbless: "/word_search/miscellaneous/Marbless",
+  mastermind: "/word_search/miscellaneous/Mastermind",
+  spellingbee: "/word_search/miscellaneous/Spelling_Bee",
+  threepeat: "/word_search/miscellaneous/Threepeat",
+  wordpeaks: "/word_search/miscellaneous/Word_Peaks",
+  wordiply: "/word_search/miscellaneous/Wordiply",
+  splice: "/word_ladder/Splice",
+  pivots: "/word_ladder/Pivots",
+  weaverx: "/word_ladder/Weaver_X",
+  craftwords: "/word_ladder/Craftwords",
+  "4": "/word_ladder/classic/4_letters",
+  "5": "/word_ladder/classic/5_letters",
+  "6": "/word_ladder/classic/6_letters",
+  blunderwall: "/math/Blunderwall",
+  dodeku: "/math/Dodeku",
+  sheetdoku: "/math/Sheetdoku",
+  sudoku: "/logic/sudoku",
+  sudokuvariation: "/logic/sudoku_variation",
+  starbattle: "/logic/star_battle",
+};
+const URL_MODE_MAP: Record<string, Mode> = Object.fromEntries(
+  Object.entries(MODE_URL_MAP).map(([k, v]) => [v, isNaN(Number(k)) ? (k as Mode) : (Number(k) as Mode)])
+);
+
 function Index() {
   const [mode, setMode] = useState<Mode>("wordle");
   const [start, setStart] = useState("TOWER");
