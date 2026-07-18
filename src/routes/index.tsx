@@ -245,6 +245,9 @@ function Index() {
   ]);
   const [flResults, setFlResults] = useState<{ flippable: string[]; answers: string[] } | null>(null);
   const [pageFl, setPageFl] = useState(0);
+  const sortedMastermind = useMemo(() => mastermindResults ? (sortMode === "frequency" ? sortWordsByFrequency(mastermindResults) : [...mastermindResults].sort()) : null, [mastermindResults, sortMode]);
+  const sortedWordPeaks = useMemo(() => wordPeaksResults ? (sortMode === "frequency" ? sortWordsByFrequency(wordPeaksResults) : [...wordPeaksResults].sort()) : null, [wordPeaksResults, sortMode]);
+  const sortedFlAnswers = useMemo(() => flResults ? (sortMode === "frequency" ? sortWordsByFrequency(flResults.answers) : [...flResults.answers].sort()) : null, [flResults, sortMode]);
   const [flStartingWords, setFlStartingWords] = useState<0 | 1>(0);
   const [flLocked, setFlLocked] = useState<boolean>(false);
   // Double Dabble: 15 cells (3x5); positions 10 and 14 are faded/disabled. Each usable cell holds 2 distinct letters.
