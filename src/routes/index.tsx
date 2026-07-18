@@ -111,10 +111,38 @@ function Paginator({ page, setPage, total, perPage = 50 }: { page: number; setPa
   const pages = Math.ceil(total / perPage);
   if (pages <= 1) return null;
   return (
-    <div className="mt-4 flex items-center justify-center gap-3 text-sm">
-      <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(Math.max(0, page - 1))}>Prev</Button>
+    <div className="mt-4 flex items-center justify-center gap-2 text-sm">
+      <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(0)} aria-label="First page">{"<<"}</Button>
+      <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(Math.max(0, page - 1))} aria-label="Previous page">{"<"}</Button>
       <span>Page {page + 1} of {pages}</span>
-      <Button size="sm" variant="outline" disabled={page >= pages - 1} onClick={() => setPage(Math.min(pages - 1, page + 1))}>Next</Button>
+      <Button size="sm" variant="outline" disabled={page >= pages - 1} onClick={() => setPage(Math.min(pages - 1, page + 1))} aria-label="Next page">{">"}</Button>
+      <Button size="sm" variant="outline" disabled={page >= pages - 1} onClick={() => setPage(pages - 1)} aria-label="Last page">{">>"}</Button>
+    </div>
+  );
+}
+
+function SortToggle({ value, onChange }: { value: "frequency" | "alphabetical"; onChange: (v: "frequency" | "alphabetical") => void }) {
+  return (
+    <div className="mb-4 inline-flex items-center gap-2 text-xs font-medium">
+      <span className="text-muted-foreground">Sort by</span>
+      <div className="inline-flex rounded-md border p-1">
+        <button
+          type="button"
+          onClick={() => onChange("frequency")}
+          className={`rounded px-2 py-1 transition ${value === "frequency" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+          aria-pressed={value === "frequency"}
+        >
+          Commonness
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange("alphabetical")}
+          className={`rounded px-2 py-1 transition ${value === "alphabetical" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+          aria-pressed={value === "alphabetical"}
+        >
+          Alphabetical
+        </button>
+      </div>
     </div>
   );
 }
