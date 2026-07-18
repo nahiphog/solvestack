@@ -5375,15 +5375,15 @@ function Index() {
           );
         })()}
 
-        {mastermindResults && (
+        {mastermindResults && sortedMastermind && (
           <section className="mt-10">
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {mastermindResults.length} possible {mastermindResults.length === 1 ? "answer" : "answers"}
+                {sortedMastermind.length} possible {sortedMastermind.length === 1 ? "answer" : "answers"}
               </h2>
               <button
                 onClick={() => {
-                  copyText(`${mastermindResults.length} possible ${mastermindResults.length === 1 ? "answer" : "answers"}:\n${mastermindResults.join(", ")}\n\nSolved via ${window.location.href}.`);
+                  copyText(`${sortedMastermind.length} possible ${sortedMastermind.length === 1 ? "answer" : "answers"}:\n${sortedMastermind.join(", ")}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 aria-label="Copy all answers"
@@ -5391,9 +5391,10 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
+            <SortToggle value={sortMode} onChange={setSortMode} />
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {mastermindResults.slice(pageMM * 50, pageMM * 50 + 50).map((w) => (
+                {sortedMastermind.slice(pageMM * 50, pageMM * 50 + 50).map((w) => (
                   <button
                     key={w}
                     type="button"
@@ -5405,7 +5406,7 @@ function Index() {
                 ))}
               </div>
             </div>
-            <Paginator page={pageMM} setPage={setPageMM} total={mastermindResults.length} />
+            <Paginator page={pageMM} setPage={setPageMM} total={sortedMastermind.length} />
           </section>
         )}
 
