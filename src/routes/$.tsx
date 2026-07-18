@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Route as IndexRoute } from "./index";
 
 export const Route = createFileRoute("/$")({
-  component: IndexRoute.options.component!,
+  component: RouteComponent,
   head: () => ({
     meta: [
       { title: "Solver Sanctuary" },
@@ -10,3 +9,9 @@ export const Route = createFileRoute("/$")({
     ],
   }),
 });
+
+function RouteComponent() {
+  const IndexModule = require("./index");
+  const Comp = IndexModule.Route.options.component;
+  return <Comp />;
+}
