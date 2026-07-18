@@ -4752,6 +4752,127 @@ function Index() {
             );
           })()
 
+        ) : mode === "starbattle" ? (
+          (() => {
+            const N = sbSize;
+            const REGION_COLORS: Record<number, { bg: string; border: string; chip: string }> = {
+              1:  { bg: "bg-red-500/20",     border: "border-red-500",     chip: "bg-red-500" },
+              2:  { bg: "bg-blue-500/20",    border: "border-blue-500",    chip: "bg-blue-500" },
+              3:  { bg: "bg-emerald-500/20", border: "border-emerald-500", chip: "bg-emerald-500" },
+              4:  { bg: "bg-amber-500/20",   border: "border-amber-500",   chip: "bg-amber-500" },
+              5:  { bg: "bg-purple-500/20",  border: "border-purple-500",  chip: "bg-purple-500" },
+              6:  { bg: "bg-pink-500/20",    border: "border-pink-500",    chip: "bg-pink-500" },
+              7:  { bg: "bg-cyan-500/20",    border: "border-cyan-500",    chip: "bg-cyan-500" },
+              8:  { bg: "bg-orange-500/20",  border: "border-orange-500",  chip: "bg-orange-500" },
+              9:  { bg: "bg-lime-500/20",    border: "border-lime-500",    chip: "bg-lime-500" },
+              10: { bg: "bg-indigo-500/20",  border: "border-indigo-500",  chip: "bg-indigo-500" },
+              11: { bg: "bg-rose-500/20",    border: "border-rose-500",    chip: "bg-rose-500" },
+              12: { bg: "bg-teal-500/20",    border: "border-teal-500",    chip: "bg-teal-500" },
+            };
+            const changeSize = (newSize: number) => {
+              setSbSize(newSize);
+              if (newSize === 9) {
+                setSbRegions(STAR_BATTLE_DEFAULT_9.map((r) => r.slice()));
+              } else {
+                setSbRegions(Array.from({ length: newSize }, () => Array<number>(newSize).fill(0)));
+              }
+              if (sbPaintColor > newSize) setSbPaintColor(1);
+              setSbResults(null);
+            };
+            return (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center gap-4 text-sm">
+                  <label className="flex items-center gap-2">
+                    <span className="font-medium">Size:</span>
+                    <select
+                      value={sbSize}
+                      onChange={(e) => changeSize(parseInt(e.target.value, 10))}
+                      className="rounded border bg-background px-2 py-1"
+                    >
+                      {[6, 7, 8, 9, 10, 11, 12].map((n) => (
+                        <option key={n} value={n}>{n}×{n}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <select
+                      value={sbStars}
+                      onChange={(e) => { setSbStars(parseInt(e.target.value, 10)); setSbResults(null); }}
+                      className="rounded border bg-background px-2 py-1"
+                    >
+                      {[1, 2, 3, 4, 5, 6].map((n) => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                    <span>{sbStars === 1 ? "star" : "stars"} per row/region/column.</span>
+                  </label>
+                </div>
+                <div>
+                  <div className="mb-2 text-sm font-medium">Paint region (click cells to assign)</div>
+                  <div className="flex flex-wrap gap-2">
+                    {Array.from({ length: N }, (_, i) => i + 1).map((reg) => {
+                      const col = REGION_COLORS[reg] || REGION_COLORS[1];
+                      return (
+                        <button
+                          key={reg}
+                          onClick={() => setSbPaintColor(reg)}
+                          className={`flex items-center gap-2 rounded-md border-2 px-3 py-1.5 text-sm font-medium transition ${
+                            sbPaintColor === reg
+                              ? `${col.border} ${col.bg}`
+                              : "border-border bg-muted hover:bg-accent"
+                          }`}
+                        >
+                          <span className={`inline-block h-3 w-3 rounded-sm ${col.chip}`} />
+                          Region {reg}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-2 text-sm font-medium">Grid (click to paint region)</div>
+                  <div className="inline-block">
+                    {Array.from({ length: N }, (_, r) => (
+                      <div key={r} className="mt-1 flex gap-1 first:mt-0">
+                        {Array.from({ length: N }, (_, c) => {
+                          const reg = sbRegions[r]?.[c] ?? 0;
+                          const col = REGION_COLORS[reg] || { bg: "bg-muted", border: "border-border", chip: "" };
+                          return (
+                            <div
+                              key={c}
+                              onClick={() => {
+                                setSbRegions((prev) => prev.map((row, ri) => ri === r ? row.map((x, ci) => ci === c ? sbPaintColor : x) : row));
+                                setSbResults(null);
+                              }}
+                              className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded border-2 ${col.border} ${col.bg}`}
+                              aria-label={`Cell row ${r + 1} col ${c + 1}, region ${reg}`}
+                            >
+                              <span className="text-[10px] font-semibold text-muted-foreground">{reg || ""}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    onClick={() => {
+                      setSbRegions(Array.from({ length: N }, () => Array<number>(N).fill(0)));
+                      setSbResults(null);
+                    }}
+                    variant="outline"
+                    size="lg"
+                  >
+                    Clear all
+                  </Button>
+                  <Button onClick={solveStarBattle} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+              </div>
+            );
+          })()
 
         ) : mode === "threepeat" ? (
           <div className="space-y-4">
