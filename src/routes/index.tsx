@@ -5410,15 +5410,15 @@ function Index() {
           </section>
         )}
 
-        {wordPeaksResults && (
+        {wordPeaksResults && sortedWordPeaks && (
           <section className="mt-10">
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {wordPeaksResults.length} possible {wordPeaksResults.length === 1 ? "answer" : "answers"}
+                {sortedWordPeaks.length} possible {sortedWordPeaks.length === 1 ? "answer" : "answers"}
               </h2>
               <button
                 onClick={() => {
-                  copyText(`${wordPeaksResults.length} possible ${wordPeaksResults.length === 1 ? "answer" : "answers"}:\n${wordPeaksResults.join(", ")}\n\nSolved via ${window.location.href}.`);
+                  copyText(`${sortedWordPeaks.length} possible ${sortedWordPeaks.length === 1 ? "answer" : "answers"}:\n${sortedWordPeaks.join(", ")}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 aria-label="Copy all answers"
@@ -5426,9 +5426,10 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
+            <SortToggle value={sortMode} onChange={setSortMode} />
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {wordPeaksResults.slice(pageWP * 50, pageWP * 50 + 50).map((w) => (
+                {sortedWordPeaks.slice(pageWP * 50, pageWP * 50 + 50).map((w) => (
                   <button
                     key={w}
                     type="button"
@@ -5440,22 +5441,22 @@ function Index() {
                 ))}
               </div>
             </div>
-            <Paginator page={pageWP} setPage={setPageWP} total={wordPeaksResults.length} />
+            <Paginator page={pageWP} setPage={setPageWP} total={sortedWordPeaks.length} />
           </section>
         )}
 
-        {flResults && (
+        {flResults && sortedFlAnswers && (
           <section className="mt-10">
             <div className="mb-2 text-sm text-muted-foreground">
               {flResults.flippable.length} flippable 5-letter {flResults.flippable.length === 1 ? "word" : "words"} from your letter bank.
             </div>
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {flResults.answers.length} possible {flResults.answers.length === 1 ? "answer" : "answers"}
+                {sortedFlAnswers.length} possible {sortedFlAnswers.length === 1 ? "answer" : "answers"}
               </h2>
               <button
                 onClick={() => {
-                  copyText(`${flResults.answers.length} possible ${flResults.answers.length === 1 ? "answer" : "answers"}:\n${flResults.answers.join(", ")}\n\nSolved via ${window.location.href}.`);
+                  copyText(`${sortedFlAnswers.length} possible ${sortedFlAnswers.length === 1 ? "answer" : "answers"}:\n${sortedFlAnswers.join(", ")}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 aria-label="Copy all answers"
@@ -5463,9 +5464,10 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
+            <SortToggle value={sortMode} onChange={setSortMode} />
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {flResults.answers.slice(pageFl * 50, pageFl * 50 + 50).map((w) => (
+                {sortedFlAnswers.slice(pageFl * 50, pageFl * 50 + 50).map((w) => (
                   <button
                     key={w}
                     type="button"
@@ -5486,7 +5488,7 @@ function Index() {
                 ))}
               </div>
             </div>
-            <Paginator page={pageFl} setPage={setPageFl} total={flResults.answers.length} />
+            <Paginator page={pageFl} setPage={setPageFl} total={sortedFlAnswers.length} />
           </section>
         )}
 
