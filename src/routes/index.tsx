@@ -570,13 +570,16 @@ function Index() {
   useEffect(() => { setPageWordle(0); }, [wordleResults, sortMode]);
   useEffect(() => { if (wordleResults) setSortMode("frequency"); }, [wordleResults]);
   useEffect(() => { setPageWrdl(0); }, [wrdlResults]);
-  useEffect(() => { setPageMM(0); setSortMode("frequency"); }, [mastermindResults]);
-  useEffect(() => { setPageWP(0); setSortMode("frequency"); }, [wordPeaksResults]);
+  useEffect(() => { setPageMM(0); }, [mastermindResults, sortMode]);
+  useEffect(() => { if (mastermindResults) setSortMode("frequency"); }, [mastermindResults]);
+  useEffect(() => { setPageWP(0); }, [wordPeaksResults, sortMode]);
+  useEffect(() => { if (wordPeaksResults) setSortMode("frequency"); }, [wordPeaksResults]);
 
   useEffect(() => { setPageMarbless(0); setSelectedMarbless(new Set()); }, [marblessResults]);
   useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
-  useEffect(() => { setPageFl(0); }, [flResults]);
+  useEffect(() => { setPageFl(0); }, [flResults, sortMode]);
+  useEffect(() => { if (flResults) setSortMode("frequency"); }, [flResults]);
   useEffect(() => { setPageWor(0); }, [worResults]);
   useEffect(() => { setPageSd(0); }, [sdResults]);
   useEffect(() => { setPageSudoku(0); }, [sudokuResults]);
