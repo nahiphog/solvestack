@@ -771,8 +771,34 @@ function Index() {
     }, 0);
   };
 
-
-
+  const solveStarBattle = () => {
+    setError(null);
+    setSbResults(null);
+    for (let r = 0; r < sbSize; r++) {
+      for (let c = 0; c < sbSize; c++) {
+        if (!sbRegions[r]?.[c]) {
+          setError("All cells must be painted with a region color.");
+          return;
+        }
+      }
+    }
+    const counts = new Map<number, number>();
+    for (let r = 0; r < sbSize; r++) for (let c = 0; c < sbSize; c++) {
+      const v = sbRegions[r][c];
+      counts.set(v, (counts.get(v) || 0) + 1);
+    }
+    if (counts.size !== sbSize) {
+      setError(`Grid must be partitioned into exactly ${sbSize} regions.`);
+      return;
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const res = starBattleSolve(sbRegions, sbStars, 200);
+      if (res.length === 0) setError("No solutions found.");
+      else setSbResults(res);
+      setSolving(false);
+    }, 0);
+  };
 
 
   const solveSpellingBee = async () => {
