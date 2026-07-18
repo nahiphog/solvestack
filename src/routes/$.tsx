@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as IndexRoute } from "./index";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const IndexComponent: any = IndexRoute.options.component;
+
 export const Route = createFileRoute("/$")({
-  component: IndexRoute.options.component!,
+  component: IndexComponent,
   head: () => ({
     meta: [
       { title: "Solver Sanctuary" },
