@@ -636,6 +636,10 @@ function Index() {
 
   const switchMode = (m: Mode) => {
     setMode(m);
+    const path = MODE_URL_MAP[String(m)];
+    if (path && typeof window !== "undefined" && window.location.pathname !== path) {
+      window.history.replaceState({}, "", path);
+    }
     setPaths(null);
     setWordiplyResults(null);
     setWordleResults(null);
