@@ -3130,13 +3130,13 @@ function Index() {
             {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && mode !== "wrdl" && (
               mode === "wordle" ? (
                 <div className="rounded-lg border border-border p-3 space-y-2">
+                  <div className="text-sm font-medium">Additional options:</div>
                   <div className="flex items-center gap-2 text-sm">
-                    <span>Optional input: Add</span>
-                    <select
-                      className="rounded border border-border bg-background px-2 py-1"
-                      defaultValue="0"
-                      onChange={(e) => {
-                        const n = parseInt(e.target.value, 10);
+                    <span>-</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const n = wordleStartingCount;
                         if (n === 0) return;
                         const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
                         if (!sheet || sheet.length === 0) return;
@@ -3145,6 +3145,14 @@ function Index() {
                         setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), ...newGuesses]);
                         setWordleResults(null);
                       }}
+                      className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
+                    >
+                      Add
+                    </button>
+                    <select
+                      className="rounded border border-border bg-background px-2 py-1"
+                      value={String(wordleStartingCount)}
+                      onChange={(e) => setWordleStartingCount(parseInt(e.target.value, 10))}
                     >
                       <option value="0">0</option>
                       <option value="2">2</option>
@@ -3154,6 +3162,7 @@ function Index() {
                     <span>strategic starting words.</span>
                   </div>
                   <label className="flex items-center gap-2 text-sm">
+                    <span>-</span>
                     <input
                       type="checkbox"
                       checked={wordleAcceptAllValid}
