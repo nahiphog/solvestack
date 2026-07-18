@@ -932,3 +932,125 @@ export async function threepeatSolve(
   results.sort((a, b) => a[0].localeCompare(b[0]));
   return results;
 }
+
+export type StarBattleSolution = Array<[number, number]>;
+
+export function starBattleSolve(
+  regions: number[][],
+  starsPerUnit: number,
+  maxSolutions = 200,
+): StarBattleSolution[] {
+  const R = regions.length;
+  const C = regions[0]?.length ?? 0;
+  const k = starsPerUnit;
+  if (R === 0 || C === 0 || k <= 0) return [];
+  for (const row of regions) if (row.length !== C) return [];
+
+  const regionCells = new Map<number, Array<[number, number]>>();
+  for (let r = 0; r < R; r++) {
+    for (let c = 0; c < C; c++) {
+      const reg = regions[r][c];
+      if (!regionCells.has(reg)) regionCells.set(reg, []);
+      regionCells.get(reg)!.push([r, c]);
+    }
+  }
+  const rowCount = new Array<number>(R).fill(0);
+  const colCount = new Array<number>(C).fill(0);
+  const regCount = new Map<number, number>();
+  for (const key of regionCells.keys()) regCount.set(key, 0);
+  const starsGrid: boolean[][] = Array.from({ length: R }, () => new Array<boolean>(C).fill(false));
+  const solutions: StarBattleSolution[] = [];
+
+  const canPlace = (r: number, c: number): boolean => {
+    if (rowCount[r] >= k || colCount[c] >= k) return false;
+    const reg = regions[r][c];
+    if ((regCount.get(reg) || 0) >= k) return false;
+    if (starsGrid[r][c]) return false;
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const rr = r + dr, cc = c + dc;
+        if (rr < 0 || rr >= R || cc < 0 || cc >= C) continue;
+        if (starsGrid[rr][cc]) return false;
+      }
+    }
+    return true;
+  };
+  const place = (r: number, c: number) => {
+    starsGrid[r][c] = true; rowCount[r]++; colCount[c]++;
+    const reg = regions[r][c]; regCount.set(reg, (regCount.get(reg) || 0) + 1);
+  };
+  const remove = (r: number, c: number) => {
+    starsGrid[r][c] = false; rowCount[r]--; colCount[c]--;
+    const reg = regions[r][c]; regCount.set(reg, (regCount.get(reg) || 0) - 1);
+  };
+  const rowCandidates = (r: number): Array<[number, number]> => {
+    const out: Array<[number, number]> = [];
+    for (let c = 0; c < C; c++) if (canPlace(r, c)) out.push([r, c]);
+    return out;
+  };
+  const feasible = (): boolean => {
+    for (let r = 0; r < R; r++) {
+      const need = k - rowCount[r];
+      if (need < 0) return false;
+      if (need > 0 && rowCandidates(r).length < need) return false;
+    }
+    for (let c = 0; c < C; c++) if (colCount[c] > k) return false;
+    for (const [reg, cells] of regionCells) {
+      const need = k - (regCount.get(reg) || 0);
+      if (need < 0) return false;
+      if (need > 0) {
+        let poss = 0;
+        for (const [r, c] of cells) if (canPlace(r, c)) poss++;
+        if (poss < need) return false;
+      }
+    }
+    return true;
+  };
+  const chooseRow = (): { row: number; cands: Array<[number, number]> } | null => {
+    let best = -1;
+    let bestCands: Array<[number, number]> | null = null;
+    for (let r = 0; r < R; r++) {
+      if (rowCount[r] < k) {
+        const cand = rowCandidates(r);
+        if (bestCands === null || cand.length < bestCands.length) {
+          best = r; bestCands = cand;
+        }
+      }
+    }
+    if (best < 0 || bestCands === null) return null;
+    return { row: best, cands: bestCands };
+  };
+  const backtrack = () => {
+    if (solutions.length >= maxSolutions) return;
+    if (rowCount.every((x) => x === k)) {
+      if (colCount.every((x) => x === k) && Array.from(regCount.values()).every((v) => v === k)) {
+        const sol: StarBattleSolution = [];
+        for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) if (starsGrid[r][c]) sol.push([r, c]);
+        solutions.push(sol);
+      }
+      return;
+    }
+    if (!feasible()) return;
+    const pick = chooseRow();
+    if (!pick) return;
+    const need = k - rowCount[pick.row];
+    const cands = pick.cands;
+    const rec = (start: number, left: number) => {
+      if (solutions.length >= maxSolutions) return;
+      if (left === 0) { backtrack(); return; }
+      for (let i = start; i < cands.length; i++) {
+        const [r, c] = cands[i];
+        if (canPlace(r, c)) {
+          place(r, c);
+          rec(i + 1, left - 1);
+          remove(r, c);
+          if (solutions.length >= maxSolutions) return;
+        }
+      }
+    };
+    rec(0, need);
+  };
+  backtrack();
+  return solutions;
+}
