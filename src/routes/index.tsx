@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useState } from "react";
-import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, sudokuSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
@@ -60,6 +60,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   jeffgoldblum: { start: "", goal: "" },
   sudoku: { start: "", goal: "" },
   sudokuvariation: { start: "", goal: "" },
+  starbattle: { start: "", goal: "" },
   shuntle: { start: "", goal: "" },
   splitle: { start: "", goal: "" },
   blunderwall: { start: "", goal: "" },
@@ -497,6 +498,23 @@ function Index() {
   const [sudokuVarDisjoint, setSudokuVarDisjoint] = useState(false);
   const [sudokuVarRegions, setSudokuVarRegions] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
   const [sudokuVarPaintColor, setSudokuVarPaintColor] = useState<number>(1);
+  const STAR_BATTLE_DEFAULT_9: number[][] = [
+    [1,2,2,3,3,4,4,5,5],
+    [1,1,2,2,3,3,4,4,5],
+    [6,1,1,2,2,3,3,4,4],
+    [6,6,1,1,2,2,3,3,4],
+    [8,6,6,1,1,7,7,3,3],
+    [8,8,6,6,1,1,7,7,3],
+    [9,8,8,6,6,1,1,7,7],
+    [9,9,9,9,6,6,1,1,7],
+    [9,9,9,9,9,9,6,1,1],
+  ];
+  const [sbSize, setSbSize] = useState<number>(9);
+  const [sbStars, setSbStars] = useState<number>(1);
+  const [sbRegions, setSbRegions] = useState<number[][]>(() => STAR_BATTLE_DEFAULT_9.map((r) => r.slice()));
+  const [sbPaintColor, setSbPaintColor] = useState<number>(1);
+  const [sbResults, setSbResults] = useState<StarBattleSolution[] | null>(null);
+  const [pageSb, setPageSb] = useState(0);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
@@ -531,6 +549,7 @@ function Index() {
   useEffect(() => { setPageSd(0); }, [sdResults]);
   useEffect(() => { setPageSudoku(0); }, [sudokuResults]);
   useEffect(() => { setPageSudokuVar(0); }, [sudokuVarResults]);
+  useEffect(() => { setPageSb(0); }, [sbResults]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
 
@@ -564,6 +583,7 @@ function Index() {
     setSdResults(null);
     setSudokuResults(null);
     setSudokuVarResults(null);
+    setSbResults(null);
     setBwResult(null);
     setError(null);
     setSplitleP1Error(null);
@@ -751,8 +771,34 @@ function Index() {
     }, 0);
   };
 
-
-
+  const solveStarBattle = () => {
+    setError(null);
+    setSbResults(null);
+    for (let r = 0; r < sbSize; r++) {
+      for (let c = 0; c < sbSize; c++) {
+        if (!sbRegions[r]?.[c]) {
+          setError("All cells must be painted with a region color.");
+          return;
+        }
+      }
+    }
+    const counts = new Map<number, number>();
+    for (let r = 0; r < sbSize; r++) for (let c = 0; c < sbSize; c++) {
+      const v = sbRegions[r][c];
+      counts.set(v, (counts.get(v) || 0) + 1);
+    }
+    if (counts.size !== sbSize) {
+      setError(`Grid must be partitioned into exactly ${sbSize} regions.`);
+      return;
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const res = starBattleSolve(sbRegions, sbStars, 200);
+      if (res.length === 0) setError("No solutions found.");
+      else setSbResults(res);
+      setSolving(false);
+    }, 0);
+  };
 
 
   const solveSpellingBee = async () => {
@@ -1442,7 +1488,7 @@ function Index() {
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "threepeat";
-            const inLogic = mode === "sudoku" || mode === "sudokuvariation";
+            const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle";
             const inLadder = !isMath && !inSearch && !inLogic;
             const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : s.id === "logic" ? inLogic : inLadder;
             return (
@@ -1714,8 +1760,8 @@ function Index() {
           </div>
         )}
 
-        {(mode === "sudoku" || mode === "sudokuvariation") && (
-          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
+        {(mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle") && (
+          <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             <button
               onClick={() => switchMode("sudoku")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
@@ -1735,6 +1781,16 @@ function Index() {
               }`}
             >
               Sudoku (variation)
+            </button>
+            <button
+              onClick={() => switchMode("starbattle")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "starbattle"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Star Battle
             </button>
           </div>
         )}
@@ -2173,6 +2229,21 @@ function Index() {
         {mode === "sudokuvariation" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p>A typical 9×9 Sudoku, but with more variations!</p>
+          </div>
+        )}
+        {mode === "starbattle" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>
+              <a href="https://www.netflix.com/tudum/puzzled/starstruck/daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Netflix</a>
+              {" · "}
+              <a href="https://www.linkedin.com/games/queens/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Linked In</a>
+              {" · "}
+              <a href="https://greatest.games/g/shrooms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Greatest Games</a>
+            </p>
+            <p>You are given a square grid, partitioned into non-overlapping regions.</p>
+            <p>Each row, column and region contains a fixed number of stars in them.</p>
+            <p>Each star cannot be adjacent with each other, not even diagonally adjacent.</p>
+            <p>Pick a region color, then click cells to assign them.</p>
           </div>
         )}
         {mode === "wordpeaks" && (
@@ -4681,6 +4752,127 @@ function Index() {
             );
           })()
 
+        ) : mode === "starbattle" ? (
+          (() => {
+            const N = sbSize;
+            const REGION_COLORS: Record<number, { bg: string; border: string; chip: string }> = {
+              1:  { bg: "bg-red-500/20",     border: "border-red-500",     chip: "bg-red-500" },
+              2:  { bg: "bg-blue-500/20",    border: "border-blue-500",    chip: "bg-blue-500" },
+              3:  { bg: "bg-emerald-500/20", border: "border-emerald-500", chip: "bg-emerald-500" },
+              4:  { bg: "bg-amber-500/20",   border: "border-amber-500",   chip: "bg-amber-500" },
+              5:  { bg: "bg-purple-500/20",  border: "border-purple-500",  chip: "bg-purple-500" },
+              6:  { bg: "bg-pink-500/20",    border: "border-pink-500",    chip: "bg-pink-500" },
+              7:  { bg: "bg-cyan-500/20",    border: "border-cyan-500",    chip: "bg-cyan-500" },
+              8:  { bg: "bg-orange-500/20",  border: "border-orange-500",  chip: "bg-orange-500" },
+              9:  { bg: "bg-lime-500/20",    border: "border-lime-500",    chip: "bg-lime-500" },
+              10: { bg: "bg-indigo-500/20",  border: "border-indigo-500",  chip: "bg-indigo-500" },
+              11: { bg: "bg-rose-500/20",    border: "border-rose-500",    chip: "bg-rose-500" },
+              12: { bg: "bg-teal-500/20",    border: "border-teal-500",    chip: "bg-teal-500" },
+            };
+            const changeSize = (newSize: number) => {
+              setSbSize(newSize);
+              if (newSize === 9) {
+                setSbRegions(STAR_BATTLE_DEFAULT_9.map((r) => r.slice()));
+              } else {
+                setSbRegions(Array.from({ length: newSize }, () => Array<number>(newSize).fill(0)));
+              }
+              if (sbPaintColor > newSize) setSbPaintColor(1);
+              setSbResults(null);
+            };
+            return (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center gap-4 text-sm">
+                  <label className="flex items-center gap-2">
+                    <span className="font-medium">Size:</span>
+                    <select
+                      value={sbSize}
+                      onChange={(e) => changeSize(parseInt(e.target.value, 10))}
+                      className="rounded border bg-background px-2 py-1"
+                    >
+                      {[6, 7, 8, 9, 10, 11, 12].map((n) => (
+                        <option key={n} value={n}>{n}×{n}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <select
+                      value={sbStars}
+                      onChange={(e) => { setSbStars(parseInt(e.target.value, 10)); setSbResults(null); }}
+                      className="rounded border bg-background px-2 py-1"
+                    >
+                      {[1, 2, 3, 4, 5, 6].map((n) => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                    <span>{sbStars === 1 ? "star" : "stars"} per row/region/column.</span>
+                  </label>
+                </div>
+                <div>
+                  <div className="mb-2 text-sm font-medium">Paint region (click cells to assign)</div>
+                  <div className="flex flex-wrap gap-2">
+                    {Array.from({ length: N }, (_, i) => i + 1).map((reg) => {
+                      const col = REGION_COLORS[reg] || REGION_COLORS[1];
+                      return (
+                        <button
+                          key={reg}
+                          onClick={() => setSbPaintColor(reg)}
+                          className={`flex items-center gap-2 rounded-md border-2 px-3 py-1.5 text-sm font-medium transition ${
+                            sbPaintColor === reg
+                              ? `${col.border} ${col.bg}`
+                              : "border-border bg-muted hover:bg-accent"
+                          }`}
+                        >
+                          <span className={`inline-block h-3 w-3 rounded-sm ${col.chip}`} />
+                          Region {reg}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-2 text-sm font-medium">Grid (click to paint region)</div>
+                  <div className="inline-block">
+                    {Array.from({ length: N }, (_, r) => (
+                      <div key={r} className="mt-1 flex gap-1 first:mt-0">
+                        {Array.from({ length: N }, (_, c) => {
+                          const reg = sbRegions[r]?.[c] ?? 0;
+                          const col = REGION_COLORS[reg] || { bg: "bg-muted", border: "border-border", chip: "" };
+                          return (
+                            <div
+                              key={c}
+                              onClick={() => {
+                                setSbRegions((prev) => prev.map((row, ri) => ri === r ? row.map((x, ci) => ci === c ? sbPaintColor : x) : row));
+                                setSbResults(null);
+                              }}
+                              className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded border-2 ${col.border} ${col.bg}`}
+                              aria-label={`Cell row ${r + 1} col ${c + 1}, region ${reg}`}
+                            >
+                              <span className="text-[10px] font-semibold text-muted-foreground">{reg || ""}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    onClick={() => {
+                      setSbRegions(Array.from({ length: N }, () => Array<number>(N).fill(0)));
+                      setSbResults(null);
+                    }}
+                    variant="outline"
+                    size="lg"
+                  >
+                    Clear all
+                  </Button>
+                  <Button onClick={solveStarBattle} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+              </div>
+            );
+          })()
 
         ) : mode === "threepeat" ? (
           <div className="space-y-4">
@@ -5600,6 +5792,80 @@ function Index() {
               {sudokuResults && renderSudokuResults(sudokuResults, pageSudoku, setPageSudoku, false)}
               {sudokuVarResults && renderSudokuResults(sudokuVarResults, pageSudokuVar, setPageSudokuVar, true)}
             </>
+          );
+        })()}
+
+        {sbResults && (() => {
+          const N = sbSize;
+          const REGION_BG: Record<number, string> = {
+            1: "bg-red-500/20",
+            2: "bg-blue-500/20",
+            3: "bg-emerald-500/20",
+            4: "bg-amber-500/20",
+            5: "bg-purple-500/20",
+            6: "bg-pink-500/20",
+            7: "bg-cyan-500/20",
+            8: "bg-orange-500/20",
+            9: "bg-lime-500/20",
+            10: "bg-indigo-500/20",
+            11: "bg-rose-500/20",
+            12: "bg-teal-500/20",
+          };
+          const perPage = 10;
+          return (
+            <section className="mt-10">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <h2 className="text-lg font-semibold">
+                  {sbResults.length}{sbResults.length === 200 ? "+" : ""} {sbResults.length === 1 ? "solution" : "solutions"}
+                </h2>
+                <button
+                  onClick={() => {
+                    const items = sbResults.map((sol, i) => {
+                      const set = new Set(sol.map(([r, c]) => `${r},${c}`));
+                      const rows: string[] = [];
+                      for (let r = 0; r < N; r++) {
+                        const row: string[] = [];
+                        for (let c = 0; c < N; c++) row.push(set.has(`${r},${c}`) ? "★" : ".");
+                        rows.push(row.join(" "));
+                      }
+                      return `#${i + 1}\n${rows.join("\n")}`;
+                    }).join("\n\n");
+                    copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                  }}
+                  className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                  aria-label="Copy all solutions"
+                >
+                  {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                </button>
+              </div>
+              <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {sbResults.slice(pageSb * perPage, pageSb * perPage + perPage).map((sol, idx) => {
+                  const i = pageSb * perPage + idx;
+                  const set = new Set(sol.map(([r, c]) => `${r},${c}`));
+                  return (
+                    <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
+                      <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
+                      <div className="inline-block">
+                        {Array.from({ length: N }, (_, r) => (
+                          <div key={r} className="flex">
+                            {Array.from({ length: N }, (_, c) => {
+                              const reg = sbRegions[r]?.[c] ?? 0;
+                              const bg = REGION_BG[reg] || "bg-muted";
+                              return (
+                                <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg} font-mono text-base font-bold`}>
+                                  {set.has(`${r},${c}`) ? "★" : ""}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+              <Paginator page={pageSb} setPage={setPageSb} total={sbResults.length} perPage={perPage} />
+            </section>
           );
         })()}
 
