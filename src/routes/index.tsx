@@ -2231,6 +2231,21 @@ function Index() {
             <p>A typical 9×9 Sudoku, but with more variations!</p>
           </div>
         )}
+        {mode === "starbattle" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>
+              <a href="https://www.netflix.com/tudum/puzzled/starstruck/daily" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Netflix</a>
+              {" · "}
+              <a href="https://www.linkedin.com/games/queens/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Linked In</a>
+              {" · "}
+              <a href="https://greatest.games/g/shrooms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Greatest Games</a>
+            </p>
+            <p>You are given a square grid, partitioned into non-overlapping regions.</p>
+            <p>Each row, column and region contains a fixed number of stars in them.</p>
+            <p>Each star cannot be adjacent with each other, not even diagonally adjacent.</p>
+            <p>Pick a region color, then click cells to assign them.</p>
+          </div>
+        )}
         {mode === "wordpeaks" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p>Enter your guesses.</p>
