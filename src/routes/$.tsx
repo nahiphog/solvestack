@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as IndexRoute } from "./index";
 
-const IndexComponent = IndexRoute.options.component as React.ComponentType;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const IndexComponent: any = IndexRoute.options.component;
 
 export const Route = createFileRoute("/$")({
   component: IndexComponent,
