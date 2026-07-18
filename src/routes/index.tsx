@@ -498,6 +498,23 @@ function Index() {
   const [sudokuVarDisjoint, setSudokuVarDisjoint] = useState(false);
   const [sudokuVarRegions, setSudokuVarRegions] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
   const [sudokuVarPaintColor, setSudokuVarPaintColor] = useState<number>(1);
+  const STAR_BATTLE_DEFAULT_9: number[][] = [
+    [1,2,2,3,3,4,4,5,5],
+    [1,1,2,2,3,3,4,4,5],
+    [6,1,1,2,2,3,3,4,4],
+    [6,6,1,1,2,2,3,3,4],
+    [8,6,6,1,1,7,7,3,3],
+    [8,8,6,6,1,1,7,7,3],
+    [9,8,8,6,6,1,1,7,7],
+    [9,9,9,9,6,6,1,1,7],
+    [9,9,9,9,9,9,6,1,1],
+  ];
+  const [sbSize, setSbSize] = useState<number>(9);
+  const [sbStars, setSbStars] = useState<number>(1);
+  const [sbRegions, setSbRegions] = useState<number[][]>(() => STAR_BATTLE_DEFAULT_9.map((r) => r.slice()));
+  const [sbPaintColor, setSbPaintColor] = useState<number>(1);
+  const [sbResults, setSbResults] = useState<StarBattleSolution[] | null>(null);
+  const [pageSb, setPageSb] = useState(0);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
