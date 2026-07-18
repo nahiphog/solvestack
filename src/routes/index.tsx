@@ -175,12 +175,12 @@ function Index() {
     { word: "SLATE", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
-  const [wordleSortMode, setWordleSortMode] = useState<"frequency" | "alphabetical">("frequency");
+  const [sortMode, setSortMode] = useState<"frequency" | "alphabetical">("frequency");
   const wordleSortedResults = useMemo(() => {
     if (!wordleResults) return null;
-    if (mode !== "wordle") return wordleResults;
-    return wordleSortMode === "frequency" ? sortWordsByFrequency(wordleResults) : [...wordleResults].sort();
-  }, [wordleResults, wordleSortMode, mode]);
+    if (mode !== "wordle" && mode !== "fibble" && mode !== "jeffgoldblum") return wordleResults;
+    return sortMode === "frequency" ? sortWordsByFrequency(wordleResults) : [...wordleResults].sort();
+  }, [wordleResults, sortMode, mode]);
   const [wordleAcceptAllValid, setWordleAcceptAllValid] = useState(false);
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
