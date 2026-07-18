@@ -111,10 +111,38 @@ function Paginator({ page, setPage, total, perPage = 50 }: { page: number; setPa
   const pages = Math.ceil(total / perPage);
   if (pages <= 1) return null;
   return (
-    <div className="mt-4 flex items-center justify-center gap-3 text-sm">
-      <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(Math.max(0, page - 1))}>Prev</Button>
+    <div className="mt-4 flex items-center justify-center gap-2 text-sm">
+      <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(0)} aria-label="First page">{"<<"}</Button>
+      <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(Math.max(0, page - 1))} aria-label="Previous page">{"<"}</Button>
       <span>Page {page + 1} of {pages}</span>
-      <Button size="sm" variant="outline" disabled={page >= pages - 1} onClick={() => setPage(Math.min(pages - 1, page + 1))}>Next</Button>
+      <Button size="sm" variant="outline" disabled={page >= pages - 1} onClick={() => setPage(Math.min(pages - 1, page + 1))} aria-label="Next page">{">"}</Button>
+      <Button size="sm" variant="outline" disabled={page >= pages - 1} onClick={() => setPage(pages - 1)} aria-label="Last page">{">>"}</Button>
+    </div>
+  );
+}
+
+function SortToggle({ value, onChange }: { value: "frequency" | "alphabetical"; onChange: (v: "frequency" | "alphabetical") => void }) {
+  return (
+    <div className="mb-4 inline-flex items-center gap-2 text-xs font-medium">
+      <span className="text-muted-foreground">Sort by</span>
+      <div className="inline-flex rounded-md border p-1">
+        <button
+          type="button"
+          onClick={() => onChange("frequency")}
+          className={`rounded px-2 py-1 transition ${value === "frequency" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+          aria-pressed={value === "frequency"}
+        >
+          Commonness
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange("alphabetical")}
+          className={`rounded px-2 py-1 transition ${value === "alphabetical" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+          aria-pressed={value === "alphabetical"}
+        >
+          Alphabetical
+        </button>
+      </div>
     </div>
   );
 }
@@ -137,6 +165,40 @@ function sliceGroups(groups: [number, string[]][], page: number, perPage = 50): 
   return out;
 }
 
+const MODE_URL_MAP: Record<string, string> = {
+  wordle: "/word_search/wordle/original",
+  doubledabble: "/word_search/wordle/Double_Dabble",
+  fibble: "/word_search/wordle/Fibble",
+  flippingletters: "/word_search/wordle/Flipping_Letters",
+  jeffgoldblum: "/word_search/wordle/Jeff_Goldblumle",
+  shuntle: "/word_search/wordle/Shuntle",
+  splitle: "/word_search/wordle/Splitle",
+  worwordle: "/word_search/wordle/Wor_Wordle",
+  wrdl: "/word_search/wordle/Wrdl",
+  marbless: "/word_search/miscellaneous/Marbless",
+  mastermind: "/word_search/miscellaneous/Mastermind",
+  spellingbee: "/word_search/miscellaneous/Spelling_Bee",
+  threepeat: "/word_search/miscellaneous/Threepeat",
+  wordpeaks: "/word_search/miscellaneous/Word_Peaks",
+  wordiply: "/word_search/miscellaneous/Wordiply",
+  splice: "/word_ladder/Splice",
+  pivots: "/word_ladder/Pivots",
+  weaverx: "/word_ladder/Weaver_X",
+  craftwords: "/word_ladder/Craftwords",
+  "4": "/word_ladder/classic/4_letters",
+  "5": "/word_ladder/classic/5_letters",
+  "6": "/word_ladder/classic/6_letters",
+  blunderwall: "/math/Blunderwall",
+  dodeku: "/math/Dodeku",
+  sheetdoku: "/math/Sheetdoku",
+  sudoku: "/logic/sudoku",
+  sudokuvariation: "/logic/sudoku_variation",
+  starbattle: "/logic/star_battle",
+};
+const URL_MODE_MAP: Record<string, Mode> = Object.fromEntries(
+  Object.entries(MODE_URL_MAP).map(([k, v]) => [v, isNaN(Number(k)) ? (k as Mode) : (Number(k) as Mode)])
+);
+
 function Index() {
   const [mode, setMode] = useState<Mode>("wordle");
   const [start, setStart] = useState("TOWER");
@@ -147,13 +209,15 @@ function Index() {
     { word: "SLATE", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] },
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
-  const [wordleSortMode, setWordleSortMode] = useState<"frequency" | "alphabetical">("frequency");
+  const [sortMode, setSortMode] = useState<"frequency" | "alphabetical">("frequency");
   const wordleSortedResults = useMemo(() => {
     if (!wordleResults) return null;
-    if (mode !== "wordle") return wordleResults;
-    return wordleSortMode === "frequency" ? sortWordsByFrequency(wordleResults) : [...wordleResults].sort();
-  }, [wordleResults, wordleSortMode, mode]);
+    if (mode !== "wordle" && mode !== "fibble" && mode !== "jeffgoldblum") return wordleResults;
+    return sortMode === "frequency" ? sortWordsByFrequency(wordleResults) : [...wordleResults].sort();
+  }, [wordleResults, sortMode, mode]);
+  // per-solver frequency sorting hooks appear after their state declarations below
   const [wordleAcceptAllValid, setWordleAcceptAllValid] = useState(false);
+  const [wordleStartingCount, setWordleStartingCount] = useState<number>(0);
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
   const [wrdlWordMap, setWrdlWordMap] = useState<Record<string, string[]> | null>(null);
@@ -216,6 +280,9 @@ function Index() {
   ]);
   const [flResults, setFlResults] = useState<{ flippable: string[]; answers: string[] } | null>(null);
   const [pageFl, setPageFl] = useState(0);
+  const sortedMastermind = useMemo(() => mastermindResults ? (sortMode === "frequency" ? sortWordsByFrequency(mastermindResults) : [...mastermindResults].sort()) : null, [mastermindResults, sortMode]);
+  const sortedWordPeaks = useMemo(() => wordPeaksResults ? (sortMode === "frequency" ? sortWordsByFrequency(wordPeaksResults) : [...wordPeaksResults].sort()) : null, [wordPeaksResults, sortMode]);
+  const sortedFlAnswers = useMemo(() => flResults ? (sortMode === "frequency" ? sortWordsByFrequency(flResults.answers) : [...flResults.answers].sort()) : null, [flResults, sortMode]);
   const [flStartingWords, setFlStartingWords] = useState<0 | 1>(0);
   const [flLocked, setFlLocked] = useState<boolean>(false);
   // Double Dabble: 15 cells (3x5); positions 10 and 14 are faded/disabled. Each usable cell holds 2 distinct letters.
@@ -533,18 +600,27 @@ function Index() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const m = URL_MODE_MAP[window.location.pathname];
+    if (m !== undefined) setMode(m);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [selectedPaths, setSelectedPaths] = useState<Set<number>>(new Set());
   useEffect(() => { setPagePaths(0); setSelectedPaths(new Set()); }, [paths]);
-  useEffect(() => { setPageWordle(0); }, [wordleResults, wordleSortMode]);
-  useEffect(() => { if (wordleResults) setWordleSortMode("frequency"); }, [wordleResults]);
+  useEffect(() => { setPageWordle(0); }, [wordleResults, sortMode]);
+  useEffect(() => { if (wordleResults) setSortMode("frequency"); }, [wordleResults]);
   useEffect(() => { setPageWrdl(0); }, [wrdlResults]);
-  useEffect(() => { setPageMM(0); }, [mastermindResults]);
-  useEffect(() => { setPageWP(0); }, [wordPeaksResults]);
+  useEffect(() => { setPageMM(0); }, [mastermindResults, sortMode]);
+  useEffect(() => { if (mastermindResults) setSortMode("frequency"); }, [mastermindResults]);
+  useEffect(() => { setPageWP(0); }, [wordPeaksResults, sortMode]);
+  useEffect(() => { if (wordPeaksResults) setSortMode("frequency"); }, [wordPeaksResults]);
 
   useEffect(() => { setPageMarbless(0); setSelectedMarbless(new Set()); }, [marblessResults]);
   useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
-  useEffect(() => { setPageFl(0); }, [flResults]);
+  useEffect(() => { setPageFl(0); }, [flResults, sortMode]);
+  useEffect(() => { if (flResults) setSortMode("frequency"); }, [flResults]);
   useEffect(() => { setPageWor(0); }, [worResults]);
   useEffect(() => { setPageSd(0); }, [sdResults]);
   useEffect(() => { setPageSudoku(0); }, [sudokuResults]);
@@ -566,6 +642,10 @@ function Index() {
 
   const switchMode = (m: Mode) => {
     setMode(m);
+    const path = MODE_URL_MAP[String(m)];
+    if (path && typeof window !== "undefined" && window.location.pathname !== path) {
+      window.history.replaceState({}, "", path);
+    }
     setPaths(null);
     setWordiplyResults(null);
     setWordleResults(null);
@@ -3095,13 +3175,13 @@ function Index() {
             {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && mode !== "wrdl" && (
               mode === "wordle" ? (
                 <div className="rounded-lg border border-border p-3 space-y-2">
+                  <div className="text-sm font-medium">Additional options:</div>
                   <div className="flex items-center gap-2 text-sm">
-                    <span>Optional input: Add</span>
-                    <select
-                      className="rounded border border-border bg-background px-2 py-1"
-                      defaultValue="0"
-                      onChange={(e) => {
-                        const n = parseInt(e.target.value, 10);
+                    <span>-</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const n = wordleStartingCount;
                         if (n === 0) return;
                         const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
                         if (!sheet || sheet.length === 0) return;
@@ -3110,6 +3190,14 @@ function Index() {
                         setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), ...newGuesses]);
                         setWordleResults(null);
                       }}
+                      className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
+                    >
+                      Add
+                    </button>
+                    <select
+                      className="rounded border border-border bg-background px-2 py-1"
+                      value={String(wordleStartingCount)}
+                      onChange={(e) => setWordleStartingCount(parseInt(e.target.value, 10))}
                     >
                       <option value="0">0</option>
                       <option value="2">2</option>
@@ -3119,6 +3207,7 @@ function Index() {
                     <span>strategic starting words.</span>
                   </div>
                   <label className="flex items-center gap-2 text-sm">
+                    <span>-</span>
                     <input
                       type="checkbox"
                       checked={wordleAcceptAllValid}
@@ -5204,42 +5293,23 @@ function Index() {
 
         {wordleSortedResults && (
           <section className="mt-10">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
                 {wordleSortedResults.length} possible {wordleSortedResults.length === 1 ? "answer" : "answers"}
               </h2>
-              <div className="flex items-center gap-2">
-                {mode === "wordle" && (
-                  <div className="inline-flex rounded-md border p-1 text-xs font-medium">
-                    <button
-                      type="button"
-                      onClick={() => setWordleSortMode("frequency")}
-                      className={`rounded px-2 py-1 transition ${wordleSortMode === "frequency" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
-                      aria-pressed={wordleSortMode === "frequency"}
-                    >
-                      Frequency
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setWordleSortMode("alphabetical")}
-                      className={`rounded px-2 py-1 transition ${wordleSortMode === "alphabetical" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
-                      aria-pressed={wordleSortMode === "alphabetical"}
-                    >
-                      Alphabetical
-                    </button>
-                  </div>
-                )}
-                <button
-                  onClick={() => {
-                    copyText(`${wordleSortedResults.length} possible ${wordleSortedResults.length === 1 ? "answer" : "answers"}:\n${wordleSortedResults.join(", ")}\n\nSolved via ${window.location.href}.`);
-                  }}
-                  className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-                  aria-label="Copy all answers"
-                >
-                  {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  copyText(`${wordleSortedResults.length} possible ${wordleSortedResults.length === 1 ? "answer" : "answers"}:\n${wordleSortedResults.join(", ")}\n\nSolved via ${window.location.href}.`);
+                }}
+                className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                aria-label="Copy all answers"
+              >
+                {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+              </button>
             </div>
+            {(mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum") && (
+              <SortToggle value={sortMode} onChange={setSortMode} />
+            )}
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
                 {wordleSortedResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
@@ -5359,15 +5429,15 @@ function Index() {
           );
         })()}
 
-        {mastermindResults && (
+        {mastermindResults && sortedMastermind && (
           <section className="mt-10">
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {mastermindResults.length} possible {mastermindResults.length === 1 ? "answer" : "answers"}
+                {sortedMastermind.length} possible {sortedMastermind.length === 1 ? "answer" : "answers"}
               </h2>
               <button
                 onClick={() => {
-                  copyText(`${mastermindResults.length} possible ${mastermindResults.length === 1 ? "answer" : "answers"}:\n${mastermindResults.join(", ")}\n\nSolved via ${window.location.href}.`);
+                  copyText(`${sortedMastermind.length} possible ${sortedMastermind.length === 1 ? "answer" : "answers"}:\n${sortedMastermind.join(", ")}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 aria-label="Copy all answers"
@@ -5375,9 +5445,10 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
+            <SortToggle value={sortMode} onChange={setSortMode} />
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {mastermindResults.slice(pageMM * 50, pageMM * 50 + 50).map((w) => (
+                {sortedMastermind.slice(pageMM * 50, pageMM * 50 + 50).map((w) => (
                   <button
                     key={w}
                     type="button"
@@ -5389,19 +5460,19 @@ function Index() {
                 ))}
               </div>
             </div>
-            <Paginator page={pageMM} setPage={setPageMM} total={mastermindResults.length} />
+            <Paginator page={pageMM} setPage={setPageMM} total={sortedMastermind.length} />
           </section>
         )}
 
-        {wordPeaksResults && (
+        {wordPeaksResults && sortedWordPeaks && (
           <section className="mt-10">
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {wordPeaksResults.length} possible {wordPeaksResults.length === 1 ? "answer" : "answers"}
+                {sortedWordPeaks.length} possible {sortedWordPeaks.length === 1 ? "answer" : "answers"}
               </h2>
               <button
                 onClick={() => {
-                  copyText(`${wordPeaksResults.length} possible ${wordPeaksResults.length === 1 ? "answer" : "answers"}:\n${wordPeaksResults.join(", ")}\n\nSolved via ${window.location.href}.`);
+                  copyText(`${sortedWordPeaks.length} possible ${sortedWordPeaks.length === 1 ? "answer" : "answers"}:\n${sortedWordPeaks.join(", ")}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 aria-label="Copy all answers"
@@ -5409,9 +5480,10 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
+            <SortToggle value={sortMode} onChange={setSortMode} />
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {wordPeaksResults.slice(pageWP * 50, pageWP * 50 + 50).map((w) => (
+                {sortedWordPeaks.slice(pageWP * 50, pageWP * 50 + 50).map((w) => (
                   <button
                     key={w}
                     type="button"
@@ -5423,22 +5495,22 @@ function Index() {
                 ))}
               </div>
             </div>
-            <Paginator page={pageWP} setPage={setPageWP} total={wordPeaksResults.length} />
+            <Paginator page={pageWP} setPage={setPageWP} total={sortedWordPeaks.length} />
           </section>
         )}
 
-        {flResults && (
+        {flResults && sortedFlAnswers && (
           <section className="mt-10">
             <div className="mb-2 text-sm text-muted-foreground">
               {flResults.flippable.length} flippable 5-letter {flResults.flippable.length === 1 ? "word" : "words"} from your letter bank.
             </div>
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {flResults.answers.length} possible {flResults.answers.length === 1 ? "answer" : "answers"}
+                {sortedFlAnswers.length} possible {sortedFlAnswers.length === 1 ? "answer" : "answers"}
               </h2>
               <button
                 onClick={() => {
-                  copyText(`${flResults.answers.length} possible ${flResults.answers.length === 1 ? "answer" : "answers"}:\n${flResults.answers.join(", ")}\n\nSolved via ${window.location.href}.`);
+                  copyText(`${sortedFlAnswers.length} possible ${sortedFlAnswers.length === 1 ? "answer" : "answers"}:\n${sortedFlAnswers.join(", ")}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 aria-label="Copy all answers"
@@ -5446,9 +5518,10 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
+            <SortToggle value={sortMode} onChange={setSortMode} />
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {flResults.answers.slice(pageFl * 50, pageFl * 50 + 50).map((w) => (
+                {sortedFlAnswers.slice(pageFl * 50, pageFl * 50 + 50).map((w) => (
                   <button
                     key={w}
                     type="button"
@@ -5469,7 +5542,7 @@ function Index() {
                 ))}
               </div>
             </div>
-            <Paginator page={pageFl} setPage={setPageFl} total={flResults.answers.length} />
+            <Paginator page={pageFl} setPage={setPageFl} total={sortedFlAnswers.length} />
           </section>
         )}
 
