@@ -5795,6 +5795,80 @@ function Index() {
           );
         })()}
 
+        {sbResults && (() => {
+          const N = sbSize;
+          const REGION_BG: Record<number, string> = {
+            1: "bg-red-500/20",
+            2: "bg-blue-500/20",
+            3: "bg-emerald-500/20",
+            4: "bg-amber-500/20",
+            5: "bg-purple-500/20",
+            6: "bg-pink-500/20",
+            7: "bg-cyan-500/20",
+            8: "bg-orange-500/20",
+            9: "bg-lime-500/20",
+            10: "bg-indigo-500/20",
+            11: "bg-rose-500/20",
+            12: "bg-teal-500/20",
+          };
+          const perPage = 10;
+          return (
+            <section className="mt-10">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <h2 className="text-lg font-semibold">
+                  {sbResults.length}{sbResults.length === 200 ? "+" : ""} {sbResults.length === 1 ? "solution" : "solutions"}
+                </h2>
+                <button
+                  onClick={() => {
+                    const items = sbResults.map((sol, i) => {
+                      const set = new Set(sol.map(([r, c]) => `${r},${c}`));
+                      const rows: string[] = [];
+                      for (let r = 0; r < N; r++) {
+                        const row: string[] = [];
+                        for (let c = 0; c < N; c++) row.push(set.has(`${r},${c}`) ? "★" : ".");
+                        rows.push(row.join(" "));
+                      }
+                      return `#${i + 1}\n${rows.join("\n")}`;
+                    }).join("\n\n");
+                    copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                  }}
+                  className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                  aria-label="Copy all solutions"
+                >
+                  {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                </button>
+              </div>
+              <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {sbResults.slice(pageSb * perPage, pageSb * perPage + perPage).map((sol, idx) => {
+                  const i = pageSb * perPage + idx;
+                  const set = new Set(sol.map(([r, c]) => `${r},${c}`));
+                  return (
+                    <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
+                      <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
+                      <div className="inline-block">
+                        {Array.from({ length: N }, (_, r) => (
+                          <div key={r} className="flex">
+                            {Array.from({ length: N }, (_, c) => {
+                              const reg = sbRegions[r]?.[c] ?? 0;
+                              const bg = REGION_BG[reg] || "bg-muted";
+                              return (
+                                <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg} font-mono text-base font-bold`}>
+                                  {set.has(`${r},${c}`) ? "★" : ""}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+              <Paginator page={pageSb} setPage={setPageSb} total={sbResults.length} perPage={perPage} />
+            </section>
+          );
+        })()}
+
 
 
 
