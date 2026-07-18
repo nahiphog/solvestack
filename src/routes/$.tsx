@@ -3,5 +3,10 @@ import { Route as IndexRoute } from "./index";
 
 export const Route = createFileRoute("/$")({
   component: IndexRoute.options.component!,
-  head: IndexRoute.options.head,
+  head: () => ({
+    meta: [
+      { title: "Solver Sanctuary" },
+      { name: "description", content: "Find all shortest word ladders between two words." },
+    ],
+  }),
 });
