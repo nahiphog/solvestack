@@ -181,6 +181,10 @@ function Index() {
     if (mode !== "wordle" && mode !== "fibble" && mode !== "jeffgoldblum") return wordleResults;
     return sortMode === "frequency" ? sortWordsByFrequency(wordleResults) : [...wordleResults].sort();
   }, [wordleResults, sortMode, mode]);
+  const applySort = (arr: string[] | null) => {
+    if (!arr) return arr;
+    return sortMode === "frequency" ? sortWordsByFrequency(arr) : [...arr].sort();
+  };
   const [wordleAcceptAllValid, setWordleAcceptAllValid] = useState(false);
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
