@@ -600,6 +600,12 @@ function Index() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const m = URL_MODE_MAP[window.location.pathname];
+    if (m !== undefined) setMode(m);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [selectedPaths, setSelectedPaths] = useState<Set<number>>(new Set());
   useEffect(() => { setPagePaths(0); setSelectedPaths(new Set()); }, [paths]);
   useEffect(() => { setPageWordle(0); }, [wordleResults, sortMode]);
