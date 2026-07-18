@@ -583,6 +583,7 @@ function Index() {
     setSdResults(null);
     setSudokuResults(null);
     setSudokuVarResults(null);
+    setSbResults(null);
     setBwResult(null);
     setError(null);
     setSplitleP1Error(null);
