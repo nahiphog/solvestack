@@ -1647,98 +1647,32 @@ function Index() {
 
         {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("wordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              (Original)
-            </button>
-            <button
-              onClick={() => switchMode("doubledabble")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "doubledabble"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Double Dabble
-            </button>
-            <button
-              onClick={() => switchMode("fibble")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "fibble"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Fibble
-            </button>
-            <button
-              onClick={() => switchMode("flippingletters")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "flippingletters"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Flipping Letters
-            </button>
-            <button
-              onClick={() => switchMode("jeffgoldblum")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "jeffgoldblum"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Jeff Goldblumle
-            </button>
-            <button
-              onClick={() => switchMode("shuntle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "shuntle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Shuntle
-            </button>
-            <button
-              onClick={() => switchMode("splitle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "splitle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Splitle
-            </button>
-            <button
-              onClick={() => switchMode("worwordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "worwordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Worwordle
-            </button>
-            <button
-              onClick={() => switchMode("wrdl")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wrdl"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Wrdl
-            </button>
+            {([
+              { id: "doubledabble", label: "Double Dabble" },
+              { id: "flippingletters", label: "Flipping Letters" },
+              { id: "jeffgoldblum", label: "Jeff Goldblumle" },
+              { id: "fibble", label: "Lies" },
+              { id: "wordle", label: "(Original)" },
+              { id: "shuntle", label: "Shuntle" },
+              { id: "splitle", label: "Splitle" },
+              { id: "worwordle", label: "Worwordle" },
+              { id: "wrdl", label: "Wrdl" },
+            ] as { id: Mode; label: string }[]).map((m) => (
+              <button
+                key={String(m.id)}
+                onClick={() => switchMode(m.id)}
+                className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                  mode === m.id
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
           </div>
         )}
+
 
         {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind" || mode === "threepeat") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
