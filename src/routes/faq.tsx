@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import faqRepositories from "@/data/faqRepositories.json";
+
+
 
 const FAQ_REPOS_URL =
   "https://raw.githubusercontent.com/nahiphog/BigBigSolver/refs/heads/main/repositories_FAQ.json";
@@ -20,7 +23,7 @@ export const Route = createFileRoute("/faq")({
 });
 
 function FaqPage() {
-  const [repos, setRepos] = useState<FaqRepo[]>([]);
+  const [repos, setRepos] = useState<FaqRepo[]>(faqRepositories as FaqRepo[]);
   useEffect(() => {
     let cancelled = false;
     fetch(FAQ_REPOS_URL)

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useState } from "react";
-import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
@@ -19,12 +19,12 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const SECTIONS: { id: "ladder" | "search" | "math" | "logic"; label: string }[] = [
+const SECTIONS: { id: "ladder" | "search" | "mathlogic"; label: string }[] = [
   { id: "search", label: "Word search" },
   { id: "ladder", label: "Word ladder" },
-  { id: "math", label: "Math" },
-  { id: "logic", label: "Logic" },
+  { id: "mathlogic", label: "Math and logic" },
 ];
+
 
 const LADDER_MODES: { id: string; label: string }[] = [
   { id: "classic", label: "Classic" },
@@ -168,7 +168,7 @@ function sliceGroups(groups: [number, string[]][], page: number, perPage = 50): 
 const MODE_URL_MAP: Record<string, string> = {
   wordle: "/word_search/wordle/original",
   doubledabble: "/word_search/wordle/Double_Dabble",
-  fibble: "/word_search/wordle/Fibble",
+  fibble: "/word_search/wordle/Lies",
   flippingletters: "/word_search/wordle/Flipping_Letters",
   jeffgoldblum: "/word_search/wordle/Jeff_Goldblumle",
   shuntle: "/word_search/wordle/Shuntle",
@@ -1569,8 +1569,9 @@ function Index() {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "threepeat";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle";
-            const inLadder = !isMath && !inSearch && !inLogic;
-            const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : s.id === "logic" ? inLogic : inLadder;
+            const inMathLogic = isMath || inLogic;
+            const inLadder = !inMathLogic && !inSearch;
+            const isActive = s.id === "mathlogic" ? inMathLogic : s.id === "search" ? inSearch : inLadder;
             return (
               <button
                 key={s.id}
@@ -1579,9 +1580,7 @@ function Index() {
                     ? switchMode(4)
                     : s.id === "search"
                       ? switchMode("wordle")
-                      : s.id === "logic"
-                        ? switchMode("sudoku")
-                        : switchMode("dodeku")
+                      : switchMode("blunderwall")
                 }
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
@@ -1594,6 +1593,7 @@ function Index() {
             );
           })}
         </div>
+
 
         {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
           <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
@@ -1647,98 +1647,32 @@ function Index() {
 
         {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("wordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              (Original)
-            </button>
-            <button
-              onClick={() => switchMode("doubledabble")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "doubledabble"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Double Dabble
-            </button>
-            <button
-              onClick={() => switchMode("fibble")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "fibble"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Fibble
-            </button>
-            <button
-              onClick={() => switchMode("flippingletters")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "flippingletters"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Flipping Letters
-            </button>
-            <button
-              onClick={() => switchMode("jeffgoldblum")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "jeffgoldblum"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Jeff Goldblumle
-            </button>
-            <button
-              onClick={() => switchMode("shuntle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "shuntle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Shuntle
-            </button>
-            <button
-              onClick={() => switchMode("splitle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "splitle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Splitle
-            </button>
-            <button
-              onClick={() => switchMode("worwordle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "worwordle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Worwordle
-            </button>
-            <button
-              onClick={() => switchMode("wrdl")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "wrdl"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Wrdl
-            </button>
+            {([
+              { id: "doubledabble", label: "Double Dabble" },
+              { id: "flippingletters", label: "Flipping Letters" },
+              { id: "jeffgoldblum", label: "Jeff Goldblumle" },
+              { id: "fibble", label: "Lies" },
+              { id: "wordle", label: "(Original)" },
+              { id: "shuntle", label: "Shuntle" },
+              { id: "splitle", label: "Splitle" },
+              { id: "worwordle", label: "Worwordle" },
+              { id: "wrdl", label: "Wrdl" },
+            ] as { id: Mode; label: string }[]).map((m) => (
+              <button
+                key={String(m.id)}
+                onClick={() => switchMode(m.id)}
+                className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                  mode === m.id
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
           </div>
         )}
+
 
         {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind" || mode === "threepeat") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
@@ -1805,75 +1739,31 @@ function Index() {
           </div>
         )}
 
-        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall") && (
+        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("blunderwall")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "blunderwall"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Blunderwall
-            </button>
-            <button
-              onClick={() => switchMode("dodeku")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "dodeku"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Dodeku
-            </button>
-            <button
-              onClick={() => switchMode("sheetdoku")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "sheetdoku"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Sheetdoku
-            </button>
+            {([
+              { id: "blunderwall", label: "Blunderwall" },
+              { id: "dodeku", label: "Dodeku" },
+              { id: "sheetdoku", label: "Sheetdoku" },
+              { id: "starbattle", label: "Star Battle" },
+              { id: "sudoku", label: "Sudoku (original)" },
+              { id: "sudokuvariation", label: "Sudoku (variation)" },
+            ] as { id: Mode; label: string }[]).map((m) => (
+              <button
+                key={String(m.id)}
+                onClick={() => switchMode(m.id)}
+                className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                  mode === m.id
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
           </div>
         )}
 
-        {(mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle") && (
-          <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("sudoku")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "sudoku"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Sudoku (original)
-            </button>
-            <button
-              onClick={() => switchMode("sudokuvariation")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "sudokuvariation"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Sudoku (variation)
-            </button>
-            <button
-              onClick={() => switchMode("starbattle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "starbattle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Star Battle
-            </button>
-          </div>
-        )}
 
 
 
@@ -2094,8 +1984,13 @@ function Index() {
             <a href="https://worwordle.netlify.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Worwordle</a>
           )}
           {mode === "fibble" && (
-            <a href="https://fibble.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Fibble</a>
+            <>
+              <a href="https://fibble.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Fibble</a>
+              <span> · </span>
+              <a href="https://dailylie.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Daily Lie</a>
+            </>
           )}
+
           {mode === "jeffgoldblum" && (
             <a href="https://jeffgoldblumle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Jeff Goldblumle</a>
           )}
@@ -4870,19 +4765,7 @@ function Index() {
             };
             return (
               <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-4 text-sm">
-                  <label className="flex items-center gap-2">
-                    <span className="font-medium">Size:</span>
-                    <select
-                      value={sbSize}
-                      onChange={(e) => changeSize(parseInt(e.target.value, 10))}
-                      className="rounded border bg-background px-2 py-1"
-                    >
-                      {[6, 7, 8, 9, 10, 11, 12].map((n) => (
-                        <option key={n} value={n}>{n}×{n}</option>
-                      ))}
-                    </select>
-                  </label>
+                <div className="flex flex-col gap-2 text-sm">
                   <label className="flex items-center gap-2">
                     <select
                       value={sbStars}
@@ -4895,7 +4778,20 @@ function Index() {
                     </select>
                     <span>{sbStars === 1 ? "star" : "stars"} per row/region/column.</span>
                   </label>
+                  <label className="flex items-center gap-2">
+                    <span className="font-medium">Size:</span>
+                    <select
+                      value={sbSize}
+                      onChange={(e) => changeSize(parseInt(e.target.value, 10))}
+                      className="rounded border bg-background px-2 py-1"
+                    >
+                      {[5, 6, 7, 8, 9, 10, 11, 12].map((n) => (
+                        <option key={n} value={n}>{n}×{n}</option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
+
                 <div>
                   <div className="mb-2 text-sm font-medium">Paint region (click cells to assign)</div>
                   <div className="flex flex-wrap gap-2">
@@ -5161,20 +5057,28 @@ function Index() {
           </div>
         )}
 
-        {paths && (
+        {paths && (() => {
+          const isClassic = mode === 4 || mode === 5 || mode === 6 || mode === "craftwords" || mode === "weaverx";
+          const sortedPaths = isClassic && sortMode === "frequency"
+            ? [...paths]
+                .map((p, i) => ({ p, i, min: Math.min(...p.map((w) => getWordFrequency(w))) }))
+                .sort((a, b) => b.min - a.min || a.i - b.i)
+                .map((x) => x.p)
+            : paths;
+          return (
           <section className="mt-10">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {paths.length} optimal {paths.length === 1 ? "path" : "paths"} · {paths[0].length - 1} steps
+                {sortedPaths.length} optimal {sortedPaths.length === 1 ? "path" : "paths"} · {sortedPaths[0].length - 1} steps
               </h2>
               <button
                 onClick={() => {
                   const hasSelection = selectedPaths.size > 0;
                   const indices = hasSelection
                     ? [...selectedPaths].sort((a, b) => a - b)
-                    : paths.map((_, i) => i);
+                    : sortedPaths.map((_, i) => i);
                   const items = indices.map((i) => {
-                    const p = paths[i];
+                    const p = sortedPaths[i];
                     if (mode === "pivots") {
                       const formatted = p.map((w, j) => {
                         if (j === 0) return w;
@@ -5192,8 +5096,10 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> {selectedPaths.size > 0 ? "Copy" : "Copy all"}</>)}
               </button>
             </div>
+            {isClassic && <SortToggle value={sortMode} onChange={setSortMode} />}
+
             <ol className="space-y-3">
-              {paths.slice(pagePaths * 50, pagePaths * 50 + 50).map((path, idx) => {
+              {sortedPaths.slice(pagePaths * 50, pagePaths * 50 + 50).map((path, idx) => {
                 const i = pagePaths * 50 + idx;
                 const isSelected = selectedPaths.has(i);
                 
@@ -5230,9 +5136,11 @@ function Index() {
                 );
               })}
             </ol>
-            <Paginator page={pagePaths} setPage={setPagePaths} total={paths.length} />
+            <Paginator page={pagePaths} setPage={setPagePaths} total={sortedPaths.length} />
           </section>
-        )}
+          );
+        })()}
+
 
         {wordiplyResults && (() => {
           const reversed = [...wordiplyResults].reverse();
@@ -5310,27 +5218,56 @@ function Index() {
             {(mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum") && (
               <SortToggle value={sortMode} onChange={setSortMode} />
             )}
-            <div className="rounded-lg border bg-card p-4">
-              <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {wordleSortedResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
-                  <button
-                    key={w}
-                    type="button"
-                    onClick={() => addWordleGuessFromAnswer(w)}
-                    className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
-                  >
-                    {mode === "shuntle"
-                      ? w.split("").map((ch, i) => (
-                          <span key={i} className={ch === " " ? "text-muted-foreground/60" : ""}>
-                            {ch === " " ? "·" : ch}
-                          </span>
-                        ))
-                      : w}
-                  </button>
-                ))}
+            {mode === "shuntle" ? (
+              <div className="space-y-4">
+                {[4, 5, 6, 7].map((len) => {
+                  const group = wordleSortedResults.filter((w) => w.replace(/ /g, "").length === len);
+                  if (group.length === 0) return null;
+                  return (
+                    <div key={len}>
+                      <div className="mb-2 text-sm font-semibold">{len} letters ({group.length})</div>
+                      <div className="rounded-lg border bg-card p-4">
+                        <div className="flex flex-wrap gap-2 font-mono text-sm">
+                          {group.map((w) => (
+                            <button
+                              key={w}
+                              type="button"
+                              onClick={() => addWordleGuessFromAnswer(w)}
+                              className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                            >
+                              {w.split("").map((ch, i) => (
+                                <span key={i} className={ch === " " ? "text-muted-foreground/60" : ""}>
+                                  {ch === " " ? "·" : ch}
+                                </span>
+                              ))}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-            <Paginator page={pageWordle} setPage={setPageWordle} total={wordleSortedResults.length} />
+            ) : (
+              <>
+                <div className="rounded-lg border bg-card p-4">
+                  <div className="flex flex-wrap gap-2 font-mono text-sm">
+                    {wordleSortedResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
+                      <button
+                        key={w}
+                        type="button"
+                        onClick={() => addWordleGuessFromAnswer(w)}
+                        className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                      >
+                        {w}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <Paginator page={pageWordle} setPage={setPageWordle} total={wordleSortedResults.length} />
+              </>
+            )}
+
           </section>
         )}
 
