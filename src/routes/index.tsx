@@ -210,6 +210,15 @@ function Index() {
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
   const [sortMode, setSortMode] = useState<"frequency" | "alphabetical">("frequency");
+  const [_freqLoaded, _setFreqLoaded] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    import("@/lib/wordLadder").then(({ ensureFrequenciesLoaded }) =>
+      ensureFrequenciesLoaded().then(() => { if (!cancelled) _setFreqLoaded((n) => n + 1); }),
+    );
+    return () => { cancelled = true; };
+  }, []);
+
   const wordleSortedResults = useMemo(() => {
     if (!wordleResults) return null;
     if (mode !== "wordle" && mode !== "fibble" && mode !== "jeffgoldblum") return wordleResults;
