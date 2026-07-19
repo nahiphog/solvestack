@@ -168,7 +168,7 @@ function sliceGroups(groups: [number, string[]][], page: number, perPage = 50): 
 const MODE_URL_MAP: Record<string, string> = {
   wordle: "/word_search/wordle/original",
   doubledabble: "/word_search/wordle/Double_Dabble",
-  fibble: "/word_search/wordle/Fibble",
+  fibble: "/word_search/wordle/Lies",
   flippingletters: "/word_search/wordle/Flipping_Letters",
   jeffgoldblum: "/word_search/wordle/Jeff_Goldblumle",
   shuntle: "/word_search/wordle/Shuntle",
