@@ -5,7 +5,7 @@ import graphSplice from "@/data/wordSplice.json";
 import graphWeaverX from "@/data/wordWeaverX.json";
 import graphPivots from "@/data/wordPivots.json";
 import graphCraftWords from "@/data/wordCraftWords.json";
-import wordFrequencies from "@/data/wordFrequencies.json";
+
 
 
 
