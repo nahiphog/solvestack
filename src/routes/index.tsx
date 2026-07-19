@@ -4765,19 +4765,7 @@ function Index() {
             };
             return (
               <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-4 text-sm">
-                  <label className="flex items-center gap-2">
-                    <span className="font-medium">Size:</span>
-                    <select
-                      value={sbSize}
-                      onChange={(e) => changeSize(parseInt(e.target.value, 10))}
-                      className="rounded border bg-background px-2 py-1"
-                    >
-                      {[6, 7, 8, 9, 10, 11, 12].map((n) => (
-                        <option key={n} value={n}>{n}×{n}</option>
-                      ))}
-                    </select>
-                  </label>
+                <div className="flex flex-col gap-2 text-sm">
                   <label className="flex items-center gap-2">
                     <select
                       value={sbStars}
@@ -4790,7 +4778,20 @@ function Index() {
                     </select>
                     <span>{sbStars === 1 ? "star" : "stars"} per row/region/column.</span>
                   </label>
+                  <label className="flex items-center gap-2">
+                    <span className="font-medium">Size:</span>
+                    <select
+                      value={sbSize}
+                      onChange={(e) => changeSize(parseInt(e.target.value, 10))}
+                      className="rounded border bg-background px-2 py-1"
+                    >
+                      {[5, 6, 7, 8, 9, 10, 11, 12].map((n) => (
+                        <option key={n} value={n}>{n}×{n}</option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
+
                 <div>
                   <div className="mb-2 text-sm font-medium">Paint region (click cells to assign)</div>
                   <div className="flex flex-wrap gap-2">
