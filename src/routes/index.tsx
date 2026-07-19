@@ -1984,8 +1984,13 @@ function Index() {
             <a href="https://worwordle.netlify.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Worwordle</a>
           )}
           {mode === "fibble" && (
-            <a href="https://fibble.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Fibble</a>
+            <>
+              <a href="https://fibble.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Fibble</a>
+              <span> · </span>
+              <a href="https://dailylie.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Daily Lie</a>
+            </>
           )}
+
           {mode === "jeffgoldblum" && (
             <a href="https://jeffgoldblumle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Jeff Goldblumle</a>
           )}
