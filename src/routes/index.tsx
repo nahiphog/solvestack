@@ -210,11 +210,20 @@ function Index() {
   ]);
   const [wordleResults, setWordleResults] = useState<string[] | null>(null);
   const [sortMode, setSortMode] = useState<"frequency" | "alphabetical">("frequency");
+  const [_freqLoaded, _setFreqLoaded] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    import("@/lib/wordLadder").then(({ ensureFrequenciesLoaded }) =>
+      ensureFrequenciesLoaded().then(() => { if (!cancelled) _setFreqLoaded((n) => n + 1); }),
+    );
+    return () => { cancelled = true; };
+  }, []);
+
   const wordleSortedResults = useMemo(() => {
     if (!wordleResults) return null;
     if (mode !== "wordle" && mode !== "fibble" && mode !== "jeffgoldblum") return wordleResults;
     return sortMode === "frequency" ? sortWordsByFrequency(wordleResults) : [...wordleResults].sort();
-  }, [wordleResults, sortMode, mode]);
+  }, [wordleResults, sortMode, mode, _freqLoaded]);
   // per-solver frequency sorting hooks appear after their state declarations below
   const [wordleAcceptAllValid, setWordleAcceptAllValid] = useState(false);
   const [wordleStartingCount, setWordleStartingCount] = useState<number>(0);
@@ -280,9 +289,9 @@ function Index() {
   ]);
   const [flResults, setFlResults] = useState<{ flippable: string[]; answers: string[] } | null>(null);
   const [pageFl, setPageFl] = useState(0);
-  const sortedMastermind = useMemo(() => mastermindResults ? (sortMode === "frequency" ? sortWordsByFrequency(mastermindResults) : [...mastermindResults].sort()) : null, [mastermindResults, sortMode]);
-  const sortedWordPeaks = useMemo(() => wordPeaksResults ? (sortMode === "frequency" ? sortWordsByFrequency(wordPeaksResults) : [...wordPeaksResults].sort()) : null, [wordPeaksResults, sortMode]);
-  const sortedFlAnswers = useMemo(() => flResults ? (sortMode === "frequency" ? sortWordsByFrequency(flResults.answers) : [...flResults.answers].sort()) : null, [flResults, sortMode]);
+  const sortedMastermind = useMemo(() => mastermindResults ? (sortMode === "frequency" ? sortWordsByFrequency(mastermindResults) : [...mastermindResults].sort()) : null, [mastermindResults, sortMode, _freqLoaded]);
+  const sortedWordPeaks = useMemo(() => wordPeaksResults ? (sortMode === "frequency" ? sortWordsByFrequency(wordPeaksResults) : [...wordPeaksResults].sort()) : null, [wordPeaksResults, sortMode, _freqLoaded]);
+  const sortedFlAnswers = useMemo(() => flResults ? (sortMode === "frequency" ? sortWordsByFrequency(flResults.answers) : [...flResults.answers].sort()) : null, [flResults, sortMode, _freqLoaded]);
   const [flStartingWords, setFlStartingWords] = useState<0 | 1>(0);
   const [flLocked, setFlLocked] = useState<boolean>(false);
   // Double Dabble: 15 cells (3x5); positions 10 and 14 are faded/disabled. Each usable cell holds 2 distinct letters.
@@ -608,18 +617,18 @@ function Index() {
   }, []);
   const [selectedPaths, setSelectedPaths] = useState<Set<number>>(new Set());
   useEffect(() => { setPagePaths(0); setSelectedPaths(new Set()); }, [paths]);
-  useEffect(() => { setPageWordle(0); }, [wordleResults, sortMode]);
+  useEffect(() => { setPageWordle(0); }, [wordleResults, sortMode, _freqLoaded]);
   useEffect(() => { if (wordleResults) setSortMode("frequency"); }, [wordleResults]);
   useEffect(() => { setPageWrdl(0); }, [wrdlResults]);
-  useEffect(() => { setPageMM(0); }, [mastermindResults, sortMode]);
+  useEffect(() => { setPageMM(0); }, [mastermindResults, sortMode, _freqLoaded]);
   useEffect(() => { if (mastermindResults) setSortMode("frequency"); }, [mastermindResults]);
-  useEffect(() => { setPageWP(0); }, [wordPeaksResults, sortMode]);
+  useEffect(() => { setPageWP(0); }, [wordPeaksResults, sortMode, _freqLoaded]);
   useEffect(() => { if (wordPeaksResults) setSortMode("frequency"); }, [wordPeaksResults]);
 
   useEffect(() => { setPageMarbless(0); setSelectedMarbless(new Set()); }, [marblessResults]);
   useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
-  useEffect(() => { setPageFl(0); }, [flResults, sortMode]);
+  useEffect(() => { setPageFl(0); }, [flResults, sortMode, _freqLoaded]);
   useEffect(() => { if (flResults) setSortMode("frequency"); }, [flResults]);
   useEffect(() => { setPageWor(0); }, [worResults]);
   useEffect(() => { setPageSd(0); }, [sdResults]);
