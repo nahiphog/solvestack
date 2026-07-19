@@ -5206,27 +5206,56 @@ function Index() {
             {(mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum") && (
               <SortToggle value={sortMode} onChange={setSortMode} />
             )}
-            <div className="rounded-lg border bg-card p-4">
-              <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {wordleSortedResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
-                  <button
-                    key={w}
-                    type="button"
-                    onClick={() => addWordleGuessFromAnswer(w)}
-                    className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
-                  >
-                    {mode === "shuntle"
-                      ? w.split("").map((ch, i) => (
-                          <span key={i} className={ch === " " ? "text-muted-foreground/60" : ""}>
-                            {ch === " " ? "·" : ch}
-                          </span>
-                        ))
-                      : w}
-                  </button>
-                ))}
+            {mode === "shuntle" ? (
+              <div className="space-y-4">
+                {[4, 5, 6, 7].map((len) => {
+                  const group = wordleSortedResults.filter((w) => w.replace(/ /g, "").length === len);
+                  if (group.length === 0) return null;
+                  return (
+                    <div key={len}>
+                      <div className="mb-2 text-sm font-semibold">{len} letters ({group.length})</div>
+                      <div className="rounded-lg border bg-card p-4">
+                        <div className="flex flex-wrap gap-2 font-mono text-sm">
+                          {group.map((w) => (
+                            <button
+                              key={w}
+                              type="button"
+                              onClick={() => addWordleGuessFromAnswer(w)}
+                              className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                            >
+                              {w.split("").map((ch, i) => (
+                                <span key={i} className={ch === " " ? "text-muted-foreground/60" : ""}>
+                                  {ch === " " ? "·" : ch}
+                                </span>
+                              ))}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-            <Paginator page={pageWordle} setPage={setPageWordle} total={wordleSortedResults.length} />
+            ) : (
+              <>
+                <div className="rounded-lg border bg-card p-4">
+                  <div className="flex flex-wrap gap-2 font-mono text-sm">
+                    {wordleSortedResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
+                      <button
+                        key={w}
+                        type="button"
+                        onClick={() => addWordleGuessFromAnswer(w)}
+                        className="rounded bg-muted px-2 py-1 tracking-widest hover:bg-accent hover:text-accent-foreground"
+                      >
+                        {w}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <Paginator page={pageWordle} setPage={setPageWordle} total={wordleSortedResults.length} />
+              </>
+            )}
+
           </section>
         )}
 
