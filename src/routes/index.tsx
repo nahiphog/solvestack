@@ -1569,8 +1569,9 @@ function Index() {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "threepeat";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle";
-            const inLadder = !isMath && !inSearch && !inLogic;
-            const isActive = s.id === "math" ? isMath : s.id === "search" ? inSearch : s.id === "logic" ? inLogic : inLadder;
+            const inMathLogic = isMath || inLogic;
+            const inLadder = !inMathLogic && !inSearch;
+            const isActive = s.id === "mathlogic" ? inMathLogic : s.id === "search" ? inSearch : inLadder;
             return (
               <button
                 key={s.id}
@@ -1579,9 +1580,7 @@ function Index() {
                     ? switchMode(4)
                     : s.id === "search"
                       ? switchMode("wordle")
-                      : s.id === "logic"
-                        ? switchMode("sudoku")
-                        : switchMode("dodeku")
+                      : switchMode("blunderwall")
                 }
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
@@ -1594,6 +1593,7 @@ function Index() {
             );
           })}
         </div>
+
 
         {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
           <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
