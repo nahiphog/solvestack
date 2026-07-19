@@ -23,7 +23,7 @@ export const Route = createFileRoute("/faq")({
 });
 
 function FaqPage() {
-  const [repos, setRepos] = useState<FaqRepo[]>([]);
+  const [repos, setRepos] = useState<FaqRepo[]>(faqRepositories as FaqRepo[]);
   useEffect(() => {
     let cancelled = false;
     fetch(FAQ_REPOS_URL)
