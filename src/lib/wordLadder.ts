@@ -679,11 +679,26 @@ async function getFiveLetterWords(): Promise<string[]> {
   return _fiveLetterWordsCache;
 }
 
-const frequencyMap: Record<string, number> = wordFrequencies;
+let frequencyMap: Record<string, number> = {};
+let _freqLoadPromise: Promise<void> | null = null;
+
+export function ensureFrequenciesLoaded(): Promise<void> {
+  if (!_freqLoadPromise) {
+    _freqLoadPromise =
+      typeof fetch === "undefined"
+        ? Promise.resolve()
+        : fetch("/wordFrequencies.json")
+            .then((r) => r.json())
+            .then((d: Record<string, number>) => { frequencyMap = d; })
+            .catch(() => {});
+  }
+  return _freqLoadPromise;
+}
 
 export function getWordFrequency(word: string): number {
   return frequencyMap[word.toUpperCase()] ?? 0;
 }
+
 
 export function sortWordsByFrequency(words: string[], mostCommonFirst = true): string[] {
   const groups = new Map<number, string[]>();
