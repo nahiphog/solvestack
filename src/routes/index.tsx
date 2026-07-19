@@ -5057,20 +5057,28 @@ function Index() {
           </div>
         )}
 
-        {paths && (
+        {paths && (() => {
+          const isClassic = mode === 4 || mode === 5 || mode === 6 || mode === "craftwords" || mode === "weaverx";
+          const sortedPaths = isClassic && sortMode === "frequency"
+            ? [...paths]
+                .map((p, i) => ({ p, i, min: Math.min(...p.map((w) => getWordFrequency(w))) }))
+                .sort((a, b) => b.min - a.min || a.i - b.i)
+                .map((x) => x.p)
+            : paths;
+          return (
           <section className="mt-10">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {paths.length} optimal {paths.length === 1 ? "path" : "paths"} · {paths[0].length - 1} steps
+                {sortedPaths.length} optimal {sortedPaths.length === 1 ? "path" : "paths"} · {sortedPaths[0].length - 1} steps
               </h2>
               <button
                 onClick={() => {
                   const hasSelection = selectedPaths.size > 0;
                   const indices = hasSelection
                     ? [...selectedPaths].sort((a, b) => a - b)
-                    : paths.map((_, i) => i);
+                    : sortedPaths.map((_, i) => i);
                   const items = indices.map((i) => {
-                    const p = paths[i];
+                    const p = sortedPaths[i];
                     if (mode === "pivots") {
                       const formatted = p.map((w, j) => {
                         if (j === 0) return w;
@@ -5088,6 +5096,8 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> {selectedPaths.size > 0 ? "Copy" : "Copy all"}</>)}
               </button>
             </div>
+            {isClassic && <SortToggle value={sortMode} onChange={setSortMode} />}
+
             <ol className="space-y-3">
               {paths.slice(pagePaths * 50, pagePaths * 50 + 50).map((path, idx) => {
                 const i = pagePaths * 50 + idx;
