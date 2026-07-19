@@ -1805,75 +1805,31 @@ function Index() {
           </div>
         )}
 
-        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall") && (
+        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("blunderwall")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "blunderwall"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Blunderwall
-            </button>
-            <button
-              onClick={() => switchMode("dodeku")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "dodeku"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Dodeku
-            </button>
-            <button
-              onClick={() => switchMode("sheetdoku")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "sheetdoku"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Sheetdoku
-            </button>
+            {([
+              { id: "blunderwall", label: "Blunderwall" },
+              { id: "dodeku", label: "Dodeku" },
+              { id: "sheetdoku", label: "Sheetdoku" },
+              { id: "starbattle", label: "Star Battle" },
+              { id: "sudoku", label: "Sudoku (original)" },
+              { id: "sudokuvariation", label: "Sudoku (variation)" },
+            ] as { id: Mode; label: string }[]).map((m) => (
+              <button
+                key={String(m.id)}
+                onClick={() => switchMode(m.id)}
+                className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                  mode === m.id
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
           </div>
         )}
 
-        {(mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle") && (
-          <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("sudoku")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "sudoku"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Sudoku (original)
-            </button>
-            <button
-              onClick={() => switchMode("sudokuvariation")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "sudokuvariation"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Sudoku (variation)
-            </button>
-            <button
-              onClick={() => switchMode("starbattle")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "starbattle"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Star Battle
-            </button>
-          </div>
-        )}
 
 
 
