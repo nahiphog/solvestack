@@ -5099,7 +5099,7 @@ function Index() {
             {isClassic && <SortToggle value={sortMode} onChange={setSortMode} />}
 
             <ol className="space-y-3">
-              {paths.slice(pagePaths * 50, pagePaths * 50 + 50).map((path, idx) => {
+              {sortedPaths.slice(pagePaths * 50, pagePaths * 50 + 50).map((path, idx) => {
                 const i = pagePaths * 50 + idx;
                 const isSelected = selectedPaths.has(i);
                 
@@ -5136,9 +5136,11 @@ function Index() {
                 );
               })}
             </ol>
-            <Paginator page={pagePaths} setPage={setPagePaths} total={paths.length} />
+            <Paginator page={pagePaths} setPage={setPagePaths} total={sortedPaths.length} />
           </section>
-        )}
+          );
+        })()}
+
 
         {wordiplyResults && (() => {
           const reversed = [...wordiplyResults].reverse();
