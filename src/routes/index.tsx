@@ -5506,19 +5506,19 @@ function Index() {
           </section>
         )}
 
-        {worResults && (
+        {worResults && sortedWor && (
           <section className="mt-10">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {worResults.length} possible {worResults.length === 1 ? "answer" : "answers"}
+                {sortedWor.length} possible {sortedWor.length === 1 ? "answer" : "answers"}
               </h2>
               <button
                 onClick={() => {
-                  const items = worResults.map((w) => {
+                  const items = sortedWor.map((w) => {
                     const [a, b] = worwordleSplit(w);
                     return `${w} (${a} + ${b})`;
                   }).join(", ");
-                  copyText(`${worResults.length} possible ${worResults.length === 1 ? "answer" : "answers"}:\n${items}\n\nSolved via ${window.location.href}.`);
+                  copyText(`${sortedWor.length} possible ${sortedWor.length === 1 ? "answer" : "answers"}:\n${items}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 aria-label="Copy all answers"
@@ -5526,9 +5526,10 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
-            <div className="rounded-lg border bg-card p-4">
+            <SortToggle value={sortMode} onChange={setSortMode} />
+            <div className="mt-3 rounded-lg border bg-card p-4">
               <div className="flex flex-col gap-2 font-mono text-sm">
-                {worResults.slice(pageWor * 50, pageWor * 50 + 50).map((w) => {
+                {sortedWor.slice(pageWor * 50, pageWor * 50 + 50).map((w) => {
                   const [a, b] = worwordleSplit(w);
                   return (
                     <div key={w} className="flex items-center gap-2">
@@ -5548,7 +5549,7 @@ function Index() {
                 })}
               </div>
             </div>
-            <Paginator page={pageWor} setPage={setPageWor} total={worResults.length} />
+            <Paginator page={pageWor} setPage={setPageWor} total={sortedWor.length} />
           </section>
         )}
 
