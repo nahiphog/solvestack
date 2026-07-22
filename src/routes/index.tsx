@@ -3054,19 +3054,24 @@ function Index() {
           <div className={mode === "splitle" ? "space-y-4 border-2 border-border rounded-lg p-4" : "space-y-4"}>
             {mode === "splitle" && (
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Optional input: Add</span>
+                <button
+                  type="button"
+                  onClick={() => applySplitleStartingWords(3)}
+                  className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
+                >
+                  Add
+                </button>
                 <select
-                  value={splitleStartingWords}
-                  onChange={(e) => applySplitleStartingWords(Number(e.target.value) as 0 | 3)}
+                  value={splitleStartingWords === 0 ? 3 : splitleStartingWords}
+                  onChange={(e) => applySplitleStartingWords(Number(e.target.value) as 3)}
                   className="rounded border bg-background px-2 py-1 text-sm"
                 >
-                  <option value={0}>0</option>
                   <option value={3}>3</option>
                 </select>
-                <span className="text-muted-foreground">strategic starting words.</span>
+                <span className="text-muted-foreground">strategic strings.</span>
               </div>
             )}
-            {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && mode !== "wrdl" && (
+            {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && mode !== "wrdl" && mode !== "fibble" && (
               mode === "wordle" ? (
                 <div className="rounded-lg border border-border p-3 space-y-2">
                   <div className="text-sm font-medium">Additional options:</div>
@@ -3112,7 +3117,7 @@ function Index() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-sm">
-                  <span>Optional input: Add</span>
+                  <span>Additional option: Add</span>
                   <select
                     className="rounded border border-border bg-background px-2 py-1"
                     defaultValue="0"
@@ -3138,34 +3143,34 @@ function Index() {
             )}
             {mode === "jeffgoldblum" && (
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Optional input: Add</span>
-                <select
-                  value={jgStartingWord}
-                  onChange={(e) => {
-                    const v = Number(e.target.value) as 0 | 1;
-                    setJgStartingWord(v);
-                    if (v === 1) {
-                      const word = Math.random() < 0.5 ? "PRAISEWORTHY" : "WISECRACKING";
-                      setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), { word, pattern: Array(12).fill("GREY") as WordleColor[] }]);
-                    }
+                <button
+                  type="button"
+                  onClick={() => {
+                    setJgStartingWord(1);
+                    const word = Math.random() < 0.5 ? "PRAISEWORTHY" : "WISECRACKING";
+                    setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), { word, pattern: Array(12).fill("GREY") as WordleColor[] }]);
                   }}
-                  className="rounded border border-border bg-background px-2 py-1"
+                  className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                 >
-                  <option value={0}>0</option>
-                  <option value={1}>1</option>
-                </select>
-                <span className="text-muted-foreground">word into the solver.</span>
+                  Add
+                </button>
+                <span className="text-muted-foreground">1 strategic starting word.</span>
               </div>
             )}
             {mode === "wrdl" && (
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Optional input: Add</span>
+                <button
+                  type="button"
+                  onClick={() => applyWrdlStartingWords(wrdlStartingWords === 0 ? 2 : wrdlStartingWords)}
+                  className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
+                >
+                  Add
+                </button>
                 <select
-                  value={wrdlStartingWords}
-                  onChange={(e) => applyWrdlStartingWords(Number(e.target.value) as 0 | 2 | 3)}
+                  value={wrdlStartingWords === 0 ? 2 : wrdlStartingWords}
+                  onChange={(e) => applyWrdlStartingWords(Number(e.target.value) as 2 | 3)}
                   className="rounded border bg-background px-2 py-1 text-sm"
                 >
-                  <option value={0}>0</option>
                   <option value={2}>2</option>
                   <option value={3}>3</option>
                 </select>
