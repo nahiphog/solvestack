@@ -221,8 +221,16 @@ function Index() {
 
   const wordleSortedResults = useMemo(() => {
     if (!wordleResults) return null;
-    if (mode !== "wordle" && mode !== "fibble" && mode !== "jeffgoldblum") return wordleResults;
-    return sortMode === "frequency" ? sortWordsByFrequency(wordleResults) : [...wordleResults].sort();
+    if (mode !== "wordle" && mode !== "fibble" && mode !== "jeffgoldblum" && mode !== "shuntle") return wordleResults;
+    if (sortMode !== "frequency") return [...wordleResults].sort();
+    if (mode === "shuntle") {
+      return [...wordleResults].sort((a, b) => {
+        const fa = getWordFrequency(a.replace(/ /g, ""));
+        const fb = getWordFrequency(b.replace(/ /g, ""));
+        return fb - fa || a.localeCompare(b);
+      });
+    }
+    return sortWordsByFrequency(wordleResults);
   }, [wordleResults, sortMode, mode, _freqLoaded]);
   // per-solver frequency sorting hooks appear after their state declarations below
   const [wordleAcceptAllValid, setWordleAcceptAllValid] = useState(false);
@@ -292,6 +300,10 @@ function Index() {
   const sortedMastermind = useMemo(() => mastermindResults ? (sortMode === "frequency" ? sortWordsByFrequency(mastermindResults) : [...mastermindResults].sort()) : null, [mastermindResults, sortMode, _freqLoaded]);
   const sortedWordPeaks = useMemo(() => wordPeaksResults ? (sortMode === "frequency" ? sortWordsByFrequency(wordPeaksResults) : [...wordPeaksResults].sort()) : null, [wordPeaksResults, sortMode, _freqLoaded]);
   const sortedFlAnswers = useMemo(() => flResults ? (sortMode === "frequency" ? sortWordsByFrequency(flResults.answers) : [...flResults.answers].sort()) : null, [flResults, sortMode, _freqLoaded]);
+  const sortedSpellingBee = useMemo(() => {
+    if (!spellingBeeResults) return null;
+    return spellingBeeResults.map(([s, ws]) => [s, sortMode === "frequency" ? sortWordsByFrequency(ws) : [...ws].sort()] as [number, string[]]);
+  }, [spellingBeeResults, sortMode, _freqLoaded]);
   const [flStartingWords, setFlStartingWords] = useState<0 | 1>(0);
   const [flLocked, setFlLocked] = useState<boolean>(false);
   // Double Dabble: 15 cells (3x5); positions 10 and 14 are faded/disabled. Each usable cell holds 2 distinct letters.
@@ -405,6 +417,17 @@ function Index() {
   const [worResults, setWorResults] = useState<string[] | null>(null);
   const [pageWor, setPageWor] = useState(0);
   const [worStartingWords, setWorStartingWords] = useState<0 | 2>(0);
+  const sortedWor = useMemo(() => {
+    if (!worResults) return null;
+    if (sortMode !== "frequency") return [...worResults].sort();
+    return [...worResults].sort((a, b) => {
+      const [a1, a2] = worwordleSplit(a);
+      const [b1, b2] = worwordleSplit(b);
+      const fa = Math.min(getWordFrequency(a1), getWordFrequency(a2));
+      const fb = Math.min(getWordFrequency(b1), getWordFrequency(b2));
+      return fb - fa || a.localeCompare(b);
+    });
+  }, [worResults, sortMode, _freqLoaded]);
 
   const applyWorStartingWords = (count: 0 | 2) => {
     setWorStartingWords(count);
@@ -1589,7 +1612,7 @@ function Index() {
                     ? switchMode(4)
                     : s.id === "search"
                       ? switchMode("wordle")
-                      : switchMode("blunderwall")
+                      : switchMode("sudoku")
                 }
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
@@ -2123,16 +2146,14 @@ function Index() {
 
         {mode === "shuntle" && (
           <div className="mb-4 flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Optional input: Add</span>
-            <select
-              value={shuntleStartingWords}
-              onChange={(e) => applyShuntleStartingWords(Number(e.target.value) as 0 | 2)}
-              className="rounded border bg-background px-2 py-1 text-sm"
+            <button
+              type="button"
+              onClick={() => applyShuntleStartingWords(2)}
+              className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
             >
-              <option value={0}>0</option>
-              <option value={2}>2</option>
-            </select>
-            <span className="text-muted-foreground">strategic starting words.</span>
+              Add
+            </button>
+            <span className="text-muted-foreground">2 strategic starting words.</span>
           </div>
         )}
 
@@ -2227,7 +2248,6 @@ function Index() {
             <p>You are given a square grid, partitioned into non-overlapping regions.</p>
             <p>Each row, column and region contains a fixed number of stars in them.</p>
             <p>Each star cannot be adjacent with each other, not even diagonally adjacent.</p>
-            <p>Pick a region color, then click cells to assign them.</p>
           </div>
         )}
         {mode === "wordpeaks" && (
@@ -2277,7 +2297,7 @@ function Index() {
         )}
         {mode === "worwordle" && (
           <div className="mb-4 flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Optional input: Add</span>
+            <span className="text-muted-foreground">Additional option: Add</span>
             <select
               value={worStartingWords}
               onChange={(e) => applyWorStartingWords(Number(e.target.value) as 0 | 2)}
@@ -2457,27 +2477,20 @@ function Index() {
                     <div className="space-y-4 rounded-lg border bg-card p-4">
                       {StartingFlippableWords.length > 0 && (
                       <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <span>Optional input: Add</span>
-                        <select
-                          value={flStartingWords}
-                          onChange={(e) => {
-                            const n = Number(e.target.value) as 0 | 1;
-                            setFlStartingWords(n);
-                            if (n === 1) {
-                              const pick = StartingFlippableWords[Math.floor(Math.random() * StartingFlippableWords.length)];
-                              setFlGuesses([{ word: pick.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
-                            } else {
-                              setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
-                            }
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFlStartingWords(1);
+                            const pick = StartingFlippableWords[Math.floor(Math.random() * StartingFlippableWords.length)];
+                            setFlGuesses([{ word: pick.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
                             setFlResults(null);
                             setError(null);
                           }}
-                          className="rounded border border-border bg-background px-2 py-1 text-sm"
+                          className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                         >
-                          <option value={0}>0</option>
-                          <option value={1}>1</option>
-                        </select>
-                        <span>strategic starting words.</span>
+                          Add
+                        </button>
+                        <span>1 strategic starting word.</span>
                       </div>
                       )}
                       {flGuesses.map((g, gi) => (
@@ -3064,19 +3077,24 @@ function Index() {
           <div className={mode === "splitle" ? "space-y-4 border-2 border-border rounded-lg p-4" : "space-y-4"}>
             {mode === "splitle" && (
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Optional input: Add</span>
+                <button
+                  type="button"
+                  onClick={() => applySplitleStartingWords(3)}
+                  className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
+                >
+                  Add
+                </button>
                 <select
-                  value={splitleStartingWords}
-                  onChange={(e) => applySplitleStartingWords(Number(e.target.value) as 0 | 3)}
+                  value={splitleStartingWords === 0 ? 3 : splitleStartingWords}
+                  onChange={(e) => applySplitleStartingWords(Number(e.target.value) as 3)}
                   className="rounded border bg-background px-2 py-1 text-sm"
                 >
-                  <option value={0}>0</option>
                   <option value={3}>3</option>
                 </select>
-                <span className="text-muted-foreground">strategic starting words.</span>
+                <span className="text-muted-foreground">strategic strings.</span>
               </div>
             )}
-            {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && mode !== "wrdl" && (
+            {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && mode !== "wrdl" && mode !== "fibble" && (
               mode === "wordle" ? (
                 <div className="rounded-lg border border-border p-3 space-y-2">
                   <div className="text-sm font-medium">Additional options:</div>
@@ -3122,7 +3140,7 @@ function Index() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-sm">
-                  <span>Optional input: Add</span>
+                  <span>Additional option: Add</span>
                   <select
                     className="rounded border border-border bg-background px-2 py-1"
                     defaultValue="0"
@@ -3148,34 +3166,34 @@ function Index() {
             )}
             {mode === "jeffgoldblum" && (
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Optional input: Add</span>
-                <select
-                  value={jgStartingWord}
-                  onChange={(e) => {
-                    const v = Number(e.target.value) as 0 | 1;
-                    setJgStartingWord(v);
-                    if (v === 1) {
-                      const word = Math.random() < 0.5 ? "PRAISEWORTHY" : "WISECRACKING";
-                      setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), { word, pattern: Array(12).fill("GREY") as WordleColor[] }]);
-                    }
+                <button
+                  type="button"
+                  onClick={() => {
+                    setJgStartingWord(1);
+                    const word = Math.random() < 0.5 ? "PRAISEWORTHY" : "WISECRACKING";
+                    setWordleGuesses((prev) => [...prev.filter((g) => !isEmptyGuessWord(g.word)), { word, pattern: Array(12).fill("GREY") as WordleColor[] }]);
                   }}
-                  className="rounded border border-border bg-background px-2 py-1"
+                  className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                 >
-                  <option value={0}>0</option>
-                  <option value={1}>1</option>
-                </select>
-                <span className="text-muted-foreground">word into the solver.</span>
+                  Add
+                </button>
+                <span className="text-muted-foreground">1 strategic starting word.</span>
               </div>
             )}
             {mode === "wrdl" && (
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Optional input: Add</span>
+                <button
+                  type="button"
+                  onClick={() => applyWrdlStartingWords(wrdlStartingWords === 0 ? 2 : wrdlStartingWords)}
+                  className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
+                >
+                  Add
+                </button>
                 <select
-                  value={wrdlStartingWords}
-                  onChange={(e) => applyWrdlStartingWords(Number(e.target.value) as 0 | 2 | 3)}
+                  value={wrdlStartingWords === 0 ? 2 : wrdlStartingWords}
+                  onChange={(e) => applyWrdlStartingWords(Number(e.target.value) as 2 | 3)}
                   className="rounded border bg-background px-2 py-1 text-sm"
                 >
-                  <option value={0}>0</option>
                   <option value={2}>2</option>
                   <option value={3}>3</option>
                 </select>
@@ -3764,7 +3782,7 @@ function Index() {
             </div>
             {mastermindLen === 5 && (
               <div className="flex items-center gap-2 text-sm">
-                <span>Optional input: Add</span>
+                <span>Additional option: Add</span>
                 <select
                   className="rounded border border-border bg-background px-2 py-1"
                   defaultValue=""
@@ -3788,7 +3806,7 @@ function Index() {
             )}
             {mastermindLen === 4 && (
               <div className="flex items-center gap-2 text-sm">
-                <span>Optional input: Add</span>
+                <span>Additional option: Add</span>
                 <select
                   className="rounded border border-border bg-background px-2 py-1"
                   defaultValue=""
@@ -5352,21 +5370,17 @@ function Index() {
                   {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
                 </button>
               </div>
+              <div className="mb-3">
+                <SortToggle value={sortMode} onChange={setSortMode} />
+              </div>
               <div className="space-y-4">
-                {spellingBeeResults.map(([score, words]) => (
+                {(sortedSpellingBee ?? spellingBeeResults).map(([score, words]) => (
                   <div key={score} className="rounded-lg border bg-card p-4">
                     <div className="mb-2 text-sm font-semibold text-muted-foreground">
                       {score} {score === 1 ? "point" : "points"} · {words.length} {words.length === 1 ? "word" : "words"}
                     </div>
-                    <div className="flex flex-wrap gap-2 font-mono text-sm">
-                      {words.map((w) => (
-                        <span
-                          key={w}
-                          className="rounded bg-muted px-2 py-1 tracking-widest"
-                        >
-                          {w}
-                        </span>
-                      ))}
+                    <div className="font-mono text-sm">
+                      {words.join(", ")}
                     </div>
                   </div>
                 ))}
@@ -5492,19 +5506,19 @@ function Index() {
           </section>
         )}
 
-        {worResults && (
+        {worResults && sortedWor && (
           <section className="mt-10">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
-                {worResults.length} possible {worResults.length === 1 ? "answer" : "answers"}
+                {sortedWor.length} possible {sortedWor.length === 1 ? "answer" : "answers"}
               </h2>
               <button
                 onClick={() => {
-                  const items = worResults.map((w) => {
+                  const items = sortedWor.map((w) => {
                     const [a, b] = worwordleSplit(w);
                     return `${w} (${a} + ${b})`;
                   }).join(", ");
-                  copyText(`${worResults.length} possible ${worResults.length === 1 ? "answer" : "answers"}:\n${items}\n\nSolved via ${window.location.href}.`);
+                  copyText(`${sortedWor.length} possible ${sortedWor.length === 1 ? "answer" : "answers"}:\n${items}\n\nSolved via ${window.location.href}.`);
                 }}
                 className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 aria-label="Copy all answers"
@@ -5512,9 +5526,10 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
-            <div className="rounded-lg border bg-card p-4">
+            <SortToggle value={sortMode} onChange={setSortMode} />
+            <div className="mt-3 rounded-lg border bg-card p-4">
               <div className="flex flex-col gap-2 font-mono text-sm">
-                {worResults.slice(pageWor * 50, pageWor * 50 + 50).map((w) => {
+                {sortedWor.slice(pageWor * 50, pageWor * 50 + 50).map((w) => {
                   const [a, b] = worwordleSplit(w);
                   return (
                     <div key={w} className="flex items-center gap-2">
@@ -5534,7 +5549,7 @@ function Index() {
                 })}
               </div>
             </div>
-            <Paginator page={pageWor} setPage={setPageWor} total={worResults.length} />
+            <Paginator page={pageWor} setPage={setPageWor} total={sortedWor.length} />
           </section>
         )}
 
