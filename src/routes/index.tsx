@@ -417,6 +417,17 @@ function Index() {
   const [worResults, setWorResults] = useState<string[] | null>(null);
   const [pageWor, setPageWor] = useState(0);
   const [worStartingWords, setWorStartingWords] = useState<0 | 2>(0);
+  const sortedWor = useMemo(() => {
+    if (!worResults) return null;
+    if (sortMode !== "frequency") return [...worResults].sort();
+    return [...worResults].sort((a, b) => {
+      const [a1, a2] = worwordleSplit(a);
+      const [b1, b2] = worwordleSplit(b);
+      const fa = Math.min(getWordFrequency(a1), getWordFrequency(a2));
+      const fb = Math.min(getWordFrequency(b1), getWordFrequency(b2));
+      return fb - fa || a.localeCompare(b);
+    });
+  }, [worResults, sortMode, _freqLoaded]);
 
   const applyWorStartingWords = (count: 0 | 2) => {
     setWorStartingWords(count);
