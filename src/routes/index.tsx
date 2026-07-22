@@ -2274,7 +2274,7 @@ function Index() {
         )}
         {mode === "worwordle" && (
           <div className="mb-4 flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Optional input: Add</span>
+            <span className="text-muted-foreground">Additional option: Add</span>
             <select
               value={worStartingWords}
               onChange={(e) => applyWorStartingWords(Number(e.target.value) as 0 | 2)}
