@@ -1589,7 +1589,7 @@ function Index() {
                     ? switchMode(4)
                     : s.id === "search"
                       ? switchMode("wordle")
-                      : switchMode("blunderwall")
+                      : switchMode("sudoku")
                 }
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
