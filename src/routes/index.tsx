@@ -2225,7 +2225,6 @@ function Index() {
             <p>You are given a square grid, partitioned into non-overlapping regions.</p>
             <p>Each row, column and region contains a fixed number of stars in them.</p>
             <p>Each star cannot be adjacent with each other, not even diagonally adjacent.</p>
-            <p>Pick a region color, then click cells to assign them.</p>
           </div>
         )}
         {mode === "wordpeaks" && (
