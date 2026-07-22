@@ -2454,27 +2454,20 @@ function Index() {
                     <div className="space-y-4 rounded-lg border bg-card p-4">
                       {StartingFlippableWords.length > 0 && (
                       <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <span>Optional input: Add</span>
-                        <select
-                          value={flStartingWords}
-                          onChange={(e) => {
-                            const n = Number(e.target.value) as 0 | 1;
-                            setFlStartingWords(n);
-                            if (n === 1) {
-                              const pick = StartingFlippableWords[Math.floor(Math.random() * StartingFlippableWords.length)];
-                              setFlGuesses([{ word: pick.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
-                            } else {
-                              setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
-                            }
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFlStartingWords(1);
+                            const pick = StartingFlippableWords[Math.floor(Math.random() * StartingFlippableWords.length)];
+                            setFlGuesses([{ word: pick.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
                             setFlResults(null);
                             setError(null);
                           }}
-                          className="rounded border border-border bg-background px-2 py-1 text-sm"
+                          className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                         >
-                          <option value={0}>0</option>
-                          <option value={1}>1</option>
-                        </select>
-                        <span>strategic starting words.</span>
+                          Add
+                        </button>
+                        <span>1 strategic starting word.</span>
                       </div>
                       )}
                       {flGuesses.map((g, gi) => (
