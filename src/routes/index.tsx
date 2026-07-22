@@ -304,17 +304,6 @@ function Index() {
     if (!spellingBeeResults) return null;
     return spellingBeeResults.map(([s, ws]) => [s, sortMode === "frequency" ? sortWordsByFrequency(ws) : [...ws].sort()] as [number, string[]]);
   }, [spellingBeeResults, sortMode, _freqLoaded]);
-  const sortedWor = useMemo(() => {
-    if (!worResults) return null;
-    if (sortMode !== "frequency") return [...worResults].sort();
-    return [...worResults].sort((a, b) => {
-      const [a1, a2] = worwordleSplit(a);
-      const [b1, b2] = worwordleSplit(b);
-      const fa = Math.min(getWordFrequency(a1), getWordFrequency(a2));
-      const fb = Math.min(getWordFrequency(b1), getWordFrequency(b2));
-      return fb - fa || a.localeCompare(b);
-    });
-  }, [worResults, sortMode, _freqLoaded]);
   const [flStartingWords, setFlStartingWords] = useState<0 | 1>(0);
   const [flLocked, setFlLocked] = useState<boolean>(false);
   // Double Dabble: 15 cells (3x5); positions 10 and 14 are faded/disabled. Each usable cell holds 2 distinct letters.
