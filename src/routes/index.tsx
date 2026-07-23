@@ -5076,7 +5076,7 @@ function Index() {
         )}
 
         {paths && (() => {
-          const isClassic = mode === 4 || mode === 5 || mode === 6 || mode === "craftwords" || mode === "weaverx";
+          const isClassic = mode === 4 || mode === 5 || mode === 6 || mode === "craftwords" || mode === "weaverx" || mode === "splice";
           const sortedPaths = isClassic && sortMode === "frequency"
             ? [...paths]
                 .map((p, i) => ({ p, i, min: Math.min(...p.map((w) => getWordFrequency(w))) }))
