@@ -2146,14 +2146,14 @@ function Index() {
 
         {mode === "shuntle" && (
           <div className="mb-4 flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Optional:</span>
             <button
               type="button"
               onClick={() => applyShuntleStartingWords(2)}
               className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
             >
-              Add
+              Add 2 strategic starting words
             </button>
-            <span className="text-muted-foreground">2 strategic starting words.</span>
           </div>
         )}
 
