@@ -3112,7 +3112,6 @@ function Index() {
                       value={String(wordleStartingCount)}
                       onChange={(e) => setWordleStartingCount(parseInt(e.target.value, 10))}
                     >
-                      <option value="0">0</option>
                       <option value="2">2</option>
                       <option value="3">3</option>
                       <option value="4">4</option>
