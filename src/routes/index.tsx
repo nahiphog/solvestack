@@ -5870,7 +5870,8 @@ function Index() {
                   return (
                     <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
                       <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
-                      <div className="inline-block">
+                      <div className="inline-block border-2 border-foreground/70">
+
                         {Array.from({ length: N }, (_, r) => (
                           <div key={r} className="flex">
                             {Array.from({ length: N }, (_, c) => {
