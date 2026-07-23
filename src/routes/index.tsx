@@ -3075,21 +3075,14 @@ function Index() {
           <div className={mode === "splitle" ? "space-y-4 border-2 border-border rounded-lg p-4" : "space-y-4"}>
             {mode === "splitle" && (
               <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Optional:</span>
                 <button
                   type="button"
                   onClick={() => applySplitleStartingWords(3)}
                   className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                 >
-                  Add
+                  Add 3 strategic starting strings
                 </button>
-                <select
-                  value={splitleStartingWords === 0 ? 3 : splitleStartingWords}
-                  onChange={(e) => applySplitleStartingWords(Number(e.target.value) as 3)}
-                  className="rounded border bg-background px-2 py-1 text-sm"
-                >
-                  <option value={3}>3</option>
-                </select>
-                <span className="text-muted-foreground">strategic strings.</span>
               </div>
             )}
             {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && mode !== "wrdl" && mode !== "fibble" && (
