@@ -5549,7 +5549,14 @@ function Index() {
 
 
 
-        {marblessResults && (
+        {marblessResults && (() => {
+          const sortedMarbless = sortMode === "frequency"
+            ? [...marblessResults]
+                .map((s, i) => ({ s, i, min: Math.min(...s.words.map((w) => getWordFrequency(w))) }))
+                .sort((a, b) => b.min - a.min || a.i - b.i)
+                .map((x) => x.s)
+            : marblessResults;
+          return (
           <section className="mt-10">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
