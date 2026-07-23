@@ -2297,16 +2297,14 @@ function Index() {
         )}
         {mode === "worwordle" && (
           <div className="mb-4 flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Additional option: Add</span>
-            <select
-              value={worStartingWords}
-              onChange={(e) => applyWorStartingWords(Number(e.target.value) as 0 | 2)}
-              className="rounded border bg-background px-2 py-1 text-sm"
+            <span className="text-muted-foreground">Optional:</span>
+            <button
+              type="button"
+              onClick={() => applyWorStartingWords(2)}
+              className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
             >
-              <option value={0}>0</option>
-              <option value={2}>2</option>
-            </select>
-            <span className="text-muted-foreground">strategic starting words.</span>
+              Add 2 strategic starting strings
+            </button>
           </div>
         )}
 
