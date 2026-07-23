@@ -5567,10 +5567,10 @@ function Index() {
                   const hasSel = selectedMarbless.size > 0;
                   const indices = hasSel
                     ? [...selectedMarbless].sort((a, b) => a - b)
-                    : marblessResults.map((_, i) => i);
+                    : sortedMarbless.map((_, i) => i);
                   const items = indices
                     .map((i) => {
-                      const s = marblessResults[i];
+                      const s = sortedMarbless[i];
                       return `${i + 1}. ${s.words.join(" ")} · moves: ${s.moves.join(",")}`;
                     })
                     .join("\n");
@@ -5582,8 +5582,9 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> {selectedMarbless.size > 0 ? "Copy" : "Copy all"}</>)}
               </button>
             </div>
+            <SortToggle value={sortMode} onChange={setSortMode} />
             <ol className="space-y-4">
-              {marblessResults.slice(pageMarbless * 50, pageMarbless * 50 + 50).map((sol, idx) => {
+              {sortedMarbless.slice(pageMarbless * 50, pageMarbless * 50 + 50).map((sol, idx) => {
                 const i = pageMarbless * 50 + idx;
                 const isSelected = selectedMarbless.has(i);
                 return (
@@ -5619,10 +5620,11 @@ function Index() {
                 );
               })}
             </ol>
-            <Paginator page={pageMarbless} setPage={setPageMarbless} total={marblessResults.length} />
+            <Paginator page={pageMarbless} setPage={setPageMarbless} total={sortedMarbless.length} />
 
           </section>
-        )}
+          );
+        })()}
 
         {dodekuResult && (
           <section className="mt-10">
