@@ -3156,6 +3156,7 @@ function Index() {
             )}
             {mode === "jeffgoldblum" && (
               <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Optional:</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -3165,29 +3166,29 @@ function Index() {
                   }}
                   className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                 >
-                  Add
+                  Add 1 strategic starting word
                 </button>
-                <span className="text-muted-foreground">1 strategic starting word.</span>
               </div>
             )}
             {mode === "wrdl" && (
               <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Optional:</span>
                 <button
                   type="button"
-                  onClick={() => applyWrdlStartingWords(wrdlStartingWords === 0 ? 2 : wrdlStartingWords)}
+                  onClick={() => applyWrdlStartingWords((wrdlStartingWords === 0 ? 2 : wrdlStartingWords) as 2 | 3)}
                   className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                 >
                   Add
                 </button>
                 <select
                   value={wrdlStartingWords === 0 ? 2 : wrdlStartingWords}
-                  onChange={(e) => applyWrdlStartingWords(Number(e.target.value) as 2 | 3)}
+                  onChange={(e) => setWrdlStartingWords(Number(e.target.value) as 2 | 3)}
                   className="rounded border bg-background px-2 py-1 text-sm"
                 >
                   <option value={2}>2</option>
                   <option value={3}>3</option>
                 </select>
-                <span className="text-muted-foreground">strategic starting words.</span>
+                <span className="text-muted-foreground">starting strings.</span>
               </div>
             )}
             {wordleGuesses.map((g, gi) => (
