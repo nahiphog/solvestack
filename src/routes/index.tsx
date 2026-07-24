@@ -1600,7 +1600,7 @@ function Index() {
 
         <div ref={topPillRef} className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
-            const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall";
+            const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "threepeat";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle";
             const inMathLogic = isMath || inLogic;
