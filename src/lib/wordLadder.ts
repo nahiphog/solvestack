@@ -54,6 +54,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   doubledabble: 5,
   wrdl: 5,
   threepeat: 0,
+  fifteenpuzzle: 0,
   
   
 };
