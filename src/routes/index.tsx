@@ -2309,10 +2309,25 @@ function Index() {
           </div>
         )}
         {mode === "fifteenpuzzle" && (
-          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+          <div className="mb-4 text-sm text-muted-foreground space-y-2">
             <p>
               <a href="https://15puzzle.netlify.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">15 puzzle</a>
+              {" · "}
+              <a href="https://apps.apple.com/my/app/15-fifteen-number-puzzle/id6752566141" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">iOS app</a>
             </p>
+            <div className="flex items-center gap-2">
+              <span className="text-foreground">Size:</span>
+              <select
+                value={fpSize}
+                onChange={(e) => changeFpSize(parseInt(e.target.value, 10))}
+                className="rounded border bg-background px-2 py-1 text-sm"
+              >
+                <option value={3}>3x3</option>
+                <option value={4}>4x4</option>
+                <option value={5}>5x5</option>
+                <option value={6}>6x6</option>
+              </select>
+            </div>
             <p>Goal: Slide tiles in numerical order (from left to right, top to bottom).</p>
             <p>Disclaimer: The algorithm applied here uses A* algorithm, which doesn't necessarily mean that it's an optimal solution.</p>
           </div>
