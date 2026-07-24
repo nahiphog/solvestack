@@ -5051,13 +5051,22 @@ function Index() {
                       )}
                     </div>
                     {fpResult.tileMoves.length > 0 && (
-                      <div className="text-xs text-muted-foreground break-words">
-                        <span className="font-medium">Move sequence:</span>{" "}
-                        {fpResult.tileMoves.map((t, i) => (
-                          <span key={i} className={i === fpStep - 1 ? "font-bold text-foreground" : ""}>
-                            {t}{i < fpResult.tileMoves.length - 1 ? ", " : ""}
-                          </span>
-                        ))}
+                      <div className="text-sm text-muted-foreground">
+                        <span className="font-medium">Move sequence:</span>
+                        <div className="mt-1 font-mono text-base leading-relaxed text-foreground">
+                          {(() => {
+                            const formatted = fpResult.tileMoves.map((t) => String(t).padStart(2));
+                            const rows: string[] = [];
+                            for (let i = 0; i < formatted.length; i += 10) {
+                              const chunk = formatted.slice(i, i + 10);
+                              const isLast = i + 10 >= formatted.length;
+                              rows.push(chunk.join(", ") + (isLast ? "" : ", "));
+                            }
+                            return rows.map((row, idx) => (
+                              <div key={idx}>{row}</div>
+                            ));
+                          })()}
+                        </div>
                       </div>
                     )}
                     <div className="flex flex-wrap gap-2">
