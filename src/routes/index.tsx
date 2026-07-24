@@ -5012,6 +5012,9 @@ function Index() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" onClick={clearFpBoard} size="lg">
+                    Clear all
+                  </Button>
                   <Button onClick={solveFifteenPuzzle} disabled={solving} size="lg">
                     {solving ? "Solving..." : "Solve"}
                   </Button>
