@@ -4961,10 +4961,18 @@ function Index() {
 
         ) : mode === "fifteenpuzzle" ? (
           (() => {
+            const N = fpSize;
+            const total = N * N;
+            const maxTile = total - 1;
             const setCell = (idx: number, valStr: string) => {
-              const v = valStr === "" ? -1 : parseInt(valStr, 10);
+              const s = valStr.replace(/[^0-9]/g, "");
               const nb = fpBoard.slice();
-              nb[idx] = Number.isFinite(v) ? v : -1;
+              if (s === "") {
+                nb[idx] = 0;
+              } else {
+                const v = parseInt(s, 10);
+                nb[idx] = Number.isFinite(v) ? v : 0;
+              }
               setFpBoard(nb);
               setFpResult(null);
               setFpError(null);
@@ -4972,26 +4980,31 @@ function Index() {
             };
             const displayBoard = fpResult ? fpResult.states[fpStep] : fpBoard;
             const totalSteps = fpResult ? fpResult.states.length : 0;
+            // goal position: tile v (1..maxTile) at index v-1; blank at last index
+            const isCorrect = (v: number, i: number) => {
+              if (v === 0) return i === total - 1;
+              return i === v - 1;
+            };
             return (
               <div className="space-y-4">
                 <div>
-                  <div className="mb-2 text-sm font-medium">Enter starting board (0 = blank tile):</div>
-                  <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+                  <div className="mb-2 text-sm font-medium">Enter starting board (leave one tile blank):</div>
+                  <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
                     {fpBoard.map((v, i) => (
                       <input
                         key={i}
-                        type="number"
-                        min={0}
-                        max={15}
-                        value={v < 0 ? "" : v}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={String(maxTile).length}
+                        value={v === 0 ? "" : String(v)}
                         onChange={(e) => setCell(i, e.target.value)}
-                        className="h-14 w-14 rounded border bg-background text-center text-lg font-semibold"
+                        className="h-14 w-14 rounded border bg-background text-center text-lg font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     ))}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button onClick={shuffleFifteen} variant="secondary">Shuffle</Button>
                   <Button onClick={solveFifteenPuzzle} disabled={solving} size="lg">
                     {solving ? "Solving..." : "Solve"}
                   </Button>
@@ -5004,16 +5017,17 @@ function Index() {
                         ? "Already solved."
                         : `Solved in ${totalSteps - 1} moves.`}
                     </div>
-                    <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+                    <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
                       {displayBoard.map((v, i) => {
                         const justMovedTile = fpStep > 0 ? fpResult.tileMoves[fpStep - 1] : -1;
                         const isMoved = v !== 0 && v === justMovedTile;
+                        const correct = v !== 0 && isCorrect(v, i);
+                        const borderCls = correct ? "border-2 border-green-500" : "border";
+                        const bgCls = v === 0 ? "bg-muted" : isMoved ? "bg-yellow-300 dark:bg-yellow-500 dark:text-black" : "bg-background";
                         return (
                           <div
                             key={i}
-                            className={`flex h-14 w-14 items-center justify-center rounded border text-lg font-semibold ${
-                              v === 0 ? "bg-muted" : isMoved ? "bg-yellow-300 dark:bg-yellow-500 dark:text-black" : "bg-background"
-                            }`}
+                            className={`flex h-14 w-14 items-center justify-center rounded text-lg font-semibold ${borderCls} ${bgCls}`}
                           >
                             {v === 0 ? "" : v}
                           </div>
