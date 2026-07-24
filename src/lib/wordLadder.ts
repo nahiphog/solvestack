@@ -1089,7 +1089,7 @@ export function fifteenPuzzleSolvable(board: number[], n = 4): boolean {
   if (n % 2 === 1) return inv % 2 === 0;
   const blankIdx = board.indexOf(0);
   const blankRowFromBottom = n - Math.floor(blankIdx / n);
-  return (inv + blankRowFromBottom) % 2 === 0;
+  return (inv + blankRowFromBottom) % 2 === 1;
 }
 
 function manhattanPlusLC(board: number[], n: number, goalPos: Int8Array): number {
