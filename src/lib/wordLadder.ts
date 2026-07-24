@@ -1077,6 +1077,7 @@ export function starBattleSolve(
 export type FifteenPuzzleResult = {
   states: number[][]; // states[0] is initial, states[k] after k moves
   moves: string[];    // "Up" | "Down" | "Left" | "Right" — direction the blank moves
+  tileMoves: number[]; // tile value moved into the blank at each step
 };
 
 export function fifteenPuzzleSolvable(board: number[], n = 4): boolean {
