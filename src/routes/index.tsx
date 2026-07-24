@@ -2309,6 +2309,9 @@ function Index() {
         )}
         {mode === "fifteenpuzzle" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>
+              <a href="https://15puzzle.netlify.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">15 puzzle</a>
+            </p>
             <p>Goal: Slide tiles in numerical order (from left to right, top to bottom).</p>
             <p>Disclaimer: The algorithm applied here uses A* algorithm, which doesn't necessarily mean that it's an optimal solution.</p>
           </div>
