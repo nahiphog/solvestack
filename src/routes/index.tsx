@@ -1773,9 +1773,10 @@ function Index() {
           </div>
         )}
 
-        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle") && (
+        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "fifteenpuzzle") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             {([
+              { id: "fifteenpuzzle", label: "15 Puzzle" },
               { id: "blunderwall", label: "Blunderwall" },
               { id: "dodeku", label: "Dodeku" },
               { id: "sheetdoku", label: "Sheetdoku" },
