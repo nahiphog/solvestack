@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useState } from "react";
-import { dodekuSolve, fibbleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
@@ -67,6 +67,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   doubledabble: { start: "", goal: "" },
   wrdl: { start: "", goal: "" },
   threepeat: { start: "", goal: "" },
+  fifteenpuzzle: { start: "", goal: "" },
   
 
 };
@@ -194,6 +195,7 @@ const MODE_URL_MAP: Record<string, string> = {
   sudoku: "/logic/sudoku",
   sudokuvariation: "/logic/sudoku_variation",
   starbattle: "/logic/star_battle",
+  fifteenpuzzle: "/math/15_puzzle",
 };
 const URL_MODE_MAP: Record<string, Mode> = Object.fromEntries(
   Object.entries(MODE_URL_MAP).map(([k, v]) => [v, isNaN(Number(k)) ? (k as Mode) : (Number(k) as Mode)])
@@ -614,6 +616,11 @@ function Index() {
   const [sbPaintColor, setSbPaintColor] = useState<number>(1);
   const [sbResults, setSbResults] = useState<StarBattleSolution[] | null>(null);
   const [pageSb, setPageSb] = useState(0);
+  const FP_DEFAULT: number[] = [12, 11, 0, 9, 13, 4, 15, 14, 8, 7, 2, 3, 10, 6, 5, 1];
+  const [fpBoard, setFpBoard] = useState<number[]>(() => FP_DEFAULT.slice());
+  const [fpResult, setFpResult] = useState<FifteenPuzzleResult | null>(null);
+  const [fpStep, setFpStep] = useState(0);
+  const [fpError, setFpError] = useState<string | null>(null);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
@@ -696,6 +703,9 @@ function Index() {
     setSudokuResults(null);
     setSudokuVarResults(null);
     setSbResults(null);
+    setFpResult(null);
+    setFpError(null);
+    setFpStep(0);
     setBwResult(null);
     setError(null);
     setSplitleP1Error(null);
@@ -910,6 +920,52 @@ function Index() {
       else setSbResults(res);
       setSolving(false);
     }, 0);
+  };
+
+  const solveFifteenPuzzle = () => {
+    setFpError(null);
+    setFpResult(null);
+    setFpStep(0);
+    const seen = new Set(fpBoard);
+    if (seen.size !== 16 || fpBoard.some((v) => v < 0 || v > 15)) {
+      setFpError("Board must contain each of 0-15 exactly once (0 = blank).");
+      return;
+    }
+    if (!fifteenPuzzleSolvable(fpBoard, 4)) {
+      setFpError("This board is not solvable.");
+      return;
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const res = fifteenPuzzleSolve(fpBoard.slice(), 4);
+      if (!res) setFpError("No solution found within search limits.");
+      else { setFpResult(res); setFpStep(0); }
+      setSolving(false);
+    }, 0);
+  };
+
+  const shuffleFifteen = () => {
+    setFpResult(null);
+    setFpError(null);
+    setFpStep(0);
+    const b = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0];
+    let blank = 15;
+    let last = -1;
+    for (let i = 0; i < 300; i++) {
+      const r = (blank / 4) | 0, c = blank % 4;
+      const opts: number[] = [];
+      if (r > 0) opts.push(blank - 4);
+      if (r < 3) opts.push(blank + 4);
+      if (c > 0) opts.push(blank - 1);
+      if (c < 3) opts.push(blank + 1);
+      const filtered = opts.filter((x) => x !== last);
+      const pick = filtered[Math.floor(Math.random() * filtered.length)];
+      b[blank] = b[pick];
+      b[pick] = 0;
+      last = blank;
+      blank = pick;
+    }
+    setFpBoard(b);
   };
 
 
@@ -1598,7 +1654,7 @@ function Index() {
 
         <div ref={topPillRef} className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
-            const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall";
+            const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "threepeat";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle";
             const inMathLogic = isMath || inLogic;
@@ -1771,9 +1827,10 @@ function Index() {
           </div>
         )}
 
-        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle") && (
+        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "fifteenpuzzle") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             {([
+              { id: "fifteenpuzzle", label: "15 Puzzle" },
               { id: "blunderwall", label: "Blunderwall" },
               { id: "dodeku", label: "Dodeku" },
               { id: "sheetdoku", label: "Sheetdoku" },
@@ -2248,6 +2305,12 @@ function Index() {
             <p>You are given a square grid, partitioned into non-overlapping regions.</p>
             <p>Each row, column and region contains a fixed number of stars in them.</p>
             <p>Each star cannot be adjacent with each other, not even diagonally adjacent.</p>
+          </div>
+        )}
+        {mode === "fifteenpuzzle" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Goal: Slide tiles in numerical order (from left to right, top to bottom).</p>
+            <p>Disclaimer: The algorithm applied here uses A* algorithm, which doesn't necessarily mean that it's an optimal solution.</p>
           </div>
         )}
         {mode === "wordpeaks" && (
@@ -4877,6 +4940,80 @@ function Index() {
             );
           })()
 
+        ) : mode === "fifteenpuzzle" ? (
+          (() => {
+            const setCell = (idx: number, valStr: string) => {
+              const v = valStr === "" ? -1 : parseInt(valStr, 10);
+              const nb = fpBoard.slice();
+              nb[idx] = Number.isFinite(v) ? v : -1;
+              setFpBoard(nb);
+              setFpResult(null);
+              setFpError(null);
+              setFpStep(0);
+            };
+            const displayBoard = fpResult ? fpResult.states[fpStep] : fpBoard;
+            const totalSteps = fpResult ? fpResult.states.length : 0;
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-sm font-medium">Enter starting board (0 = blank tile):</div>
+                  <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+                    {fpBoard.map((v, i) => (
+                      <input
+                        key={i}
+                        type="number"
+                        min={0}
+                        max={15}
+                        value={v < 0 ? "" : v}
+                        onChange={(e) => setCell(i, e.target.value)}
+                        className="h-14 w-14 rounded border bg-background text-center text-lg font-semibold"
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={shuffleFifteen} variant="secondary">Shuffle</Button>
+                  <Button onClick={solveFifteenPuzzle} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+                {fpError && <div className="text-sm text-red-500">{fpError}</div>}
+                {fpResult && (
+                  <div className="space-y-3 rounded-md border p-4">
+                    <div className="text-sm font-medium">
+                      {totalSteps === 1
+                        ? "Already solved."
+                        : `Solved in ${totalSteps - 1} moves.`}
+                    </div>
+                    <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+                      {displayBoard.map((v, i) => (
+                        <div
+                          key={i}
+                          className={`flex h-14 w-14 items-center justify-center rounded border text-lg font-semibold ${
+                            v === 0 ? "bg-muted" : "bg-background"
+                          }`}
+                        >
+                          {v === 0 ? "" : v}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Step {fpStep} of {totalSteps - 1}
+                      {fpStep > 0 && fpResult.moves[fpStep - 1] && (
+                        <> — last move: <span className="font-medium">{fpResult.moves[fpStep - 1]}</span></>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setFpStep(0)} disabled={fpStep === 0}>{"<<"}</Button>
+                      <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.max(0, s - 1))} disabled={fpStep === 0}>Previous move</Button>
+                      <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.min(totalSteps - 1, s + 1))} disabled={fpStep >= totalSteps - 1}>Next move</Button>
+                      <Button variant="outline" size="sm" onClick={() => setFpStep(totalSteps - 1)} disabled={fpStep >= totalSteps - 1}>{">>"}</Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()
         ) : mode === "threepeat" ? (
           <div className="space-y-4">
             <p className="text-sm font-medium">Enter three words (space to leave it blank):</p>
