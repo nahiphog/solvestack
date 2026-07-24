@@ -2307,6 +2307,12 @@ function Index() {
             <p>Each star cannot be adjacent with each other, not even diagonally adjacent.</p>
           </div>
         )}
+        {mode === "fifteenpuzzle" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>Goal: Slide tiles in numerical order (from left to right, top to bottom).</p>
+            <p>Disclaimer: The algorithm applied here uses A* algorithm, which doesn't necessarily mean that it's an optimal solution.</p>
+          </div>
+        )}
         {mode === "wordpeaks" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p>Enter your guesses.</p>
