@@ -5053,7 +5053,7 @@ function Index() {
                     {fpResult.tileMoves.length > 0 && (
                       <div className="text-sm text-muted-foreground">
                         <span className="font-medium">Move sequence:</span>
-                        <div className="mt-1 font-mono text-base leading-relaxed text-foreground">
+                        <pre className="mt-1 font-mono text-base leading-relaxed text-foreground whitespace-pre-wrap">
                           {(() => {
                             const formatted = fpResult.tileMoves.map((t) => String(t).padStart(2));
                             const rows: string[] = [];
@@ -5062,11 +5062,9 @@ function Index() {
                               const isLast = i + 10 >= formatted.length;
                               rows.push(chunk.join(", ") + (isLast ? "" : ", "));
                             }
-                            return rows.map((row, idx) => (
-                              <div key={idx}>{row}</div>
-                            ));
+                            return rows.join("\n");
                           })()}
-                        </div>
+                        </pre>
                       </div>
                     )}
                     <div className="flex flex-wrap gap-2">
