@@ -1118,7 +1118,7 @@ function manhattanPlusLC(board: number[], n: number, goalPos: Int8Array): number
 }
 
 // IDA* solver. Returns null if not solvable or exceeds node cap.
-export function fifteenPuzzleSolve(initial: number[], n = 4, nodeCap = 3_000_000): FifteenPuzzleResult | null {
+export function fifteenPuzzleSolve(initial: number[], n = 4, nodeCap = 80_000_000): FifteenPuzzleResult | null {
   if (initial.length !== n * n) return null;
   if (!fifteenPuzzleSolvable(initial, n)) return null;
   const goalPos = new Int8Array(n * n);
