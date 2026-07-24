@@ -959,6 +959,13 @@ function Index() {
     }, 0);
   };
 
+  const clearFpBoard = () => {
+    setFpBoard(Array(fpSize * fpSize).fill(0));
+    setFpResult(null);
+    setFpError(null);
+    setFpStep(0);
+  };
+
   const changeFpSize = (n: number) => {
     setFpSize(n);
     setFpBoard(makeFpDefault(n));
