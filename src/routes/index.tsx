@@ -4989,23 +4989,37 @@ function Index() {
                         : `Solved in ${totalSteps - 1} moves.`}
                     </div>
                     <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
-                      {displayBoard.map((v, i) => (
-                        <div
-                          key={i}
-                          className={`flex h-14 w-14 items-center justify-center rounded border text-lg font-semibold ${
-                            v === 0 ? "bg-muted" : "bg-background"
-                          }`}
-                        >
-                          {v === 0 ? "" : v}
-                        </div>
-                      ))}
+                      {displayBoard.map((v, i) => {
+                        const justMovedTile = fpStep > 0 ? fpResult.tileMoves[fpStep - 1] : -1;
+                        const isMoved = v !== 0 && v === justMovedTile;
+                        return (
+                          <div
+                            key={i}
+                            className={`flex h-14 w-14 items-center justify-center rounded border text-lg font-semibold ${
+                              v === 0 ? "bg-muted" : isMoved ? "bg-yellow-300 dark:bg-yellow-500 dark:text-black" : "bg-background"
+                            }`}
+                          >
+                            {v === 0 ? "" : v}
+                          </div>
+                        );
+                      })}
                     </div>
                     <div className="text-sm text-muted-foreground">
                       Step {fpStep} of {totalSteps - 1}
-                      {fpStep > 0 && fpResult.moves[fpStep - 1] && (
-                        <> — last move: <span className="font-medium">{fpResult.moves[fpStep - 1]}</span></>
+                      {fpStep > 0 && (
+                        <> — moved tile: <span className="font-medium">{fpResult.tileMoves[fpStep - 1]}</span></>
                       )}
                     </div>
+                    {fpResult.tileMoves.length > 0 && (
+                      <div className="text-xs text-muted-foreground break-words">
+                        <span className="font-medium">Move sequence:</span>{" "}
+                        {fpResult.tileMoves.map((t, i) => (
+                          <span key={i} className={i === fpStep - 1 ? "font-bold text-foreground" : ""}>
+                            {t}{i < fpResult.tileMoves.length - 1 ? ", " : ""}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-2">
                       <Button variant="outline" size="sm" onClick={() => setFpStep(0)} disabled={fpStep === 0}>{"<<"}</Button>
                       <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.max(0, s - 1))} disabled={fpStep === 0}>Previous move</Button>
