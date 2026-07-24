@@ -616,7 +616,7 @@ function Index() {
   const [sbPaintColor, setSbPaintColor] = useState<number>(1);
   const [sbResults, setSbResults] = useState<StarBattleSolution[] | null>(null);
   const [pageSb, setPageSb] = useState(0);
-  const FP_DEFAULT: number[] = [12, 11, 0, 9, 13, 4, 15, 14, 8, 7, 2, 3, 10, 6, 5, 1];
+  const FP_DEFAULT: number[] = [15, 0, 7, 3, 4, 12, 5, 13, 10, 1, 11, 2, 6, 14, 9, 8];
   const [fpBoard, setFpBoard] = useState<number[]>(() => FP_DEFAULT.slice());
   const [fpResult, setFpResult] = useState<FifteenPuzzleResult | null>(null);
   const [fpStep, setFpStep] = useState(0);
@@ -2309,6 +2309,9 @@ function Index() {
         )}
         {mode === "fifteenpuzzle" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
+            <p>
+              <a href="https://15puzzle.netlify.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">15 puzzle</a>
+            </p>
             <p>Goal: Slide tiles in numerical order (from left to right, top to bottom).</p>
             <p>Disclaimer: The algorithm applied here uses A* algorithm, which doesn't necessarily mean that it's an optimal solution.</p>
           </div>
@@ -4986,23 +4989,37 @@ function Index() {
                         : `Solved in ${totalSteps - 1} moves.`}
                     </div>
                     <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
-                      {displayBoard.map((v, i) => (
-                        <div
-                          key={i}
-                          className={`flex h-14 w-14 items-center justify-center rounded border text-lg font-semibold ${
-                            v === 0 ? "bg-muted" : "bg-background"
-                          }`}
-                        >
-                          {v === 0 ? "" : v}
-                        </div>
-                      ))}
+                      {displayBoard.map((v, i) => {
+                        const justMovedTile = fpStep > 0 ? fpResult.tileMoves[fpStep - 1] : -1;
+                        const isMoved = v !== 0 && v === justMovedTile;
+                        return (
+                          <div
+                            key={i}
+                            className={`flex h-14 w-14 items-center justify-center rounded border text-lg font-semibold ${
+                              v === 0 ? "bg-muted" : isMoved ? "bg-yellow-300 dark:bg-yellow-500 dark:text-black" : "bg-background"
+                            }`}
+                          >
+                            {v === 0 ? "" : v}
+                          </div>
+                        );
+                      })}
                     </div>
                     <div className="text-sm text-muted-foreground">
                       Step {fpStep} of {totalSteps - 1}
-                      {fpStep > 0 && fpResult.moves[fpStep - 1] && (
-                        <> — last move: <span className="font-medium">{fpResult.moves[fpStep - 1]}</span></>
+                      {fpStep > 0 && (
+                        <> — moved tile: <span className="font-medium">{fpResult.tileMoves[fpStep - 1]}</span></>
                       )}
                     </div>
+                    {fpResult.tileMoves.length > 0 && (
+                      <div className="text-xs text-muted-foreground break-words">
+                        <span className="font-medium">Move sequence:</span>{" "}
+                        {fpResult.tileMoves.map((t, i) => (
+                          <span key={i} className={i === fpStep - 1 ? "font-bold text-foreground" : ""}>
+                            {t}{i < fpResult.tileMoves.length - 1 ? ", " : ""}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-2">
                       <Button variant="outline" size="sm" onClick={() => setFpStep(0)} disabled={fpStep === 0}>{"<<"}</Button>
                       <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.max(0, s - 1))} disabled={fpStep === 0}>Previous move</Button>
