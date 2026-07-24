@@ -616,8 +616,16 @@ function Index() {
   const [sbPaintColor, setSbPaintColor] = useState<number>(1);
   const [sbResults, setSbResults] = useState<StarBattleSolution[] | null>(null);
   const [pageSb, setPageSb] = useState(0);
-  const FP_DEFAULT: number[] = [15, 0, 7, 3, 4, 12, 5, 13, 10, 1, 11, 2, 6, 14, 9, 8];
-  const [fpBoard, setFpBoard] = useState<number[]>(() => FP_DEFAULT.slice());
+  const FP_DEFAULT_4: number[] = [15, 0, 7, 3, 4, 12, 5, 13, 10, 1, 11, 2, 6, 14, 9, 8];
+  const makeFpDefault = (n: number): number[] => {
+    if (n === 4) return FP_DEFAULT_4.slice();
+    const arr: number[] = [];
+    for (let i = 1; i < n * n; i++) arr.push(i);
+    arr.push(0);
+    return arr;
+  };
+  const [fpSize, setFpSize] = useState<number>(4);
+  const [fpBoard, setFpBoard] = useState<number[]>(() => FP_DEFAULT_4.slice());
   const [fpResult, setFpResult] = useState<FifteenPuzzleResult | null>(null);
   const [fpStep, setFpStep] = useState(0);
   const [fpError, setFpError] = useState<string | null>(null);
@@ -926,47 +934,40 @@ function Index() {
     setFpError(null);
     setFpResult(null);
     setFpStep(0);
-    const seen = new Set(fpBoard);
-    if (seen.size !== 16 || fpBoard.some((v) => v < 0 || v > 15)) {
-      setFpError("Board must contain each of 0-15 exactly once (0 = blank).");
+    const N = fpSize;
+    const total = N * N;
+    const maxTile = total - 1;
+    if (fpBoard.length !== total) {
+      setFpError(`Board must have exactly ${total} cells.`);
       return;
     }
-    if (!fifteenPuzzleSolvable(fpBoard, 4)) {
+    const seen = new Set(fpBoard);
+    if (seen.size !== total || fpBoard.some((v) => v < 0 || v > maxTile)) {
+      setFpError(`Board must contain each of 0-${maxTile} exactly once (blank = 0).`);
+      return;
+    }
+    if (!fifteenPuzzleSolvable(fpBoard, N)) {
       setFpError("This board is not solvable.");
       return;
     }
     setSolving(true);
     setTimeout(() => {
-      const res = fifteenPuzzleSolve(fpBoard.slice(), 4);
+      const res = fifteenPuzzleSolve(fpBoard.slice(), N);
       if (!res) setFpError("No solution found within search limits.");
       else { setFpResult(res); setFpStep(0); }
       setSolving(false);
     }, 0);
   };
 
-  const shuffleFifteen = () => {
+  const changeFpSize = (n: number) => {
+    setFpSize(n);
+    setFpBoard(makeFpDefault(n));
     setFpResult(null);
     setFpError(null);
     setFpStep(0);
-    const b = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0];
-    let blank = 15;
-    let last = -1;
-    for (let i = 0; i < 300; i++) {
-      const r = (blank / 4) | 0, c = blank % 4;
-      const opts: number[] = [];
-      if (r > 0) opts.push(blank - 4);
-      if (r < 3) opts.push(blank + 4);
-      if (c > 0) opts.push(blank - 1);
-      if (c < 3) opts.push(blank + 1);
-      const filtered = opts.filter((x) => x !== last);
-      const pick = filtered[Math.floor(Math.random() * filtered.length)];
-      b[blank] = b[pick];
-      b[pick] = 0;
-      last = blank;
-      blank = pick;
-    }
-    setFpBoard(b);
   };
+
+
 
 
   const solveSpellingBee = async () => {
@@ -2308,10 +2309,25 @@ function Index() {
           </div>
         )}
         {mode === "fifteenpuzzle" && (
-          <div className="mb-4 text-sm text-muted-foreground space-y-1">
+          <div className="mb-4 text-sm text-muted-foreground space-y-2">
             <p>
               <a href="https://15puzzle.netlify.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">15 puzzle</a>
+              {" · "}
+              <a href="https://apps.apple.com/my/app/15-fifteen-number-puzzle/id6752566141" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">iOS app</a>
             </p>
+            <div className="flex items-center gap-2">
+              <span className="text-foreground">Size:</span>
+              <select
+                value={fpSize}
+                onChange={(e) => changeFpSize(parseInt(e.target.value, 10))}
+                className="rounded border bg-background px-2 py-1 text-sm"
+              >
+                <option value={3}>3x3</option>
+                <option value={4}>4x4</option>
+                <option value={5}>5x5</option>
+                <option value={6}>6x6</option>
+              </select>
+            </div>
             <p>Goal: Slide tiles in numerical order (from left to right, top to bottom).</p>
             <p>Disclaimer: The algorithm applied here uses A* algorithm, which doesn't necessarily mean that it's an optimal solution.</p>
           </div>
@@ -4945,10 +4961,18 @@ function Index() {
 
         ) : mode === "fifteenpuzzle" ? (
           (() => {
+            const N = fpSize;
+            const total = N * N;
+            const maxTile = total - 1;
             const setCell = (idx: number, valStr: string) => {
-              const v = valStr === "" ? -1 : parseInt(valStr, 10);
+              const s = valStr.replace(/[^0-9]/g, "");
               const nb = fpBoard.slice();
-              nb[idx] = Number.isFinite(v) ? v : -1;
+              if (s === "") {
+                nb[idx] = 0;
+              } else {
+                const v = parseInt(s, 10);
+                nb[idx] = Number.isFinite(v) ? v : 0;
+              }
               setFpBoard(nb);
               setFpResult(null);
               setFpError(null);
@@ -4956,26 +4980,31 @@ function Index() {
             };
             const displayBoard = fpResult ? fpResult.states[fpStep] : fpBoard;
             const totalSteps = fpResult ? fpResult.states.length : 0;
+            // goal position: tile v (1..maxTile) at index v-1; blank at last index
+            const isCorrect = (v: number, i: number) => {
+              if (v === 0) return i === total - 1;
+              return i === v - 1;
+            };
             return (
               <div className="space-y-4">
                 <div>
-                  <div className="mb-2 text-sm font-medium">Enter starting board (0 = blank tile):</div>
-                  <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+                  <div className="mb-2 text-sm font-medium">Enter starting board (leave one tile blank):</div>
+                  <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
                     {fpBoard.map((v, i) => (
                       <input
                         key={i}
-                        type="number"
-                        min={0}
-                        max={15}
-                        value={v < 0 ? "" : v}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={String(maxTile).length}
+                        value={v === 0 ? "" : String(v)}
                         onChange={(e) => setCell(i, e.target.value)}
-                        className="h-14 w-14 rounded border bg-background text-center text-lg font-semibold"
+                        className="h-14 w-14 rounded border bg-background text-center text-lg font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     ))}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button onClick={shuffleFifteen} variant="secondary">Shuffle</Button>
                   <Button onClick={solveFifteenPuzzle} disabled={solving} size="lg">
                     {solving ? "Solving..." : "Solve"}
                   </Button>
@@ -4988,16 +5017,17 @@ function Index() {
                         ? "Already solved."
                         : `Solved in ${totalSteps - 1} moves.`}
                     </div>
-                    <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+                    <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
                       {displayBoard.map((v, i) => {
                         const justMovedTile = fpStep > 0 ? fpResult.tileMoves[fpStep - 1] : -1;
                         const isMoved = v !== 0 && v === justMovedTile;
+                        const correct = v !== 0 && isCorrect(v, i);
+                        const borderCls = correct ? "border-2 border-green-500" : "border";
+                        const bgCls = v === 0 ? "bg-muted" : isMoved ? "bg-yellow-300 dark:bg-yellow-500 dark:text-black" : "bg-background";
                         return (
                           <div
                             key={i}
-                            className={`flex h-14 w-14 items-center justify-center rounded border text-lg font-semibold ${
-                              v === 0 ? "bg-muted" : isMoved ? "bg-yellow-300 dark:bg-yellow-500 dark:text-black" : "bg-background"
-                            }`}
+                            className={`flex h-14 w-14 items-center justify-center rounded text-lg font-semibold ${borderCls} ${bgCls}`}
                           >
                             {v === 0 ? "" : v}
                           </div>
