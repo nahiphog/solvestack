@@ -922,6 +922,52 @@ function Index() {
     }, 0);
   };
 
+  const solveFifteenPuzzle = () => {
+    setFpError(null);
+    setFpResult(null);
+    setFpStep(0);
+    const seen = new Set(fpBoard);
+    if (seen.size !== 16 || fpBoard.some((v) => v < 0 || v > 15)) {
+      setFpError("Board must contain each of 0-15 exactly once (0 = blank).");
+      return;
+    }
+    if (!fifteenPuzzleSolvable(fpBoard, 4)) {
+      setFpError("This board is not solvable.");
+      return;
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const res = fifteenPuzzleSolve(fpBoard.slice(), 4);
+      if (!res) setFpError("No solution found within search limits.");
+      else { setFpResult(res); setFpStep(0); }
+      setSolving(false);
+    }, 0);
+  };
+
+  const shuffleFifteen = () => {
+    setFpResult(null);
+    setFpError(null);
+    setFpStep(0);
+    const b = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0];
+    let blank = 15;
+    let last = -1;
+    for (let i = 0; i < 300; i++) {
+      const r = (blank / 4) | 0, c = blank % 4;
+      const opts: number[] = [];
+      if (r > 0) opts.push(blank - 4);
+      if (r < 3) opts.push(blank + 4);
+      if (c > 0) opts.push(blank - 1);
+      if (c < 3) opts.push(blank + 1);
+      const filtered = opts.filter((x) => x !== last);
+      const pick = filtered[Math.floor(Math.random() * filtered.length)];
+      b[blank] = b[pick];
+      b[pick] = 0;
+      last = blank;
+      blank = pick;
+    }
+    setFpBoard(b);
+  };
+
 
   const solveSpellingBee = async () => {
     setError(null);
