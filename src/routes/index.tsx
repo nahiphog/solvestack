@@ -4940,6 +4940,80 @@ function Index() {
             );
           })()
 
+        ) : mode === "fifteenpuzzle" ? (
+          (() => {
+            const setCell = (idx: number, valStr: string) => {
+              const v = valStr === "" ? -1 : parseInt(valStr, 10);
+              const nb = fpBoard.slice();
+              nb[idx] = Number.isFinite(v) ? v : -1;
+              setFpBoard(nb);
+              setFpResult(null);
+              setFpError(null);
+              setFpStep(0);
+            };
+            const displayBoard = fpResult ? fpResult.states[fpStep] : fpBoard;
+            const totalSteps = fpResult ? fpResult.states.length : 0;
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-sm font-medium">Enter starting board (0 = blank tile):</div>
+                  <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+                    {fpBoard.map((v, i) => (
+                      <input
+                        key={i}
+                        type="number"
+                        min={0}
+                        max={15}
+                        value={v < 0 ? "" : v}
+                        onChange={(e) => setCell(i, e.target.value)}
+                        className="h-14 w-14 rounded border bg-background text-center text-lg font-semibold"
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={shuffleFifteen} variant="secondary">Shuffle</Button>
+                  <Button onClick={solveFifteenPuzzle} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+                {fpError && <div className="text-sm text-red-500">{fpError}</div>}
+                {fpResult && (
+                  <div className="space-y-3 rounded-md border p-4">
+                    <div className="text-sm font-medium">
+                      {totalSteps === 1
+                        ? "Already solved."
+                        : `Solved in ${totalSteps - 1} moves.`}
+                    </div>
+                    <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+                      {displayBoard.map((v, i) => (
+                        <div
+                          key={i}
+                          className={`flex h-14 w-14 items-center justify-center rounded border text-lg font-semibold ${
+                            v === 0 ? "bg-muted" : "bg-background"
+                          }`}
+                        >
+                          {v === 0 ? "" : v}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Step {fpStep} of {totalSteps - 1}
+                      {fpStep > 0 && fpResult.moves[fpStep - 1] && (
+                        <> — last move: <span className="font-medium">{fpResult.moves[fpStep - 1]}</span></>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setFpStep(0)} disabled={fpStep === 0}>{"<<"}</Button>
+                      <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.max(0, s - 1))} disabled={fpStep === 0}>Previous move</Button>
+                      <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.min(totalSteps - 1, s + 1))} disabled={fpStep >= totalSteps - 1}>Next move</Button>
+                      <Button variant="outline" size="sm" onClick={() => setFpStep(totalSteps - 1)} disabled={fpStep >= totalSteps - 1}>{">>"}</Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()
         ) : mode === "threepeat" ? (
           <div className="space-y-4">
             <p className="text-sm font-medium">Enter three words (space to leave it blank):</p>
