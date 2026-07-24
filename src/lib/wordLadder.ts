@@ -1070,3 +1070,110 @@ export function starBattleSolve(
   backtrack();
   return solutions;
 }
+
+// ---------------- 15-Puzzle (sliding tile) solver ----------------
+// Board is a flat array of length n*n. 0 represents the blank.
+// Solved state is [1, 2, ..., n*n - 1, 0].
+export type FifteenPuzzleResult = {
+  states: number[][]; // states[0] is initial, states[k] after k moves
+  moves: string[];    // "Up" | "Down" | "Left" | "Right" — direction the blank moves
+};
+
+export function fifteenPuzzleSolvable(board: number[], n = 4): boolean {
+  const tiles = board.filter((v) => v !== 0);
+  let inv = 0;
+  for (let i = 0; i < tiles.length; i++)
+    for (let j = i + 1; j < tiles.length; j++)
+      if (tiles[i] > tiles[j]) inv++;
+  if (n % 2 === 1) return inv % 2 === 0;
+  const blankIdx = board.indexOf(0);
+  const blankRowFromBottom = n - Math.floor(blankIdx / n);
+  return (inv + blankRowFromBottom) % 2 === 0;
+}
+
+function manhattanPlusLC(board: number[], n: number, goalPos: Int8Array): number {
+  let d = 0;
+  const rowTiles: number[][] = Array.from({ length: n }, () => []);
+  const colTiles: number[][] = Array.from({ length: n }, () => []);
+  for (let i = 0; i < board.length; i++) {
+    const v = board[i];
+    if (v === 0) continue;
+    const gi = goalPos[v];
+    const gr = (gi / n) | 0, gc = gi % n;
+    const r = (i / n) | 0, c = i % n;
+    d += Math.abs(gr - r) + Math.abs(gc - c);
+    if (gr === r) rowTiles[r].push(gc);
+    if (gc === c) colTiles[c].push(gr);
+  }
+  const lc = (arr: number[]) => {
+    let confl = 0;
+    for (let i = 0; i < arr.length; i++)
+      for (let j = i + 1; j < arr.length; j++)
+        if (arr[i] > arr[j]) confl++;
+    return confl;
+  };
+  for (let i = 0; i < n; i++) d += 2 * (lc(rowTiles[i]) + lc(colTiles[i]));
+  return d;
+}
+
+// IDA* solver. Returns null if not solvable or exceeds node cap.
+export function fifteenPuzzleSolve(initial: number[], n = 4, nodeCap = 3_000_000): FifteenPuzzleResult | null {
+  if (initial.length !== n * n) return null;
+  if (!fifteenPuzzleSolvable(initial, n)) return null;
+  const goalPos = new Int8Array(n * n);
+  for (let v = 1; v < n * n; v++) goalPos[v] = v - 1;
+  goalPos[0] = n * n - 1;
+
+  const board = initial.slice();
+  const path: number[][] = [board.slice()];
+  const moves: string[] = [];
+  const DIRS: { dr: number; dc: number; name: string; opp: number }[] = [
+    { dr: -1, dc: 0, name: "Up", opp: 1 },
+    { dr: 1, dc: 0, name: "Down", opp: 0 },
+    { dr: 0, dc: -1, name: "Left", opp: 3 },
+    { dr: 0, dc: 1, name: "Right", opp: 2 },
+  ];
+  let evaluated = 0;
+  const FOUND = -1;
+
+  const search = (g: number, bound: number, blankIdx: number, lastDir: number): number => {
+    evaluated++;
+    if (evaluated > nodeCap) return -2;
+    const h = manhattanPlusLC(board, n, goalPos);
+    const f = g + h;
+    if (f > bound) return f;
+    if (h === 0) return FOUND;
+    let min = Infinity;
+    const br = (blankIdx / n) | 0, bc = blankIdx % n;
+    for (let d = 0; d < 4; d++) {
+      if (d === lastDir) continue;
+      const nr = br + DIRS[d].dr, nc = bc + DIRS[d].dc;
+      if (nr < 0 || nr >= n || nc < 0 || nc >= n) continue;
+      const ni = nr * n + nc;
+      board[blankIdx] = board[ni];
+      board[ni] = 0;
+      path.push(board.slice());
+      moves.push(DIRS[d].name);
+      const t = search(g + 1, bound, ni, DIRS[d].opp);
+      if (t === FOUND) return FOUND;
+      if (t === -2) return -2;
+      if (t < min) min = t;
+      board[ni] = board[blankIdx];
+      board[blankIdx] = 0;
+      path.pop();
+      moves.pop();
+    }
+    return min === Infinity ? -1 : min;
+  };
+
+  let bound = manhattanPlusLC(board, n, goalPos);
+  const blank0 = board.indexOf(0);
+  // Weighted IDA*: multiply bound growth by 1 (still admissible), but cap iterations.
+  for (let iter = 0; iter < 200; iter++) {
+    const t = search(0, bound, blank0, -1);
+    if (t === FOUND) return { states: path, moves };
+    if (t === -2 || t === Infinity || t < 0) return null;
+    bound = t;
+  }
+  return null;
+}
