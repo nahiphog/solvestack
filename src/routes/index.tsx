@@ -616,8 +616,16 @@ function Index() {
   const [sbPaintColor, setSbPaintColor] = useState<number>(1);
   const [sbResults, setSbResults] = useState<StarBattleSolution[] | null>(null);
   const [pageSb, setPageSb] = useState(0);
-  const FP_DEFAULT: number[] = [15, 0, 7, 3, 4, 12, 5, 13, 10, 1, 11, 2, 6, 14, 9, 8];
-  const [fpBoard, setFpBoard] = useState<number[]>(() => FP_DEFAULT.slice());
+  const FP_DEFAULT_4: number[] = [15, 0, 7, 3, 4, 12, 5, 13, 10, 1, 11, 2, 6, 14, 9, 8];
+  const makeFpDefault = (n: number): number[] => {
+    if (n === 4) return FP_DEFAULT_4.slice();
+    const arr: number[] = [];
+    for (let i = 1; i < n * n; i++) arr.push(i);
+    arr.push(0);
+    return arr;
+  };
+  const [fpSize, setFpSize] = useState<number>(4);
+  const [fpBoard, setFpBoard] = useState<number[]>(() => FP_DEFAULT_4.slice());
   const [fpResult, setFpResult] = useState<FifteenPuzzleResult | null>(null);
   const [fpStep, setFpStep] = useState(0);
   const [fpError, setFpError] = useState<string | null>(null);
