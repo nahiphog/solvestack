@@ -1128,6 +1128,7 @@ export function fifteenPuzzleSolve(initial: number[], n = 4, nodeCap = 3_000_000
   const board = initial.slice();
   const path: number[][] = [board.slice()];
   const moves: string[] = [];
+  const tileMoves: number[] = [];
   const DIRS: { dr: number; dc: number; name: string; opp: number }[] = [
     { dr: -1, dc: 0, name: "Up", opp: 1 },
     { dr: 1, dc: 0, name: "Down", opp: 0 },
@@ -1151,10 +1152,12 @@ export function fifteenPuzzleSolve(initial: number[], n = 4, nodeCap = 3_000_000
       const nr = br + DIRS[d].dr, nc = bc + DIRS[d].dc;
       if (nr < 0 || nr >= n || nc < 0 || nc >= n) continue;
       const ni = nr * n + nc;
+      const movedTile = board[ni];
       board[blankIdx] = board[ni];
       board[ni] = 0;
       path.push(board.slice());
       moves.push(DIRS[d].name);
+      tileMoves.push(movedTile);
       const t = search(g + 1, bound, ni, DIRS[d].opp);
       if (t === FOUND) return FOUND;
       if (t === -2) return -2;
@@ -1163,16 +1166,16 @@ export function fifteenPuzzleSolve(initial: number[], n = 4, nodeCap = 3_000_000
       board[blankIdx] = 0;
       path.pop();
       moves.pop();
+      tileMoves.pop();
     }
     return min === Infinity ? -1 : min;
   };
 
   let bound = manhattanPlusLC(board, n, goalPos);
   const blank0 = board.indexOf(0);
-  // Weighted IDA*: multiply bound growth by 1 (still admissible), but cap iterations.
   for (let iter = 0; iter < 200; iter++) {
     const t = search(0, bound, blank0, -1);
-    if (t === FOUND) return { states: path, moves };
+    if (t === FOUND) return { states: path, moves, tileMoves };
     if (t === -2 || t === Infinity || t < 0) return null;
     bound = t;
   }
