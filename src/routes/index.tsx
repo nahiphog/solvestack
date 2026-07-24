@@ -195,6 +195,7 @@ const MODE_URL_MAP: Record<string, string> = {
   sudoku: "/logic/sudoku",
   sudokuvariation: "/logic/sudoku_variation",
   starbattle: "/logic/star_battle",
+  fifteenpuzzle: "/math/15_puzzle",
 };
 const URL_MODE_MAP: Record<string, Mode> = Object.fromEntries(
   Object.entries(MODE_URL_MAP).map(([k, v]) => [v, isNaN(Number(k)) ? (k as Mode) : (Number(k) as Mode)])
