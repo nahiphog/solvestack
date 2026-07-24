@@ -67,6 +67,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   doubledabble: { start: "", goal: "" },
   wrdl: { start: "", goal: "" },
   threepeat: { start: "", goal: "" },
+  fifteenpuzzle: { start: "", goal: "" },
   
 
 };
