@@ -5444,7 +5444,7 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
-            {(mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum") && (
+            {(mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle") && (
               <SortToggle value={sortMode} onChange={setSortMode} />
             )}
             {mode === "shuntle" ? (
