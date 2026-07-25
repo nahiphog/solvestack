@@ -5063,18 +5063,25 @@ function Index() {
                     {fpResult.tileMoves.length > 0 && (
                       <div className="text-sm text-muted-foreground">
                         <span className="font-medium">Move sequence:</span>
-                        <pre className="mt-1 font-mono text-base leading-relaxed text-foreground whitespace-pre-wrap">
-                          {(() => {
-                            const formatted = fpResult.tileMoves.map((t) => String(t).padStart(2));
-                            const rows: string[] = [];
-                            for (let i = 0; i < formatted.length; i += 10) {
-                              const chunk = formatted.slice(i, i + 10);
-                              const isLast = i + 10 >= formatted.length;
-                              rows.push(chunk.join(", ") + (isLast ? "" : ", "));
-                            }
-                            return rows.join("\n");
-                          })()}
-                        </pre>
+                        <div className="mt-1 flex flex-wrap gap-x-1.5 gap-y-1 font-mono text-base leading-relaxed text-foreground">
+                          {fpResult.tileMoves.map((t, i) => {
+                            const isCurrent = i === fpStep - 1;
+                            return (
+                              <span key={i}>
+                                <span
+                                  className={
+                                    isCurrent
+                                      ? "rounded bg-yellow-300 px-1 font-bold text-black dark:bg-yellow-500"
+                                      : ""
+                                  }
+                                >
+                                  {t}
+                                </span>
+                                {i < fpResult.tileMoves.length - 1 ? "," : ""}
+                              </span>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                     <div className="flex flex-wrap gap-2">
