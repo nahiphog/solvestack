@@ -5545,6 +5545,17 @@ function Index() {
         {spellingBeeResults && (() => {
           const totalWords = spellingBeeResults.reduce((n, [, ws]) => n + ws.length, 0);
           const totalScore = spellingBeeResults.reduce((n, [score, ws]) => n + score * ws.length, 0);
+          const requiredLetters = new Set(
+            (spellingBeeMiddle + spellingBeeOthers).toUpperCase().replace(/[^A-Z]/g, "").split("")
+          );
+          const isPangram = (w: string) => {
+            const s = new Set(w.toUpperCase().split(""));
+            if (s.size !== requiredLetters.size) return false;
+            for (const ch of requiredLetters) if (!s.has(ch)) return false;
+            return true;
+          };
+          const allWords = spellingBeeResults.flatMap(([, ws]) => ws);
+          const pangrams = allWords.filter(isPangram);
           return (
             <section className="mt-10">
               <div className="mb-2 text-base font-semibold">
@@ -5567,6 +5578,18 @@ function Index() {
                   {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
                 </button>
               </div>
+              {requiredLetters.size === 7 && (
+                <div className="mb-3 rounded-lg border border-amber-500/60 bg-amber-500/10 p-3 text-sm">
+                  <div className="font-semibold text-amber-700 dark:text-amber-300">
+                    {pangrams.length} {pangrams.length === 1 ? "word uses" : "words use"} all 7 letters.
+                  </div>
+                  {pangrams.length > 0 && (
+                    <div className="mt-1 font-mono text-amber-800 dark:text-amber-200">
+                      {pangrams.join(", ")}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="mb-3">
                 <SortToggle value={sortMode} onChange={setSortMode} />
               </div>
@@ -5577,7 +5600,14 @@ function Index() {
                       {score} {score === 1 ? "point" : "points"} · {words.length} {words.length === 1 ? "word" : "words"}
                     </div>
                     <div className="font-mono text-sm">
-                      {words.join(", ")}
+                      {words.map((w, i) => (
+                        <span key={w}>
+                          {i > 0 && ", "}
+                          <span className={isPangram(w) ? "rounded bg-amber-500/20 px-1 font-bold text-amber-800 dark:text-amber-200" : ""}>
+                            {w}
+                          </span>
+                        </span>
+                      ))}
                     </div>
                   </div>
                 ))}
