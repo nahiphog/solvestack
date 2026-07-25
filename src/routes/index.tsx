@@ -2049,6 +2049,8 @@ function Index() {
               <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
               <span> · </span>
               <a href="https://www.bostonglobe.com/games/word-flower/?p1=BGMenu_Sections" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Boston Globe</a>
+              <span> · </span>
+              <a href="https://greatest.games/g/wordexo" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">WordExo</a>
             </>
           )}
           {mode === "craftwords" && (
