@@ -6081,7 +6081,7 @@ function Index() {
                   const i = pageSb * perPage + idx;
                   const set = new Set(sol.map(([r, c]) => `${r},${c}`));
                   return (
-                    <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
+                    <li key={i} className="overflow-x-auto rounded-lg border bg-card p-3 text-card-foreground">
                       <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
                       <div className="inline-block border-2 border-foreground/70">
 
@@ -6090,8 +6090,9 @@ function Index() {
                             {Array.from({ length: N }, (_, c) => {
                               const reg = sbRegions[r]?.[c] ?? 0;
                               const bg = REGION_BG[reg] || "bg-muted";
+                              const cellSize = N >= 11 ? "h-6 w-6 text-xs" : N >= 9 ? "h-7 w-7 text-sm" : "h-8 w-8 text-base";
                               return (
-                                <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg} font-mono text-base font-bold`}>
+                                <div key={c} className={`flex items-center justify-center border border-border ${bg} ${cellSize} font-mono font-bold`}>
                                   {set.has(`${r},${c}`) ? "★" : ""}
                                 </div>
                               );
