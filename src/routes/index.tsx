@@ -4882,11 +4882,11 @@ function Index() {
                       onChange={(e) => { setSbStars(parseInt(e.target.value, 10)); setSbResults(null); }}
                       className="rounded border bg-background px-2 py-1"
                     >
-                      {[1, 2, 3, 4, 5, 6].map((n) => (
-                        <option key={n} value={n}>{n}</option>
+                      {[1, 2, 3].map((n) => (
+                        <option key={n} value={n}>{n === 1 ? "1 star" : `${n} stars`}</option>
                       ))}
                     </select>
-                    <span>{sbStars === 1 ? "star" : "stars"} per row/region/column.</span>
+                    <span>every row, column and region.</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <span className="font-medium">Size:</span>
