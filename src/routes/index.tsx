@@ -227,14 +227,19 @@ function Index() {
   const wordleSortedResults = useMemo(() => {
     if (!wordleResults) return null;
     if (mode !== "wordle" && mode !== "fibble" && mode !== "jeffgoldblum" && mode !== "shuntle") return wordleResults;
-    if (sortMode !== "frequency") return [...wordleResults].sort();
     if (mode === "shuntle") {
-      return [...wordleResults].sort((a, b) => {
-        const fa = getWordFrequency(a.replace(/ /g, ""));
-        const fb = getWordFrequency(b.replace(/ /g, ""));
-        return fb - fa || a.localeCompare(b);
-      });
+      if (sortMode === "frequency") {
+        return [...wordleResults].sort((a, b) => {
+          const fa = getWordFrequency(a.replace(/ /g, ""));
+          const fb = getWordFrequency(b.replace(/ /g, ""));
+          return fb - fa || a.localeCompare(b);
+        });
+      }
+      return [...wordleResults].sort((a, b) =>
+        a.replace(/ /g, "").localeCompare(b.replace(/ /g, ""))
+      );
     }
+    if (sortMode !== "frequency") return [...wordleResults].sort();
     return sortWordsByFrequency(wordleResults);
   }, [wordleResults, sortMode, mode, _freqLoaded]);
   // per-solver frequency sorting hooks appear after their state declarations below
