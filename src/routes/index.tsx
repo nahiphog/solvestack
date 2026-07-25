@@ -1881,7 +1881,7 @@ function Index() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              (X letters)
+              (Original)
             </button>
             <button
               onClick={() => switchMode("craftwords")}
