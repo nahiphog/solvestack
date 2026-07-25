@@ -186,9 +186,9 @@ const MODE_URL_MAP: Record<string, string> = {
   pivots: "/word_ladder/Pivots",
   weaverx: "/word_ladder/Weaver_X",
   craftwords: "/word_ladder/Craftwords",
-  "4": "/word_ladder/classic/4_letters",
-  "5": "/word_ladder/classic/5_letters",
-  "6": "/word_ladder/classic/6_letters",
+  "4": "/word_ladder/classic/Original",
+  "5": "/word_ladder/classic/Original",
+  "6": "/word_ladder/classic/Original",
   blunderwall: "/math/Blunderwall",
   dodeku: "/math/Dodeku",
   sheetdoku: "/math/Sheetdoku",
@@ -197,9 +197,12 @@ const MODE_URL_MAP: Record<string, string> = {
   starbattle: "/logic/star_battle",
   fifteenpuzzle: "/math/15_puzzle",
 };
-const URL_MODE_MAP: Record<string, Mode> = Object.fromEntries(
-  Object.entries(MODE_URL_MAP).map(([k, v]) => [v, isNaN(Number(k)) ? (k as Mode) : (Number(k) as Mode)])
-);
+const URL_MODE_MAP: Record<string, Mode> = {
+  ...Object.fromEntries(
+    Object.entries(MODE_URL_MAP).map(([k, v]) => [v, isNaN(Number(k)) ? (k as Mode) : (Number(k) as Mode)])
+  ),
+  "/word_ladder/classic/Original": 4,
+};
 
 function Index() {
   const [mode, setMode] = useState<Mode>("wordle");
@@ -224,14 +227,19 @@ function Index() {
   const wordleSortedResults = useMemo(() => {
     if (!wordleResults) return null;
     if (mode !== "wordle" && mode !== "fibble" && mode !== "jeffgoldblum" && mode !== "shuntle") return wordleResults;
-    if (sortMode !== "frequency") return [...wordleResults].sort();
     if (mode === "shuntle") {
-      return [...wordleResults].sort((a, b) => {
-        const fa = getWordFrequency(a.replace(/ /g, ""));
-        const fb = getWordFrequency(b.replace(/ /g, ""));
-        return fb - fa || a.localeCompare(b);
-      });
+      if (sortMode === "frequency") {
+        return [...wordleResults].sort((a, b) => {
+          const fa = getWordFrequency(a.replace(/ /g, ""));
+          const fb = getWordFrequency(b.replace(/ /g, ""));
+          return fb - fa || a.localeCompare(b);
+        });
+      }
+      return [...wordleResults].sort((a, b) =>
+        a.replace(/ /g, "").localeCompare(b.replace(/ /g, ""))
+      );
     }
+    if (sortMode !== "frequency") return [...wordleResults].sort();
     return sortWordsByFrequency(wordleResults);
   }, [wordleResults, sortMode, mode, _freqLoaded]);
   // per-solver frequency sorting hooks appear after their state declarations below
@@ -1878,7 +1886,7 @@ function Index() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              (X letters)
+              (Original)
             </button>
             <button
               onClick={() => switchMode("craftwords")}
@@ -2046,6 +2054,8 @@ function Index() {
               <a href="https://www.nytimes.com/puzzles/spelling-bee" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Spelling Bee</a>
               <span> · </span>
               <a href="https://www.bostonglobe.com/games/word-flower/?p1=BGMenu_Sections" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Boston Globe</a>
+              <span> · </span>
+              <a href="https://greatest.games/g/wordexo" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">WordExo</a>
             </>
           )}
           {mode === "craftwords" && (
@@ -4879,11 +4889,11 @@ function Index() {
                       onChange={(e) => { setSbStars(parseInt(e.target.value, 10)); setSbResults(null); }}
                       className="rounded border bg-background px-2 py-1"
                     >
-                      {[1, 2, 3, 4, 5, 6].map((n) => (
-                        <option key={n} value={n}>{n}</option>
+                      {[1, 2, 3].map((n) => (
+                        <option key={n} value={n}>{n === 1 ? "1 star" : `${n} stars`}</option>
                       ))}
                     </select>
-                    <span>{sbStars === 1 ? "star" : "stars"} per row/region/column.</span>
+                    <span>every row, column and region.</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <span className="font-medium">Size:</span>
@@ -5053,18 +5063,25 @@ function Index() {
                     {fpResult.tileMoves.length > 0 && (
                       <div className="text-sm text-muted-foreground">
                         <span className="font-medium">Move sequence:</span>
-                        <pre className="mt-1 font-mono text-base leading-relaxed text-foreground whitespace-pre-wrap">
-                          {(() => {
-                            const formatted = fpResult.tileMoves.map((t) => String(t).padStart(2));
-                            const rows: string[] = [];
-                            for (let i = 0; i < formatted.length; i += 10) {
-                              const chunk = formatted.slice(i, i + 10);
-                              const isLast = i + 10 >= formatted.length;
-                              rows.push(chunk.join(", ") + (isLast ? "" : ", "));
-                            }
-                            return rows.join("\n");
-                          })()}
-                        </pre>
+                        <div className="mt-1 flex flex-wrap gap-x-1.5 gap-y-1 font-mono text-base leading-relaxed text-foreground">
+                          {fpResult.tileMoves.map((t, i) => {
+                            const isCurrent = i === fpStep - 1;
+                            return (
+                              <span key={i}>
+                                <span
+                                  className={
+                                    isCurrent
+                                      ? "rounded bg-yellow-300 px-1 font-bold text-black dark:bg-yellow-500"
+                                      : ""
+                                  }
+                                >
+                                  {t}
+                                </span>
+                                {i < fpResult.tileMoves.length - 1 ? "," : ""}
+                              </span>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                     <div className="flex flex-wrap gap-2">
@@ -5434,7 +5451,7 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
-            {(mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum") && (
+            {(mode === "wordle" || mode === "fibble" || mode === "jeffgoldblum" || mode === "shuntle") && (
               <SortToggle value={sortMode} onChange={setSortMode} />
             )}
             {mode === "shuntle" ? (
@@ -5540,6 +5557,17 @@ function Index() {
         {spellingBeeResults && (() => {
           const totalWords = spellingBeeResults.reduce((n, [, ws]) => n + ws.length, 0);
           const totalScore = spellingBeeResults.reduce((n, [score, ws]) => n + score * ws.length, 0);
+          const requiredLetters = new Set(
+            (spellingBeeMiddle + spellingBeeOthers).toUpperCase().replace(/[^A-Z]/g, "").split("")
+          );
+          const isPangram = (w: string) => {
+            const s = new Set(w.toUpperCase().split(""));
+            if (s.size !== requiredLetters.size) return false;
+            for (const ch of requiredLetters) if (!s.has(ch)) return false;
+            return true;
+          };
+          const allWords = spellingBeeResults.flatMap(([, ws]) => ws);
+          const pangrams = allWords.filter(isPangram);
           return (
             <section className="mt-10">
               <div className="mb-2 text-base font-semibold">
@@ -5562,6 +5590,18 @@ function Index() {
                   {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
                 </button>
               </div>
+              {requiredLetters.size === 7 && (
+                <div className="mb-3 rounded-lg border border-amber-500/60 bg-amber-500/10 p-3 text-sm">
+                  <div className="font-semibold text-amber-700 dark:text-amber-300">
+                    {pangrams.length} {pangrams.length === 1 ? "word uses" : "words use"} all 7 letters.
+                  </div>
+                  {pangrams.length > 0 && (
+                    <div className="mt-1 font-mono text-amber-800 dark:text-amber-200">
+                      {pangrams.join(", ")}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="mb-3">
                 <SortToggle value={sortMode} onChange={setSortMode} />
               </div>
@@ -5572,7 +5612,14 @@ function Index() {
                       {score} {score === 1 ? "point" : "points"} · {words.length} {words.length === 1 ? "word" : "words"}
                     </div>
                     <div className="font-mono text-sm">
-                      {words.join(", ")}
+                      {words.map((w, i) => (
+                        <span key={w}>
+                          {i > 0 && ", "}
+                          <span className={isPangram(w) ? "rounded bg-amber-500/20 px-1 font-bold text-amber-800 dark:text-amber-200" : ""}>
+                            {w}
+                          </span>
+                        </span>
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -6078,7 +6125,7 @@ function Index() {
                   const i = pageSb * perPage + idx;
                   const set = new Set(sol.map(([r, c]) => `${r},${c}`));
                   return (
-                    <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
+                    <li key={i} className="overflow-x-auto rounded-lg border bg-card p-3 text-card-foreground">
                       <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
                       <div className="inline-block border-2 border-foreground/70">
 
@@ -6087,8 +6134,9 @@ function Index() {
                             {Array.from({ length: N }, (_, c) => {
                               const reg = sbRegions[r]?.[c] ?? 0;
                               const bg = REGION_BG[reg] || "bg-muted";
+                              const cellSize = N >= 11 ? "h-6 w-6 text-xs" : N >= 9 ? "h-7 w-7 text-sm" : "h-8 w-8 text-base";
                               return (
-                                <div key={c} className={`flex h-8 w-8 items-center justify-center border border-border ${bg} font-mono text-base font-bold`}>
+                                <div key={c} className={`flex items-center justify-center border border-border ${bg} ${cellSize} font-mono font-bold`}>
                                   {set.has(`${r},${c}`) ? "★" : ""}
                                 </div>
                               );
