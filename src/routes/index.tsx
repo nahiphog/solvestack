@@ -186,9 +186,9 @@ const MODE_URL_MAP: Record<string, string> = {
   pivots: "/word_ladder/Pivots",
   weaverx: "/word_ladder/Weaver_X",
   craftwords: "/word_ladder/Craftwords",
-  "4": "/word_ladder/classic/4_letters",
-  "5": "/word_ladder/classic/5_letters",
-  "6": "/word_ladder/classic/6_letters",
+  "4": "/word_ladder/classic/Original",
+  "5": "/word_ladder/classic/Original",
+  "6": "/word_ladder/classic/Original",
   blunderwall: "/math/Blunderwall",
   dodeku: "/math/Dodeku",
   sheetdoku: "/math/Sheetdoku",
@@ -197,9 +197,12 @@ const MODE_URL_MAP: Record<string, string> = {
   starbattle: "/logic/star_battle",
   fifteenpuzzle: "/math/15_puzzle",
 };
-const URL_MODE_MAP: Record<string, Mode> = Object.fromEntries(
-  Object.entries(MODE_URL_MAP).map(([k, v]) => [v, isNaN(Number(k)) ? (k as Mode) : (Number(k) as Mode)])
-);
+const URL_MODE_MAP: Record<string, Mode> = {
+  ...Object.fromEntries(
+    Object.entries(MODE_URL_MAP).map(([k, v]) => [v, isNaN(Number(k)) ? (k as Mode) : (Number(k) as Mode)])
+  ),
+  "/word_ladder/classic/Original": 4,
+};
 
 function Index() {
   const [mode, setMode] = useState<Mode>("wordle");
