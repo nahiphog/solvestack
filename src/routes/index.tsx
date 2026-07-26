@@ -248,7 +248,7 @@ function Index() {
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
   const [wrdlWordMap, setWrdlWordMap] = useState<Record<string, string[]> | null>(null);
-  const [threepeatWords, setThreepeatWords] = useState<[string, string, string]>(["", "", ""]);
+  const [threepeatWords, setThreepeatWords] = useState<[string, string, string]>(["  IST", "  VER", "  TCH"]);
   const [threepeatResults, setThreepeatResults] = useState<ThreepeatSolution[] | null>(null);
   const [threepeatError, setThreepeatError] = useState<string | null>(null);
   const [threepeatSolving, setThreepeatSolving] = useState(false);
@@ -5732,6 +5732,7 @@ function Index() {
                         if (emptyIdx !== -1) return prev.map((g, i) => (i === emptyIdx ? row : g));
                         return [...prev, row];
                       });
+                      setFlResults(null);
                     }}
                     className="rounded bg-muted px-2 py-1 tracking-widest transition hover:bg-accent hover:text-accent-foreground"
                     title={`Add ${w.toUpperCase()} as a guess`}
