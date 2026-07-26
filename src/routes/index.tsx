@@ -673,7 +673,8 @@ function Index() {
   useEffect(() => { if (wordPeaksResults) setSortMode("frequency"); }, [wordPeaksResults]);
 
   useEffect(() => { setPageMarbless(0); setSelectedMarbless(new Set()); }, [marblessResults]);
-  useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
+  useEffect(() => { setPageWordiply(0); }, [wordiplyResults, sortMode, _freqLoaded]);
+  useEffect(() => { if (wordiplyResults) setSortMode("frequency"); }, [wordiplyResults]);
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
   useEffect(() => { setPageFl(0); }, [flResults, sortMode, _freqLoaded]);
   useEffect(() => { if (flResults) setSortMode("frequency"); }, [flResults]);
