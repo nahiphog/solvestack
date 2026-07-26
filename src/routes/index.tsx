@@ -291,6 +291,7 @@ function Index() {
   const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
   const [mastermindLen, setMastermindLen] = useState<4 | 5>(5);
+  const [mastermindAddCount, setMastermindAddCount] = useState<number>(2);
   const [mastermindRows, setMastermindRows] = useState<{ word: string; greens: number; yellows: number }[]>([
     { word: "", greens: 0, yellows: 0 },
   ]);
