@@ -3112,7 +3112,14 @@ function Index() {
                       <Button onClick={solve} disabled={ddLoadingWords} size="lg">Solve</Button>
                     </div>
                     {ddSolveError && <p className="text-sm text-red-600">{ddSolveError}</p>}
-                    {ddResults && (
+                    {ddResults && (() => {
+                      const ddSorted = ddResults
+                        .map(([tuple, words]) => [
+                          tuple,
+                          [...words].sort((a, b) => getWordFrequency(b) - getWordFrequency(a) || a.localeCompare(b)),
+                        ] as [string, string[]])
+                        .sort((a, b) => getWordFrequency(b[1][0] ?? "") - getWordFrequency(a[1][0] ?? "") || a[0].localeCompare(b[0]));
+                      return (
                       <section className="mt-4">
                         <h2 className="mb-2 text-base font-semibold">
                           {ddResults.reduce((s, [, ws]) => s + ws.length, 0)} possible {ddResults.reduce((s, [, ws]) => s + ws.length, 0) === 1 ? "word" : "words"}
@@ -3127,9 +3134,10 @@ function Index() {
                               </tr>
                             </thead>
                             <tbody className="divide-y">
-                              {ddResults.map(([tuple, words]) => {
+                              {ddSorted.map(([tuple, words]) => {
                                 const keys = tuple.split(",");
                                 const formatted = `[${keys.join(", ")}]`;
+
                                 const addAsGuess = () => {
                                   const w = words[0];
                                   const newRow = { word: w, pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] };
