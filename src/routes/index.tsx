@@ -248,7 +248,7 @@ function Index() {
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
   const [wrdlWordMap, setWrdlWordMap] = useState<Record<string, string[]> | null>(null);
-  const [threepeatWords, setThreepeatWords] = useState<[string, string, string]>(["", "", ""]);
+  const [threepeatWords, setThreepeatWords] = useState<[string, string, string]>(["  IST", "  VER", "  TCH"]);
   const [threepeatResults, setThreepeatResults] = useState<ThreepeatSolution[] | null>(null);
   const [threepeatError, setThreepeatError] = useState<string | null>(null);
   const [threepeatSolving, setThreepeatSolving] = useState(false);
@@ -291,6 +291,7 @@ function Index() {
   const [spellingBeeOthers, setSpellingBeeOthers] = useState("OWERAB");
   const [spellingBeeResults, setSpellingBeeResults] = useState<[number, string[]][] | null>(null);
   const [mastermindLen, setMastermindLen] = useState<4 | 5>(5);
+  const [mastermindAddCount, setMastermindAddCount] = useState<number>(2);
   const [mastermindRows, setMastermindRows] = useState<{ word: string; greens: number; yellows: number }[]>([
     { word: "", greens: 0, yellows: 0 },
   ]);
@@ -672,7 +673,8 @@ function Index() {
   useEffect(() => { if (wordPeaksResults) setSortMode("frequency"); }, [wordPeaksResults]);
 
   useEffect(() => { setPageMarbless(0); setSelectedMarbless(new Set()); }, [marblessResults]);
-  useEffect(() => { setPageWordiply(0); }, [wordiplyResults]);
+  useEffect(() => { setPageWordiply(0); }, [wordiplyResults, sortMode, _freqLoaded]);
+  useEffect(() => { if (wordiplyResults) setSortMode("frequency"); }, [wordiplyResults]);
   useEffect(() => { setPageBee(0); }, [spellingBeeResults]);
   useEffect(() => { setPageFl(0); }, [flResults, sortMode, _freqLoaded]);
   useEffect(() => { if (flResults) setSortMode("frequency"); }, [flResults]);
@@ -2579,15 +2581,16 @@ function Index() {
                           onClick={() => {
                             setFlStartingWords(1);
                             const pick = StartingFlippableWords[Math.floor(Math.random() * StartingFlippableWords.length)];
-                            setFlGuesses([{ word: pick.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                            const row = { word: pick.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] };
+                            setFlGuesses((prev) => [...prev.filter((g) => g.word.trim()), row]);
                             setFlResults(null);
                             setError(null);
                           }}
                           className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                         >
-                          Add
+                          Add 1 strategic word
                         </button>
-                        <span>1 strategic starting word.</span>
+
                       </div>
                       )}
                       {flGuesses.map((g, gi) => (
@@ -3109,7 +3112,14 @@ function Index() {
                       <Button onClick={solve} disabled={ddLoadingWords} size="lg">Solve</Button>
                     </div>
                     {ddSolveError && <p className="text-sm text-red-600">{ddSolveError}</p>}
-                    {ddResults && (
+                    {ddResults && (() => {
+                      const ddSorted = ddResults
+                        .map(([tuple, words]) => [
+                          tuple,
+                          [...words].sort((a, b) => getWordFrequency(b) - getWordFrequency(a) || a.localeCompare(b)),
+                        ] as [string, string[]])
+                        .sort((a, b) => getWordFrequency(b[1][0] ?? "") - getWordFrequency(a[1][0] ?? "") || a[0].localeCompare(b[0]));
+                      return (
                       <section className="mt-4">
                         <h2 className="mb-2 text-base font-semibold">
                           {ddResults.reduce((s, [, ws]) => s + ws.length, 0)} possible {ddResults.reduce((s, [, ws]) => s + ws.length, 0) === 1 ? "word" : "words"}
@@ -3124,9 +3134,10 @@ function Index() {
                               </tr>
                             </thead>
                             <tbody className="divide-y">
-                              {ddResults.map(([tuple, words]) => {
+                              {ddSorted.map(([tuple, words]) => {
                                 const keys = tuple.split(",");
                                 const formatted = `[${keys.join(", ")}]`;
+
                                 const addAsGuess = () => {
                                   const w = words[0];
                                   const newRow = { word: w, pattern: ["GREY","GREY","GREY","GREY","GREY"] as WordleColor[] };
@@ -3158,7 +3169,8 @@ function Index() {
                           </table>
                         </div>
                       </section>
-                    )}
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -3872,12 +3884,11 @@ function Index() {
             </div>
             {mastermindLen === 5 && (
               <div className="flex items-center gap-2 text-sm">
-                <span>Additional option: Add</span>
-                <select
-                  className="rounded border border-border bg-background px-2 py-1"
-                  defaultValue=""
-                  onChange={(e) => {
-                    const n = parseInt(e.target.value, 10);
+                <span>Optional:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const n = mastermindAddCount;
                     const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
                     if (!sheet || sheet.length === 0) return;
                     const row = sheet[Math.floor(Math.random() * sheet.length)];
@@ -3885,47 +3896,52 @@ function Index() {
                     setMastermindRows((prev) => [...prev.filter((r) => !isEmptyGuessWord(r.word)), ...additions]);
                     setMastermindResults(null);
                   }}
+                  className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                 >
-                  <option value="" disabled>—</option>
+                  Add
+                </button>
+                <select
+                  className="rounded border border-border bg-background px-2 py-1"
+                  value={mastermindAddCount}
+                  onChange={(e) => setMastermindAddCount(parseInt(e.target.value, 10))}
+                >
                   <option value="2">2</option>
                   <option value="3">3</option>
                   <option value="4">4</option>
                 </select>
-                <span>strategic starting words into the solver.</span>
+                <span>strategic starting words.</span>
               </div>
             )}
             {mastermindLen === 4 && (
               <div className="flex items-center gap-2 text-sm">
-                <span>Additional option: Add</span>
-                <select
-                  className="rounded border border-border bg-background px-2 py-1"
-                  defaultValue=""
-                  onChange={(e) => {
-                    const n = parseInt(e.target.value, 10);
-                    if (n === 0) return;
-                    if (n === 3) {
-                      const triplets = [
-                        ["RANK", "SHOW", "TIME"],
-                        ["LEAF", "ROCK", "WIND"],
-                        ["KIND", "LOVE", "STAR"],
-                        ["JUMP", "LIFE", "TASK"],
-                        ["HOPE", "RUNS", "WALK"],
-                        ["FISH", "PLAY", "WORD"],
-                      ];
-                      const pick = triplets[Math.floor(Math.random() * triplets.length)];
-                      const additions = pick.map((w) => ({ word: w, greens: 0, yellows: 0 }));
-                      setMastermindRows((prev) => [...prev.filter((r) => !isEmptyGuessWord(r.word)), ...additions]);
-                      setMastermindResults(null);
-                    }
+                <span>Optional:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const triplets = [
+                      ["RANK", "SHOW", "TIME"],
+                      ["LEAF", "ROCK", "WIND"],
+                      ["KIND", "LOVE", "STAR"],
+                      ["JUMP", "LIFE", "TASK"],
+                      ["HOPE", "RUNS", "WALK"],
+                      ["FISH", "PLAY", "WORD"],
+                    ];
+                    const pick = triplets[Math.floor(Math.random() * triplets.length)];
+                    const additions = pick.map((w) => ({ word: w, greens: 0, yellows: 0 }));
+                    setMastermindRows((prev) => [...prev.filter((r) => !isEmptyGuessWord(r.word)), ...additions]);
+                    setMastermindResults(null);
                   }}
+                  className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                 >
-                  <option value="" disabled>—</option>
-                  <option value="0">0</option>
+                  Add
+                </button>
+                <select className="rounded border border-border bg-background px-2 py-1" value={3} onChange={() => {}}>
                   <option value="3">3</option>
                 </select>
-                <span>strategic starting words into the solver.</span>
+                <span>strategic starting words.</span>
               </div>
             )}
+
             {mastermindRows.map((row, ri) => (
               <div key={ri} className="flex flex-wrap items-end gap-3 rounded-lg border-2 border-border p-3">
 
@@ -5379,7 +5395,11 @@ function Index() {
 
 
         {wordiplyResults && (() => {
-          const reversed = [...wordiplyResults].reverse();
+          const sortGroup = (ws: string[]) =>
+            sortMode === "frequency"
+              ? [...ws].sort((a, b) => getWordFrequency(b) - getWordFrequency(a) || a.localeCompare(b))
+              : [...ws].sort((a, b) => a.localeCompare(b));
+          const reversed = [...wordiplyResults].reverse().map(([extra, ws]) => [extra, sortGroup(ws)] as [number, string[]]);
           const flat: string[] = [];
           for (const [, ws] of reversed) {
             for (const w of ws) {
@@ -5411,6 +5431,7 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
+            <SortToggle value={sortMode} onChange={setSortMode} />
             <div className="space-y-4">
               {sliceGroups(reversed, pageWordiply).map(([extra, words]) => (
                 <div key={extra} className="rounded-lg border bg-card p-4">
@@ -5593,15 +5614,11 @@ function Index() {
               {requiredLetters.size === 7 && (
                 <div className="mb-3 rounded-lg border border-amber-500/60 bg-amber-500/10 p-3 text-sm">
                   <div className="font-semibold text-amber-700 dark:text-amber-300">
-                    {pangrams.length} {pangrams.length === 1 ? "word uses" : "words use"} all 7 letters.
+                    The {pangrams.length} {pangrams.length === 1 ? "word" : "words"} highlighted in yellow {pangrams.length === 1 ? "uses" : "use"} all 7 letters.
                   </div>
-                  {pangrams.length > 0 && (
-                    <div className="mt-1 font-mono text-amber-800 dark:text-amber-200">
-                      {pangrams.join(", ")}
-                    </div>
-                  )}
                 </div>
               )}
+
               <div className="mb-3">
                 <SortToggle value={sortMode} onChange={setSortMode} />
               </div>
@@ -5732,6 +5749,7 @@ function Index() {
                         if (emptyIdx !== -1) return prev.map((g, i) => (i === emptyIdx ? row : g));
                         return [...prev, row];
                       });
+                      setFlResults(null);
                     }}
                     className="rounded bg-muted px-2 py-1 tracking-widest transition hover:bg-accent hover:text-accent-foreground"
                     title={`Add ${w.toUpperCase()} as a guess`}
