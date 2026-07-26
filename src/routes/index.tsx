@@ -5599,15 +5599,11 @@ function Index() {
               {requiredLetters.size === 7 && (
                 <div className="mb-3 rounded-lg border border-amber-500/60 bg-amber-500/10 p-3 text-sm">
                   <div className="font-semibold text-amber-700 dark:text-amber-300">
-                    {pangrams.length} {pangrams.length === 1 ? "word uses" : "words use"} all 7 letters.
+                    The {pangrams.length} {pangrams.length === 1 ? "word" : "words"} highlighted in yellow {pangrams.length === 1 ? "uses" : "use"} all 7 letters.
                   </div>
-                  {pangrams.length > 0 && (
-                    <div className="mt-1 font-mono text-amber-800 dark:text-amber-200">
-                      {pangrams.join(", ")}
-                    </div>
-                  )}
                 </div>
               )}
+
               <div className="mb-3">
                 <SortToggle value={sortMode} onChange={setSortMode} />
               </div>
