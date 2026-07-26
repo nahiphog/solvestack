@@ -2579,15 +2579,16 @@ function Index() {
                           onClick={() => {
                             setFlStartingWords(1);
                             const pick = StartingFlippableWords[Math.floor(Math.random() * StartingFlippableWords.length)];
-                            setFlGuesses([{ word: pick.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
+                            const row = { word: pick.toUpperCase(), pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] as WordleColor[] };
+                            setFlGuesses((prev) => [...prev.filter((g) => g.word.trim()), row]);
                             setFlResults(null);
                             setError(null);
                           }}
                           className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                         >
-                          Add
+                          Add 1 strategic word
                         </button>
-                        <span>1 strategic starting word.</span>
+
                       </div>
                       )}
                       {flGuesses.map((g, gi) => (
