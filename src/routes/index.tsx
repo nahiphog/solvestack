@@ -5421,6 +5421,7 @@ function Index() {
                 {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
               </button>
             </div>
+            <SortToggle value={sortMode} onChange={setSortMode} />
             <div className="space-y-4">
               {sliceGroups(reversed, pageWordiply).map(([extra, words]) => (
                 <div key={extra} className="rounded-lg border bg-card p-4">
