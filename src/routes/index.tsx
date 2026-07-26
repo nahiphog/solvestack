@@ -5385,7 +5385,11 @@ function Index() {
 
 
         {wordiplyResults && (() => {
-          const reversed = [...wordiplyResults].reverse();
+          const sortGroup = (ws: string[]) =>
+            sortMode === "frequency"
+              ? [...ws].sort((a, b) => getWordFrequency(b) - getWordFrequency(a) || a.localeCompare(b))
+              : [...ws].sort((a, b) => a.localeCompare(b));
+          const reversed = [...wordiplyResults].reverse().map(([extra, ws]) => [extra, sortGroup(ws)] as [number, string[]]);
           const flat: string[] = [];
           for (const [, ws] of reversed) {
             for (const w of ws) {
