@@ -3169,7 +3169,8 @@ function Index() {
                           </table>
                         </div>
                       </section>
-                    )}
+                      );
+                    })()}
                   </div>
                 )}
               </div>
