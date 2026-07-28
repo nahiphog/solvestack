@@ -1999,6 +1999,8 @@ function Index() {
               <a href="https://www.bostonglobe.com/games/word-flower/?p1=BGMenu_Sections" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Boston Globe</a>
               <span> · </span>
               <a href="https://greatest.games/g/wordexo" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">WordExo</a>
+              <span> · </span>
+              <a href="https://www.pangramathon.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Pangramathon</a>
             </>
           )}
           {mode === "craftwords" && (
