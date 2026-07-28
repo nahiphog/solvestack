@@ -19,21 +19,11 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const SECTIONS: { id: "ladder" | "search" | "mathlogic"; label: string }[] = [
-  { id: "search", label: "Word search" },
-  { id: "ladder", label: "Word ladder" },
+const SECTIONS: { id: "ladder" | "search" | "mathlogic" | "other"; label: string }[] = [
   { id: "mathlogic", label: "Math and logic" },
-];
-
-
-const LADDER_MODES: { id: string; label: string }[] = [
-  { id: "classic", label: "Classic" },
-  { id: "miscellaneous", label: "Miscellaneous" },
-];
-
-const SEARCH_MODES: { id: string; label: string }[] = [
-  { id: "wordle", label: "Wordle" },
-  { id: "miscellaneous", label: "Miscellaneous" },
+  { id: "other", label: "Other word puzzles" },
+  { id: "ladder", label: "Word ladder" },
+  { id: "search", label: "Wordle" },
 ];
 
 const HEX_CLIP = "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
