@@ -5026,11 +5026,11 @@ function Index() {
                             return (
                               <span key={i}>
                                 <span
-                                  className={
+                                  className={`rounded px-1 font-bold ${
                                     isCurrent
-                                      ? "rounded bg-yellow-300 px-1 font-bold text-black dark:bg-yellow-500"
-                                      : ""
-                                  }
+                                      ? "bg-yellow-300 text-black dark:bg-yellow-500"
+                                      : "bg-transparent text-foreground"
+                                  }`}
                                 >
                                   {t}
                                 </span>
