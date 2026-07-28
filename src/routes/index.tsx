@@ -1663,11 +1663,12 @@ function Index() {
         <div ref={topPillRef} className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle";
-            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "threepeat";
+            const inSearch = mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl";
+            const inOther = mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "threepeat";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle";
             const inMathLogic = isMath || inLogic;
-            const inLadder = !inMathLogic && !inSearch;
-            const isActive = s.id === "mathlogic" ? inMathLogic : s.id === "search" ? inSearch : inLadder;
+            const inLadder = !inMathLogic && !inSearch && !inOther;
+            const isActive = s.id === "mathlogic" ? inMathLogic : s.id === "search" ? inSearch : s.id === "other" ? inOther : inLadder;
             return (
               <button
                 key={s.id}
@@ -1676,7 +1677,9 @@ function Index() {
                     ? switchMode(4)
                     : s.id === "search"
                       ? switchMode("wordle")
-                      : switchMode("sudoku")
+                      : s.id === "other"
+                        ? switchMode("spellingbee")
+                        : switchMode("sudoku")
                 }
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
@@ -1690,56 +1693,6 @@ function Index() {
           })}
         </div>
 
-
-        {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
-          <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
-            {LADDER_MODES.map((m) => {
-              const isActive =
-                m.id === "classic"
-                  ? mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords"
-                  : mode === "splice" || mode === "pivots";
-              return (
-                <button
-                  key={m.id}
-                  onClick={() => m.id === "classic" ? switchMode(4) : switchMode("splice")}
-                  className={`flex-1 rounded px-4 py-1.5 text-sm font-medium transition ${
-                    isActive
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {m.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "threepeat") && (
-          <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
-            {SEARCH_MODES.map((m) => {
-              const isActive =
-                m.id === "wordle"
-                  ? mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl"
-                  : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind" || mode === "threepeat";
-
-              return (
-                <button
-                  key={m.id}
-                  onClick={() => m.id === "wordle" ? switchMode("wordle") : switchMode("spellingbee")}
-                  className={`flex-1 rounded px-4 py-1.5 text-sm font-medium transition ${
-
-                    isActive
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {m.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
 
         {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
