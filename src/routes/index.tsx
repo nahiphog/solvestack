@@ -1821,10 +1821,10 @@ function Index() {
 
 
 
-        {(mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords") && (
+        {(mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords" || mode === "splice" || mode === "pivots") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             <button
-              onClick={() => switchMode(5)}
+              onClick={() => switchMode(4)}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === 4 || mode === 5 || mode === 6
                   ? "bg-background text-foreground shadow-sm"
@@ -1844,6 +1844,16 @@ function Index() {
               Craft Words
             </button>
             <button
+              onClick={() => switchMode("pivots")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "pivots"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Play Pivots
+            </button>
+            <button
               onClick={() => switchMode("weaverx")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "weaverx"
@@ -1852,6 +1862,16 @@ function Index() {
               }`}
             >
               Weaver X
+            </button>
+            <button
+              onClick={() => switchMode("splice")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "splice"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Word Splice
             </button>
           </div>
         )}
