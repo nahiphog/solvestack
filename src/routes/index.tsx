@@ -19,21 +19,11 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const SECTIONS: { id: "ladder" | "search" | "mathlogic"; label: string }[] = [
-  { id: "search", label: "Word search" },
-  { id: "ladder", label: "Word ladder" },
+const SECTIONS: { id: "ladder" | "search" | "mathlogic" | "other"; label: string }[] = [
   { id: "mathlogic", label: "Math and logic" },
-];
-
-
-const LADDER_MODES: { id: string; label: string }[] = [
-  { id: "classic", label: "Classic" },
-  { id: "miscellaneous", label: "Miscellaneous" },
-];
-
-const SEARCH_MODES: { id: string; label: string }[] = [
-  { id: "wordle", label: "Wordle" },
-  { id: "miscellaneous", label: "Miscellaneous" },
+  { id: "other", label: "Other word puzzles" },
+  { id: "ladder", label: "Word ladder" },
+  { id: "search", label: "Wordle" },
 ];
 
 const HEX_CLIP = "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
@@ -167,28 +157,28 @@ function sliceGroups(groups: [number, string[]][], page: number, perPage = 50): 
 }
 
 const MODE_URL_MAP: Record<string, string> = {
-  wordle: "/word_search/wordle/original",
-  doubledabble: "/word_search/wordle/Double_Dabble",
-  fibble: "/word_search/wordle/Lies",
-  flippingletters: "/word_search/wordle/Flipping_Letters",
-  jeffgoldblum: "/word_search/wordle/Jeff_Goldblumle",
-  shuntle: "/word_search/wordle/Shuntle",
-  splitle: "/word_search/wordle/Splitle",
-  worwordle: "/word_search/wordle/Wor_Wordle",
-  wrdl: "/word_search/wordle/Wrdl",
-  marbless: "/word_search/miscellaneous/Marbless",
-  mastermind: "/word_search/miscellaneous/Mastermind",
-  spellingbee: "/word_search/miscellaneous/Spelling_Bee",
-  threepeat: "/word_search/miscellaneous/Threepeat",
-  wordpeaks: "/word_search/miscellaneous/Word_Peaks",
-  wordiply: "/word_search/miscellaneous/Wordiply",
+  wordle: "/wordle/original",
+  doubledabble: "/wordle/Double_Dabble",
+  fibble: "/wordle/Lies",
+  flippingletters: "/wordle/Flipping_Letters",
+  jeffgoldblum: "/wordle/Jeff_Goldblumle",
+  shuntle: "/wordle/Shuntle",
+  splitle: "/wordle/Splitle",
+  worwordle: "/wordle/Wor_Wordle",
+  wrdl: "/wordle/Wrdl",
+  marbless: "/other_word_puzzles/Marbless",
+  mastermind: "/other_word_puzzles/Mastermind",
+  spellingbee: "/other_word_puzzles/Spelling_Bee",
+  threepeat: "/other_word_puzzles/Threepeat",
+  wordpeaks: "/other_word_puzzles/Word_Peaks",
+  wordiply: "/other_word_puzzles/Wordiply",
   splice: "/word_ladder/Splice",
   pivots: "/word_ladder/Pivots",
   weaverx: "/word_ladder/Weaver_X",
   craftwords: "/word_ladder/Craftwords",
-  "4": "/word_ladder/classic/Original",
-  "5": "/word_ladder/classic/Original",
-  "6": "/word_ladder/classic/Original",
+  "4": "/word_ladder/Original",
+  "5": "/word_ladder/Original",
+  "6": "/word_ladder/Original",
   blunderwall: "/math/Blunderwall",
   dodeku: "/math/Dodeku",
   sheetdoku: "/math/Sheetdoku",
@@ -201,7 +191,7 @@ const URL_MODE_MAP: Record<string, Mode> = {
   ...Object.fromEntries(
     Object.entries(MODE_URL_MAP).map(([k, v]) => [v, isNaN(Number(k)) ? (k as Mode) : (Number(k) as Mode)])
   ),
-  "/word_ladder/classic/Original": 4,
+  "/word_ladder/Original": 4,
 };
 
 function Index() {
@@ -1673,11 +1663,12 @@ function Index() {
         <div ref={topPillRef} className="mb-3 inline-flex rounded-md border bg-muted p-1">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle";
-            const inSearch = mode === "wordle" || mode === "fibble" || mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "threepeat";
+            const inSearch = mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl";
+            const inOther = mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "threepeat";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle";
             const inMathLogic = isMath || inLogic;
-            const inLadder = !inMathLogic && !inSearch;
-            const isActive = s.id === "mathlogic" ? inMathLogic : s.id === "search" ? inSearch : inLadder;
+            const inLadder = !inMathLogic && !inSearch && !inOther;
+            const isActive = s.id === "mathlogic" ? inMathLogic : s.id === "search" ? inSearch : s.id === "other" ? inOther : inLadder;
             return (
               <button
                 key={s.id}
@@ -1686,7 +1677,9 @@ function Index() {
                     ? switchMode(4)
                     : s.id === "search"
                       ? switchMode("wordle")
-                      : switchMode("sudoku")
+                      : s.id === "other"
+                        ? switchMode("spellingbee")
+                        : switchMode("sudoku")
                 }
                 className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                   isActive
@@ -1700,56 +1693,6 @@ function Index() {
           })}
         </div>
 
-
-        {(mode === 4 || mode === 5 || mode === 6 || mode === "splice" || mode === "weaverx" || mode === "pivots" || mode === "craftwords") && (
-          <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
-            {LADDER_MODES.map((m) => {
-              const isActive =
-                m.id === "classic"
-                  ? mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords"
-                  : mode === "splice" || mode === "pivots";
-              return (
-                <button
-                  key={m.id}
-                  onClick={() => m.id === "classic" ? switchMode(4) : switchMode("splice")}
-                  className={`flex-1 rounded px-4 py-1.5 text-sm font-medium transition ${
-                    isActive
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {m.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {(mode === "wordle" || mode === "fibble" || mode === "mastermind" || mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "threepeat") && (
-          <div className="mb-6 flex rounded-md border bg-muted p-1" style={{ width: topPillWidth }}>
-            {SEARCH_MODES.map((m) => {
-              const isActive =
-                m.id === "wordle"
-                  ? mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl"
-                  : mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind" || mode === "threepeat";
-
-              return (
-                <button
-                  key={m.id}
-                  onClick={() => m.id === "wordle" ? switchMode("wordle") : switchMode("spellingbee")}
-                  className={`flex-1 rounded px-4 py-1.5 text-sm font-medium transition ${
-
-                    isActive
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {m.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
 
         {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
@@ -1878,10 +1821,10 @@ function Index() {
 
 
 
-        {(mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords") && (
+        {(mode === 4 || mode === 5 || mode === 6 || mode === "weaverx" || mode === "craftwords" || mode === "splice" || mode === "pivots") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             <button
-              onClick={() => switchMode(5)}
+              onClick={() => switchMode(4)}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === 4 || mode === 5 || mode === 6
                   ? "bg-background text-foreground shadow-sm"
@@ -1901,6 +1844,16 @@ function Index() {
               Craft Words
             </button>
             <button
+              onClick={() => switchMode("pivots")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "pivots"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Play Pivots
+            </button>
+            <button
               onClick={() => switchMode("weaverx")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${
                 mode === "weaverx"
@@ -1909,6 +1862,16 @@ function Index() {
               }`}
             >
               Weaver X
+            </button>
+            <button
+              onClick={() => switchMode("splice")}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                mode === "splice"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Word Splice
             </button>
           </div>
         )}
@@ -1943,30 +1906,8 @@ function Index() {
           </>
         )}
 
-        {(mode === "splice" || mode === "pivots") && (
-          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("pivots")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "pivots"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Play Pivots
-            </button>
-            <button
-              onClick={() => switchMode("splice")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "splice"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Word Splice
-            </button>
-          </div>
-        )}
+
+
 
         <div className="mb-4 flex flex-wrap gap-3 text-sm">
           {mode === "splice" && (
@@ -2058,6 +1999,8 @@ function Index() {
               <a href="https://www.bostonglobe.com/games/word-flower/?p1=BGMenu_Sections" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Boston Globe</a>
               <span> · </span>
               <a href="https://greatest.games/g/wordexo" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">WordExo</a>
+              <span> · </span>
+              <a href="https://www.pangramathon.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Pangramathon</a>
             </>
           )}
           {mode === "craftwords" && (
@@ -3199,7 +3142,7 @@ function Index() {
             {mode !== "jeffgoldblum" && mode !== "shuntle" && mode !== "splitle" && mode !== "wrdl" && mode !== "fibble" && (
               mode === "wordle" ? (
                 <div className="rounded-lg border border-border p-3 space-y-2">
-                  <div className="text-sm font-medium">Additional options:</div>
+                  <div className="text-sm font-medium">Optional:</div>
                   <div className="flex items-center gap-2 text-sm">
                     <span>-</span>
                     <button
@@ -5085,11 +5028,11 @@ function Index() {
                             return (
                               <span key={i}>
                                 <span
-                                  className={
+                                  className={`rounded px-1 font-bold ${
                                     isCurrent
-                                      ? "rounded bg-yellow-300 px-1 font-bold text-black dark:bg-yellow-500"
-                                      : ""
-                                  }
+                                      ? "bg-yellow-300 text-black dark:bg-yellow-500"
+                                      : "bg-transparent text-foreground"
+                                  }`}
                                 >
                                   {t}
                                 </span>
