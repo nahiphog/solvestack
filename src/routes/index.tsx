@@ -1886,30 +1886,8 @@ function Index() {
           </>
         )}
 
-        {(mode === "splice" || mode === "pivots") && (
-          <div className="mb-4 grid grid-cols-2 gap-1 rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("pivots")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "pivots"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Play Pivots
-            </button>
-            <button
-              onClick={() => switchMode("splice")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "splice"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Word Splice
-            </button>
-          </div>
-        )}
+
+
 
         <div className="mb-4 flex flex-wrap gap-3 text-sm">
           {mode === "splice" && (
