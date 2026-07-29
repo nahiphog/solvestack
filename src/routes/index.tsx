@@ -1660,7 +1660,7 @@ function Index() {
           </div>
         </header>
 
-        <div ref={topPillRef} className="mb-3 inline-flex rounded-md border bg-muted p-1">
+        <div ref={topPillRef} className="mb-3 grid grid-cols-2 gap-2 rounded-md border border-brown/50 bg-brown p-2">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl";
@@ -1681,10 +1681,10 @@ function Index() {
                         ? switchMode("spellingbee")
                         : switchMode("sudoku")
                 }
-                className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                className={`rounded px-4 py-2 text-sm font-medium transition ${
                   isActive
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-brown-foreground text-brown shadow-sm"
+                    : "text-brown-foreground hover:bg-brown-foreground/20"
                 }`}
               >
                 {s.label}
