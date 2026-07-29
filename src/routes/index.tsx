@@ -20,10 +20,10 @@ export const Route = createFileRoute("/")({
 });
 
 const SECTIONS: { id: "ladder" | "search" | "mathlogic" | "other"; label: string }[] = [
+  { id: "search", label: "Wordle" },
+  { id: "ladder", label: "Word ladder" },
   { id: "mathlogic", label: "Math and logic" },
   { id: "other", label: "Other word puzzles" },
-  { id: "ladder", label: "Word ladder" },
-  { id: "search", label: "Wordle" },
 ];
 
 const HEX_CLIP = "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
