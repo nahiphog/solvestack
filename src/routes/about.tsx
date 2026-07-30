@@ -11,7 +11,9 @@ export const Route = createFileRoute("/about")({
       { name: "description", content: "About Solver Sanctuary — why it was built, inspirations, and how to support the project." },
       { property: "og:title", content: "About — Solver Sanctuary" },
       { property: "og:description", content: "About Solver Sanctuary — why it was built, inspirations, and how to support the project." },
+      { property: "og:url", content: "https://solversanctuary.com/about" },
     ],
+    links: [{ rel: "canonical", href: "https://solversanctuary.com/about" }],
   }),
   component: AboutPage,
 });

@@ -8,10 +8,12 @@ export const Route = createFileRoute("/changelog")({
   head: () => ({
     meta: [
       { title: "Changelog — Solver Sanctuary" },
-      { name: "description", content: "Recent updates and changes to Solver Sanctuary." },
+      { name: "description", content: "Recent updates, new solvers, and fixes shipped to Solver Sanctuary." },
       { property: "og:title", content: "Changelog — Solver Sanctuary" },
-      { property: "og:description", content: "Recent updates and changes to Solver Sanctuary." },
+      { property: "og:description", content: "Recent updates, new solvers, and fixes shipped to Solver Sanctuary." },
+      { property: "og:url", content: "https://solversanctuary.com/changelog" },
     ],
+    links: [{ rel: "canonical", href: "https://solversanctuary.com/changelog" }],
   }),
   component: ChangelogPage,
 });
