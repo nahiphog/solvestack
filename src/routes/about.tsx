@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { OG_IMAGE_URL } from "@/lib/seo";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import qrAsset from "@/assets/solver-sanctuary-qrcode.png.asset.json";
@@ -13,11 +14,11 @@ export const Route = createFileRoute("/about")({
       { property: "og:description", content: "About Solver Sanctuary — why it was built, inspirations, and how to support the project." },
       { property: "og:url", content: "https://solversanctuary.com/about" },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://solversanctuary.com/og-image.jpg" },
+      { property: "og:image", content: OG_IMAGE_URL },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "About — Solver Sanctuary" },
       { name: "twitter:description", content: "About Solver Sanctuary — why it was built, inspirations, and how to support the project." },
-      { name: "twitter:image", content: "https://solversanctuary.com/og-image.jpg" },
+      { name: "twitter:image", content: OG_IMAGE_URL },
     ],
     links: [{ rel: "canonical", href: "https://solversanctuary.com/about" }],
   }),

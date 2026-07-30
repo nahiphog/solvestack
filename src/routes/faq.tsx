@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { OG_IMAGE_URL } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import faqRepositories from "@/data/faqRepositories.json";
 
@@ -19,11 +20,11 @@ export const Route = createFileRoute("/faq")({
       { property: "og:description", content: "Frequently asked questions about Solver Sanctuary: word lists, new solvers, and recommended puzzle repositories." },
       { property: "og:url", content: "https://solversanctuary.com/faq" },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://solversanctuary.com/og-image.jpg" },
+      { property: "og:image", content: OG_IMAGE_URL },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "FAQ — Solver Sanctuary" },
       { name: "twitter:description", content: "Frequently asked questions about Solver Sanctuary: word lists, new solvers, and recommended puzzle repositories." },
-      { name: "twitter:image", content: "https://solversanctuary.com/og-image.jpg" },
+      { name: "twitter:image", content: OG_IMAGE_URL },
     ],
     links: [{ rel: "canonical", href: "https://solversanctuary.com/faq" }],
     scripts: [
