@@ -14,9 +14,37 @@ export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
       { title: "FAQ — Solver Sanctuary" },
-      { name: "description", content: "Frequently asked questions about Solver Sanctuary." },
+      { name: "description", content: "Frequently asked questions about Solver Sanctuary: word lists, new solvers, and recommended puzzle repositories." },
       { property: "og:title", content: "FAQ — Solver Sanctuary" },
-      { property: "og:description", content: "Frequently asked questions about Solver Sanctuary." },
+      { property: "og:description", content: "Frequently asked questions about Solver Sanctuary: word lists, new solvers, and recommended puzzle repositories." },
+      { property: "og:url", content: "https://solversanctuary.com/faq" },
+    ],
+    links: [{ rel: "canonical", href: "https://solversanctuary.com/faq" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "Where did I get the word list from?",
+              acceptedAnswer: { "@type": "Answer", text: "From norvig.com/ngrams/word.list" },
+            },
+            {
+              "@type": "Question",
+              name: "Would you be adding more puzzle solvers to this site?",
+              acceptedAnswer: { "@type": "Answer", text: "Yes, but only for those that I'm passionate in." },
+            },
+            {
+              "@type": "Question",
+              name: "Why do some websites not accept certain words?",
+              acceptedAnswer: { "@type": "Answer", text: "The word list that they used might differ from mine." },
+            },
+          ],
+        }),
+      },
     ],
   }),
   component: FaqPage,

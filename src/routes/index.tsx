@@ -12,10 +12,36 @@ import { SudokuCopyBoard } from "@/components/sudoku-copy-controls";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Solver Sanctuary" },
-      { name: "description", content: "Find all shortest word ladders between two words." },
+      { title: "Solver Sanctuary — Word Game & Puzzle Solvers" },
+      {
+        name: "description",
+        content:
+          "Free solvers for Wordle, word ladders, Sudoku, Star Battle, the 15 puzzle and more — instant answers for word games and logic puzzles.",
+      },
+      { property: "og:title", content: "Solver Sanctuary — Word Game & Puzzle Solvers" },
+      {
+        property: "og:description",
+        content:
+          "Free solvers for Wordle, word ladders, Sudoku, Star Battle, the 15 puzzle and more — instant answers for word games and logic puzzles.",
+      },
+      { property: "og:url", content: "https://solversanctuary.com/" },
+    ],
+    links: [{ rel: "canonical", href: "https://solversanctuary.com/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Solver Sanctuary",
+          url: "https://solversanctuary.com/",
+          description:
+            "Free solvers for word games and logic puzzles, including Wordle, word ladders, Sudoku, Star Battle and the 15 puzzle.",
+        }),
+      },
     ],
   }),
+
   component: Index,
 });
 
