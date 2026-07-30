@@ -83,12 +83,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Solver Sanctuary" },
       { property: "og:description", content: "Solver Sanctuary is a collection of word game solvers and puzzle tools." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:site_name", content: "Solver Sanctuary" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Solver Sanctuary" },
       { name: "twitter:description", content: "Solver Sanctuary is a collection of word game solvers and puzzle tools." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9f4c08ec-8dcc-4a14-9ba7-53ef3649bbf7/id-preview-809c475b--fecf7337-5c8a-42d4-8e26-68dcba69a5b6.lovable.app-1780405949666.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9f4c08ec-8dcc-4a14-9ba7-53ef3649bbf7/id-preview-809c475b--fecf7337-5c8a-42d4-8e26-68dcba69a5b6.lovable.app-1780405949666.png" },
     ],
     links: [
       {
