@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { OG_IMAGE_URL } from "@/lib/seo";
 import { useEffect, useState } from "react";
 
 const CHANGELOG_URL =
@@ -13,11 +14,11 @@ export const Route = createFileRoute("/changelog")({
       { property: "og:description", content: "Recent updates, new solvers, and fixes shipped to Solver Sanctuary." },
       { property: "og:url", content: "https://solversanctuary.com/changelog" },
       { property: "og:type", content: "article" },
-      { property: "og:image", content: "https://solversanctuary.com/og-image.jpg" },
+      { property: "og:image", content: OG_IMAGE_URL },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Changelog — Solver Sanctuary" },
       { name: "twitter:description", content: "Recent updates, new solvers, and fixes shipped to Solver Sanctuary." },
-      { name: "twitter:image", content: "https://solversanctuary.com/og-image.jpg" },
+      { name: "twitter:image", content: OG_IMAGE_URL },
     ],
     links: [{ rel: "canonical", href: "https://solversanctuary.com/changelog" }],
   }),
