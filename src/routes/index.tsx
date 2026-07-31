@@ -5207,8 +5207,13 @@ function Index() {
           (() => {
             const N = spSize;
             const cellCls = N >= 8 ? "h-9 w-9 text-sm" : N >= 6 ? "h-11 w-11 text-base" : "h-12 w-12 text-base";
+            const sanitizeInt = (v: string) => {
+              const neg = v.trim().startsWith("-");
+              const digits = v.replace(/[^0-9]/g, "");
+              return (neg ? "-" : "") + digits;
+            };
             const setCell = (r: number, c: number, v: string) => {
-              const clean = v.replace(/[^0-9-]/g, "");
+              const clean = sanitizeInt(v);
               const ng = spGrid.map((row) => row.slice());
               ng[r][c] = clean;
               setSpGrid(ng);
@@ -5244,7 +5249,7 @@ function Index() {
                             value={spRowSums[r]}
                             onChange={(e) => {
                               const nr = spRowSums.slice();
-                              nr[r] = e.target.value.replace(/[^0-9-]/g, "");
+                              nr[r] = sanitizeInt(e.target.value);
                               setSpRowSums(nr);
                               clearSpOutput();
                             }}
@@ -5260,7 +5265,7 @@ function Index() {
                           value={spColSums[c]}
                           onChange={(e) => {
                             const nc = spColSums.slice();
-                            nc[c] = e.target.value.replace(/[^0-9-]/g, "");
+                            nc[c] = sanitizeInt(e.target.value);
                             setSpColSums(nc);
                             clearSpOutput();
                           }}
@@ -5297,13 +5302,21 @@ function Index() {
                           row.map((keep, c) => (
                             <div
                               key={`s-${r}-${c}`}
-                              className={`flex items-center justify-center rounded font-semibold ${cellCls} ${
+                              className={`relative flex items-center justify-center font-semibold ${cellCls} ${
                                 keep
-                                  ? "border-2 border-green-500 text-green-600 dark:text-green-400"
-                                  : "border-2 border-red-500 text-red-600 line-through dark:text-red-400"
+                                  ? "rounded-full border-2 border-green-500 text-green-600 dark:text-green-400"
+                                  : "text-red-600 dark:text-red-400"
                               }`}
                             >
                               {spGrid[r][c]}
+                              {!keep && (
+                                <span
+                                  aria-hidden
+                                  className="pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-bold text-red-500/80"
+                                >
+                                  ✕
+                                </span>
+                              )}
                             </div>
                           ))
                         )}
