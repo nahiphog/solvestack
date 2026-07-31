@@ -5207,8 +5207,13 @@ function Index() {
           (() => {
             const N = spSize;
             const cellCls = N >= 8 ? "h-9 w-9 text-sm" : N >= 6 ? "h-11 w-11 text-base" : "h-12 w-12 text-base";
+            const sanitizeInt = (v: string) => {
+              const neg = v.trim().startsWith("-");
+              const digits = v.replace(/[^0-9]/g, "");
+              return (neg ? "-" : "") + digits;
+            };
             const setCell = (r: number, c: number, v: string) => {
-              const clean = v.replace(/[^0-9-]/g, "");
+              const clean = sanitizeInt(v);
               const ng = spGrid.map((row) => row.slice());
               ng[r][c] = clean;
               setSpGrid(ng);
