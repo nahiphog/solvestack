@@ -5249,7 +5249,7 @@ function Index() {
                             value={spRowSums[r]}
                             onChange={(e) => {
                               const nr = spRowSums.slice();
-                              nr[r] = e.target.value.replace(/[^0-9-]/g, "");
+                              nr[r] = sanitizeInt(e.target.value);
                               setSpRowSums(nr);
                               clearSpOutput();
                             }}
@@ -5265,7 +5265,7 @@ function Index() {
                           value={spColSums[c]}
                           onChange={(e) => {
                             const nc = spColSums.slice();
-                            nc[c] = e.target.value.replace(/[^0-9-]/g, "");
+                            nc[c] = sanitizeInt(e.target.value);
                             setSpColSums(nc);
                             clearSpOutput();
                           }}
