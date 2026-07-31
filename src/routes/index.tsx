@@ -5203,6 +5203,126 @@ function Index() {
               </div>
             );
           })()
+        ) : mode === "sumplete" ? (
+          (() => {
+            const N = spSize;
+            const cellCls = N >= 8 ? "h-9 w-9 text-sm" : N >= 6 ? "h-11 w-11 text-base" : "h-12 w-12 text-base";
+            const setCell = (r: number, c: number, v: string) => {
+              const clean = v.replace(/[^0-9-]/g, "");
+              const ng = spGrid.map((row) => row.slice());
+              ng[r][c] = clean;
+              setSpGrid(ng);
+              clearSpOutput();
+            };
+            const total = spSolutions ? spSolutions.length : 0;
+            const sol = spSolutions ? spSolutions[Math.min(pageSp, total - 1)] : null;
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-sm font-medium">Enter the grid and the target sums:</div>
+                  <div className="overflow-x-auto">
+                    <div
+                      className="inline-grid gap-1"
+                      style={{ gridTemplateColumns: `repeat(${N + 1}, minmax(0, 1fr))` }}
+                    >
+                      {Array.from({ length: N }).map((_, r) => (
+                        <>
+                          {Array.from({ length: N }).map((__, c) => (
+                            <input
+                              key={`g-${r}-${c}`}
+                              type="text"
+                              inputMode="numeric"
+                              value={spGrid[r][c]}
+                              onChange={(e) => setCell(r, c, e.target.value)}
+                              className={`${cellCls} rounded border bg-background text-center font-semibold`}
+                            />
+                          ))}
+                          <input
+                            key={`rs-${r}`}
+                            type="text"
+                            inputMode="numeric"
+                            value={spRowSums[r]}
+                            onChange={(e) => {
+                              const nr = spRowSums.slice();
+                              nr[r] = e.target.value.replace(/[^0-9-]/g, "");
+                              setSpRowSums(nr);
+                              clearSpOutput();
+                            }}
+                            className={`${cellCls} rounded border-2 border-primary bg-muted text-center font-bold`}
+                          />
+                        </>
+                      ))}
+                      {Array.from({ length: N }).map((_, c) => (
+                        <input
+                          key={`cs-${c}`}
+                          type="text"
+                          inputMode="numeric"
+                          value={spColSums[c]}
+                          onChange={(e) => {
+                            const nc = spColSums.slice();
+                            nc[c] = e.target.value.replace(/[^0-9-]/g, "");
+                            setSpColSums(nc);
+                            clearSpOutput();
+                          }}
+                          className={`${cellCls} rounded border-2 border-primary bg-muted text-center font-bold`}
+                        />
+                      ))}
+                      <div className={cellCls} />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" onClick={clearSpAll} size="lg">
+                    Clear all
+                  </Button>
+                  <Button onClick={solveSumplete} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+                {spError && <div className="text-sm text-red-500">{spError}</div>}
+                {sol && (
+                  <div className="space-y-3 rounded-md border p-4">
+                    <div className="text-sm font-medium">
+                      Found {total} solution{total === 1 ? "" : "s"}.
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Green circled cells are kept; red crossed-out cells are cancelled.
+                    </div>
+                    <div className="overflow-x-auto">
+                      <div
+                        className="inline-grid gap-1"
+                        style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}
+                      >
+                        {sol.map((row, r) =>
+                          row.map((keep, c) => (
+                            <div
+                              key={`s-${r}-${c}`}
+                              className={`flex items-center justify-center rounded font-semibold ${cellCls} ${
+                                keep
+                                  ? "border-2 border-green-500 text-green-600 dark:text-green-400"
+                                  : "border-2 border-red-500 text-red-600 line-through dark:text-red-400"
+                              }`}
+                            >
+                              {spGrid[r][c]}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                    {total > 1 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setPageSp(0)} disabled={pageSp === 0}>{"<<"}</Button>
+                        <Button variant="outline" size="sm" onClick={() => setPageSp((x) => Math.max(0, x - 1))} disabled={pageSp === 0}>{"<"}</Button>
+                        <span className="text-sm text-muted-foreground">Page {pageSp + 1} of {total}</span>
+                        <Button variant="outline" size="sm" onClick={() => setPageSp((x) => Math.min(total - 1, x + 1))} disabled={pageSp >= total - 1}>{">"}</Button>
+                        <Button variant="outline" size="sm" onClick={() => setPageSp(total - 1)} disabled={pageSp >= total - 1}>{">>"}</Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })()
         ) : mode === "threepeat" ? (
           <div className="space-y-4">
             <p className="text-sm font-medium">Enter three words (space to leave it blank):</p>
