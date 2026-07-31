@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { OG_IMAGE_URL } from "@/lib/seo";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, sumpleteSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type SumpleteSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
@@ -5226,7 +5226,7 @@ function Index() {
                       style={{ gridTemplateColumns: `repeat(${N + 1}, minmax(0, 1fr))` }}
                     >
                       {Array.from({ length: N }).map((_, r) => (
-                        <>
+                        <Fragment key={`row-${r}`}>
                           {Array.from({ length: N }).map((__, c) => (
                             <input
                               key={`g-${r}-${c}`}
@@ -5250,7 +5250,7 @@ function Index() {
                             }}
                             className={`${cellCls} rounded border-2 border-primary bg-muted text-center font-bold`}
                           />
-                        </>
+                        </Fragment>
                       ))}
                       {Array.from({ length: N }).map((_, c) => (
                         <input
