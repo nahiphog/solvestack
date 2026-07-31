@@ -5297,13 +5297,21 @@ function Index() {
                           row.map((keep, c) => (
                             <div
                               key={`s-${r}-${c}`}
-                              className={`flex items-center justify-center rounded font-semibold ${cellCls} ${
+                              className={`relative flex items-center justify-center font-semibold ${cellCls} ${
                                 keep
-                                  ? "border-2 border-green-500 text-green-600 dark:text-green-400"
-                                  : "border-2 border-red-500 text-red-600 line-through dark:text-red-400"
+                                  ? "rounded-full border-2 border-green-500 text-green-600 dark:text-green-400"
+                                  : "text-red-600 dark:text-red-400"
                               }`}
                             >
                               {spGrid[r][c]}
+                              {!keep && (
+                                <span
+                                  aria-hidden
+                                  className="pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-bold text-red-500/80"
+                                >
+                                  ✕
+                                </span>
+                              )}
                             </div>
                           ))
                         )}
