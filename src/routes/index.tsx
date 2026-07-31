@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { OG_IMAGE_URL } from "@/lib/seo";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { useState } from "react";
-import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { Fragment, useState } from "react";
+import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, sumpleteSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type SumpleteSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
@@ -91,6 +91,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   wrdl: { start: "", goal: "" },
   threepeat: { start: "", goal: "" },
   fifteenpuzzle: { start: "", goal: "" },
+  sumplete: { start: "", goal: "" },
   
 
 };
@@ -219,6 +220,7 @@ const MODE_URL_MAP: Record<string, string> = {
   sudokuvariation: "/logic/sudoku_variation",
   starbattle: "/logic/star_battle",
   fifteenpuzzle: "/math/15_puzzle",
+  sumplete: "/math/Sumplete",
 };
 const URL_MODE_MAP: Record<string, Mode> = {
   ...Object.fromEntries(
@@ -661,6 +663,20 @@ function Index() {
   const [fpResult, setFpResult] = useState<FifteenPuzzleResult | null>(null);
   const [fpStep, setFpStep] = useState(0);
   const [fpError, setFpError] = useState<string | null>(null);
+  const SP_DEFAULT_GRID: number[][] = [
+    [9, 2, 4, 1, 7],
+    [8, 4, 6, 8, 9],
+    [7, 3, 6, 3, 8],
+    [2, 5, 8, 1, 7],
+    [3, 4, 3, 8, 7],
+  ];
+  const [spSize, setSpSize] = useState<number>(5);
+  const [spGrid, setSpGrid] = useState<string[][]>(() => SP_DEFAULT_GRID.map((r) => r.map(String)));
+  const [spRowSums, setSpRowSums] = useState<string[]>(["17", "23", "15", "17", "14"]);
+  const [spColSums, setSpColSums] = useState<string[]>(["21", "0", "17", "17", "31"]);
+  const [spSolutions, setSpSolutions] = useState<SumpleteSolution[] | null>(null);
+  const [spError, setSpError] = useState<string | null>(null);
+  const [pageSp, setPageSp] = useState(0);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
@@ -1005,6 +1021,81 @@ function Index() {
     setFpResult(null);
     setFpError(null);
     setFpStep(0);
+  };
+
+  const clearSpOutput = () => {
+    setSpSolutions(null);
+    setSpError(null);
+    setPageSp(0);
+  };
+
+  const changeSpSize = (n: number) => {
+    setSpSize(n);
+    if (n === 5) {
+      setSpGrid(SP_DEFAULT_GRID.map((r) => r.map(String)));
+      setSpRowSums(["17", "23", "15", "17", "14"]);
+      setSpColSums(["21", "0", "17", "17", "31"]);
+    } else {
+      setSpGrid(Array.from({ length: n }, () => Array(n).fill("")));
+      setSpRowSums(Array(n).fill(""));
+      setSpColSums(Array(n).fill(""));
+    }
+    clearSpOutput();
+  };
+
+  const clearSpAll = () => {
+    setSpGrid(Array.from({ length: spSize }, () => Array(spSize).fill("")));
+    setSpRowSums(Array(spSize).fill(""));
+    setSpColSums(Array(spSize).fill(""));
+    clearSpOutput();
+  };
+
+  const solveSumplete = () => {
+    setSpError(null);
+    setSpSolutions(null);
+    setPageSp(0);
+    const parse = (v: string) => {
+      const t = v.trim();
+      if (t === "" || t === "-") return null;
+      const n = Number(t);
+      return Number.isFinite(n) && Number.isInteger(n) ? n : null;
+    };
+    const grid: number[][] = [];
+    for (let r = 0; r < spSize; r++) {
+      const row: number[] = [];
+      for (let c = 0; c < spSize; c++) {
+        const v = parse(spGrid[r][c]);
+        if (v === null) {
+          setSpError("Every cell must contain an integer.");
+          return;
+        }
+        row.push(v);
+      }
+      grid.push(row);
+    }
+    const rowSums: number[] = [];
+    const colSums: number[] = [];
+    for (let i = 0; i < spSize; i++) {
+      const rv = parse(spRowSums[i]);
+      const cv = parse(spColSums[i]);
+      if (rv === null || cv === null) {
+        setSpError("Every row and column target sum must be an integer.");
+        return;
+      }
+      rowSums.push(rv);
+      colSums.push(cv);
+    }
+    if (rowSums.reduce((a, b) => a + b, 0) !== colSums.reduce((a, b) => a + b, 0)) {
+      setSpError("The row target sums and column target sums must add up to the same total.");
+      return;
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const res = sumpleteSolve(grid, rowSums, colSums, 50);
+      if (res.length === 0) setSpError("No solutions found.");
+      else setSpSolutions(res);
+      setSolving(false);
+    }, 0);
   };
 
 
@@ -1695,7 +1786,7 @@ function Index() {
 
         <div ref={topPillRef} className="mb-3 grid grid-cols-2 gap-2 rounded-md border border-brown/50 bg-brown p-2">
           {SECTIONS.map((s) => {
-            const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle";
+            const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle" || mode === "sumplete";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl";
             const inOther = mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "threepeat";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle";
@@ -1821,7 +1912,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "fifteenpuzzle") && (
+        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "fifteenpuzzle" || mode === "sumplete") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             {([
               { id: "fifteenpuzzle", label: "15 Puzzle" },
@@ -1831,6 +1922,7 @@ function Index() {
               { id: "starbattle", label: "Star Battle" },
               { id: "sudoku", label: "Sudoku (original)" },
               { id: "sudokuvariation", label: "Sudoku (variation)" },
+              { id: "sumplete", label: "Sumplete" },
             ] as { id: Mode; label: string }[]).map((m) => (
               <button
                 key={String(m.id)}
@@ -2325,6 +2417,30 @@ function Index() {
             </div>
             <p>Goal: Slide tiles in numerical order (from left to right, top to bottom).</p>
             <p>Disclaimer: The algorithm applied here uses A* algorithm, which doesn't necessarily mean that it's an optimal solution.</p>
+          </div>
+        )}
+        {mode === "sumplete" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-2">
+            <p>
+              <a href="https://sumplete.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Sumplete</a>
+              {" · "}
+              <a href="https://www.cancelwise.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">CancelWise</a>
+              {" · "}
+              <a href="https://apps.apple.com/app/number-sums-math-games/id6449427809" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Number Sums</a>
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-foreground">Size:</span>
+              <select
+                value={spSize}
+                onChange={(e) => changeSpSize(parseInt(e.target.value, 10))}
+                className="rounded border bg-background px-2 py-1 text-sm"
+              >
+                {[3, 4, 5, 6, 7, 8, 9].map((n) => (
+                  <option key={n} value={n}>{n}x{n}</option>
+                ))}
+              </select>
+            </div>
+            <p>Cancel all the cells to match the target sums at the end of each row and each column.</p>
           </div>
         )}
         {mode === "wordpeaks" && (
@@ -5082,6 +5198,126 @@ function Index() {
                       <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.min(totalSteps - 1, s + 1))} disabled={fpStep >= totalSteps - 1}>Next move</Button>
                       <Button variant="outline" size="sm" onClick={() => setFpStep(totalSteps - 1)} disabled={fpStep >= totalSteps - 1}>{">>"}</Button>
                     </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()
+        ) : mode === "sumplete" ? (
+          (() => {
+            const N = spSize;
+            const cellCls = N >= 8 ? "h-9 w-9 text-sm" : N >= 6 ? "h-11 w-11 text-base" : "h-12 w-12 text-base";
+            const setCell = (r: number, c: number, v: string) => {
+              const clean = v.replace(/[^0-9-]/g, "");
+              const ng = spGrid.map((row) => row.slice());
+              ng[r][c] = clean;
+              setSpGrid(ng);
+              clearSpOutput();
+            };
+            const total = spSolutions ? spSolutions.length : 0;
+            const sol = spSolutions ? spSolutions[Math.min(pageSp, total - 1)] : null;
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-sm font-medium">Enter the grid and the target sums:</div>
+                  <div className="overflow-x-auto">
+                    <div
+                      className="inline-grid gap-1"
+                      style={{ gridTemplateColumns: `repeat(${N + 1}, minmax(0, 1fr))` }}
+                    >
+                      {Array.from({ length: N }).map((_, r) => (
+                        <Fragment key={`row-${r}`}>
+                          {Array.from({ length: N }).map((__, c) => (
+                            <input
+                              key={`g-${r}-${c}`}
+                              type="text"
+                              inputMode="numeric"
+                              value={spGrid[r][c]}
+                              onChange={(e) => setCell(r, c, e.target.value)}
+                              className={`${cellCls} rounded border bg-background text-center font-semibold`}
+                            />
+                          ))}
+                          <input
+                            key={`rs-${r}`}
+                            type="text"
+                            inputMode="numeric"
+                            value={spRowSums[r]}
+                            onChange={(e) => {
+                              const nr = spRowSums.slice();
+                              nr[r] = e.target.value.replace(/[^0-9-]/g, "");
+                              setSpRowSums(nr);
+                              clearSpOutput();
+                            }}
+                            className={`${cellCls} rounded border-2 border-primary bg-muted text-center font-bold`}
+                          />
+                        </Fragment>
+                      ))}
+                      {Array.from({ length: N }).map((_, c) => (
+                        <input
+                          key={`cs-${c}`}
+                          type="text"
+                          inputMode="numeric"
+                          value={spColSums[c]}
+                          onChange={(e) => {
+                            const nc = spColSums.slice();
+                            nc[c] = e.target.value.replace(/[^0-9-]/g, "");
+                            setSpColSums(nc);
+                            clearSpOutput();
+                          }}
+                          className={`${cellCls} rounded border-2 border-primary bg-muted text-center font-bold`}
+                        />
+                      ))}
+                      <div className={cellCls} />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" onClick={clearSpAll} size="lg">
+                    Clear all
+                  </Button>
+                  <Button onClick={solveSumplete} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+                {spError && <div className="text-sm text-red-500">{spError}</div>}
+                {sol && (
+                  <div className="space-y-3 rounded-md border p-4">
+                    <div className="text-sm font-medium">
+                      Found {total} solution{total === 1 ? "" : "s"}.
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Green circled cells are kept; red crossed-out cells are cancelled.
+                    </div>
+                    <div className="overflow-x-auto">
+                      <div
+                        className="inline-grid gap-1"
+                        style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}
+                      >
+                        {sol.map((row, r) =>
+                          row.map((keep, c) => (
+                            <div
+                              key={`s-${r}-${c}`}
+                              className={`flex items-center justify-center rounded font-semibold ${cellCls} ${
+                                keep
+                                  ? "border-2 border-green-500 text-green-600 dark:text-green-400"
+                                  : "border-2 border-red-500 text-red-600 line-through dark:text-red-400"
+                              }`}
+                            >
+                              {spGrid[r][c]}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                    {total > 1 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setPageSp(0)} disabled={pageSp === 0}>{"<<"}</Button>
+                        <Button variant="outline" size="sm" onClick={() => setPageSp((x) => Math.max(0, x - 1))} disabled={pageSp === 0}>{"<"}</Button>
+                        <span className="text-sm text-muted-foreground">Page {pageSp + 1} of {total}</span>
+                        <Button variant="outline" size="sm" onClick={() => setPageSp((x) => Math.min(total - 1, x + 1))} disabled={pageSp >= total - 1}>{">"}</Button>
+                        <Button variant="outline" size="sm" onClick={() => setPageSp(total - 1)} disabled={pageSp >= total - 1}>{">>"}</Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

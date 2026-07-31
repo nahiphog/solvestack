@@ -11,7 +11,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "starbattle" | "shuntle" | "splitle" | "blunderwall" | "doubledabble" | "wrdl" | "threepeat" | "fifteenpuzzle";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "starbattle" | "shuntle" | "splitle" | "blunderwall" | "doubledabble" | "wrdl" | "threepeat" | "fifteenpuzzle" | "sumplete";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -55,6 +55,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   wrdl: 5,
   threepeat: 0,
   fifteenpuzzle: 0,
+  sumplete: 0,
   
   
 };
@@ -1180,4 +1181,75 @@ export function fifteenPuzzleSolve(initial: number[], n = 4, nodeCap = 80_000_00
     bound = t;
   }
   return null;
+}
+
+// ---------- Sumplete ----------
+export type SumpleteSolution = boolean[][]; // true = keep (circled), false = cancel (crossed out)
+
+export function sumpleteSolve(
+  grid: number[][],
+  rowSums: number[],
+  colSums: number[],
+  maxSolutions = 50,
+): SumpleteSolution[] {
+  const rows = grid.length;
+  const cols = rows > 0 ? grid[0].length : 0;
+  const solutions: SumpleteSolution[] = [];
+  const selection: boolean[][] = Array.from({ length: rows }, () => Array(cols).fill(false));
+
+  // running column sums of kept cells, and max remaining addable per column
+  const colRunning = Array(cols).fill(0);
+  const colRemainingPos: number[] = Array(cols).fill(0);
+  for (let c = 0; c < cols; c++) {
+    for (let r = 0; r < rows; r++) if (grid[r][c] > 0) colRemainingPos[c] += grid[r][c];
+  }
+  const colRemainingNeg: number[] = Array(cols).fill(0);
+  for (let c = 0; c < cols; c++) {
+    for (let r = 0; r < rows; r++) if (grid[r][c] < 0) colRemainingNeg[c] += grid[r][c];
+  }
+
+  const rowMaxPos: number[] = grid.map((row) => row.reduce((a, v) => a + (v > 0 ? v : 0), 0));
+  const rowMinNeg: number[] = grid.map((row) => row.reduce((a, v) => a + (v < 0 ? v : 0), 0));
+
+  const backtrack = (r: number, c: number, rowSum: number, rowPosLeft: number, rowNegLeft: number) => {
+    if (solutions.length >= maxSolutions) return;
+    if (r === rows) {
+      for (let j = 0; j < cols; j++) if (colRunning[j] !== colSums[j]) return;
+      solutions.push(selection.map((row) => row.slice()));
+      return;
+    }
+    if (c === cols) {
+      if (rowSum !== rowSums[r]) return;
+      backtrack(r + 1, 0, 0, rowMaxPos[r + 1] ?? 0, rowMinNeg[r + 1] ?? 0);
+      return;
+    }
+    const v = grid[r][c];
+    // prune: can this row still reach its target?
+    if (rowSum + rowPosLeft < rowSums[r] || rowSum + rowNegLeft > rowSums[r]) return;
+    const nextPosLeft = rowPosLeft - (v > 0 ? v : 0);
+    const nextNegLeft = rowNegLeft - (v < 0 ? v : 0);
+    const posLeftCol = colRemainingPos[c] - (v > 0 ? v : 0);
+    const negLeftCol = colRemainingNeg[c] - (v < 0 ? v : 0);
+
+    // Option 1: keep
+    selection[r][c] = true;
+    colRunning[c] += v;
+    colRemainingPos[c] = posLeftCol;
+    colRemainingNeg[c] = negLeftCol;
+    if (colRunning[c] + posLeftCol >= colSums[c] && colRunning[c] + negLeftCol <= colSums[c]) {
+      backtrack(r, c + 1, rowSum + v, nextPosLeft, nextNegLeft);
+    }
+    colRunning[c] -= v;
+
+    // Option 2: cancel
+    selection[r][c] = false;
+    if (colRunning[c] + posLeftCol >= colSums[c] && colRunning[c] + negLeftCol <= colSums[c]) {
+      backtrack(r, c + 1, rowSum, nextPosLeft, nextNegLeft);
+    }
+    colRemainingPos[c] = posLeftCol + (v > 0 ? v : 0);
+    colRemainingNeg[c] = negLeftCol + (v < 0 ? v : 0);
+  };
+
+  if (rows > 0 && cols > 0) backtrack(0, 0, 0, rowMaxPos[0], rowMinNeg[0]);
+  return solutions;
 }
