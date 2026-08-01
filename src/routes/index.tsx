@@ -5249,7 +5249,8 @@ function Index() {
                           <input
                             key={`rs-${r}`}
                             type="text"
-                            inputMode="numeric"
+                            inputMode="decimal"
+                            pattern="-?[0-9]*"
                             value={spRowSums[r]}
                             onChange={(e) => {
                               const nr = spRowSums.slice();
@@ -5265,7 +5266,8 @@ function Index() {
                         <input
                           key={`cs-${c}`}
                           type="text"
-                          inputMode="numeric"
+                          inputMode="decimal"
+                          pattern="-?[0-9]*"
                           value={spColSums[c]}
                           onChange={(e) => {
                             const nc = spColSums.slice();
