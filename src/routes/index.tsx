@@ -2389,6 +2389,8 @@ function Index() {
               <a href="https://www.linkedin.com/games/queens/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Linked In</a>
               {" · "}
               <a href="https://greatest.games/g/shrooms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Greatest Games</a>
+              {" · "}
+              <a href="https://inkwellgames.com/games/stars/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Inkwell games</a>
             </p>
             <p>You are given a square grid, partitioned into non-overlapping regions.</p>
             <p>Each row, column and region contains a fixed number of stars in them.</p>
@@ -2668,6 +2670,7 @@ function Index() {
                     <div className="space-y-4 rounded-lg border bg-card p-4">
                       {StartingFlippableWords.length > 0 && (
                       <div className="flex flex-wrap items-center gap-2 text-sm">
+                        <span className="text-muted-foreground">Optional:</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -2680,7 +2683,7 @@ function Index() {
                           }}
                           className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                         >
-                          Add 1 strategic word
+                          Add 1 starting word
                         </button>
 
                       </div>
@@ -5236,7 +5239,8 @@ function Index() {
                             <input
                               key={`g-${r}-${c}`}
                               type="text"
-                              inputMode="numeric"
+                              inputMode="decimal"
+                              pattern="-?[0-9]*"
                               value={spGrid[r][c]}
                               onChange={(e) => setCell(r, c, e.target.value)}
                               className={`${cellCls} rounded border bg-background text-center font-semibold`}
@@ -5245,7 +5249,8 @@ function Index() {
                           <input
                             key={`rs-${r}`}
                             type="text"
-                            inputMode="numeric"
+                            inputMode="decimal"
+                            pattern="-?[0-9]*"
                             value={spRowSums[r]}
                             onChange={(e) => {
                               const nr = spRowSums.slice();
@@ -5261,7 +5266,8 @@ function Index() {
                         <input
                           key={`cs-${c}`}
                           type="text"
-                          inputMode="numeric"
+                          inputMode="decimal"
+                          pattern="-?[0-9]*"
                           value={spColSums[c]}
                           onChange={(e) => {
                             const nc = spColSums.slice();
