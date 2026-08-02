@@ -13,24 +13,24 @@ import { SudokuCopyBoard } from "@/components/sudoku-copy-controls";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Solver Sanctuary — Word Game & Puzzle Solvers" },
+      { title: "Solver Sanctuary - A collection of puzzle solvers" },
       {
         name: "description",
         content:
-          "Free solvers for Wordle, word ladders, Sudoku, Star Battle, the 15 puzzle and more — instant answers for word games and logic puzzles.",
+          "Free solvers for Wordle, word ladders, Sudoku, Star Battle,  and much more!",
       },
-      { property: "og:title", content: "Solver Sanctuary — Word Game & Puzzle Solvers" },
+      { property: "og:title", content: "Solver Sanctuary - A collection of puzzle solvers" },
       {
         property: "og:description",
         content:
-          "Free solvers for Wordle, word ladders, Sudoku, Star Battle, the 15 puzzle and more — instant answers for word games and logic puzzles.",
+          "Free solvers for Wordle, word ladders, Sudoku, Star Battle,  and much more!",
       },
       { property: "og:url", content: "https://solversanctuary.com/" },
       { property: "og:type", content: "website" },
       { property: "og:image", content: OG_IMAGE_URL },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Solver Sanctuary — Word Game & Puzzle Solvers" },
-      { name: "twitter:description", content: "Free solvers for Wordle, word ladders, Sudoku, Star Battle, the 15 puzzle and more — instant answers for word games and logic puzzles." },
+      { name: "twitter:title", content: "Solver Sanctuary - A collection of puzzle solvers" },
+      { name: "twitter:description", content: "Free solvers for Wordle, word ladders, Sudoku, Star Battle,  and much more!" },
       { name: "twitter:image", content: OG_IMAGE_URL },
     ],
     links: [{ rel: "canonical", href: "https://solversanctuary.com/" }],
