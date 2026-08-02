@@ -5279,6 +5279,120 @@ function Index() {
               </div>
             );
           })()
+        ) : mode === "rotato" ? (
+          (() => {
+            const N = rtSize;
+            const total = N * N;
+            const cellCls = N >= 6 ? "h-11 w-11 text-base" : "h-14 w-14 text-lg";
+            const setCell = (idx: number, valStr: string) => {
+              const digits = valStr.replace(/[^0-9]/g, "");
+              const nb = rtBoard.slice();
+              nb[idx] = digits === "" ? 0 : parseInt(digits, 10);
+              setRtBoard(nb);
+              clearRtOutput();
+            };
+            const displayBoard = rtResult ? rtResult.states[rtStep] : rtBoard;
+            const totalSteps = rtResult ? rtResult.states.length : 0;
+            const activeMove = rtResult && rtStep > 0 ? rtResult.moves[rtStep - 1] : null;
+            const inActiveBlock = (i: number) => {
+              if (!activeMove) return false;
+              const r = Math.floor(i / N);
+              const c = i % N;
+              return (r === activeMove.br || r === activeMove.br + 1) && (c === activeMove.bc || c === activeMove.bc + 1);
+            };
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-sm font-medium">Enter the scrambled grid (1 to {total}):</div>
+                  <div className="overflow-x-auto">
+                    <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
+                      {rtBoard.map((v, i) => (
+                        <input
+                          key={i}
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          maxLength={String(total).length}
+                          value={v === 0 ? "" : String(v)}
+                          onChange={(e) => setCell(i, e.target.value)}
+                          className={`${cellCls} rounded border bg-background text-center font-semibold [appearance:textfield]`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" onClick={clearRtBoard} size="lg">
+                    Clear all
+                  </Button>
+                  <Button onClick={solveRotato} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+                {rtError && <div className="text-sm text-red-500">{rtError}</div>}
+                {rtResult && (
+                  <div className="space-y-3 rounded-md border p-4">
+                    <div className="text-sm font-medium">
+                      {totalSteps === 1 ? "Already solved." : `Solved in ${totalSteps - 1} rotations.`}
+                    </div>
+                    <div className="overflow-x-auto">
+                      <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
+                        {displayBoard.map((v, i) => {
+                          const correct = v === i + 1;
+                          const active = inActiveBlock(i);
+                          const borderCls = correct
+                            ? "border-2 border-green-500"
+                            : active
+                              ? activeMove!.clockwise
+                                ? "border-2 border-blue-500"
+                                : "border-2 border-orange-500"
+                              : "border";
+                          const bgCls = active
+                            ? activeMove!.clockwise
+                              ? "bg-blue-100 dark:bg-blue-900/50"
+                              : "bg-orange-100 dark:bg-orange-900/50"
+                            : "bg-background";
+                          return (
+                            <div
+                              key={i}
+                              className={`flex items-center justify-center rounded font-semibold ${cellCls} ${borderCls} ${bgCls}`}
+                            >
+                              {v}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Step {rtStep} of {totalSteps - 1}
+                      {activeMove && (
+                        <>
+                          {" — rotated the 2x2 block at row "}
+                          <span className="font-medium text-foreground">{activeMove.br + 1}</span>
+                          {", column "}
+                          <span className="font-medium text-foreground">{activeMove.bc + 1}</span>
+                          {" "}
+                          <span className={`font-semibold ${activeMove.clockwise ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"}`}>
+                            {activeMove.clockwise ? "clockwise" : "anticlockwise"}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <span className="text-blue-600 dark:text-blue-400">Blue</span> = clockwise rotation,{" "}
+                      <span className="text-orange-600 dark:text-orange-400">orange</span> = anticlockwise rotation, green = number in its final cell.
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setRtStep(0)} disabled={rtStep === 0}>{"<<"}</Button>
+                      <Button variant="outline" size="sm" onClick={() => setRtStep((s) => Math.max(0, s - 1))} disabled={rtStep === 0}>Previous move</Button>
+                      <Button variant="outline" size="sm" onClick={() => setRtStep((s) => Math.min(totalSteps - 1, s + 1))} disabled={rtStep >= totalSteps - 1}>Next move</Button>
+                      <Button variant="outline" size="sm" onClick={() => setRtStep(totalSteps - 1)} disabled={rtStep >= totalSteps - 1}>{">>"}</Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()
         ) : mode === "sumplete" ? (
           (() => {
             const N = spSize;
