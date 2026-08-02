@@ -1253,3 +1253,302 @@ export function sumpleteSolve(
   if (rows > 0 && cols > 0) backtrack(0, 0, 0, rowMaxPos[0], rowMinNeg[0]);
   return solutions;
 }
+
+// ---------- Rotato ----------
+export type RotatoMove = { br: number; bc: number; clockwise: boolean };
+export type RotatoResult = { states: number[][]; moves: RotatoMove[] };
+
+type RotatoEntry = { move: RotatoMove | null; state: number[] };
+
+const rtKey = (s: number[]) => s.join(",");
+
+function rtSafeRotations(locked: Set<string>, n: number): RotatoMove[] {
+  const out: RotatoMove[] = [];
+  for (let br = 0; br < n - 1; br++) {
+    for (let bc = 0; bc < n - 1; bc++) {
+      if (
+        !locked.has(`${br},${bc}`) &&
+        !locked.has(`${br},${bc + 1}`) &&
+        !locked.has(`${br + 1},${bc}`) &&
+        !locked.has(`${br + 1},${bc + 1}`)
+      ) {
+        out.push({ br, bc, clockwise: true });
+        out.push({ br, bc, clockwise: false });
+      }
+    }
+  }
+  return out;
+}
+
+export function rotatoApply(state: number[], n: number, br: number, bc: number, clockwise: boolean): number[] {
+  const g = state.slice();
+  const i00 = br * n + bc;
+  const i01 = i00 + 1;
+  const i10 = i00 + n;
+  const i11 = i10 + 1;
+  if (clockwise) {
+    g[i00] = state[i10];
+    g[i01] = state[i00];
+    g[i11] = state[i01];
+    g[i10] = state[i11];
+  } else {
+    g[i00] = state[i01];
+    g[i01] = state[i11];
+    g[i10] = state[i00];
+    g[i11] = state[i10];
+  }
+  return g;
+}
+
+// Minimal binary heap for A*
+class RtHeap {
+  private a: { f: number; g: number; state: number[] }[] = [];
+  push(item: { f: number; g: number; state: number[] }) {
+    const a = this.a;
+    a.push(item);
+    let i = a.length - 1;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (a[p].f <= a[i].f) break;
+      [a[p], a[i]] = [a[i], a[p]];
+      i = p;
+    }
+  }
+  pop() {
+    const a = this.a;
+    if (a.length === 0) return undefined;
+    const top = a[0];
+    const last = a.pop()!;
+    if (a.length > 0) {
+      a[0] = last;
+      let i = 0;
+      for (;;) {
+        const l = 2 * i + 1;
+        const r = l + 1;
+        let m = i;
+        if (l < a.length && a[l].f < a[m].f) m = l;
+        if (r < a.length && a[r].f < a[m].f) m = r;
+        if (m === i) break;
+        [a[m], a[i]] = [a[i], a[m]];
+        i = m;
+      }
+    }
+    return top;
+  }
+  get size() {
+    return this.a.length;
+  }
+}
+
+function rtSolvePhaseAstar(
+  start: number[],
+  n: number,
+  targets: Map<number, [number, number]>,
+  locked: Set<string>,
+  nodeCap: number
+): { path: RotatoEntry[]; state: number[] } | null {
+  const rotations = rtSafeRotations(locked, n);
+  const heuristic = (s: number[]) => {
+    let h = 0;
+    for (let idx = 0; idx < s.length; idx++) {
+      const t = targets.get(s[idx]);
+      if (t) h += Math.abs(Math.floor(idx / n) - t[0]) + Math.abs((idx % n) - t[1]);
+    }
+    return h;
+  };
+  const isGoal = (s: number[]) => {
+    for (const [val, [tr, tc]] of targets) if (s[tr * n + tc] !== val) return false;
+    return true;
+  };
+  if (isGoal(start)) return { path: [], state: start };
+
+  const heap = new RtHeap();
+  heap.push({ f: heuristic(start), g: 0, state: start });
+  const cameFrom = new Map<string, { prev: number[]; move: RotatoMove } | null>();
+  cameFrom.set(rtKey(start), null);
+  const bestG = new Map<string, number>([[rtKey(start), 0]]);
+  let expanded = 0;
+
+  while (heap.size > 0) {
+    const cur = heap.pop()!;
+    if (++expanded > nodeCap) return null;
+    const curKey = rtKey(cur.state);
+    if ((bestG.get(curKey) ?? Infinity) < cur.g) continue;
+    if (isGoal(cur.state)) {
+      const path: RotatoEntry[] = [];
+      let k = curKey;
+      let st = cur.state;
+      for (;;) {
+        const from = cameFrom.get(k);
+        if (!from) break;
+        path.push({ move: from.move, state: st });
+        st = from.prev;
+        k = rtKey(st);
+      }
+      path.reverse();
+      return { path, state: cur.state };
+    }
+    for (const rot of rotations) {
+      const next = rotatoApply(cur.state, n, rot.br, rot.bc, rot.clockwise);
+      const nk = rtKey(next);
+      const ng = cur.g + 1;
+      if (ng < (bestG.get(nk) ?? Infinity)) {
+        bestG.set(nk, ng);
+        cameFrom.set(nk, { prev: cur.state, move: rot });
+        heap.push({ f: ng + 2 * heuristic(next), g: ng, state: next });
+      }
+    }
+  }
+  return null;
+}
+
+function rtSolveFinalBfs(
+  start: number[],
+  n: number,
+  targets: Map<number, [number, number]>,
+  locked: Set<string>,
+  nodeCap: number
+): { path: RotatoEntry[]; state: number[] } | null {
+  const rotations = rtSafeRotations(locked, n);
+  const isGoal = (s: number[]) => {
+    for (const [val, [tr, tc]] of targets) if (s[tr * n + tc] !== val) return false;
+    return true;
+  };
+  if (isGoal(start)) return { path: [], state: start };
+  const queue: number[][] = [start];
+  const cameFrom = new Map<string, { prev: number[]; move: RotatoMove } | null>();
+  cameFrom.set(rtKey(start), null);
+  let head = 0;
+  let visited = 0;
+  while (head < queue.length) {
+    const cur = queue[head++];
+    if (++visited > nodeCap) return null;
+    if (isGoal(cur)) {
+      const path: RotatoEntry[] = [];
+      let st = cur;
+      for (;;) {
+        const from = cameFrom.get(rtKey(st));
+        if (!from) break;
+        path.push({ move: from.move, state: st });
+        st = from.prev;
+      }
+      path.reverse();
+      return { path, state: cur };
+    }
+    for (const rot of rotations) {
+      const next = rotatoApply(cur, n, rot.br, rot.bc, rot.clockwise);
+      const nk = rtKey(next);
+      if (!cameFrom.has(nk)) {
+        cameFrom.set(nk, { prev: cur, move: rot });
+        queue.push(next);
+      }
+    }
+  }
+  return null;
+}
+
+function rtPrune(seq: RotatoEntry[]): RotatoEntry[] {
+  const seen = new Map<string, number>();
+  const pruned: RotatoEntry[] = [];
+  for (const entry of seq) {
+    const k = rtKey(entry.state);
+    if (seen.has(k)) {
+      const idx = seen.get(k)!;
+      pruned.length = idx + 1;
+      seen.clear();
+      pruned.forEach((e, i) => seen.set(rtKey(e.state), i));
+    } else {
+      pruned.push(entry);
+      seen.set(k, pruned.length - 1);
+    }
+  }
+  return pruned;
+}
+
+export function rotatoSolve(startGrid: number[], n: number, nodeCap = 2_000_000): RotatoResult | null {
+  let state = startGrid.slice();
+  const sequence: RotatoEntry[] = [{ move: null, state }];
+  const locked = new Set<string>();
+  let k = 0;
+
+  while (n - k > 3) {
+    // Top row k
+    for (let c = k; c < n - 2; c++) {
+      const val = k * n + c + 1;
+      const res = rtSolvePhaseAstar(state, n, new Map([[val, [k, c] as [number, number]]]), locked, nodeCap);
+      if (!res) return null;
+      sequence.push(...res.path);
+      state = res.state;
+      locked.add(`${k},${c}`);
+    }
+    const valA = k * n + (n - 2) + 1;
+    const valB = k * n + (n - 1) + 1;
+    if (state[k * n + (n - 2)] === valA && state[k * n + (n - 1)] === valB) {
+      locked.add(`${k},${n - 2}`);
+      locked.add(`${k},${n - 1}`);
+    } else {
+      const res = rtSolvePhaseAstar(
+        state,
+        n,
+        new Map([
+          [valA, [k, n - 1] as [number, number]],
+          [valB, [k + 1, n - 1] as [number, number]],
+        ]),
+        locked,
+        nodeCap
+      );
+      if (!res) return null;
+      sequence.push(...res.path);
+      state = rotatoApply(res.state, n, k, n - 2, false);
+      sequence.push({ move: { br: k, bc: n - 2, clockwise: false }, state });
+      locked.add(`${k},${n - 2}`);
+      locked.add(`${k},${n - 1}`);
+    }
+
+    // Left column k
+    for (let r = k + 1; r < n - 2; r++) {
+      const val = r * n + k + 1;
+      const res = rtSolvePhaseAstar(state, n, new Map([[val, [r, k] as [number, number]]]), locked, nodeCap);
+      if (!res) return null;
+      sequence.push(...res.path);
+      state = res.state;
+      locked.add(`${r},${k}`);
+    }
+    const valC = (n - 2) * n + k + 1;
+    const valD = (n - 1) * n + k + 1;
+    if (state[(n - 2) * n + k] === valC && state[(n - 1) * n + k] === valD) {
+      locked.add(`${n - 2},${k}`);
+      locked.add(`${n - 1},${k}`);
+    } else {
+      const res = rtSolvePhaseAstar(
+        state,
+        n,
+        new Map([
+          [valC, [n - 1, k] as [number, number]],
+          [valD, [n - 1, k + 1] as [number, number]],
+        ]),
+        locked,
+        nodeCap
+      );
+      if (!res) return null;
+      sequence.push(...res.path);
+      state = rotatoApply(res.state, n, n - 2, k, true);
+      sequence.push({ move: { br: n - 2, bc: k, clockwise: true }, state });
+      locked.add(`${n - 2},${k}`);
+      locked.add(`${n - 1},${k}`);
+    }
+    k += 1;
+  }
+
+  const finalTargets = new Map<number, [number, number]>();
+  for (let r = k; r < n; r++) for (let c = k; c < n; c++) finalTargets.set(r * n + c + 1, [r, c]);
+  const res = rtSolveFinalBfs(state, n, finalTargets, locked, nodeCap);
+  if (!res) return null;
+  sequence.push(...res.path);
+
+  const optimized = rtPrune(sequence);
+  return {
+    states: optimized.map((e) => e.state),
+    moves: optimized.slice(1).map((e) => e.move!),
+  };
+}
