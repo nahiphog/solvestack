@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { OG_IMAGE_URL } from "@/lib/seo";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Fragment, useState } from "react";
-import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, sumpleteSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type SumpleteSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, rotatoSolve, sumpleteSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type RotatoResult, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type SumpleteSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
@@ -92,6 +92,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   threepeat: { start: "", goal: "" },
   fifteenpuzzle: { start: "", goal: "" },
   sumplete: { start: "", goal: "" },
+  rotato: { start: "", goal: "" },
   
 
 };
@@ -221,6 +222,7 @@ const MODE_URL_MAP: Record<string, string> = {
   starbattle: "/logic/star_battle",
   fifteenpuzzle: "/math/15_puzzle",
   sumplete: "/math/Sumplete",
+  rotato: "/math/Rotato",
 };
 const URL_MODE_MAP: Record<string, Mode> = {
   ...Object.fromEntries(
@@ -663,6 +665,17 @@ function Index() {
   const [fpResult, setFpResult] = useState<FifteenPuzzleResult | null>(null);
   const [fpStep, setFpStep] = useState(0);
   const [fpError, setFpError] = useState<string | null>(null);
+  const RT_DEFAULTS: Record<number, number[]> = {
+    3: [1, 4, 6, 5, 3, 2, 9, 7, 8],
+    4: [15, 5, 6, 13, 8, 7, 2, 9, 12, 14, 3, 10, 1, 4, 11, 16],
+    5: [2, 20, 18, 3, 9, 12, 1, 4, 21, 16, 14, 23, 10, 19, 6, 22, 13, 17, 11, 8, 15, 5, 24, 7, 25],
+    6: [2, 9, 1, 5, 20, 16, 8, 7, 30, 29, 10, 12, 31, 23, 28, 11, 18, 6, 3, 26, 27, 17, 36, 35, 32, 34, 19, 13, 22, 4, 33, 21, 25, 14, 15, 24],
+  };
+  const [rtSize, setRtSize] = useState<number>(4);
+  const [rtBoard, setRtBoard] = useState<number[]>(() => RT_DEFAULTS[4].slice());
+  const [rtResult, setRtResult] = useState<RotatoResult | null>(null);
+  const [rtStep, setRtStep] = useState(0);
+  const [rtError, setRtError] = useState<string | null>(null);
   const SP_DEFAULT_GRID: number[][] = [
     [9, 2, 4, 1, 7],
     [8, 4, 6, 8, 9],
@@ -763,6 +776,7 @@ function Index() {
     setFpResult(null);
     setFpError(null);
     setFpStep(0);
+    clearRtOutput();
     setBwResult(null);
     setError(null);
     setSplitleP1Error(null);
@@ -1021,6 +1035,44 @@ function Index() {
     setFpResult(null);
     setFpError(null);
     setFpStep(0);
+  };
+
+  const clearRtOutput = () => {
+    setRtResult(null);
+    setRtError(null);
+    setRtStep(0);
+  };
+
+  const changeRtSize = (n: number) => {
+    setRtSize(n);
+    setRtBoard(RT_DEFAULTS[n].slice());
+    clearRtOutput();
+  };
+
+  const clearRtBoard = () => {
+    setRtBoard(Array(rtSize * rtSize).fill(0));
+    clearRtOutput();
+  };
+
+  const solveRotato = () => {
+    clearRtOutput();
+    const N = rtSize;
+    const total = N * N;
+    if (rtBoard.some((v) => v < 1 || v > total)) {
+      setRtError(`Every cell must contain a number from 1 to ${total}.`);
+      return;
+    }
+    if (new Set(rtBoard).size !== total) {
+      setRtError(`The grid must contain each of 1-${total} exactly once.`);
+      return;
+    }
+    setSolving(true);
+    setTimeout(() => {
+      const res = rotatoSolve(rtBoard.slice(), N);
+      if (!res) setRtError("No solution found within search limits.");
+      else { setRtResult(res); setRtStep(0); }
+      setSolving(false);
+    }, 0);
   };
 
   const clearSpOutput = () => {
@@ -1786,7 +1838,7 @@ function Index() {
 
         <div ref={topPillRef} className="mb-3 grid grid-cols-2 gap-2 rounded-md border border-brown/50 bg-brown p-2">
           {SECTIONS.map((s) => {
-            const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle" || mode === "sumplete";
+            const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle" || mode === "sumplete" || mode === "rotato";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl";
             const inOther = mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "threepeat";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle";
@@ -1912,12 +1964,13 @@ function Index() {
           </div>
         )}
 
-        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "fifteenpuzzle" || mode === "sumplete") && (
+        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "fifteenpuzzle" || mode === "sumplete" || mode === "rotato") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             {([
               { id: "fifteenpuzzle", label: "15 Puzzle" },
               { id: "blunderwall", label: "Blunderwall" },
               { id: "dodeku", label: "Dodeku" },
+              { id: "rotato", label: "Rotato" },
               { id: "sheetdoku", label: "Sheetdoku" },
               { id: "starbattle", label: "Star Battle" },
               { id: "sudoku", label: "Sudoku (original)" },
@@ -2419,6 +2472,26 @@ function Index() {
             </div>
             <p>Goal: Slide tiles in numerical order (from left to right, top to bottom).</p>
             <p>Disclaimer: The algorithm applied here uses A* algorithm, which doesn't necessarily mean that it's an optimal solution.</p>
+          </div>
+        )}
+        {mode === "rotato" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-2">
+            <p>
+              <a href="https://greatest.games/g/rotato/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Rotato</a>
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-foreground">Size:</span>
+              <select
+                value={rtSize}
+                onChange={(e) => changeRtSize(parseInt(e.target.value, 10))}
+                className="rounded border bg-background px-2 py-1 text-sm"
+              >
+                {[3, 4, 5, 6].map((n) => (
+                  <option key={n} value={n}>{n}x{n}</option>
+                ))}
+              </select>
+            </div>
+            <p>Place the scrambled grid into chronological order by rotating 2x2 blocks.</p>
           </div>
         )}
         {mode === "sumplete" && (
