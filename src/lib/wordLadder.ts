@@ -11,7 +11,7 @@ import graphCraftWords from "@/data/wordCraftWords.json";
 
 type Graph = Record<string, string[]>;
 
-export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "starbattle" | "shuntle" | "splitle" | "blunderwall" | "doubledabble" | "wrdl" | "threepeat" | "fifteenpuzzle" | "sumplete";
+export type Mode = 4 | 5 | 6 | "splice" | "weaverx" | "pivots" | "wordiply" | "wordle" | "fibble" | "spellingbee" | "craftwords" | "mastermind" | "marbless" | "dodeku" | "wordpeaks" | "flippingletters" | "worwordle" | "sheetdoku" | "jeffgoldblum" | "sudoku" | "sudokuvariation" | "starbattle" | "shuntle" | "splitle" | "blunderwall" | "doubledabble" | "wrdl" | "threepeat" | "fifteenpuzzle" | "sumplete" | "rotato";
 export type WordLength = Mode;
 
 const GRAPHS: Record<string, Graph> = {
@@ -56,6 +56,7 @@ export const MODE_WORD_LENGTH: Record<string, number> = {
   threepeat: 0,
   fifteenpuzzle: 0,
   sumplete: 0,
+  rotato: 0,
   
   
 };
