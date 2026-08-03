@@ -5342,22 +5342,21 @@ function Index() {
                         {displayBoard.map((v, i) => {
                           const correct = v === i + 1;
                           const active = inActiveBlock(i);
-                          const borderCls = correct
-                            ? "border-2 border-green-500"
-                            : active
-                              ? activeMove!.clockwise
-                                ? "border-2 border-blue-500"
-                                : "border-2 border-orange-500"
-                              : "border";
+                          const borderCls = active
+                            ? activeMove!.clockwise
+                              ? "border-2 border-blue-500"
+                              : "border-2 border-orange-500"
+                            : "border";
                           const bgCls = active
                             ? activeMove!.clockwise
                               ? "bg-blue-100 dark:bg-blue-900/50"
                               : "bg-orange-100 dark:bg-orange-900/50"
                             : "bg-background";
+                          const textCls = correct ? "text-green-600 dark:text-green-400" : "";
                           return (
                             <div
                               key={i}
-                              className={`flex items-center justify-center rounded font-semibold ${cellCls} ${borderCls} ${bgCls}`}
+                              className={`flex items-center justify-center rounded font-semibold ${cellCls} ${borderCls} ${bgCls} ${textCls}`}
                             >
                               {v}
                             </div>
