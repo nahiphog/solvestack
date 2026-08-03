@@ -345,7 +345,9 @@ function Index() {
   const [flStartingWords, setFlStartingWords] = useState<0 | 1>(0);
   const [flLocked, setFlLocked] = useState<boolean>(false);
   // Double Dabble: 15 cells (3x5); positions 10 and 14 are faded/disabled. Each usable cell holds 2 distinct letters.
-  const [ddKeys, setDdKeys] = useState<string[]>(Array(15).fill(""));
+  const [ddKeys, setDdKeys] = useState<string[]>([
+    "af", "bl", "cr", "do", "eg", "hx", "iw", "jv", "ks", "mp", "", "ny", "qu", "tz", "",
+  ]);
   const [ddLocked, setDdLocked] = useState<boolean>(false);
   const [ddError, setDdError] = useState<string | null>(null);
   const [ddPartitionedKeys, setDdPartitionedKeys] = useState<string[]>([]);
