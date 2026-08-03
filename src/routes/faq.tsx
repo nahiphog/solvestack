@@ -130,7 +130,51 @@ function FaqPage() {
                 </div>
               );
             })()}
+          </div>
 
+          <div className="rounded-lg border bg-card p-5 shadow-sm">
+            <p className="font-semibold">What other games do you personally recommend?</p>
+            <div className="mt-2 space-y-3">
+              <div>
+                <p className="font-medium">S-tier:</p>
+                <ol className="mt-1 list-none space-y-1">
+                  <li>
+                    i.{" "}
+                    <a className="text-primary underline" href="https://en.wikipedia.org/wiki/Nier:_Automata" target="_blank" rel="noopener noreferrer">Nier: Automata</a>
+                  </li>
+                </ol>
+              </div>
+              <div>
+                <p className="font-medium">A-tier:</p>
+                <ol className="mt-1 list-none space-y-1">
+                  <li>
+                    ii.{" "}
+                    <a className="text-primary underline" href="https://apps.apple.com/app/id6780127023" target="_blank" rel="noopener noreferrer">Mine-O-Gram</a>
+                  </li>
+                  <li>
+                    iii.{" "}
+                    <a className="text-primary underline" href="https://apps.apple.com/app/id6759974345" target="_blank" rel="noopener noreferrer">Hedgemaze</a>
+                  </li>
+                  <li>
+                    iv.{" "}
+                    <a className="text-primary underline" href="https://apps.apple.com/app/id1283262104" target="_blank" rel="noopener noreferrer">Fillomino infinity</a>
+                  </li>
+                  <li>
+                    v.{" "}
+                    <a className="text-primary underline" href="https://apps.apple.com/app/id1580054076" target="_blank" rel="noopener noreferrer">Pocket Chess</a>
+                  </li>
+                </ol>
+              </div>
+              <div>
+                <p className="font-medium">B-tier:</p>
+                <ol className="mt-1 list-none space-y-1">
+                  <li>
+                    vi.{" "}
+                    <a className="text-primary underline" href="https://apps.apple.com/app/id1489118195" target="_blank" rel="noopener noreferrer">Good Sudoku</a>
+                  </li>
+                </ol>
+              </div>
+            </div>
           </div>
         </div>
       </div>
