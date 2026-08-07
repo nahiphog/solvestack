@@ -4707,7 +4707,7 @@ function Index() {
                             const v = e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 7);
                             setBwWords((prev) => prev.map((x, idx) => (idx === i ? v : x)));
                           }}
-                          className="font-mono uppercase placeholder:normal-case"
+                          className={`font-mono uppercase placeholder:normal-case ${w.trim().length === 7 ? "border-green-500 focus-visible:ring-green-500" : ""}`}
                         />
                       )
                     ))}
