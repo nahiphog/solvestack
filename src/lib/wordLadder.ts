@@ -1258,7 +1258,7 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
       }
       if (!fpPlaceTile(ctx, t1, at(top + 1, c))) { console.error("FAIL7"); return null; }
       ctx.locked.add(at(top + 1, c));
-      if (!fpPlaceTile(ctx, t2, at(top + 1, c + 1))) { console.error("FAIL8"); return null; }
+      if (!fpPlaceTile(ctx, t2, at(top + 1, c + 1))) { console.error("FAIL8", c, t1, t2, JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
       ctx.locked.delete(at(top + 1, c));
       ctx.locked.add(at(top + 1, c + 1));
       if (!fpMoveBlank(ctx, at(top, c), at(top + 1, c))) { console.error("FAIL9"); return null; }
