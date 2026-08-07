@@ -1553,3 +1553,131 @@ export function rotatoSolve(startGrid: number[], n: number, nodeCap = 2_000_000)
     moves: optimized.slice(1).map((e) => e.move!),
   };
 }
+
+// ---------------------------------------------------------------------------
+// Blunderwall: expected-guess-minimising decision tree analysis
+// ---------------------------------------------------------------------------
+
+export type BlunderwallStart = {
+  word: string;
+  avg: number;
+  guaranteed: boolean;
+};
+
+export type BlunderwallAnalysis = {
+  starts: BlunderwallStart[];
+  best: string[];
+};
+
+const bwMatch = (guess: string, secret: string): number => {
+  let n = 0;
+  for (let i = 0; i < guess.length; i++) if (guess[i] === secret[i]) n++;
+  return n;
+};
+
+type BwNode = { guess: string; avg: number };
+
+class BwEngine {
+  private memo = new Map<string, BwNode | null>();
+  constructor(private words: string[]) {}
+
+  /** Best next guess for `pool` with `attemptsLeft` guesses remaining (after this one there are attemptsLeft-1). */
+  solve(pool: string[], attemptsLeft: number): BwNode | null {
+    if (pool.length === 0) return null;
+    if (pool.length === 1) return { guess: pool[0], avg: 1 };
+    if (attemptsLeft <= 0) return null;
+    const key = `${attemptsLeft}|${pool.join(",")}`;
+    const cached = this.memo.get(key);
+    if (cached !== undefined) return cached;
+    let best: BwNode | null = null;
+    for (const guess of this.words) {
+      const buckets = new Map<number, string[]>();
+      for (const secret of pool) {
+        const score = bwMatch(guess, secret);
+        const arr = buckets.get(score);
+        if (arr) arr.push(secret);
+        else buckets.set(score, [secret]);
+      }
+      if (buckets.size === 1 && !pool.includes(guess)) continue;
+      let sum = 0;
+      let ok = true;
+      for (const [score, sub] of buckets) {
+        if (score === guess.length) {
+          sum += 1;
+          continue;
+        }
+        const child = this.solve(sub, attemptsLeft - 1);
+        if (!child) {
+          ok = false;
+          break;
+        }
+        sum += sub.length * (child.avg + 1);
+      }
+      if (!ok) continue;
+      const avg = sum / pool.length;
+      if (!best || avg < best.avg) best = { guess, avg };
+    }
+    this.memo.set(key, best);
+    return best;
+  }
+
+  /** Expected guesses when the first guess is forced to `start`. */
+  evaluateStart(start: string, attemptsLeft: number): number | null {
+    const pool = this.words;
+    const buckets = new Map<number, string[]>();
+    for (const secret of pool) {
+      const score = bwMatch(start, secret);
+      const arr = buckets.get(score);
+      if (arr) arr.push(secret);
+      else buckets.set(score, [secret]);
+    }
+    let sum = 0;
+    for (const [score, sub] of buckets) {
+      if (score === start.length) {
+        sum += 1;
+        continue;
+      }
+      const child = this.solve(sub, attemptsLeft - 1);
+      if (!child) return null;
+      sum += sub.length * (child.avg + 1);
+    }
+    return sum / pool.length;
+  }
+}
+
+/** Analyse every candidate starting word over the full word set. */
+export function blunderwallAnalyze(words: string[], maxGuesses = 4): BlunderwallAnalysis {
+  const engine = new BwEngine(words);
+  const loose = new BwEngine(words);
+  const starts: BlunderwallStart[] = [];
+  for (const w of words) {
+    const strict = engine.evaluateStart(w, maxGuesses);
+    if (strict !== null) {
+      starts.push({ word: w, avg: strict, guaranteed: true });
+    } else {
+      const relaxed = loose.evaluateStart(w, words.length + 1);
+      starts.push({ word: w, avg: relaxed ?? Infinity, guaranteed: false });
+    }
+  }
+  starts.sort((a, b) => (a.guaranteed === b.guaranteed ? a.avg - b.avg : a.guaranteed ? -1 : 1));
+  const guaranteed = starts.filter((s) => s.guaranteed);
+  const bestAvg = guaranteed.length ? guaranteed[0].avg : starts.length ? starts[0].avg : 0;
+  const best = (guaranteed.length ? guaranteed : starts)
+    .filter((s) => Math.abs(s.avg - bestAvg) < 1e-9)
+    .map((s) => s.word);
+  return { starts, best };
+}
+
+/** Recommended next guess given the remaining candidate pool. */
+export function blunderwallNextGuess(
+  words: string[],
+  pool: string[],
+  attemptsLeft: number,
+): { guess: string; avg: number; guaranteed: boolean } | null {
+  const engine = new BwEngine(words);
+  const strict = engine.solve(pool, Math.max(1, attemptsLeft));
+  if (strict) return { guess: strict.guess, avg: strict.avg, guaranteed: true };
+  const loose = new BwEngine(words).solve(pool, words.length + 1);
+  if (!loose) return null;
+  return { guess: loose.guess, avg: loose.avg, guaranteed: false };
+}
