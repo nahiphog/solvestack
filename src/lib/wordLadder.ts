@@ -1221,7 +1221,7 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
     for (let c = 0; c <= n - 3; c++) {
       const tile = goalTile(r, c);
       if (ctx.board[at(r, c)] !== tile) {
-        if (!fpPlaceTile(ctx, tile, at(r, c))) { console.error("FAIL1"); return null; }
+        if (!fpPlaceTile(ctx, tile, at(r, c))) return null;
       }
       ctx.locked.add(at(r, c));
     }
@@ -1230,15 +1230,15 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
     if (!(ctx.board[at(r, n - 2)] === t1 && ctx.board[at(r, n - 1)] === t2)) {
       if (ctx.board[at(r, n - 2)] === t1) {
         // Break the false placement so the maneuver can run.
-        if (!fpMoveBlank(ctx, at(r + 1, n - 2), at(r, n - 2))) { console.error("FAIL2"); return null; }
+        if (!fpMoveBlank(ctx, at(r + 1, n - 2), at(r, n - 2))) return null;
         fpSlide(ctx, at(r, n - 2));
       }
-      if (!fpPlaceTile(ctx, t1, at(r, n - 1))) { console.error("FAIL3"); return null; }
+      if (!fpPlaceTile(ctx, t1, at(r, n - 1))) return null;
       ctx.locked.add(at(r, n - 1));
-      if (!fpPlaceTile(ctx, t2, at(r + 1, n - 1))) { console.error("FAIL4"); return null; }
+      if (!fpPlaceTile(ctx, t2, at(r + 1, n - 1))) return null;
       ctx.locked.delete(at(r, n - 1));
       ctx.locked.add(at(r + 1, n - 1));
-      if (!fpMoveBlank(ctx, at(r, n - 2), at(r, n - 1))) { console.error("FAIL5"); return null; }
+      if (!fpMoveBlank(ctx, at(r, n - 2), at(r, n - 1))) return null;
       ctx.locked.delete(at(r + 1, n - 1));
       fpSlide(ctx, at(r, n - 1));
       fpSlide(ctx, at(r + 1, n - 1));
@@ -1252,19 +1252,16 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
   for (let c = 0; c <= n - 3; c++) {
     const t1 = goalTile(top, c), t2 = goalTile(top + 1, c);
     if (!(ctx.board[at(top, c)] === t1 && ctx.board[at(top + 1, c)] === t2)) {
-      if (ctx.board[at(top, c)] === t1) {
-        if (!fpMoveBlank(ctx, at(top, c + 1), at(top, c))) { console.error("FAIL6"); return null; }
-        fpSlide(ctx, at(top, c));
-      }
-      if (!fpPlaceTile(ctx, t1, at(top + 1, c))) { console.error("FAIL7"); return null; }
-      ctx.locked.add(at(top + 1, c));
-      if (!fpPlaceTile(ctx, t2, at(top + 1, c + 1))) { console.error("FAIL8", c, t1, t2, JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
-      ctx.locked.delete(at(top + 1, c));
-      ctx.locked.add(at(top + 1, c + 1));
-      if (!fpMoveBlank(ctx, at(top, c), at(top + 1, c))) { console.error("FAIL9"); return null; }
-      ctx.locked.delete(at(top + 1, c + 1));
-      fpSlide(ctx, at(top + 1, c));
-      fpSlide(ctx, at(top + 1, c + 1));
+      // Stage the pair as t2 above and t1 to its right, then rotate them in.
+      if (!fpPlaceTile(ctx, t2, at(top, c))) return null;
+      ctx.locked.add(at(top, c));
+      if (!fpPlaceTile(ctx, t1, at(top, c + 1))) return null;
+      ctx.locked.add(at(top, c + 1));
+      if (!fpMoveBlank(ctx, at(top + 1, c), -1)) return null;
+      ctx.locked.delete(at(top, c));
+      ctx.locked.delete(at(top, c + 1));
+      fpSlide(ctx, at(top, c));
+      fpSlide(ctx, at(top, c + 1));
     }
     ctx.locked.add(at(top, c));
     ctx.locked.add(at(top + 1, c));
@@ -1273,11 +1270,11 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
   // Phase 3: rotate the final 2x2 into place.
   const cells = [at(top, n - 2), at(top, n - 1), at(top + 1, n - 1), at(top + 1, n - 2)];
   const isSolved = () => ctx.board.every((v, i) => v === (i === n * n - 1 ? 0 : i + 1));
-  if (!fpMoveBlank(ctx, at(top + 1, n - 1), -1)) { console.error("FAIL10"); return null; }
+  if (!fpMoveBlank(ctx, at(top + 1, n - 1), -1)) return null;
   for (let k = 0; k < 4 && !isSolved(); k++) {
     const blank = ctx.board.indexOf(0);
     const pos = cells.indexOf(blank);
-    if (pos === -1) { console.error("FAIL11"); return null; }
+    if (pos === -1) return null;
     fpSlide(ctx, cells[(pos + 1) % 4]);
     fpSlide(ctx, cells[(pos + 2) % 4]);
     fpSlide(ctx, cells[(pos + 3) % 4]);
