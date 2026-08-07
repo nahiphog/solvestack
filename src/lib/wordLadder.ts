@@ -1119,10 +1119,178 @@ function manhattanPlusLC(board: number[], n: number, goalPos: Int8Array): number
   return d;
 }
 
+// ---- Rudimentary staged (human-style) solver, used for larger boards ----
+type FpCtx = {
+  n: number;
+  board: number[];
+  locked: Set<number>;
+  states: number[][];
+  moves: string[];
+  tileMoves: number[];
+};
+
+const FP_DIR_NAME = (from: number, to: number, n: number): string => {
+  const fr = (from / n) | 0, fc = from % n;
+  const tr = (to / n) | 0, tc = to % n;
+  if (tr < fr) return "Up";
+  if (tr > fr) return "Down";
+  if (tc < fc) return "Left";
+  return "Right";
+};
+
+/** Slide the tile at `cell` into the adjacent blank. */
+function fpSlide(ctx: FpCtx, cell: number) {
+  const blank = ctx.board.indexOf(0);
+  const tile = ctx.board[cell];
+  ctx.board[blank] = tile;
+  ctx.board[cell] = 0;
+  ctx.states.push(ctx.board.slice());
+  ctx.moves.push(FP_DIR_NAME(blank, cell, ctx.n));
+  ctx.tileMoves.push(tile);
+}
+
+/** Walk the blank to `target` without disturbing locked cells or `avoid`. */
+function fpMoveBlank(ctx: FpCtx, target: number, avoid: number): boolean {
+  const { n, board, locked } = ctx;
+  const start = board.indexOf(0);
+  if (start === target) return true;
+  const prev = new Map<number, number>();
+  const queue = [start];
+  const seen = new Set<number>([start]);
+  while (queue.length) {
+    const cur = queue.shift()!;
+    if (cur === target) break;
+    const r = (cur / n) | 0, c = cur % n;
+    const nbrs = [
+      r > 0 ? cur - n : -1,
+      r < n - 1 ? cur + n : -1,
+      c > 0 ? cur - 1 : -1,
+      c < n - 1 ? cur + 1 : -1,
+    ];
+    for (const nb of nbrs) {
+      if (nb < 0 || seen.has(nb) || locked.has(nb) || nb === avoid) continue;
+      seen.add(nb);
+      prev.set(nb, cur);
+      queue.push(nb);
+    }
+  }
+  if (!seen.has(target)) return false;
+  const path: number[] = [];
+  let cur = target;
+  while (cur !== start) {
+    path.push(cur);
+    cur = prev.get(cur)!;
+  }
+  path.reverse();
+  for (const cell of path) fpSlide(ctx, cell);
+  return true;
+}
+
+/** Move `tile` to `target`, keeping locked cells intact. */
+function fpPlaceTile(ctx: FpCtx, tile: number, target: number): boolean {
+  const { n } = ctx;
+  for (let guard = 0; guard < 4 * n * n; guard++) {
+    const cur = ctx.board.indexOf(tile);
+    if (cur === target) return true;
+    const cr = (cur / n) | 0, cc = cur % n;
+    const tr = (target / n) | 0, tc = target % n;
+    const next = cc !== tc ? cur + Math.sign(tc - cc) : cur + n * Math.sign(tr - cr);
+    if (!fpMoveBlank(ctx, next, cur)) return false;
+    fpSlide(ctx, cur);
+  }
+  return false;
+}
+
+function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null {
+  const ctx: FpCtx = {
+    n,
+    board: initial.slice(),
+    locked: new Set<number>(),
+    states: [initial.slice()],
+    moves: [],
+    tileMoves: [],
+  };
+  const at = (r: number, c: number) => r * n + c;
+  const goalTile = (r: number, c: number) => {
+    const idx = r * n + c;
+    return idx === n * n - 1 ? 0 : idx + 1;
+  };
+
+  // Phase 1: solve rows top-down until two rows remain.
+  for (let r = 0; r <= n - 3; r++) {
+    for (let c = 0; c <= n - 3; c++) {
+      const tile = goalTile(r, c);
+      if (ctx.board[at(r, c)] !== tile) {
+        if (!fpPlaceTile(ctx, tile, at(r, c))) return null;
+      }
+      ctx.locked.add(at(r, c));
+    }
+    // Last two tiles of the row need the rotate maneuver.
+    const t1 = goalTile(r, n - 2), t2 = goalTile(r, n - 1);
+    if (!(ctx.board[at(r, n - 2)] === t1 && ctx.board[at(r, n - 1)] === t2)) {
+      if (ctx.board[at(r, n - 2)] === t1) {
+        // Break the false placement so the maneuver can run.
+        if (!fpMoveBlank(ctx, at(r + 1, n - 2), at(r, n - 2))) return null;
+        fpSlide(ctx, at(r, n - 2));
+      }
+      if (!fpPlaceTile(ctx, t1, at(r, n - 1))) return null;
+      ctx.locked.add(at(r, n - 1));
+      if (!fpPlaceTile(ctx, t2, at(r + 1, n - 1))) return null;
+      ctx.locked.delete(at(r, n - 1));
+      ctx.locked.add(at(r + 1, n - 1));
+      if (!fpMoveBlank(ctx, at(r, n - 2), at(r, n - 1))) return null;
+      ctx.locked.delete(at(r + 1, n - 1));
+      fpSlide(ctx, at(r, n - 1));
+      fpSlide(ctx, at(r + 1, n - 1));
+    }
+    ctx.locked.add(at(r, n - 2));
+    ctx.locked.add(at(r, n - 1));
+  }
+
+  // Phase 2: solve the remaining two rows column by column.
+  const top = n - 2;
+  for (let c = 0; c <= n - 3; c++) {
+    const t1 = goalTile(top, c), t2 = goalTile(top + 1, c);
+    if (!(ctx.board[at(top, c)] === t1 && ctx.board[at(top + 1, c)] === t2)) {
+      if (ctx.board[at(top, c)] === t1) {
+        if (!fpMoveBlank(ctx, at(top, c + 1), at(top, c))) return null;
+        fpSlide(ctx, at(top, c));
+      }
+      if (!fpPlaceTile(ctx, t1, at(top + 1, c))) return null;
+      ctx.locked.add(at(top + 1, c));
+      if (!fpPlaceTile(ctx, t2, at(top + 1, c + 1))) return null;
+      ctx.locked.delete(at(top + 1, c));
+      ctx.locked.add(at(top + 1, c + 1));
+      if (!fpMoveBlank(ctx, at(top, c), at(top + 1, c))) return null;
+      ctx.locked.delete(at(top + 1, c + 1));
+      fpSlide(ctx, at(top + 1, c));
+      fpSlide(ctx, at(top + 1, c + 1));
+    }
+    ctx.locked.add(at(top, c));
+    ctx.locked.add(at(top + 1, c));
+  }
+
+  // Phase 3: rotate the final 2x2 into place.
+  const cells = [at(top, n - 2), at(top, n - 1), at(top + 1, n - 1), at(top + 1, n - 2)];
+  const isSolved = () => ctx.board.every((v, i) => v === (i === n * n - 1 ? 0 : i + 1));
+  if (!fpMoveBlank(ctx, at(top + 1, n - 1), -1)) return null;
+  for (let k = 0; k < 4 && !isSolved(); k++) {
+    const blank = ctx.board.indexOf(0);
+    const pos = cells.indexOf(blank);
+    if (pos === -1) return null;
+    fpSlide(ctx, cells[(pos + 1) % 4]);
+    fpSlide(ctx, cells[(pos + 2) % 4]);
+    fpSlide(ctx, cells[(pos + 3) % 4]);
+  }
+  if (!isSolved()) return null;
+  return { states: ctx.states, moves: ctx.moves, tileMoves: ctx.tileMoves };
+}
+
 // IDA* solver. Returns null if not solvable or exceeds node cap.
 export function fifteenPuzzleSolve(initial: number[], n = 4, nodeCap = 80_000_000): FifteenPuzzleResult | null {
   if (initial.length !== n * n) return null;
   if (!fifteenPuzzleSolvable(initial, n)) return null;
+  if (n >= 5) return fpSolveStaged(initial, n);
   const goalPos = new Int8Array(n * n);
   for (let v = 1; v < n * n; v++) goalPos[v] = v - 1;
   goalPos[0] = n * n - 1;
