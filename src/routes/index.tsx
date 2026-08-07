@@ -20,6 +20,15 @@ function getBwAnalysis(words: string[]): BlunderwallAnalysis {
   return res;
 }
 
+const bwNextCache = new Map<string, { guess: string; avg: number; guaranteed: boolean } | null>();
+function getBwNext(words: string[], pool: string[], attemptsLeft: number) {
+  const key = `${attemptsLeft}|${words.join(",")}|${pool.join(",")}`;
+  if (bwNextCache.has(key)) return bwNextCache.get(key)!;
+  const res = blunderwallNextGuess(words, pool, attemptsLeft);
+  bwNextCache.set(key, res);
+  return res;
+}
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -4632,6 +4641,12 @@ function Index() {
           (() => {
             const cleanWords = bwWords.map((w) => w.trim().toUpperCase()).filter((w) => w.length === 7);
             const canLock = cleanWords.length === 16 && new Set(cleanWords).size === 16;
+            const analysis = bwLocked && canLock ? getBwAnalysis(cleanWords) : null;
+            const answeredCount = bwGuesses.filter((g) => g.word && g.tally !== "-").length;
+            const advice =
+              bwLocked && canLock && bwResult && bwResult.length > 1
+                ? getBwNext(cleanWords, bwResult, Math.max(1, 4 - answeredCount))
+                : null;
             const wordOptionLabels = ["(First word)", "(Second word)", "(Third word)", "(Fourth word)"];
             const compareTwo = (a: string, b: string) =>
               a.split("").reduce((acc, ch, i) => acc + (ch === b[i] ? 1 : 0), 0);
@@ -4757,6 +4772,52 @@ function Index() {
                   )}
                 </div>
 
+                {analysis && (
+                  <div className="rounded-lg border-2 border-border p-4">
+                    <h2 className="mb-1 text-lg font-semibold">Starting word analysis</h2>
+                    <p className="mb-3 text-sm">
+                      Best first {analysis.best.length === 1 ? "guess" : "guesses"}:{" "}
+                      {analysis.best.map((w, i) => (
+                        <span key={w}>
+                          {i > 0 ? ", " : ""}
+                          <span className="font-mono font-semibold text-green-700 dark:text-green-400">{w}</span>
+                        </span>
+                      ))}
+                    </p>
+                    <table className="w-full max-w-lg border-collapse text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="p-2 text-center font-medium">Starting word</th>
+                          <th className="p-2 text-center font-medium">Average guesses</th>
+                          <th className="p-2 text-center font-medium">Within 4 tries</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analysis.starts.map((s) => {
+                          const isBest = analysis.best.includes(s.word);
+                          return (
+                            <tr key={s.word} className="border-b">
+                              <td className={`p-2 text-center font-mono ${isBest ? "font-semibold text-green-700 dark:text-green-400" : ""} ${s.guaranteed ? "" : "text-red-600 dark:text-red-400"}`}>
+                                {s.word}
+                              </td>
+                              <td className={`p-2 text-center ${s.guaranteed ? "" : "text-red-600 dark:text-red-400"}`}>
+                                {Number.isFinite(s.avg) ? s.avg.toFixed(4) : "—"}
+                              </td>
+                              <td className="p-2 text-center">
+                                {s.guaranteed ? (
+                                  <span className="text-green-700 dark:text-green-400">Guaranteed</span>
+                                ) : (
+                                  <span className="text-red-600 dark:text-red-400">Avoid — may need more than 4 guesses</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
                 {bwLocked && (
                   <>
                     <div className="hidden">
@@ -4835,6 +4896,16 @@ function Index() {
                         <h2 className="mb-2 text-lg font-semibold">
                           {bwResult.length} possible {bwResult.length === 1 ? "answer" : "answers"}
                         </h2>
+                        {advice && (
+                          <p className="mb-3 text-sm">
+                            Next guess to make:{" "}
+                            <span className="font-mono font-semibold text-green-700 dark:text-green-400">{advice.guess}</span>{" "}
+                            <span className="text-muted-foreground">
+                              (expected {advice.avg.toFixed(2)} more {advice.avg < 2 ? "guess" : "guesses"}
+                              {advice.guaranteed ? "" : "; cannot be guaranteed within the remaining tries"})
+                            </span>
+                          </p>
+                        )}
                         {bwResult.length > 0 ? (
                           <div className="flex flex-wrap gap-2">
                             {bwResult.map((w) => (
