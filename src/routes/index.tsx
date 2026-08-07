@@ -674,8 +674,18 @@ function Index() {
   const [sbResults, setSbResults] = useState<StarBattleSolution[] | null>(null);
   const [pageSb, setPageSb] = useState(0);
   const FP_DEFAULT_4: number[] = [15, 0, 7, 3, 4, 12, 5, 13, 10, 1, 11, 2, 6, 14, 9, 8];
+  const FP_DEFAULT_3: number[] = [1, 6, 7, 5, 3, 8, 2, 4, 0];
+  const FP_DEFAULT_5: number[] = [
+    18, 10, 12, 22, 24,
+    9, 5, 17, 2, 19,
+    15, 16, 14, 20, 1,
+    0, 23, 21, 13, 8,
+    4, 11, 3, 6, 7,
+  ];
   const makeFpDefault = (n: number): number[] => {
+    if (n === 3) return FP_DEFAULT_3.slice();
     if (n === 4) return FP_DEFAULT_4.slice();
+    if (n === 5) return FP_DEFAULT_5.slice();
     const arr: number[] = [];
     for (let i = 1; i < n * n; i++) arr.push(i);
     arr.push(0);
