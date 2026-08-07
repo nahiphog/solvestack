@@ -1221,7 +1221,7 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
     for (let c = 0; c <= n - 3; c++) {
       const tile = goalTile(r, c);
       if (ctx.board[at(r, c)] !== tile) {
-        if (!fpPlaceTile(ctx, tile, at(r, c))) return null;
+        if (!fpPlaceTile(ctx, tile, at(r, c))) { console.error("F1", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
       }
       ctx.locked.add(at(r, c));
     }
@@ -1230,15 +1230,15 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
     if (!(ctx.board[at(r, n - 2)] === t1 && ctx.board[at(r, n - 1)] === t2)) {
       if (ctx.board[at(r, n - 2)] === t1) {
         // Break the false placement so the maneuver can run.
-        if (!fpMoveBlank(ctx, at(r + 1, n - 2), at(r, n - 2))) return null;
+        if (!fpMoveBlank(ctx, at(r + 1, n - 2), at(r, n - 2))) { console.error("F2", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
         fpSlide(ctx, at(r, n - 2));
       }
-      if (!fpPlaceTile(ctx, t1, at(r, n - 1))) return null;
+      if (!fpPlaceTile(ctx, t1, at(r, n - 1))) { console.error("F3", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
       ctx.locked.add(at(r, n - 1));
-      if (!fpPlaceTile(ctx, t2, at(r + 1, n - 1))) return null;
+      if (!fpPlaceTile(ctx, t2, at(r + 1, n - 1))) { console.error("F4", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
       ctx.locked.delete(at(r, n - 1));
       ctx.locked.add(at(r + 1, n - 1));
-      if (!fpMoveBlank(ctx, at(r, n - 2), at(r, n - 1))) return null;
+      if (!fpMoveBlank(ctx, at(r, n - 2), at(r, n - 1))) { console.error("F5", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
       ctx.locked.delete(at(r + 1, n - 1));
       fpSlide(ctx, at(r, n - 1));
       fpSlide(ctx, at(r + 1, n - 1));
@@ -1253,11 +1253,11 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
     const t1 = goalTile(top, c), t2 = goalTile(top + 1, c);
     if (!(ctx.board[at(top, c)] === t1 && ctx.board[at(top + 1, c)] === t2)) {
       // Stage the pair as t2 above and t1 to its right, then rotate them in.
-      if (!fpPlaceTile(ctx, t2, at(top, c))) return null;
+      if (!fpPlaceTile(ctx, t2, at(top, c))) { console.error("F6", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
       ctx.locked.add(at(top, c));
-      if (!fpPlaceTile(ctx, t1, at(top, c + 1))) return null;
+      if (!fpPlaceTile(ctx, t1, at(top, c + 1))) { console.error("F7", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
       ctx.locked.add(at(top, c + 1));
-      if (!fpMoveBlank(ctx, at(top + 1, c), -1)) return null;
+      if (!fpMoveBlank(ctx, at(top + 1, c), -1)) { console.error("F8", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
       ctx.locked.delete(at(top, c));
       ctx.locked.delete(at(top, c + 1));
       fpSlide(ctx, at(top, c));
@@ -1270,16 +1270,16 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
   // Phase 3: rotate the final 2x2 into place.
   const cells = [at(top, n - 2), at(top, n - 1), at(top + 1, n - 1), at(top + 1, n - 2)];
   const isSolved = () => ctx.board.every((v, i) => v === (i === n * n - 1 ? 0 : i + 1));
-  if (!fpMoveBlank(ctx, at(top + 1, n - 1), -1)) return null;
+  if (!fpMoveBlank(ctx, at(top + 1, n - 1), -1)) { console.error("F9", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
   for (let k = 0; k < 4 && !isSolved(); k++) {
     const blank = ctx.board.indexOf(0);
     const pos = cells.indexOf(blank);
-    if (pos === -1) return null;
+    if (pos === -1) { console.error("F10", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
     fpSlide(ctx, cells[(pos + 1) % 4]);
     fpSlide(ctx, cells[(pos + 2) % 4]);
     fpSlide(ctx, cells[(pos + 3) % 4]);
   }
-  if (!isSolved()) return null;
+  if (!isSolved()) { console.error("F11", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
   return { states: ctx.states, moves: ctx.moves, tileMoves: ctx.tileMoves };
 }
 
