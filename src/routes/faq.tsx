@@ -182,15 +182,6 @@ function FaqPage() {
                   </li>
                 </ol>
               </div>
-              <div>
-                <p className="font-medium">B-tier:</p>
-                <ol className="mt-1 list-none space-y-1">
-                  <li>
-                    vi.{" "}
-                    <a className="text-primary underline" href="https://apps.apple.com/app/id1489118195" target="_blank" rel="noopener noreferrer">Good Sudoku</a>
-                  </li>
-                </ol>
-              </div>
             </div>
           </div>
         </div>
