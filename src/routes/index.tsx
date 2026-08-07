@@ -2,13 +2,23 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { OG_IMAGE_URL } from "@/lib/seo";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Fragment, useState } from "react";
-import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, rotatoSolve, sumpleteSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type RotatoResult, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type SumpleteSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, rotatoSolve, sumpleteSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, blunderwallAnalyze, blunderwallNextGuess, type BlunderwallAnalysis, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type RotatoResult, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type SumpleteSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon, ChevronDown, ChevronUp } from "lucide-react";
 import { SudokuCopyBoard } from "@/components/sudoku-copy-controls";
+
+const bwAnalysisCache = new Map<string, BlunderwallAnalysis>();
+function getBwAnalysis(words: string[]): BlunderwallAnalysis {
+  const key = words.join(",");
+  const hit = bwAnalysisCache.get(key);
+  if (hit) return hit;
+  const res = blunderwallAnalyze(words);
+  bwAnalysisCache.set(key, res);
+  return res;
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
