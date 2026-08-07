@@ -1127,6 +1127,7 @@ type FpCtx = {
   states: number[][];
   moves: string[];
   tileMoves: number[];
+  rand: () => number;
 };
 
 const FP_DIR_NAME = (from: number, to: number, n: number): string => {
@@ -1194,14 +1195,31 @@ function fpPlaceTile(ctx: FpCtx, tile: number, target: number): boolean {
     if (cur === target) return true;
     const cr = (cur / n) | 0, cc = cur % n;
     const tr = (target / n) | 0, tc = target % n;
-    const next = cc !== tc ? cur + Math.sign(tc - cc) : cur + n * Math.sign(tr - cr);
-    if (!fpMoveBlank(ctx, next, cur)) return false;
-    fpSlide(ctx, cur);
+    const horiz = cur + Math.sign(tc - cc);
+    const vert = cur + n * Math.sign(tr - cr);
+    const options: number[] = [];
+    if (cc !== tc) options.push(horiz);
+    if (cr !== tr) options.push(vert);
+    if (options.length === 2 && ctx.rand() < 0.5) options.reverse();
+    let moved = false;
+    for (const next of options) {
+      if (fpMoveBlank(ctx, next, cur)) {
+        fpSlide(ctx, cur);
+        moved = true;
+        break;
+      }
+    }
+    if (!moved) return false;
   }
   return false;
 }
 
-function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null {
+function fpSolveStagedOnce(
+  initial: number[],
+  n: number,
+  rand: () => number,
+  scramble: number,
+): FifteenPuzzleResult | null {
   const ctx: FpCtx = {
     n,
     board: initial.slice(),
@@ -1209,7 +1227,19 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
     states: [initial.slice()],
     moves: [],
     tileMoves: [],
+    rand,
   };
+  // Optional random warm-up shuffle, used when a straight attempt gets stuck.
+  for (let k = 0; k < scramble; k++) {
+    const blank = ctx.board.indexOf(0);
+    const br = (blank / n) | 0, bc = blank % n;
+    const cand: number[] = [];
+    if (br > 0) cand.push(blank - n);
+    if (br < n - 1) cand.push(blank + n);
+    if (bc > 0) cand.push(blank - 1);
+    if (bc < n - 1) cand.push(blank + 1);
+    fpSlide(ctx, cand[Math.floor(rand() * cand.length)]);
+  }
   const at = (r: number, c: number) => r * n + c;
   const goalTile = (r: number, c: number) => {
     const idx = r * n + c;
@@ -1221,7 +1251,7 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
     for (let c = 0; c <= n - 3; c++) {
       const tile = goalTile(r, c);
       if (ctx.board[at(r, c)] !== tile) {
-        if (!fpPlaceTile(ctx, tile, at(r, c))) { console.error("F1", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
+        if (!fpPlaceTile(ctx, tile, at(r, c))) return null;
       }
       ctx.locked.add(at(r, c));
     }
@@ -1230,15 +1260,15 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
     if (!(ctx.board[at(r, n - 2)] === t1 && ctx.board[at(r, n - 1)] === t2)) {
       if (ctx.board[at(r, n - 2)] === t1) {
         // Break the false placement so the maneuver can run.
-        if (!fpMoveBlank(ctx, at(r + 1, n - 2), at(r, n - 2))) { console.error("F2", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
+        if (!fpMoveBlank(ctx, at(r + 1, n - 2), at(r, n - 2))) return null;
         fpSlide(ctx, at(r, n - 2));
       }
-      if (!fpPlaceTile(ctx, t1, at(r, n - 1))) { console.error("F3", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
+      if (!fpPlaceTile(ctx, t1, at(r, n - 1))) return null;
       ctx.locked.add(at(r, n - 1));
-      if (!fpPlaceTile(ctx, t2, at(r + 1, n - 1))) { console.error("F4", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
+      if (!fpPlaceTile(ctx, t2, at(r + 1, n - 1))) return null;
       ctx.locked.delete(at(r, n - 1));
       ctx.locked.add(at(r + 1, n - 1));
-      if (!fpMoveBlank(ctx, at(r, n - 2), at(r, n - 1))) { console.error("F5", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
+      if (!fpMoveBlank(ctx, at(r, n - 2), at(r, n - 1))) return null;
       ctx.locked.delete(at(r + 1, n - 1));
       fpSlide(ctx, at(r, n - 1));
       fpSlide(ctx, at(r + 1, n - 1));
@@ -1253,11 +1283,11 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
     const t1 = goalTile(top, c), t2 = goalTile(top + 1, c);
     if (!(ctx.board[at(top, c)] === t1 && ctx.board[at(top + 1, c)] === t2)) {
       // Stage the pair as t2 above and t1 to its right, then rotate them in.
-      if (!fpPlaceTile(ctx, t2, at(top, c))) { console.error("F6", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
+      if (!fpPlaceTile(ctx, t2, at(top, c))) return null;
       ctx.locked.add(at(top, c));
-      if (!fpPlaceTile(ctx, t1, at(top, c + 1))) { console.error("F7", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
+      if (!fpPlaceTile(ctx, t1, at(top, c + 1))) return null;
       ctx.locked.add(at(top, c + 1));
-      if (!fpMoveBlank(ctx, at(top + 1, c), -1)) { console.error("F8", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
+      if (!fpMoveBlank(ctx, at(top + 1, c), -1)) return null;
       ctx.locked.delete(at(top, c));
       ctx.locked.delete(at(top, c + 1));
       fpSlide(ctx, at(top, c));
@@ -1270,16 +1300,16 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
   // Phase 3: rotate the final 2x2 into place.
   const cells = [at(top, n - 2), at(top, n - 1), at(top + 1, n - 1), at(top + 1, n - 2)];
   const isSolved = () => ctx.board.every((v, i) => v === (i === n * n - 1 ? 0 : i + 1));
-  if (!fpMoveBlank(ctx, at(top + 1, n - 1), -1)) { console.error("F9", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
+  if (!fpMoveBlank(ctx, at(top + 1, n - 1), -1)) return null;
   for (let k = 0; k < 4 && !isSolved(); k++) {
     const blank = ctx.board.indexOf(0);
     const pos = cells.indexOf(blank);
-    if (pos === -1) { console.error("F10", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
+    if (pos === -1) return null;
     fpSlide(ctx, cells[(pos + 1) % 4]);
     fpSlide(ctx, cells[(pos + 2) % 4]);
     fpSlide(ctx, cells[(pos + 3) % 4]);
   }
-  if (!isSolved()) { console.error("F11", JSON.stringify(ctx.board), JSON.stringify([...ctx.locked])); return null; }
+  if (!isSolved()) return null;
   return { states: ctx.states, moves: ctx.moves, tileMoves: ctx.tileMoves };
 }
 
@@ -1287,7 +1317,18 @@ function fpSolveStaged(initial: number[], n: number): FifteenPuzzleResult | null
 export function fifteenPuzzleSolve(initial: number[], n = 4, nodeCap = 80_000_000): FifteenPuzzleResult | null {
   if (initial.length !== n * n) return null;
   if (!fifteenPuzzleSolvable(initial, n)) return null;
-  if (n >= 5) return fpSolveStaged(initial, n);
+  if (n >= 5) {
+    let seed = 0x2f6e2b1;
+    const rand = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 0x100000000;
+    };
+    for (let attempt = 0; attempt < 400; attempt++) {
+      const res = fpSolveStagedOnce(initial, n, rand, attempt === 0 ? 0 : 1 + (attempt % 12));
+      if (res) return res;
+    }
+    return null;
+  }
   const goalPos = new Int8Array(n * n);
   for (let v = 1; v < n * n; v++) goalPos[v] = v - 1;
   goalPos[0] = n * n - 1;
