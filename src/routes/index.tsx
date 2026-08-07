@@ -4912,7 +4912,7 @@ function Index() {
                             Next guess to make:{" "}
                             <span className="font-mono font-semibold text-green-700 dark:text-green-400">{advice.guess}</span>{" "}
                             <span className="text-muted-foreground">
-                              (expected {advice.avg.toFixed(2)} more {advice.avg < 2 ? "guess" : "guesses"}
+                              (expected {advice.avg.toFixed(2)} more {advice.avg === 1 ? "guess" : "guesses"}
                               {advice.guaranteed ? "" : "; cannot be guaranteed within the remaining tries"})
                             </span>
                           </p>
