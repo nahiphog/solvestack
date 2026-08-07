@@ -2502,7 +2502,7 @@ function Index() {
               </select>
             </div>
             <p>Goal: Slide tiles in numerical order (from left to right, top to bottom).</p>
-            <p>Disclaimer: The algorithm applied here uses A* algorithm, which doesn't necessarily mean that it's an optimal solution.</p>
+            <p>Disclaimer: We are using the most rudimentary approach to solve this puzzle. It is by no means an optimal approach.</p>
           </div>
         )}
         {mode === "rotato" && (
@@ -2523,6 +2523,7 @@ function Index() {
               </select>
             </div>
             <p>Place the scrambled grid into chronological order by rotating 2x2 blocks.</p>
+            <p>Disclaimer: We are using the most rudimentary approach to solve this puzzle. It is by no means an optimal approach.</p>
           </div>
         )}
         {mode === "sumplete" && (
