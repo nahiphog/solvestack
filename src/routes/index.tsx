@@ -2,13 +2,32 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { OG_IMAGE_URL } from "@/lib/seo";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Fragment, useState } from "react";
-import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, rotatoSolve, sumpleteSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type RotatoResult, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type SumpleteSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, rotatoSolve, sumpleteSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, blunderwallAnalyze, blunderwallNextGuess, type BlunderwallAnalysis, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type RotatoResult, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type SumpleteSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon, ChevronDown, ChevronUp } from "lucide-react";
 import { SudokuCopyBoard } from "@/components/sudoku-copy-controls";
+
+const bwAnalysisCache = new Map<string, BlunderwallAnalysis>();
+function getBwAnalysis(words: string[]): BlunderwallAnalysis {
+  const key = words.join(",");
+  const hit = bwAnalysisCache.get(key);
+  if (hit) return hit;
+  const res = blunderwallAnalyze(words);
+  bwAnalysisCache.set(key, res);
+  return res;
+}
+
+const bwNextCache = new Map<string, { guess: string; avg: number; guaranteed: boolean } | null>();
+function getBwNext(words: string[], pool: string[], attemptsLeft: number) {
+  const key = `${attemptsLeft}|${words.join(",")}|${pool.join(",")}`;
+  if (bwNextCache.has(key)) return bwNextCache.get(key)!;
+  const res = blunderwallNextGuess(words, pool, attemptsLeft);
+  bwNextCache.set(key, res);
+  return res;
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -655,8 +674,18 @@ function Index() {
   const [sbResults, setSbResults] = useState<StarBattleSolution[] | null>(null);
   const [pageSb, setPageSb] = useState(0);
   const FP_DEFAULT_4: number[] = [15, 0, 7, 3, 4, 12, 5, 13, 10, 1, 11, 2, 6, 14, 9, 8];
+  const FP_DEFAULT_3: number[] = [1, 6, 7, 5, 3, 8, 2, 4, 0];
+  const FP_DEFAULT_5: number[] = [
+    18, 10, 12, 22, 24,
+    9, 5, 17, 2, 19,
+    15, 16, 14, 20, 1,
+    0, 23, 21, 13, 8,
+    4, 11, 3, 6, 7,
+  ];
   const makeFpDefault = (n: number): number[] => {
+    if (n === 3) return FP_DEFAULT_3.slice();
     if (n === 4) return FP_DEFAULT_4.slice();
+    if (n === 5) return FP_DEFAULT_5.slice();
     const arr: number[] = [];
     for (let i = 1; i < n * n; i++) arr.push(i);
     arr.push(0);
@@ -2473,7 +2502,7 @@ function Index() {
               </select>
             </div>
             <p>Goal: Slide tiles in numerical order (from left to right, top to bottom).</p>
-            <p>Disclaimer: The algorithm applied here uses A* algorithm, which doesn't necessarily mean that it's an optimal solution.</p>
+            <p>Disclaimer: We are using the most rudimentary approach to solve this puzzle. It is by no means an optimal approach.</p>
           </div>
         )}
         {mode === "rotato" && (
@@ -2494,6 +2523,7 @@ function Index() {
               </select>
             </div>
             <p>Place the scrambled grid into chronological order by rotating 2x2 blocks.</p>
+            <p>Disclaimer: We are using the most rudimentary approach to solve this puzzle. It is by no means an optimal approach.</p>
           </div>
         )}
         {mode === "sumplete" && (
@@ -4622,6 +4652,12 @@ function Index() {
           (() => {
             const cleanWords = bwWords.map((w) => w.trim().toUpperCase()).filter((w) => w.length === 7);
             const canLock = cleanWords.length === 16 && new Set(cleanWords).size === 16;
+            const analysis = bwLocked && canLock ? getBwAnalysis(cleanWords) : null;
+            const answeredCount = bwGuesses.filter((g) => g.word && g.tally !== "-").length;
+            const advice =
+              bwLocked && canLock && bwResult && bwResult.length > 1
+                ? getBwNext(cleanWords, bwResult, Math.max(1, 4 - answeredCount))
+                : null;
             const wordOptionLabels = ["(First word)", "(Second word)", "(Third word)", "(Fourth word)"];
             const compareTwo = (a: string, b: string) =>
               a.split("").reduce((acc, ch, i) => acc + (ch === b[i] ? 1 : 0), 0);
@@ -4707,7 +4743,7 @@ function Index() {
                             const v = e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 7);
                             setBwWords((prev) => prev.map((x, idx) => (idx === i ? v : x)));
                           }}
-                          className="font-mono uppercase placeholder:normal-case"
+                          className={`font-mono uppercase placeholder:normal-case ${w.trim().length === 7 ? "border-green-500 focus-visible:ring-green-500" : ""}`}
                         />
                       )
                     ))}
@@ -4746,6 +4782,52 @@ function Index() {
                     </p>
                   )}
                 </div>
+
+                {analysis && (
+                  <div className="rounded-lg border-2 border-border p-4">
+                    <h2 className="mb-1 text-lg font-semibold">Starting word analysis</h2>
+                    <p className="mb-3 text-sm">
+                      Best first {analysis.best.length === 1 ? "guess" : "guesses"}:{" "}
+                      {analysis.best.map((w, i) => (
+                        <span key={w}>
+                          {i > 0 ? ", " : ""}
+                          <span className="font-mono font-semibold text-green-700 dark:text-green-400">{w}</span>
+                        </span>
+                      ))}
+                    </p>
+                    <table className="w-full max-w-lg border-collapse text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="p-2 text-center font-medium">Starting word</th>
+                          <th className="p-2 text-center font-medium">Average guesses</th>
+                          <th className="p-2 text-center font-medium">Within 4 tries</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analysis.starts.map((s) => {
+                          const isBest = analysis.best.includes(s.word);
+                          return (
+                            <tr key={s.word} className="border-b">
+                              <td className={`p-2 text-center font-mono ${isBest ? "font-semibold text-green-700 dark:text-green-400" : ""} ${s.guaranteed ? "" : "text-red-600 dark:text-red-400"}`}>
+                                {s.word}
+                              </td>
+                              <td className={`p-2 text-center ${s.guaranteed ? "" : "text-red-600 dark:text-red-400"}`}>
+                                {Number.isFinite(s.avg) ? s.avg.toFixed(4) : "—"}
+                              </td>
+                              <td className="p-2 text-center">
+                                {s.guaranteed ? (
+                                  <span className="text-green-700 dark:text-green-400">Guaranteed</span>
+                                ) : (
+                                  <span className="text-red-600 dark:text-red-400">Avoid — may need more than 4 guesses</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
 
                 {bwLocked && (
                   <>
@@ -4825,6 +4907,16 @@ function Index() {
                         <h2 className="mb-2 text-lg font-semibold">
                           {bwResult.length} possible {bwResult.length === 1 ? "answer" : "answers"}
                         </h2>
+                        {advice && (
+                          <p className="mb-3 text-sm">
+                            Next guess to make:{" "}
+                            <span className="font-mono font-semibold text-green-700 dark:text-green-400">{advice.guess}</span>{" "}
+                            <span className="text-muted-foreground">
+                              (expected {advice.avg.toFixed(2)} more {advice.avg === 1 ? "guess" : "guesses"}
+                              {advice.guaranteed ? "" : "; cannot be guaranteed within the remaining tries"})
+                            </span>
+                          </p>
+                        )}
                         {bwResult.length > 0 ? (
                           <div className="flex flex-wrap gap-2">
                             {bwResult.map((w) => (

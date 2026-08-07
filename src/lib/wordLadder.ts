@@ -1119,10 +1119,216 @@ function manhattanPlusLC(board: number[], n: number, goalPos: Int8Array): number
   return d;
 }
 
+// ---- Rudimentary staged (human-style) solver, used for larger boards ----
+type FpCtx = {
+  n: number;
+  board: number[];
+  locked: Set<number>;
+  states: number[][];
+  moves: string[];
+  tileMoves: number[];
+  rand: () => number;
+};
+
+const FP_DIR_NAME = (from: number, to: number, n: number): string => {
+  const fr = (from / n) | 0, fc = from % n;
+  const tr = (to / n) | 0, tc = to % n;
+  if (tr < fr) return "Up";
+  if (tr > fr) return "Down";
+  if (tc < fc) return "Left";
+  return "Right";
+};
+
+/** Slide the tile at `cell` into the adjacent blank. */
+function fpSlide(ctx: FpCtx, cell: number) {
+  const blank = ctx.board.indexOf(0);
+  const tile = ctx.board[cell];
+  ctx.board[blank] = tile;
+  ctx.board[cell] = 0;
+  ctx.states.push(ctx.board.slice());
+  ctx.moves.push(FP_DIR_NAME(blank, cell, ctx.n));
+  ctx.tileMoves.push(tile);
+}
+
+/** Walk the blank to `target` without disturbing locked cells or `avoid`. */
+function fpMoveBlank(ctx: FpCtx, target: number, avoid: number): boolean {
+  const { n, board, locked } = ctx;
+  const start = board.indexOf(0);
+  if (start === target) return true;
+  const prev = new Map<number, number>();
+  const queue = [start];
+  const seen = new Set<number>([start]);
+  while (queue.length) {
+    const cur = queue.shift()!;
+    if (cur === target) break;
+    const r = (cur / n) | 0, c = cur % n;
+    const nbrs = [
+      r > 0 ? cur - n : -1,
+      r < n - 1 ? cur + n : -1,
+      c > 0 ? cur - 1 : -1,
+      c < n - 1 ? cur + 1 : -1,
+    ];
+    for (const nb of nbrs) {
+      if (nb < 0 || seen.has(nb) || locked.has(nb) || nb === avoid) continue;
+      seen.add(nb);
+      prev.set(nb, cur);
+      queue.push(nb);
+    }
+  }
+  if (!seen.has(target)) return false;
+  const path: number[] = [];
+  let cur = target;
+  while (cur !== start) {
+    path.push(cur);
+    cur = prev.get(cur)!;
+  }
+  path.reverse();
+  for (const cell of path) fpSlide(ctx, cell);
+  return true;
+}
+
+/** Move `tile` to `target`, keeping locked cells intact. */
+function fpPlaceTile(ctx: FpCtx, tile: number, target: number): boolean {
+  const { n } = ctx;
+  for (let guard = 0; guard < 4 * n * n; guard++) {
+    const cur = ctx.board.indexOf(tile);
+    if (cur === target) return true;
+    const cr = (cur / n) | 0, cc = cur % n;
+    const tr = (target / n) | 0, tc = target % n;
+    const horiz = cur + Math.sign(tc - cc);
+    const vert = cur + n * Math.sign(tr - cr);
+    const options: number[] = [];
+    if (cc !== tc) options.push(horiz);
+    if (cr !== tr) options.push(vert);
+    if (options.length === 2 && ctx.rand() < 0.5) options.reverse();
+    let moved = false;
+    for (const next of options) {
+      if (fpMoveBlank(ctx, next, cur)) {
+        fpSlide(ctx, cur);
+        moved = true;
+        break;
+      }
+    }
+    if (!moved) return false;
+  }
+  return false;
+}
+
+function fpSolveStagedOnce(
+  initial: number[],
+  n: number,
+  rand: () => number,
+  scramble: number,
+): FifteenPuzzleResult | null {
+  const ctx: FpCtx = {
+    n,
+    board: initial.slice(),
+    locked: new Set<number>(),
+    states: [initial.slice()],
+    moves: [],
+    tileMoves: [],
+    rand,
+  };
+  // Optional random warm-up shuffle, used when a straight attempt gets stuck.
+  for (let k = 0; k < scramble; k++) {
+    const blank = ctx.board.indexOf(0);
+    const br = (blank / n) | 0, bc = blank % n;
+    const cand: number[] = [];
+    if (br > 0) cand.push(blank - n);
+    if (br < n - 1) cand.push(blank + n);
+    if (bc > 0) cand.push(blank - 1);
+    if (bc < n - 1) cand.push(blank + 1);
+    fpSlide(ctx, cand[Math.floor(rand() * cand.length)]);
+  }
+  const at = (r: number, c: number) => r * n + c;
+  const goalTile = (r: number, c: number) => {
+    const idx = r * n + c;
+    return idx === n * n - 1 ? 0 : idx + 1;
+  };
+
+  // Phase 1: solve rows top-down until two rows remain.
+  for (let r = 0; r <= n - 3; r++) {
+    for (let c = 0; c <= n - 3; c++) {
+      const tile = goalTile(r, c);
+      if (ctx.board[at(r, c)] !== tile) {
+        if (!fpPlaceTile(ctx, tile, at(r, c))) return null;
+      }
+      ctx.locked.add(at(r, c));
+    }
+    // Last two tiles of the row need the rotate maneuver.
+    const t1 = goalTile(r, n - 2), t2 = goalTile(r, n - 1);
+    if (!(ctx.board[at(r, n - 2)] === t1 && ctx.board[at(r, n - 1)] === t2)) {
+      if (ctx.board[at(r, n - 2)] === t1) {
+        // Break the false placement so the maneuver can run.
+        if (!fpMoveBlank(ctx, at(r + 1, n - 2), at(r, n - 2))) return null;
+        fpSlide(ctx, at(r, n - 2));
+      }
+      if (!fpPlaceTile(ctx, t1, at(r, n - 1))) return null;
+      ctx.locked.add(at(r, n - 1));
+      if (!fpPlaceTile(ctx, t2, at(r + 1, n - 1))) return null;
+      ctx.locked.delete(at(r, n - 1));
+      ctx.locked.add(at(r + 1, n - 1));
+      if (!fpMoveBlank(ctx, at(r, n - 2), at(r, n - 1))) return null;
+      ctx.locked.delete(at(r + 1, n - 1));
+      fpSlide(ctx, at(r, n - 1));
+      fpSlide(ctx, at(r + 1, n - 1));
+    }
+    ctx.locked.add(at(r, n - 2));
+    ctx.locked.add(at(r, n - 1));
+  }
+
+  // Phase 2: solve the remaining two rows column by column.
+  const top = n - 2;
+  for (let c = 0; c <= n - 3; c++) {
+    const t1 = goalTile(top, c), t2 = goalTile(top + 1, c);
+    if (!(ctx.board[at(top, c)] === t1 && ctx.board[at(top + 1, c)] === t2)) {
+      // Stage the pair as t2 above and t1 to its right, then rotate them in.
+      if (!fpPlaceTile(ctx, t2, at(top, c))) return null;
+      ctx.locked.add(at(top, c));
+      if (!fpPlaceTile(ctx, t1, at(top, c + 1))) return null;
+      ctx.locked.add(at(top, c + 1));
+      if (!fpMoveBlank(ctx, at(top + 1, c), -1)) return null;
+      ctx.locked.delete(at(top, c));
+      ctx.locked.delete(at(top, c + 1));
+      fpSlide(ctx, at(top, c));
+      fpSlide(ctx, at(top, c + 1));
+    }
+    ctx.locked.add(at(top, c));
+    ctx.locked.add(at(top + 1, c));
+  }
+
+  // Phase 3: rotate the final 2x2 into place.
+  const cells = [at(top, n - 2), at(top, n - 1), at(top + 1, n - 1), at(top + 1, n - 2)];
+  const isSolved = () => ctx.board.every((v, i) => v === (i === n * n - 1 ? 0 : i + 1));
+  if (!fpMoveBlank(ctx, at(top + 1, n - 1), -1)) return null;
+  for (let k = 0; k < 4 && !isSolved(); k++) {
+    const blank = ctx.board.indexOf(0);
+    const pos = cells.indexOf(blank);
+    if (pos === -1) return null;
+    fpSlide(ctx, cells[(pos + 1) % 4]);
+    fpSlide(ctx, cells[(pos + 2) % 4]);
+    fpSlide(ctx, cells[(pos + 3) % 4]);
+  }
+  if (!isSolved()) return null;
+  return { states: ctx.states, moves: ctx.moves, tileMoves: ctx.tileMoves };
+}
+
 // IDA* solver. Returns null if not solvable or exceeds node cap.
 export function fifteenPuzzleSolve(initial: number[], n = 4, nodeCap = 80_000_000): FifteenPuzzleResult | null {
   if (initial.length !== n * n) return null;
   if (!fifteenPuzzleSolvable(initial, n)) return null;
+  if (n >= 5) {
+    let seed = 0x2f6e2b1;
+    const rand = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 0x100000000;
+    };
+    for (let attempt = 0; attempt < 400; attempt++) {
+      const res = fpSolveStagedOnce(initial, n, rand, attempt === 0 ? 0 : 1 + (attempt % 12));
+      if (res) return res;
+    }
+    return null;
+  }
   const goalPos = new Int8Array(n * n);
   for (let v = 1; v < n * n; v++) goalPos[v] = v - 1;
   goalPos[0] = n * n - 1;
@@ -1552,4 +1758,132 @@ export function rotatoSolve(startGrid: number[], n: number, nodeCap = 2_000_000)
     states: optimized.map((e) => e.state),
     moves: optimized.slice(1).map((e) => e.move!),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Blunderwall: expected-guess-minimising decision tree analysis
+// ---------------------------------------------------------------------------
+
+export type BlunderwallStart = {
+  word: string;
+  avg: number;
+  guaranteed: boolean;
+};
+
+export type BlunderwallAnalysis = {
+  starts: BlunderwallStart[];
+  best: string[];
+};
+
+const bwMatch = (guess: string, secret: string): number => {
+  let n = 0;
+  for (let i = 0; i < guess.length; i++) if (guess[i] === secret[i]) n++;
+  return n;
+};
+
+type BwNode = { guess: string; avg: number };
+
+class BwEngine {
+  private memo = new Map<string, BwNode | null>();
+  constructor(private words: string[]) {}
+
+  /** Best next guess for `pool` with `attemptsLeft` guesses remaining (after this one there are attemptsLeft-1). */
+  solve(pool: string[], attemptsLeft: number): BwNode | null {
+    if (pool.length === 0) return null;
+    if (pool.length === 1) return { guess: pool[0], avg: 1 };
+    if (attemptsLeft <= 0) return null;
+    const key = `${attemptsLeft}|${pool.join(",")}`;
+    const cached = this.memo.get(key);
+    if (cached !== undefined) return cached;
+    let best: BwNode | null = null;
+    for (const guess of this.words) {
+      const buckets = new Map<number, string[]>();
+      for (const secret of pool) {
+        const score = bwMatch(guess, secret);
+        const arr = buckets.get(score);
+        if (arr) arr.push(secret);
+        else buckets.set(score, [secret]);
+      }
+      if (buckets.size === 1 && !pool.includes(guess)) continue;
+      let sum = 0;
+      let ok = true;
+      for (const [score, sub] of buckets) {
+        if (score === guess.length) {
+          sum += 1;
+          continue;
+        }
+        const child = this.solve(sub, attemptsLeft - 1);
+        if (!child) {
+          ok = false;
+          break;
+        }
+        sum += sub.length * (child.avg + 1);
+      }
+      if (!ok) continue;
+      const avg = sum / pool.length;
+      if (!best || avg < best.avg) best = { guess, avg };
+    }
+    this.memo.set(key, best);
+    return best;
+  }
+
+  /** Expected guesses when the first guess is forced to `start`. */
+  evaluateStart(start: string, attemptsLeft: number): number | null {
+    const pool = this.words;
+    const buckets = new Map<number, string[]>();
+    for (const secret of pool) {
+      const score = bwMatch(start, secret);
+      const arr = buckets.get(score);
+      if (arr) arr.push(secret);
+      else buckets.set(score, [secret]);
+    }
+    let sum = 0;
+    for (const [score, sub] of buckets) {
+      if (score === start.length) {
+        sum += 1;
+        continue;
+      }
+      const child = this.solve(sub, attemptsLeft - 1);
+      if (!child) return null;
+      sum += sub.length * (child.avg + 1);
+    }
+    return sum / pool.length;
+  }
+}
+
+/** Analyse every candidate starting word over the full word set. */
+export function blunderwallAnalyze(words: string[], maxGuesses = 4): BlunderwallAnalysis {
+  const engine = new BwEngine(words);
+  const loose = new BwEngine(words);
+  const starts: BlunderwallStart[] = [];
+  for (const w of words) {
+    const strict = engine.evaluateStart(w, maxGuesses);
+    if (strict !== null) {
+      starts.push({ word: w, avg: strict, guaranteed: true });
+    } else {
+      const relaxed = loose.evaluateStart(w, words.length + 1);
+      starts.push({ word: w, avg: relaxed ?? Infinity, guaranteed: false });
+    }
+  }
+  starts.sort((a, b) => (a.guaranteed === b.guaranteed ? a.avg - b.avg : a.guaranteed ? -1 : 1));
+  const guaranteed = starts.filter((s) => s.guaranteed);
+  const bestAvg = guaranteed.length ? guaranteed[0].avg : starts.length ? starts[0].avg : 0;
+  const best = (guaranteed.length ? guaranteed : starts)
+    .filter((s) => Math.abs(s.avg - bestAvg) < 1e-9)
+    .map((s) => s.word);
+  return { starts, best };
+}
+
+/** Recommended next guess given the remaining candidate pool. */
+export function blunderwallNextGuess(
+  words: string[],
+  pool: string[],
+  attemptsLeft: number,
+): { guess: string; avg: number; guaranteed: boolean } | null {
+  const engine = new BwEngine(words);
+  const strict = engine.solve(pool, Math.max(1, attemptsLeft));
+  if (strict) return { guess: strict.guess, avg: strict.avg, guaranteed: true };
+  const loose = new BwEngine(words).solve(pool, words.length + 1);
+  if (!loose) return null;
+  return { guess: loose.guess, avg: loose.avg, guaranteed: false };
 }
