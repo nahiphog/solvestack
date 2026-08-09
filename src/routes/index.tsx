@@ -1947,7 +1947,7 @@ function Index() {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle" || mode === "sumplete" || mode === "rotato";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl";
             const inOther = mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "threepeat";
-            const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle";
+            const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "tango";
             const inMathLogic = isMath || inLogic;
             const inLadder = !inMathLogic && !inSearch && !inOther;
             const isActive = s.id === "mathlogic" ? inMathLogic : s.id === "search" ? inSearch : s.id === "other" ? inOther : inLadder;
@@ -2070,7 +2070,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "fifteenpuzzle" || mode === "sumplete" || mode === "rotato") && (
+        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "fifteenpuzzle" || mode === "sumplete" || mode === "rotato" || mode === "tango") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             {([
               { id: "fifteenpuzzle", label: "15 Puzzle" },
@@ -2082,6 +2082,7 @@ function Index() {
               { id: "sudoku", label: "Sudoku (original)" },
               { id: "sudokuvariation", label: "Sudoku (variation)" },
               { id: "sumplete", label: "Sumplete" },
+              { id: "tango", label: "Tango" },
             ] as { id: Mode; label: string }[]).map((m) => (
               <button
                 key={String(m.id)}
