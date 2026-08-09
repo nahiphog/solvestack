@@ -5577,6 +5577,124 @@ function Index() {
               </div>
             );
           })()
+        ) : mode === "tango" ? (
+          (() => {
+            const N = 6;
+            const template = Array.from({ length: 2 * N - 1 }, (_, i) => (i % 2 === 0 ? "40px" : "16px")).join(" ");
+            const total = tgSolutions ? tgSolutions.length : 0;
+            const sol = tgSolutions ? tgSolutions[Math.min(pageTg, total - 1)] : null;
+            const circle = (v: number, key: string, interactive: boolean, onClick?: () => void) => (
+              <button
+                key={key}
+                type="button"
+                onClick={onClick}
+                disabled={!interactive}
+                aria-label={v === 1 ? "orange circle" : v === 2 ? "blue circle" : "empty cell"}
+                className="flex h-10 w-10 items-center justify-center rounded border bg-background disabled:cursor-default"
+              >
+                {v !== 0 && (
+                  <span
+                    className={`block h-7 w-7 rounded-full border-2 ${
+                      v === 1
+                        ? "border-orange-700 bg-orange-500"
+                        : "border-blue-800 bg-blue-500"
+                    }`}
+                  />
+                )}
+              </button>
+            );
+            const relLabel = (rel: number) => (rel === 1 ? "=" : rel === 2 ? "✕" : "");
+            const board = (
+              grid: number[][],
+              interactive: boolean,
+            ) => (
+              <div className="inline-grid items-center justify-items-center" style={{ gridTemplateColumns: template }}>
+                {Array.from({ length: 2 * N - 1 }).map((_, gr) =>
+                  Array.from({ length: 2 * N - 1 }).map((__, gc) => {
+                    const rowIsCell = gr % 2 === 0;
+                    const colIsCell = gc % 2 === 0;
+                    if (rowIsCell && colIsCell) {
+                      const r = gr / 2;
+                      const c = gc / 2;
+                      return circle(
+                        grid[r][c],
+                        `c-${gr}-${gc}`,
+                        interactive,
+                        interactive ? () => toggleTgCell(r, c) : undefined,
+                      );
+                    }
+                    if (rowIsCell && !colIsCell) {
+                      const r = gr / 2;
+                      const c = (gc - 1) / 2;
+                      return (
+                        <button
+                          key={`h-${gr}-${gc}`}
+                          type="button"
+                          disabled={!interactive}
+                          onClick={interactive ? () => toggleTgH(r, c) : undefined}
+                          className="flex h-10 w-4 items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          aria-label={`horizontal relation row ${r + 1} column ${c + 1}`}
+                        >
+                          {relLabel(tgH[r][c])}
+                        </button>
+                      );
+                    }
+                    if (!rowIsCell && colIsCell) {
+                      const r = (gr - 1) / 2;
+                      const c = gc / 2;
+                      return (
+                        <button
+                          key={`v-${gr}-${gc}`}
+                          type="button"
+                          disabled={!interactive}
+                          onClick={interactive ? () => toggleTgV(r, c) : undefined}
+                          className="flex h-4 w-10 items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          aria-label={`vertical relation row ${r + 1} column ${c + 1}`}
+                        >
+                          {relLabel(tgV[r][c])}
+                        </button>
+                      );
+                    }
+                    return <div key={`x-${gr}-${gc}`} className="h-4 w-4" />;
+                  }),
+                )}
+              </div>
+            );
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-sm font-medium">Enter the starting board:</div>
+                  <div className="overflow-x-auto">{board(tgGrid, true)}</div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" onClick={clearTgAll} size="lg">
+                    Clear all
+                  </Button>
+                  <Button onClick={solveTango} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+                {tgError && <div className="text-sm text-red-500">{tgError}</div>}
+                {sol && (
+                  <div className="space-y-3 rounded-md border p-4">
+                    <div className="text-sm font-medium">
+                      Found {total} solution{total === 1 ? "" : "s"}.
+                    </div>
+                    <div className="overflow-x-auto">{board(sol, false)}</div>
+                    {total > 1 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setPageTg(0)} disabled={pageTg === 0}>{"<<"}</Button>
+                        <Button variant="outline" size="sm" onClick={() => setPageTg((x) => Math.max(0, x - 1))} disabled={pageTg === 0}>{"<"}</Button>
+                        <span className="text-sm text-muted-foreground">Page {pageTg + 1} of {total}</span>
+                        <Button variant="outline" size="sm" onClick={() => setPageTg((x) => Math.min(total - 1, x + 1))} disabled={pageTg >= total - 1}>{">"}</Button>
+                        <Button variant="outline" size="sm" onClick={() => setPageTg(total - 1)} disabled={pageTg >= total - 1}>{">>"}</Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })()
         ) : mode === "sumplete" ? (
           (() => {
             const N = spSize;
