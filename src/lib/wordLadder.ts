@@ -1887,3 +1887,94 @@ export function blunderwallNextGuess(
   if (!loose) return null;
   return { guess: loose.guess, avg: loose.avg, guaranteed: false };
 }
+
+// ---------- Tango ----------
+// 0 = empty, 1 = orange, 2 = blue
+export type TangoGrid = number[][];
+
+export function tangoSolve(
+  given: TangoGrid,
+  hRel: number[][], // [6][5] 0 none, 1 equal, 2 not-equal
+  vRel: number[][], // [5][6]
+  maxSolutions = 20,
+): TangoGrid[] {
+  const N = given.length;
+  const half = N / 2;
+  const grid: TangoGrid = given.map((row) => row.slice());
+  const solutions: TangoGrid[] = [];
+  const rowCount = Array.from({ length: N }, () => [0, 0]);
+  const colCount = Array.from({ length: N }, () => [0, 0]);
+  for (let r = 0; r < N; r++)
+    for (let c = 0; c < N; c++) {
+      const v = grid[r][c];
+      if (v) {
+        rowCount[r][v - 1]++;
+        colCount[c][v - 1]++;
+      }
+    }
+
+  const okAt = (r: number, c: number): boolean => {
+    const v = grid[r][c];
+    if (!v) return true;
+    if (rowCount[r][v - 1] > half || colCount[c][v - 1] > half) return false;
+    // triples (only look backwards, cells are filled in row-major order)
+    if (c >= 2 && grid[r][c - 1] === v && grid[r][c - 2] === v) return false;
+    if (r >= 2 && grid[r - 1][c] === v && grid[r - 2][c] === v) return false;
+    if (c >= 1 && c + 1 < N && grid[r][c - 1] === v && grid[r][c + 1] === v) return false;
+    if (r >= 1 && r + 1 < N && grid[r - 1][c] === v && grid[r + 1][c] === v) return false;
+    // relations
+    if (c >= 1 && grid[r][c - 1]) {
+      const rel = hRel[r][c - 1];
+      if (rel === 1 && grid[r][c - 1] !== v) return false;
+      if (rel === 2 && grid[r][c - 1] === v) return false;
+    }
+    if (c + 1 < N && grid[r][c + 1]) {
+      const rel = hRel[r][c];
+      if (rel === 1 && grid[r][c + 1] !== v) return false;
+      if (rel === 2 && grid[r][c + 1] === v) return false;
+    }
+    if (r >= 1 && grid[r - 1][c]) {
+      const rel = vRel[r - 1][c];
+      if (rel === 1 && grid[r - 1][c] !== v) return false;
+      if (rel === 2 && grid[r - 1][c] === v) return false;
+    }
+    if (r + 1 < N && grid[r + 1][c]) {
+      const rel = vRel[r][c];
+      if (rel === 1 && grid[r + 1][c] !== v) return false;
+      if (rel === 2 && grid[r + 1][c] === v) return false;
+    }
+    return true;
+  };
+
+  const backtrack = (idx: number): void => {
+    if (solutions.length >= maxSolutions) return;
+    if (idx === N * N) {
+      for (let i = 0; i < N; i++) {
+        if (rowCount[i][0] !== half || rowCount[i][1] !== half) return;
+        if (colCount[i][0] !== half || colCount[i][1] !== half) return;
+      }
+      solutions.push(grid.map((row) => row.slice()));
+      return;
+    }
+    const r = Math.floor(idx / N);
+    const c = idx % N;
+    if (given[r][c]) {
+      if (okAt(r, c)) backtrack(idx + 1);
+      return;
+    }
+    for (const v of [1, 2]) {
+      grid[r][c] = v;
+      rowCount[r][v - 1]++;
+      colCount[c][v - 1]++;
+      if (okAt(r, c)) backtrack(idx + 1);
+      rowCount[r][v - 1]--;
+      colCount[c][v - 1]--;
+      grid[r][c] = 0;
+    }
+  };
+
+  // validate the givens themselves
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (given[r][c] && !okAt(r, c)) return [];
+  backtrack(0);
+  return solutions;
+}
