@@ -112,6 +112,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   fifteenpuzzle: { start: "", goal: "" },
   sumplete: { start: "", goal: "" },
   rotato: { start: "", goal: "" },
+  tango: { start: "", goal: "" },
   
 
 };
@@ -242,6 +243,7 @@ const MODE_URL_MAP: Record<string, string> = {
   fifteenpuzzle: "/math/15_puzzle",
   sumplete: "/math/Sumplete",
   rotato: "/math/Rotato",
+  tango: "/logic/tango",
 };
 const URL_MODE_MAP: Record<string, Mode> = {
   ...Object.fromEntries(
@@ -721,6 +723,29 @@ function Index() {
   const [spSolutions, setSpSolutions] = useState<SumpleteSolution[] | null>(null);
   const [spError, setSpError] = useState<string | null>(null);
   const [pageSp, setPageSp] = useState(0);
+  const TG_DEFAULT_GRID: number[][] = (() => {
+    const g = Array.from({ length: 6 }, () => Array(6).fill(0));
+    g[0][5] = 1;
+    g[3][2] = 1;
+    g[3][5] = 1;
+    g[4][4] = 2;
+    return g;
+  })();
+  const TG_DEFAULT_H: number[][] = (() => {
+    const h = Array.from({ length: 6 }, () => Array(5).fill(0));
+    h[0][2] = 1;
+    h[1][1] = 1;
+    h[3][3] = 2;
+    h[5][1] = 1;
+    return h;
+  })();
+  const TG_DEFAULT_V: number[][] = Array.from({ length: 5 }, () => Array(6).fill(0));
+  const [tgGrid, setTgGrid] = useState<number[][]>(() => TG_DEFAULT_GRID.map((r) => r.slice()));
+  const [tgH, setTgH] = useState<number[][]>(() => TG_DEFAULT_H.map((r) => r.slice()));
+  const [tgV, setTgV] = useState<number[][]>(() => TG_DEFAULT_V.map((r) => r.slice()));
+  const [tgSolutions, setTgSolutions] = useState<number[][][] | null>(null);
+  const [tgError, setTgError] = useState<string | null>(null);
+  const [pageTg, setPageTg] = useState(0);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
@@ -814,6 +839,9 @@ function Index() {
     setDdError(null);
     setThreepeatResults(null);
     setThreepeatError(null);
+    setTgSolutions(null);
+    setTgError(null);
+    setPageTg(0);
 
     if (m === "fibble") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
