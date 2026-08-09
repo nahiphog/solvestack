@@ -1212,6 +1212,53 @@ function Index() {
 
 
 
+  const clearTgOutput = () => {
+    setTgSolutions(null);
+    setTgError(null);
+    setPageTg(0);
+  };
+
+  const toggleTgCell = (r: number, c: number) => {
+    const ng = tgGrid.map((row) => row.slice());
+    ng[r][c] = (ng[r][c] + 1) % 3;
+    setTgGrid(ng);
+    clearTgOutput();
+  };
+
+  const toggleTgH = (r: number, c: number) => {
+    const nh = tgH.map((row) => row.slice());
+    nh[r][c] = (nh[r][c] + 1) % 3;
+    setTgH(nh);
+    clearTgOutput();
+  };
+
+  const toggleTgV = (r: number, c: number) => {
+    const nv = tgV.map((row) => row.slice());
+    nv[r][c] = (nv[r][c] + 1) % 3;
+    setTgV(nv);
+    clearTgOutput();
+  };
+
+  const clearTgAll = () => {
+    setTgGrid(Array.from({ length: 6 }, () => Array(6).fill(0)));
+    setTgH(Array.from({ length: 6 }, () => Array(5).fill(0)));
+    setTgV(Array.from({ length: 5 }, () => Array(6).fill(0)));
+    clearTgOutput();
+  };
+
+  const solveTango = () => {
+    setTgError(null);
+    setTgSolutions(null);
+    setPageTg(0);
+    setSolving(true);
+    setTimeout(() => {
+      const res = tangoSolve(tgGrid, tgH, tgV, 20);
+      if (res.length === 0) setTgError("No solutions found for this configuration.");
+      else setTgSolutions(res);
+      setSolving(false);
+    }, 0);
+  };
+
   const solveSpellingBee = async () => {
     setError(null);
     setSpellingBeeResults(null);
