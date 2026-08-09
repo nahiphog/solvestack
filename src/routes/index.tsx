@@ -2626,6 +2626,21 @@ function Index() {
             <p>Cancel all the cells to match the target sums at the end of each row and each column.</p>
           </div>
         )}
+        {mode === "tango" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-2">
+            <p>
+              <a href="https://lnkd.in/tango" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Linked In</a>
+            </p>
+            <p>Fill in a partially filled 6x6 grid so that every cell holds exactly one circle.</p>
+            <ul className="list-disc pl-5">
+              <li>Each cell is filled with an orange circle or a blue circle, but not both.</li>
+              <li>An "=" between two adjacent cells means those two cells hold identical symbols; an "✕" means they hold distinct symbols.</li>
+              <li>No more than two of the same symbol may sit next to each other, horizontally or vertically.</li>
+              <li>Each row and column must contain the same number of orange circles and blue circles.</li>
+            </ul>
+            <p>Click a cell to cycle through empty, orange and blue. Click the edge between two cells to cycle through blank, "=" and "✕".</p>
+          </div>
+        )}
         {mode === "wordpeaks" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-1">
             <p>Enter your guesses.</p>
