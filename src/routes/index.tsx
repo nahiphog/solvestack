@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { OG_IMAGE_URL } from "@/lib/seo";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Fragment, useState } from "react";
-import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, rotatoSolve, sumpleteSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, blunderwallAnalyze, blunderwallNextGuess, type BlunderwallAnalysis, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type RotatoResult, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type SumpleteSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
+import { dodekuSolve, fibbleSolve, fifteenPuzzleSolvable, fifteenPuzzleSolve, findAllShortestPaths, flippingLettersSolve, formatPivotsWord, getRandomWords, getSplitleOtherHalves, getSplitleStrategicWords, getWordFrequency, isValid5LetterWord, isValidJeffGoldblumWord, isValidNLetterWord, isValidShuntleWord, isValidSplitleHalf, isValidWord, isValidWrdlKey, jeffGoldblumLeSolve, marblessSolve, mastermindSolve, MODE_WORD_LENGTH, pivotsBracketRange, sheetdokuSolve, shuntleSolve, sortWordsByFrequency, spellingBeeSolve, splitleP2Solve, splitleSolve, starBattleSolve, sudokuSolve, rotatoSolve, sumpleteSolve, tangoSolve, threepeatSolve, wordiplySearch, wordleSolve, wordPeaksSolve, worwordleSolve, worwordleSplit, wrdlSolve, blunderwallAnalyze, blunderwallNextGuess, type BlunderwallAnalysis, type DodekuCell, type FifteenPuzzleResult, type MarblessSolution, type Mode, type RotatoResult, type SheetdokuFunc, type SheetdokuRegionDef, type StarBattleSolution, type SumpleteSolution, type ThreepeatSolution, type WordleColor, type WordPeaksDirection } from "@/lib/wordLadder";
 import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
@@ -112,6 +112,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   fifteenpuzzle: { start: "", goal: "" },
   sumplete: { start: "", goal: "" },
   rotato: { start: "", goal: "" },
+  tango: { start: "", goal: "" },
   
 
 };
@@ -242,6 +243,7 @@ const MODE_URL_MAP: Record<string, string> = {
   fifteenpuzzle: "/math/15_puzzle",
   sumplete: "/math/Sumplete",
   rotato: "/math/Rotato",
+  tango: "/logic/tango",
 };
 const URL_MODE_MAP: Record<string, Mode> = {
   ...Object.fromEntries(
@@ -721,6 +723,29 @@ function Index() {
   const [spSolutions, setSpSolutions] = useState<SumpleteSolution[] | null>(null);
   const [spError, setSpError] = useState<string | null>(null);
   const [pageSp, setPageSp] = useState(0);
+  const TG_DEFAULT_GRID: number[][] = (() => {
+    const g = Array.from({ length: 6 }, () => Array(6).fill(0));
+    g[0][5] = 1;
+    g[3][2] = 1;
+    g[3][5] = 1;
+    g[4][4] = 2;
+    return g;
+  })();
+  const TG_DEFAULT_H: number[][] = (() => {
+    const h = Array.from({ length: 6 }, () => Array(5).fill(0));
+    h[0][2] = 1;
+    h[1][1] = 1;
+    h[3][3] = 2;
+    h[5][1] = 1;
+    return h;
+  })();
+  const TG_DEFAULT_V: number[][] = Array.from({ length: 5 }, () => Array(6).fill(0));
+  const [tgGrid, setTgGrid] = useState<number[][]>(() => TG_DEFAULT_GRID.map((r) => r.slice()));
+  const [tgH, setTgH] = useState<number[][]>(() => TG_DEFAULT_H.map((r) => r.slice()));
+  const [tgV, setTgV] = useState<number[][]>(() => TG_DEFAULT_V.map((r) => r.slice()));
+  const [tgSolutions, setTgSolutions] = useState<number[][][] | null>(null);
+  const [tgError, setTgError] = useState<string | null>(null);
+  const [pageTg, setPageTg] = useState(0);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
@@ -814,6 +839,9 @@ function Index() {
     setDdError(null);
     setThreepeatResults(null);
     setThreepeatError(null);
+    setTgSolutions(null);
+    setTgError(null);
+    setPageTg(0);
 
     if (m === "fibble") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
@@ -1183,6 +1211,53 @@ function Index() {
 
 
 
+
+  const clearTgOutput = () => {
+    setTgSolutions(null);
+    setTgError(null);
+    setPageTg(0);
+  };
+
+  const toggleTgCell = (r: number, c: number) => {
+    const ng = tgGrid.map((row) => row.slice());
+    ng[r][c] = (ng[r][c] + 1) % 3;
+    setTgGrid(ng);
+    clearTgOutput();
+  };
+
+  const toggleTgH = (r: number, c: number) => {
+    const nh = tgH.map((row) => row.slice());
+    nh[r][c] = (nh[r][c] + 1) % 3;
+    setTgH(nh);
+    clearTgOutput();
+  };
+
+  const toggleTgV = (r: number, c: number) => {
+    const nv = tgV.map((row) => row.slice());
+    nv[r][c] = (nv[r][c] + 1) % 3;
+    setTgV(nv);
+    clearTgOutput();
+  };
+
+  const clearTgAll = () => {
+    setTgGrid(Array.from({ length: 6 }, () => Array(6).fill(0)));
+    setTgH(Array.from({ length: 6 }, () => Array(5).fill(0)));
+    setTgV(Array.from({ length: 5 }, () => Array(6).fill(0)));
+    clearTgOutput();
+  };
+
+  const solveTango = () => {
+    setTgError(null);
+    setTgSolutions(null);
+    setPageTg(0);
+    setSolving(true);
+    setTimeout(() => {
+      const res = tangoSolve(tgGrid, tgH, tgV, 20);
+      if (res.length === 0) setTgError("No solutions found for this configuration.");
+      else setTgSolutions(res);
+      setSolving(false);
+    }, 0);
+  };
 
   const solveSpellingBee = async () => {
     setError(null);
@@ -1872,7 +1947,7 @@ function Index() {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle" || mode === "sumplete" || mode === "rotato";
             const inSearch = mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl";
             const inOther = mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "threepeat";
-            const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle";
+            const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "tango";
             const inMathLogic = isMath || inLogic;
             const inLadder = !inMathLogic && !inSearch && !inOther;
             const isActive = s.id === "mathlogic" ? inMathLogic : s.id === "search" ? inSearch : s.id === "other" ? inOther : inLadder;
@@ -1995,7 +2070,7 @@ function Index() {
           </div>
         )}
 
-        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "fifteenpuzzle" || mode === "sumplete" || mode === "rotato") && (
+        {(mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "fifteenpuzzle" || mode === "sumplete" || mode === "rotato" || mode === "tango") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             {([
               { id: "fifteenpuzzle", label: "15 Puzzle" },
@@ -2007,6 +2082,7 @@ function Index() {
               { id: "sudoku", label: "Sudoku (original)" },
               { id: "sudokuvariation", label: "Sudoku (variation)" },
               { id: "sumplete", label: "Sumplete" },
+              { id: "tango", label: "Tango" },
             ] as { id: Mode; label: string }[]).map((m) => (
               <button
                 key={String(m.id)}
@@ -2548,6 +2624,21 @@ function Index() {
               </select>
             </div>
             <p>Cancel all the cells to match the target sums at the end of each row and each column.</p>
+          </div>
+        )}
+        {mode === "tango" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-2">
+            <p>
+              <a href="https://lnkd.in/tango" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Linked In</a>
+            </p>
+            <p>Fill in a partially filled 6x6 grid so that every cell holds exactly one circle.</p>
+            <ul className="list-disc pl-5">
+              <li>Each cell is filled with an orange circle or a blue circle, but not both.</li>
+              <li>An "=" between two adjacent cells means those two cells hold identical symbols; an "✕" means they hold distinct symbols.</li>
+              <li>No more than two of the same symbol may sit next to each other, horizontally or vertically.</li>
+              <li>Each row and column must contain the same number of orange circles and blue circles.</li>
+            </ul>
+            <p>Click a cell to cycle through empty, orange and blue. Click the edge between two cells to cycle through blank, "=" and "✕".</p>
           </div>
         )}
         {mode === "wordpeaks" && (
@@ -5481,6 +5572,124 @@ function Index() {
                       <Button variant="outline" size="sm" onClick={() => setRtStep((s) => Math.min(totalSteps - 1, s + 1))} disabled={rtStep >= totalSteps - 1}>Next move</Button>
                       <Button variant="outline" size="sm" onClick={() => setRtStep(totalSteps - 1)} disabled={rtStep >= totalSteps - 1}>{">>"}</Button>
                     </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()
+        ) : mode === "tango" ? (
+          (() => {
+            const N = 6;
+            const template = Array.from({ length: 2 * N - 1 }, (_, i) => (i % 2 === 0 ? "40px" : "16px")).join(" ");
+            const total = tgSolutions ? tgSolutions.length : 0;
+            const sol = tgSolutions ? tgSolutions[Math.min(pageTg, total - 1)] : null;
+            const circle = (v: number, key: string, interactive: boolean, onClick?: () => void) => (
+              <button
+                key={key}
+                type="button"
+                onClick={onClick}
+                disabled={!interactive}
+                aria-label={v === 1 ? "orange circle" : v === 2 ? "blue circle" : "empty cell"}
+                className="flex h-10 w-10 items-center justify-center rounded border bg-background disabled:cursor-default"
+              >
+                {v !== 0 && (
+                  <span
+                    className={`block h-7 w-7 rounded-full border-2 ${
+                      v === 1
+                        ? "border-orange-700 bg-orange-500"
+                        : "border-blue-800 bg-blue-500"
+                    }`}
+                  />
+                )}
+              </button>
+            );
+            const relLabel = (rel: number) => (rel === 1 ? "=" : rel === 2 ? "✕" : "");
+            const board = (
+              grid: number[][],
+              interactive: boolean,
+            ) => (
+              <div className="inline-grid items-center justify-items-center" style={{ gridTemplateColumns: template }}>
+                {Array.from({ length: 2 * N - 1 }).map((_, gr) =>
+                  Array.from({ length: 2 * N - 1 }).map((__, gc) => {
+                    const rowIsCell = gr % 2 === 0;
+                    const colIsCell = gc % 2 === 0;
+                    if (rowIsCell && colIsCell) {
+                      const r = gr / 2;
+                      const c = gc / 2;
+                      return circle(
+                        grid[r][c],
+                        `c-${gr}-${gc}`,
+                        interactive,
+                        interactive ? () => toggleTgCell(r, c) : undefined,
+                      );
+                    }
+                    if (rowIsCell && !colIsCell) {
+                      const r = gr / 2;
+                      const c = (gc - 1) / 2;
+                      return (
+                        <button
+                          key={`h-${gr}-${gc}`}
+                          type="button"
+                          disabled={!interactive}
+                          onClick={interactive ? () => toggleTgH(r, c) : undefined}
+                          className="flex h-10 w-4 items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          aria-label={`horizontal relation row ${r + 1} column ${c + 1}`}
+                        >
+                          {relLabel(tgH[r][c])}
+                        </button>
+                      );
+                    }
+                    if (!rowIsCell && colIsCell) {
+                      const r = (gr - 1) / 2;
+                      const c = gc / 2;
+                      return (
+                        <button
+                          key={`v-${gr}-${gc}`}
+                          type="button"
+                          disabled={!interactive}
+                          onClick={interactive ? () => toggleTgV(r, c) : undefined}
+                          className="flex h-4 w-10 items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          aria-label={`vertical relation row ${r + 1} column ${c + 1}`}
+                        >
+                          {relLabel(tgV[r][c])}
+                        </button>
+                      );
+                    }
+                    return <div key={`x-${gr}-${gc}`} className="h-4 w-4" />;
+                  }),
+                )}
+              </div>
+            );
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-sm font-medium">Enter the starting board:</div>
+                  <div className="overflow-x-auto">{board(tgGrid, true)}</div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" onClick={clearTgAll} size="lg">
+                    Clear all
+                  </Button>
+                  <Button onClick={solveTango} disabled={solving} size="lg">
+                    {solving ? "Solving..." : "Solve"}
+                  </Button>
+                </div>
+                {tgError && <div className="text-sm text-red-500">{tgError}</div>}
+                {sol && (
+                  <div className="space-y-3 rounded-md border p-4">
+                    <div className="text-sm font-medium">
+                      Found {total} solution{total === 1 ? "" : "s"}.
+                    </div>
+                    <div className="overflow-x-auto">{board(sol, false)}</div>
+                    {total > 1 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setPageTg(0)} disabled={pageTg === 0}>{"<<"}</Button>
+                        <Button variant="outline" size="sm" onClick={() => setPageTg((x) => Math.max(0, x - 1))} disabled={pageTg === 0}>{"<"}</Button>
+                        <span className="text-sm text-muted-foreground">Page {pageTg + 1} of {total}</span>
+                        <Button variant="outline" size="sm" onClick={() => setPageTg((x) => Math.min(total - 1, x + 1))} disabled={pageTg >= total - 1}>{">"}</Button>
+                        <Button variant="outline" size="sm" onClick={() => setPageTg(total - 1)} disabled={pageTg >= total - 1}>{">>"}</Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
