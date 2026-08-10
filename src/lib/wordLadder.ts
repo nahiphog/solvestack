@@ -1095,300 +1095,188 @@ export function fifteenPuzzleSolvable(board: number[], n = 4): boolean {
   return (inv + blankRowFromBottom) % 2 === 1;
 }
 
-function manhattanPlusLC(board: number[], n: number, goalPos: Int8Array): number {
-  let d = 0;
-  const rowTiles: number[][] = Array.from({ length: n }, () => []);
-  const colTiles: number[][] = Array.from({ length: n }, () => []);
-  for (let i = 0; i < board.length; i++) {
-    const v = board[i];
-    if (v === 0) continue;
-    const gi = goalPos[v];
-    const gr = (gi / n) | 0, gc = gi % n;
-    const r = (i / n) | 0, c = i % n;
-    d += Math.abs(gr - r) + Math.abs(gc - c);
-    if (gr === r) rowTiles[r].push(gc);
-    if (gc === c) colTiles[c].push(gr);
-  }
-  const lc = (arr: number[]) => {
-    let confl = 0;
-    for (let i = 0; i < arr.length; i++)
-      for (let j = i + 1; j < arr.length; j++)
-        if (arr[i] > arr[j]) confl++;
-    return confl;
-  };
-  for (let i = 0; i < n; i++) d += 2 * (lc(rowTiles[i]) + lc(colTiles[i]));
-  return d;
-}
-
-// ---- Rudimentary staged (human-style) solver, used for larger boards ----
+// ---- Rudimentary layered (human-style) solver ----
 type FpCtx = {
   n: number;
   board: number[];
-  locked: Set<number>;
+  locked: boolean[];
   states: number[][];
   moves: string[];
   tileMoves: number[];
-  rand: () => number;
 };
 
-const FP_DIR_NAME = (from: number, to: number, n: number): string => {
-  const fr = (from / n) | 0, fc = from % n;
-  const tr = (to / n) | 0, tc = to % n;
-  if (tr < fr) return "Up";
-  if (tr > fr) return "Down";
-  if (tc < fc) return "Left";
-  return "Right";
-};
+const FP_DIRS: { dr: number; dc: number; name: string }[] = [
+  { dr: -1, dc: 0, name: "Up" },
+  { dr: 1, dc: 0, name: "Down" },
+  { dr: 0, dc: -1, name: "Left" },
+  { dr: 0, dc: 1, name: "Right" },
+];
 
-/** Slide the tile at `cell` into the adjacent blank. */
-function fpSlide(ctx: FpCtx, cell: number) {
-  const blank = ctx.board.indexOf(0);
-  const tile = ctx.board[cell];
-  ctx.board[blank] = tile;
-  ctx.board[cell] = 0;
-  ctx.states.push(ctx.board.slice());
-  ctx.moves.push(FP_DIR_NAME(blank, cell, ctx.n));
+function fpPos(ctx: FpCtx, val: number): number {
+  return ctx.board.indexOf(val);
+}
+
+/** Move the blank by (dr, dc), recording the tile that slid into it. */
+function fpMoveBlank(ctx: FpCtx, dr: number, dc: number) {
+  const { n, board } = ctx;
+  const b = board.indexOf(0);
+  const nr = ((b / n) | 0) + dr;
+  const nc = (b % n) + dc;
+  const target = nr * n + nc;
+  const tile = board[target];
+  board[b] = tile;
+  board[target] = 0;
+  ctx.states.push(board.slice());
+  ctx.moves.push(dr === -1 ? "Up" : dr === 1 ? "Down" : dc === -1 ? "Left" : "Right");
   ctx.tileMoves.push(tile);
 }
 
-/** Walk the blank to `target` without disturbing locked cells or `avoid`. */
-function fpMoveBlank(ctx: FpCtx, target: number, avoid: number): boolean {
-  const { n, board, locked } = ctx;
-  const start = board.indexOf(0);
-  if (start === target) return true;
-  const prev = new Map<number, number>();
-  const queue = [start];
+/** BFS moving one tile to a destination while avoiding locked cells. */
+function fpLocalBfs(ctx: FpCtx, tile: number, dest: number): boolean {
+  const { n, locked } = ctx;
+  const t = fpPos(ctx, tile);
+  if (t === dest) return true;
+  const b = ctx.board.indexOf(0);
+  const key = (br: number, tr: number) => br * n * n + tr;
+  const start = key(b, t);
+  const queue: { b: number; t: number; path: number[] }[] = [{ b, t, path: [] }];
   const seen = new Set<number>([start]);
   while (queue.length) {
     const cur = queue.shift()!;
-    if (cur === target) break;
-    const r = (cur / n) | 0, c = cur % n;
-    const nbrs = [
-      r > 0 ? cur - n : -1,
-      r < n - 1 ? cur + n : -1,
-      c > 0 ? cur - 1 : -1,
-      c < n - 1 ? cur + 1 : -1,
-    ];
-    for (const nb of nbrs) {
-      if (nb < 0 || seen.has(nb) || locked.has(nb) || nb === avoid) continue;
-      seen.add(nb);
-      prev.set(nb, cur);
-      queue.push(nb);
+    if (cur.t === dest) {
+      for (const d of cur.path) fpMoveBlank(ctx, FP_DIRS[d].dr, FP_DIRS[d].dc);
+      return true;
     }
-  }
-  if (!seen.has(target)) return false;
-  const path: number[] = [];
-  let cur = target;
-  while (cur !== start) {
-    path.push(cur);
-    cur = prev.get(cur)!;
-  }
-  path.reverse();
-  for (const cell of path) fpSlide(ctx, cell);
-  return true;
-}
-
-/** Move `tile` to `target`, keeping locked cells intact. */
-function fpPlaceTile(ctx: FpCtx, tile: number, target: number): boolean {
-  const { n } = ctx;
-  for (let guard = 0; guard < 4 * n * n; guard++) {
-    const cur = ctx.board.indexOf(tile);
-    if (cur === target) return true;
-    const cr = (cur / n) | 0, cc = cur % n;
-    const tr = (target / n) | 0, tc = target % n;
-    const horiz = cur + Math.sign(tc - cc);
-    const vert = cur + n * Math.sign(tr - cr);
-    const options: number[] = [];
-    if (cc !== tc) options.push(horiz);
-    if (cr !== tr) options.push(vert);
-    if (options.length === 2 && ctx.rand() < 0.5) options.reverse();
-    let moved = false;
-    for (const next of options) {
-      if (fpMoveBlank(ctx, next, cur)) {
-        fpSlide(ctx, cur);
-        moved = true;
-        break;
-      }
+    const br = (cur.b / n) | 0, bc = cur.b % n;
+    for (let d = 0; d < 4; d++) {
+      const nr = br + FP_DIRS[d].dr, nc = bc + FP_DIRS[d].dc;
+      if (nr < 0 || nr >= n || nc < 0 || nc >= n) continue;
+      const nb = nr * n + nc;
+      if (locked[nb]) continue;
+      const nt = nb === cur.t ? cur.b : cur.t;
+      const k = key(nb, nt);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      queue.push({ b: nb, t: nt, path: [...cur.path, d] });
     }
-    if (!moved) return false;
   }
   return false;
 }
 
-function fpSolveStagedOnce(
-  initial: number[],
-  n: number,
-  rand: () => number,
-  scramble: number,
-): FifteenPuzzleResult | null {
+/** BFS moving two tiles into their destinations simultaneously. */
+function fpJointBfs(ctx: FpCtx, tileA: number, posA: number, tileB: number, posB: number): boolean {
+  const { n, locked } = ctx;
+  const b = ctx.board.indexOf(0);
+  const a = fpPos(ctx, tileA);
+  const bb = fpPos(ctx, tileB);
+  if (a === posA && bb === posB) return true;
+  const sq = n * n;
+  const key = (x: number, y: number, z: number) => (x * sq + y) * sq + z;
+  const queue: { b: number; a: number; c: number; path: number[] }[] = [{ b, a, c: bb, path: [] }];
+  const seen = new Set<number>([key(b, a, bb)]);
+  while (queue.length) {
+    const cur = queue.shift()!;
+    if (cur.a === posA && cur.c === posB) {
+      for (const d of cur.path) fpMoveBlank(ctx, FP_DIRS[d].dr, FP_DIRS[d].dc);
+      return true;
+    }
+    const br = (cur.b / n) | 0, bc = cur.b % n;
+    for (let d = 0; d < 4; d++) {
+      const nr = br + FP_DIRS[d].dr, nc = bc + FP_DIRS[d].dc;
+      if (nr < 0 || nr >= n || nc < 0 || nc >= n) continue;
+      const nb = nr * n + nc;
+      if (locked[nb]) continue;
+      const na = nb === cur.a ? cur.b : cur.a;
+      const ncTile = nb === cur.c ? cur.b : cur.c;
+      const k = key(nb, na, ncTile);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      queue.push({ b: nb, a: na, c: ncTile, path: [...cur.path, d] });
+    }
+  }
+  return false;
+}
+
+/** Solve the last 2x2 block with BFS over its four cells. */
+function fpFinal2x2(ctx: FpCtx): boolean {
+  const { n, board } = ctx;
+  const idx = (r: number, c: number) => r * n + c;
+  const cells = [idx(n - 2, n - 2), idx(n - 2, n - 1), idx(n - 1, n - 2), idx(n - 1, n - 1)];
+  const b = board.indexOf(0);
+  if (!cells.includes(b)) return false;
+  const v1 = (n - 2) * n + (n - 2) + 1;
+  const v2 = (n - 2) * n + (n - 1) + 1;
+  const v3 = (n - 1) * n + (n - 2) + 1;
+  const startState = [cells.indexOf(b), ...cells.map((c) => board[c])];
+  const goal = [3, v1, v2, v3, 0].join(",");
+  const queue: { s: number[]; path: number[] }[] = [{ s: startState, path: [] }];
+  const seen = new Set<string>([startState.join(",")]);
+  while (queue.length) {
+    const cur = queue.shift()!;
+    if (cur.s.join(",") === goal) {
+      for (const d of cur.path) fpMoveBlank(ctx, FP_DIRS[d].dr, FP_DIRS[d].dc);
+      return true;
+    }
+    const pos = cur.s[0];
+    const pr = pos < 2 ? 0 : 1, pc = pos % 2;
+    for (let d = 0; d < 4; d++) {
+      const nr = pr + FP_DIRS[d].dr, nc = pc + FP_DIRS[d].dc;
+      if (nr < 0 || nr > 1 || nc < 0 || nc > 1) continue;
+      const np = nr * 2 + nc;
+      const grid = cur.s.slice(1);
+      [grid[pos], grid[np]] = [grid[np], grid[pos]];
+      const next = [np, ...grid];
+      const k = next.join(",");
+      if (seen.has(k)) continue;
+      seen.add(k);
+      queue.push({ s: next, path: [...cur.path, d] });
+    }
+  }
+  return false;
+}
+
+/** Layered solver: rows and columns from the outside in, then the last 2x2. */
+export function fifteenPuzzleSolve(initial: number[], n = 4): FifteenPuzzleResult | null {
+  if (initial.length !== n * n) return null;
+  if (!fifteenPuzzleSolvable(initial, n)) return null;
   const ctx: FpCtx = {
     n,
     board: initial.slice(),
-    locked: new Set<number>(),
+    locked: Array(n * n).fill(false),
     states: [initial.slice()],
     moves: [],
     tileMoves: [],
-    rand,
   };
-  // Optional random warm-up shuffle, used when a straight attempt gets stuck.
-  for (let k = 0; k < scramble; k++) {
-    const blank = ctx.board.indexOf(0);
-    const br = (blank / n) | 0, bc = blank % n;
-    const cand: number[] = [];
-    if (br > 0) cand.push(blank - n);
-    if (br < n - 1) cand.push(blank + n);
-    if (bc > 0) cand.push(blank - 1);
-    if (bc < n - 1) cand.push(blank + 1);
-    fpSlide(ctx, cand[Math.floor(rand() * cand.length)]);
-  }
-  const at = (r: number, c: number) => r * n + c;
-  const goalTile = (r: number, c: number) => {
-    const idx = r * n + c;
-    return idx === n * n - 1 ? 0 : idx + 1;
-  };
+  const idx = (r: number, c: number) => r * n + c;
 
-  // Phase 1: solve rows top-down until two rows remain.
-  for (let r = 0; r <= n - 3; r++) {
-    for (let c = 0; c <= n - 3; c++) {
-      const tile = goalTile(r, c);
-      if (ctx.board[at(r, c)] !== tile) {
-        if (!fpPlaceTile(ctx, tile, at(r, c))) return null;
-      }
-      ctx.locked.add(at(r, c));
+  for (let k = 0; k <= n - 3; k++) {
+    // Row k, all but its last two tiles
+    for (let c = k; c <= n - 3; c++) {
+      const tile = k * n + c + 1;
+      if (!fpLocalBfs(ctx, tile, idx(k, c))) return null;
+      ctx.locked[idx(k, c)] = true;
     }
-    // Last two tiles of the row need the rotate maneuver.
-    const t1 = goalTile(r, n - 2), t2 = goalTile(r, n - 1);
-    if (!(ctx.board[at(r, n - 2)] === t1 && ctx.board[at(r, n - 1)] === t2)) {
-      if (ctx.board[at(r, n - 2)] === t1) {
-        // Break the false placement so the maneuver can run.
-        if (!fpMoveBlank(ctx, at(r + 1, n - 2), at(r, n - 2))) return null;
-        fpSlide(ctx, at(r, n - 2));
-      }
-      if (!fpPlaceTile(ctx, t1, at(r, n - 1))) return null;
-      ctx.locked.add(at(r, n - 1));
-      if (!fpPlaceTile(ctx, t2, at(r + 1, n - 1))) return null;
-      ctx.locked.delete(at(r, n - 1));
-      ctx.locked.add(at(r + 1, n - 1));
-      if (!fpMoveBlank(ctx, at(r, n - 2), at(r, n - 1))) return null;
-      ctx.locked.delete(at(r + 1, n - 1));
-      fpSlide(ctx, at(r, n - 1));
-      fpSlide(ctx, at(r + 1, n - 1));
+    // Row k corner pair
+    if (!fpJointBfs(ctx, k * n + (n - 2) + 1, idx(k, n - 2), k * n + (n - 1) + 1, idx(k, n - 1))) return null;
+    ctx.locked[idx(k, n - 2)] = true;
+    ctx.locked[idx(k, n - 1)] = true;
+
+    // Column k, all but its last two tiles
+    for (let r = k + 1; r <= n - 3; r++) {
+      const tile = r * n + k + 1;
+      if (!fpLocalBfs(ctx, tile, idx(r, k))) return null;
+      ctx.locked[idx(r, k)] = true;
     }
-    ctx.locked.add(at(r, n - 2));
-    ctx.locked.add(at(r, n - 1));
+    // Column k corner pair
+    if (!fpJointBfs(ctx, (n - 2) * n + k + 1, idx(n - 2, k), (n - 1) * n + k + 1, idx(n - 1, k))) return null;
+    ctx.locked[idx(n - 2, k)] = true;
+    ctx.locked[idx(n - 1, k)] = true;
   }
 
-  // Phase 2: solve the remaining two rows column by column.
-  const top = n - 2;
-  for (let c = 0; c <= n - 3; c++) {
-    const t1 = goalTile(top, c), t2 = goalTile(top + 1, c);
-    if (!(ctx.board[at(top, c)] === t1 && ctx.board[at(top + 1, c)] === t2)) {
-      // Stage the pair as t2 above and t1 to its right, then rotate them in.
-      if (!fpPlaceTile(ctx, t2, at(top, c))) return null;
-      ctx.locked.add(at(top, c));
-      if (!fpPlaceTile(ctx, t1, at(top, c + 1))) return null;
-      ctx.locked.add(at(top, c + 1));
-      if (!fpMoveBlank(ctx, at(top + 1, c), -1)) return null;
-      ctx.locked.delete(at(top, c));
-      ctx.locked.delete(at(top, c + 1));
-      fpSlide(ctx, at(top, c));
-      fpSlide(ctx, at(top, c + 1));
-    }
-    ctx.locked.add(at(top, c));
-    ctx.locked.add(at(top + 1, c));
-  }
-
-  // Phase 3: rotate the final 2x2 into place.
-  const cells = [at(top, n - 2), at(top, n - 1), at(top + 1, n - 1), at(top + 1, n - 2)];
-  const isSolved = () => ctx.board.every((v, i) => v === (i === n * n - 1 ? 0 : i + 1));
-  if (!fpMoveBlank(ctx, at(top + 1, n - 1), -1)) return null;
-  for (let k = 0; k < 4 && !isSolved(); k++) {
-    const blank = ctx.board.indexOf(0);
-    const pos = cells.indexOf(blank);
-    if (pos === -1) return null;
-    fpSlide(ctx, cells[(pos + 1) % 4]);
-    fpSlide(ctx, cells[(pos + 2) % 4]);
-    fpSlide(ctx, cells[(pos + 3) % 4]);
-  }
-  if (!isSolved()) return null;
+  if (!fpFinal2x2(ctx)) return null;
+  const solved = ctx.board.every((v, i) => v === (i === n * n - 1 ? 0 : i + 1));
+  if (!solved) return null;
   return { states: ctx.states, moves: ctx.moves, tileMoves: ctx.tileMoves };
-}
-
-// IDA* solver. Returns null if not solvable or exceeds node cap.
-export function fifteenPuzzleSolve(initial: number[], n = 4, nodeCap = 80_000_000): FifteenPuzzleResult | null {
-  if (initial.length !== n * n) return null;
-  if (!fifteenPuzzleSolvable(initial, n)) return null;
-  if (n >= 5) {
-    let seed = 0x2f6e2b1;
-    const rand = () => {
-      seed = (seed * 1664525 + 1013904223) >>> 0;
-      return seed / 0x100000000;
-    };
-    for (let attempt = 0; attempt < 400; attempt++) {
-      const res = fpSolveStagedOnce(initial, n, rand, attempt === 0 ? 0 : 1 + (attempt % 12));
-      if (res) return res;
-    }
-    return null;
-  }
-  const goalPos = new Int8Array(n * n);
-  for (let v = 1; v < n * n; v++) goalPos[v] = v - 1;
-  goalPos[0] = n * n - 1;
-
-  const board = initial.slice();
-  const path: number[][] = [board.slice()];
-  const moves: string[] = [];
-  const tileMoves: number[] = [];
-  const DIRS: { dr: number; dc: number; name: string; opp: number }[] = [
-    { dr: -1, dc: 0, name: "Up", opp: 1 },
-    { dr: 1, dc: 0, name: "Down", opp: 0 },
-    { dr: 0, dc: -1, name: "Left", opp: 3 },
-    { dr: 0, dc: 1, name: "Right", opp: 2 },
-  ];
-  let evaluated = 0;
-  const FOUND = -1;
-
-  const search = (g: number, bound: number, blankIdx: number, lastDir: number): number => {
-    evaluated++;
-    if (evaluated > nodeCap) return -2;
-    const h = manhattanPlusLC(board, n, goalPos);
-    const f = g + h;
-    if (f > bound) return f;
-    if (h === 0) return FOUND;
-    let min = Infinity;
-    const br = (blankIdx / n) | 0, bc = blankIdx % n;
-    for (let d = 0; d < 4; d++) {
-      if (d === lastDir) continue;
-      const nr = br + DIRS[d].dr, nc = bc + DIRS[d].dc;
-      if (nr < 0 || nr >= n || nc < 0 || nc >= n) continue;
-      const ni = nr * n + nc;
-      const movedTile = board[ni];
-      board[blankIdx] = board[ni];
-      board[ni] = 0;
-      path.push(board.slice());
-      moves.push(DIRS[d].name);
-      tileMoves.push(movedTile);
-      const t = search(g + 1, bound, ni, DIRS[d].opp);
-      if (t === FOUND) return FOUND;
-      if (t === -2) return -2;
-      if (t < min) min = t;
-      board[ni] = board[blankIdx];
-      board[blankIdx] = 0;
-      path.pop();
-      moves.pop();
-      tileMoves.pop();
-    }
-    return min === Infinity ? -1 : min;
-  };
-
-  let bound = manhattanPlusLC(board, n, goalPos);
-  const blank0 = board.indexOf(0);
-  for (let iter = 0; iter < 200; iter++) {
-    const t = search(0, bound, blank0, -1);
-    if (t === FOUND) return { states: path, moves, tileMoves };
-    if (t === -2 || t === Infinity || t < 0) return null;
-    bound = t;
-  }
-  return null;
 }
 
 // ---------- Sumplete ----------
