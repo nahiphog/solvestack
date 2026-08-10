@@ -4898,47 +4898,23 @@ function Index() {
 
                 {analysis && (
                   <div className="rounded-lg border-2 border-border p-4">
-                    <h2 className="mb-1 text-lg font-semibold">Starting word analysis</h2>
-                    <p className="mb-3 text-sm">
-                      Best first {analysis.best.length === 1 ? "guess" : "guesses"}:{" "}
-                      {analysis.best.map((w, i) => (
-                        <span key={w}>
-                          {i > 0 ? ", " : ""}
-                          <span className="font-mono font-semibold text-green-700 dark:text-green-400">{w}</span>
-                        </span>
-                      ))}
+                    <h2 className="mb-2 text-lg font-semibold">Starting word analysis</h2>
+                    <p className="text-sm">
+                      Best first {analysis.best.length === 1 ? "guess" : "guesses"}:
                     </p>
-                    <table className="w-full max-w-lg border-collapse text-sm">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="p-2 text-center font-medium">Starting word</th>
-                          <th className="p-2 text-center font-medium">Average guesses</th>
-                          <th className="p-2 text-center font-medium">Within 4 tries</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {analysis.starts.map((s) => {
-                          const isBest = analysis.best.includes(s.word);
-                          return (
-                            <tr key={s.word} className="border-b">
-                              <td className={`p-2 text-center font-mono ${isBest ? "font-semibold text-green-700 dark:text-green-400" : ""} ${s.guaranteed ? "" : "text-red-600 dark:text-red-400"}`}>
-                                {s.word}
-                              </td>
-                              <td className={`p-2 text-center ${s.guaranteed ? "" : "text-red-600 dark:text-red-400"}`}>
-                                {Number.isFinite(s.avg) ? s.avg.toFixed(4) : "—"}
-                              </td>
-                              <td className="p-2 text-center">
-                                {s.guaranteed ? (
-                                  <span className="text-green-700 dark:text-green-400">Guaranteed</span>
-                                ) : (
-                                  <span className="text-red-600 dark:text-red-400">Avoid — may need more than 4 guesses</span>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                    <ul className="mt-1 space-y-1 text-sm">
+                      {analysis.best.map((w) => {
+                        const s = analysis.starts.find((x) => x.word === w);
+                        return (
+                          <li key={w}>
+                            <span className="font-mono font-semibold text-green-700 dark:text-green-400">{w}</span>
+                            {s && Number.isFinite(s.avg) && (
+                              <> — {s.avg.toFixed(4)} average guesses</>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
                 )}
 
