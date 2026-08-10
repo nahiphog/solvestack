@@ -675,19 +675,38 @@ function Index() {
   const [sbPaintColor, setSbPaintColor] = useState<number>(1);
   const [sbResults, setSbResults] = useState<StarBattleSolution[] | null>(null);
   const [pageSb, setPageSb] = useState(0);
-  const FP_DEFAULT_4: number[] = [15, 0, 7, 3, 4, 12, 5, 13, 10, 1, 11, 2, 6, 14, 9, 8];
-  const FP_DEFAULT_3: number[] = [1, 6, 7, 5, 3, 8, 2, 4, 0];
+  const FP_DEFAULT_3: number[] = [6, 4, 7, 8, 5, 0, 3, 2, 1];
+  const FP_DEFAULT_4: number[] = [7, 0, 13, 5, 4, 14, 8, 2, 3, 6, 9, 12, 1, 15, 11, 10];
   const FP_DEFAULT_5: number[] = [
-    18, 10, 12, 22, 24,
-    9, 5, 17, 2, 19,
-    15, 16, 14, 20, 1,
-    0, 23, 21, 13, 8,
-    4, 11, 3, 6, 7,
+    14, 9, 19, 22, 3,
+    1, 10, 21, 8, 15,
+    24, 4, 7, 12, 18,
+    13, 5, 2, 17, 0,
+    16, 11, 6, 23, 20,
+  ];
+  const FP_DEFAULT_6: number[] = [
+    11, 15, 29, 25, 24, 22,
+    16, 2, 26, 19, 28, 10,
+    9, 30, 33, 0, 13, 7,
+    21, 1, 17, 5, 12, 20,
+    3, 4, 14, 35, 18, 32,
+    23, 31, 8, 34, 27, 6,
+  ];
+  const FP_DEFAULT_7: number[] = [
+    4, 22, 0, 15, 12, 24, 48,
+    36, 13, 16, 29, 1, 2, 39,
+    43, 7, 42, 26, 45, 38, 20,
+    23, 41, 21, 28, 32, 19, 8,
+    44, 31, 5, 25, 27, 47, 11,
+    30, 46, 3, 40, 34, 37, 33,
+    17, 18, 10, 6, 35, 9, 14,
   ];
   const makeFpDefault = (n: number): number[] => {
     if (n === 3) return FP_DEFAULT_3.slice();
     if (n === 4) return FP_DEFAULT_4.slice();
     if (n === 5) return FP_DEFAULT_5.slice();
+    if (n === 6) return FP_DEFAULT_6.slice();
+    if (n === 7) return FP_DEFAULT_7.slice();
     const arr: number[] = [];
     for (let i = 1; i < n * n; i++) arr.push(i);
     arr.push(0);
@@ -2551,6 +2570,8 @@ function Index() {
               <a href="https://greatest.games/g/shrooms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Greatest Games</a>
               {" · "}
               <a href="https://inkwellgames.com/games/stars/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Inkwell games</a>
+              {" · "}
+              <a href="https://queensgame.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Community curated list</a>
             </p>
             <p>You are given a square grid, partitioned into non-overlapping regions.</p>
             <p>Each row, column and region contains a fixed number of stars in them.</p>
@@ -2575,6 +2596,7 @@ function Index() {
                 <option value={4}>4x4</option>
                 <option value={5}>5x5</option>
                 <option value={6}>6x6</option>
+                <option value={7}>7x7</option>
               </select>
             </div>
             <p>Goal: Slide tiles in numerical order (from left to right, top to bottom).</p>
