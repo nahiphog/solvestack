@@ -180,6 +180,10 @@ function FaqPage() {
                     viii.{" "}
                     <a className="text-primary underline" href="https://apps.apple.com/app/id1489118195" target="_blank" rel="noopener noreferrer">Good Sudoku</a>
                   </li>
+                  <li>
+                    ix.{" "}
+                    <a className="text-primary underline" href="https://www.dailykillersudoku.com/" target="_blank" rel="noopener noreferrer">Daily Killer Sudoku</a>
+                  </li>
                 </ol>
               </div>
             </div>

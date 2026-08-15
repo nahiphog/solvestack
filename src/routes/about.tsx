@@ -179,6 +179,10 @@ function AboutPage() {
             <span className="font-semibold">5.</span> See{" "}
             <Link to="/changelog" className="text-primary underline">Changelog</Link>.
           </p>
+
+          <p>
+            <span className="font-semibold">6.</span> Disclaimer: this site was generated with the assistance of AI, in particular Lovable, ChatGPT, Copilot and Gemini.
+          </p>
         </div>
       </div>
     </div>

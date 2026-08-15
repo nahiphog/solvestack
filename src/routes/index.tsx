@@ -2194,6 +2194,8 @@ function Index() {
               <span>·</span>
               <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Poople</a>
               <span>·</span>
+              <a href="https://turdle.blog/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Turdle</a>
+              <span>·</span>
               <a href="https://wordchains.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Chains</a>
               <span>·</span>
               <a href="https://www.wrdlink.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wrd Link</a>
