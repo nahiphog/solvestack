@@ -716,6 +716,11 @@ function Index() {
   const [fpBoard, setFpBoard] = useState<number[]>(() => FP_DEFAULT_4.slice());
   const [fpResult, setFpResult] = useState<FifteenPuzzleResult | null>(null);
   const [fpStep, setFpStep] = useState(0);
+  const [fpMovePage, setFpMovePage] = useState(0);
+  const [fpCopied, setFpCopied] = useState(false);
+  useEffect(() => {
+    if (fpStep > 0) setFpMovePage(Math.floor((fpStep - 1) / 50));
+  }, [fpStep]);
   const [fpError, setFpError] = useState<string | null>(null);
   const RT_DEFAULTS: Record<number, number[]> = {
     3: [1, 4, 6, 5, 3, 2, 9, 7, 8],
@@ -2188,6 +2193,8 @@ function Index() {
               <a href="https://flipple.clevergoat.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Flipple</a>
               <span>·</span>
               <a href="https://poople.io/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Poople</a>
+              <span>·</span>
+              <a href="https://turdle.blog/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Turdle</a>
               <span>·</span>
               <a href="https://wordchains.xyz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Word Chains</a>
               <span>·</span>
@@ -4959,9 +4966,18 @@ function Index() {
                                   className="w-full rounded border bg-background px-2 py-1 text-center"
                                 >
                                   <option value="">{wordOptionLabels[i]}</option>
-                                  {cleanWords.map((w) => (
-                                    <option key={w} value={w}>{w}</option>
-                                  ))}
+                                  {cleanWords.map((w) => {
+                                    const isBest = i === 0 && !!analysis?.best.includes(w);
+                                    return (
+                                      <option
+                                        key={w}
+                                        value={w}
+                                        style={isBest ? { color: "#16a34a", fontWeight: 700 } : undefined}
+                                      >
+                                        {w}
+                                      </option>
+                                    );
+                                  })}
                                 </select>
                               </td>
                               <td className="p-2 text-center">
@@ -5427,30 +5443,56 @@ function Index() {
                         <> — moved tile: <span className="font-medium">{fpResult.tileMoves[fpStep - 1]}</span></>
                       )}
                     </div>
-                    {fpResult.tileMoves.length > 0 && (
-                      <div className="text-sm text-muted-foreground">
-                        <span className="font-medium">Move sequence:</span>
-                        <div className="mt-1 flex flex-wrap gap-x-1.5 gap-y-1 font-mono text-base leading-relaxed text-foreground">
-                          {fpResult.tileMoves.map((t, i) => {
-                            const isCurrent = i === fpStep - 1;
-                            return (
-                              <span key={i}>
-                                <span
-                                  className={`rounded px-1 font-bold ${
-                                    isCurrent
-                                      ? "bg-yellow-300 text-black dark:bg-yellow-500"
-                                      : "bg-transparent text-foreground"
-                                  }`}
-                                >
-                                  {t}
+                    {fpResult.tileMoves.length > 0 && (() => {
+                      const perPage = 50;
+                      const pages = Math.max(1, Math.ceil(fpResult.tileMoves.length / perPage));
+                      const page = Math.min(fpMovePage, pages - 1);
+                      const start = page * perPage;
+                      const shown = fpResult.tileMoves.slice(start, start + perPage);
+                      return (
+                        <div className="text-sm text-muted-foreground">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-medium">Move sequence:</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  await navigator.clipboard.writeText(fpResult.tileMoves.join(" -> "));
+                                  setFpCopied(true);
+                                  setTimeout(() => setFpCopied(false), 1500);
+                                } catch { /* ignore */ }
+                              }}
+                            >
+                              {fpCopied ? "Copied" : "Copy sequence"}
+                            </Button>
+                          </div>
+                          <div className="mt-1 flex flex-wrap gap-x-1.5 gap-y-1 font-mono text-base leading-relaxed text-foreground">
+                            {shown.map((t, j) => {
+                              const i = start + j;
+                              const isCurrent = i === fpStep - 1;
+                              return (
+                                <span key={i}>
+                                  <span
+                                    className={`rounded px-1 font-bold ${
+                                      isCurrent
+                                        ? "bg-yellow-300 text-black dark:bg-yellow-500"
+                                        : "bg-transparent text-foreground"
+                                    }`}
+                                  >
+                                    {t}
+                                  </span>
+                                  {i < fpResult.tileMoves.length - 1 ? "," : ""}
                                 </span>
-                                {i < fpResult.tileMoves.length - 1 ? "," : ""}
-                              </span>
-                            );
-                          })}
+                              );
+                            })}
+                          </div>
+                          {pages > 1 && (
+                            <Paginator page={page} setPage={setFpMovePage} total={fpResult.tileMoves.length} perPage={perPage} />
+                          )}
                         </div>
-                      </div>
-                    )}
+                      );
+                    })()}
                     <div className="flex flex-wrap gap-2">
                       <Button variant="outline" size="sm" onClick={() => setFpStep(0)} disabled={fpStep === 0}>{"<<"}</Button>
                       <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.max(0, s - 1))} disabled={fpStep === 0}>Previous move</Button>
@@ -6227,7 +6269,7 @@ function Index() {
               <>
                 <div className="rounded-lg border bg-card p-4">
                   <div className="flex flex-wrap gap-2 font-mono text-sm">
-                    {wordleSortedResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
+                    {wordleSortedResults.slice(pageWordle * 60, pageWordle * 60 + 60).map((w) => (
                       <button
                         key={w}
                         type="button"
@@ -6239,7 +6281,7 @@ function Index() {
                     ))}
                   </div>
                 </div>
-                <Paginator page={pageWordle} setPage={setPageWordle} total={wordleSortedResults.length} />
+                <Paginator page={pageWordle} setPage={setPageWordle} total={wordleSortedResults.length} perPage={60} />
               </>
             )}
 
@@ -6382,7 +6424,7 @@ function Index() {
             <SortToggle value={sortMode} onChange={setSortMode} />
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {sortedMastermind.slice(pageMM * 50, pageMM * 50 + 50).map((w) => (
+                {sortedMastermind.slice(pageMM * 60, pageMM * 60 + 60).map((w) => (
                   <button
                     key={w}
                     type="button"
@@ -6394,7 +6436,7 @@ function Index() {
                 ))}
               </div>
             </div>
-            <Paginator page={pageMM} setPage={setPageMM} total={sortedMastermind.length} />
+            <Paginator page={pageMM} setPage={setPageMM} total={sortedMastermind.length} perPage={60} />
           </section>
         )}
 
