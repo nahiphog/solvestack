@@ -716,6 +716,8 @@ function Index() {
   const [fpBoard, setFpBoard] = useState<number[]>(() => FP_DEFAULT_4.slice());
   const [fpResult, setFpResult] = useState<FifteenPuzzleResult | null>(null);
   const [fpStep, setFpStep] = useState(0);
+  const [fpMovePage, setFpMovePage] = useState(0);
+  const [fpCopied, setFpCopied] = useState(false);
   const [fpError, setFpError] = useState<string | null>(null);
   const RT_DEFAULTS: Record<number, number[]> = {
     3: [1, 4, 6, 5, 3, 2, 9, 7, 8],
