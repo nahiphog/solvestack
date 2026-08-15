@@ -4959,9 +4959,18 @@ function Index() {
                                   className="w-full rounded border bg-background px-2 py-1 text-center"
                                 >
                                   <option value="">{wordOptionLabels[i]}</option>
-                                  {cleanWords.map((w) => (
-                                    <option key={w} value={w}>{w}</option>
-                                  ))}
+                                  {cleanWords.map((w) => {
+                                    const isBest = i === 0 && !!analysis?.best.includes(w);
+                                    return (
+                                      <option
+                                        key={w}
+                                        value={w}
+                                        style={isBest ? { color: "#16a34a", fontWeight: 700 } : undefined}
+                                      >
+                                        {w}
+                                      </option>
+                                    );
+                                  })}
                                 </select>
                               </td>
                               <td className="p-2 text-center">
@@ -6227,7 +6236,7 @@ function Index() {
               <>
                 <div className="rounded-lg border bg-card p-4">
                   <div className="flex flex-wrap gap-2 font-mono text-sm">
-                    {wordleSortedResults.slice(pageWordle * 50, pageWordle * 50 + 50).map((w) => (
+                    {wordleSortedResults.slice(pageWordle * 60, pageWordle * 60 + 60).map((w) => (
                       <button
                         key={w}
                         type="button"
@@ -6239,7 +6248,7 @@ function Index() {
                     ))}
                   </div>
                 </div>
-                <Paginator page={pageWordle} setPage={setPageWordle} total={wordleSortedResults.length} />
+                <Paginator page={pageWordle} setPage={setPageWordle} total={wordleSortedResults.length} perPage={60} />
               </>
             )}
 
@@ -6382,7 +6391,7 @@ function Index() {
             <SortToggle value={sortMode} onChange={setSortMode} />
             <div className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap gap-2 font-mono text-sm">
-                {sortedMastermind.slice(pageMM * 50, pageMM * 50 + 50).map((w) => (
+                {sortedMastermind.slice(pageMM * 60, pageMM * 60 + 60).map((w) => (
                   <button
                     key={w}
                     type="button"
@@ -6394,7 +6403,7 @@ function Index() {
                 ))}
               </div>
             </div>
-            <Paginator page={pageMM} setPage={setPageMM} total={sortedMastermind.length} />
+            <Paginator page={pageMM} setPage={setPageMM} total={sortedMastermind.length} perPage={60} />
           </section>
         )}
 
