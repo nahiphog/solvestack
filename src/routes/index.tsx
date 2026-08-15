@@ -718,6 +718,9 @@ function Index() {
   const [fpStep, setFpStep] = useState(0);
   const [fpMovePage, setFpMovePage] = useState(0);
   const [fpCopied, setFpCopied] = useState(false);
+  useEffect(() => {
+    if (fpStep > 0) setFpMovePage(Math.floor((fpStep - 1) / 50));
+  }, [fpStep]);
   const [fpError, setFpError] = useState<string | null>(null);
   const RT_DEFAULTS: Record<number, number[]> = {
     3: [1, 4, 6, 5, 3, 2, 9, 7, 8],
