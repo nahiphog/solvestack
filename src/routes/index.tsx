@@ -5438,30 +5438,56 @@ function Index() {
                         <> — moved tile: <span className="font-medium">{fpResult.tileMoves[fpStep - 1]}</span></>
                       )}
                     </div>
-                    {fpResult.tileMoves.length > 0 && (
-                      <div className="text-sm text-muted-foreground">
-                        <span className="font-medium">Move sequence:</span>
-                        <div className="mt-1 flex flex-wrap gap-x-1.5 gap-y-1 font-mono text-base leading-relaxed text-foreground">
-                          {fpResult.tileMoves.map((t, i) => {
-                            const isCurrent = i === fpStep - 1;
-                            return (
-                              <span key={i}>
-                                <span
-                                  className={`rounded px-1 font-bold ${
-                                    isCurrent
-                                      ? "bg-yellow-300 text-black dark:bg-yellow-500"
-                                      : "bg-transparent text-foreground"
-                                  }`}
-                                >
-                                  {t}
+                    {fpResult.tileMoves.length > 0 && (() => {
+                      const perPage = 50;
+                      const pages = Math.max(1, Math.ceil(fpResult.tileMoves.length / perPage));
+                      const page = Math.min(fpMovePage, pages - 1);
+                      const start = page * perPage;
+                      const shown = fpResult.tileMoves.slice(start, start + perPage);
+                      return (
+                        <div className="text-sm text-muted-foreground">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-medium">Move sequence:</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  await navigator.clipboard.writeText(fpResult.tileMoves.join(" -> "));
+                                  setFpCopied(true);
+                                  setTimeout(() => setFpCopied(false), 1500);
+                                } catch { /* ignore */ }
+                              }}
+                            >
+                              {fpCopied ? "Copied" : "Copy sequence"}
+                            </Button>
+                          </div>
+                          <div className="mt-1 flex flex-wrap gap-x-1.5 gap-y-1 font-mono text-base leading-relaxed text-foreground">
+                            {shown.map((t, j) => {
+                              const i = start + j;
+                              const isCurrent = i === fpStep - 1;
+                              return (
+                                <span key={i}>
+                                  <span
+                                    className={`rounded px-1 font-bold ${
+                                      isCurrent
+                                        ? "bg-yellow-300 text-black dark:bg-yellow-500"
+                                        : "bg-transparent text-foreground"
+                                    }`}
+                                  >
+                                    {t}
+                                  </span>
+                                  {i < fpResult.tileMoves.length - 1 ? "," : ""}
                                 </span>
-                                {i < fpResult.tileMoves.length - 1 ? "," : ""}
-                              </span>
-                            );
-                          })}
+                              );
+                            })}
+                          </div>
+                          {pages > 1 && (
+                            <Paginator page={page} setPage={setFpMovePage} total={fpResult.tileMoves.length} perPage={perPage} />
+                          )}
                         </div>
-                      </div>
-                    )}
+                      );
+                    })()}
                     <div className="flex flex-wrap gap-2">
                       <Button variant="outline" size="sm" onClick={() => setFpStep(0)} disabled={fpStep === 0}>{"<<"}</Button>
                       <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.max(0, s - 1))} disabled={fpStep === 0}>Previous move</Button>
