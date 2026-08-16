@@ -5632,7 +5632,9 @@ function Index() {
         ) : mode === "tango" ? (
           (() => {
             const N = 6;
-            const template = Array.from({ length: 2 * N - 1 }, (_, i) => (i % 2 === 0 ? "40px" : "16px")).join(" ");
+            const templateFor = (cell: number, gap: number) =>
+              Array.from({ length: 2 * N - 1 }, (_, i) => (i % 2 === 0 ? `${cell}px` : `${gap}px`)).join(" ");
+
             const total = tgSolutions ? tgSolutions.length : 0;
             const sol = tgSolutions ? tgSolutions[Math.min(pageTg, total - 1)] : null;
             const circle = (v: number, key: string, interactive: boolean, onClick?: () => void) => (
