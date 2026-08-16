@@ -5385,11 +5385,16 @@ function Index() {
               if (v === 0) return i === total - 1;
               return i === v - 1;
             };
+            const gridStyle = {
+              gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))`,
+              width: `min(100%, ${N * 56}px)`,
+            } as const;
+            const cellText = N <= 4 ? "text-lg" : N <= 6 ? "text-base" : "text-sm";
             return (
               <div className="space-y-4">
                 <div>
                   <div className="mb-2 text-sm font-medium">Enter starting board (leave one tile blank):</div>
-                  <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
+                  <div className="grid gap-1" style={gridStyle}>
                     {fpBoard.map((v, i) => (
                       <input
                         key={i}
@@ -5399,7 +5404,7 @@ function Index() {
                         maxLength={String(maxTile).length}
                         value={v === 0 ? "" : String(v)}
                         onChange={(e) => setCell(i, e.target.value)}
-                        className="h-14 w-14 rounded border bg-background text-center text-lg font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className={`aspect-square w-full min-w-0 rounded border bg-background p-0 text-center font-semibold ${cellText} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                       />
                     ))}
                   </div>
@@ -5420,7 +5425,7 @@ function Index() {
                         ? "Already solved."
                         : `Solved in ${totalSteps - 1} moves.`}
                     </div>
-                    <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
+                    <div className="grid gap-1" style={gridStyle}>
                       {displayBoard.map((v, i) => {
                         const justMovedTile = fpStep > 0 ? fpResult.tileMoves[fpStep - 1] : -1;
                         const isMoved = v !== 0 && v === justMovedTile;
@@ -5430,19 +5435,28 @@ function Index() {
                         return (
                           <div
                             key={i}
-                            className={`flex h-14 w-14 items-center justify-center rounded text-lg font-semibold ${borderCls} ${bgCls}`}
+                            className={`flex aspect-square w-full min-w-0 items-center justify-center rounded font-semibold ${cellText} ${borderCls} ${bgCls}`}
                           >
                             {v === 0 ? "" : v}
                           </div>
                         );
                       })}
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Step {fpStep} of {totalSteps - 1}
-                      {fpStep > 0 && (
-                        <> — moved tile: <span className="font-medium">{fpResult.tileMoves[fpStep - 1]}</span></>
-                      )}
+                    <div className="flex items-center justify-between gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.max(0, s - 1))} disabled={fpStep === 0}>Previous move</Button>
+                      <div className="text-center text-sm text-muted-foreground">
+                        <div>Step {fpStep} of {totalSteps - 1}:</div>
+                        <div>
+                          {fpStep > 0 ? (
+                            <>moved tile: <span className="font-medium">{fpResult.tileMoves[fpStep - 1]}</span></>
+                          ) : (
+                            "starting position"
+                          )}
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.min(totalSteps - 1, s + 1))} disabled={fpStep >= totalSteps - 1}>Next move</Button>
                     </div>
+
                     {fpResult.tileMoves.length > 0 && (() => {
                       const perPage = 50;
                       const pages = Math.max(1, Math.ceil(fpResult.tileMoves.length / perPage));
