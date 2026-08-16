@@ -5637,22 +5637,24 @@ function Index() {
 
             const total = tgSolutions ? tgSolutions.length : 0;
             const sol = tgSolutions ? tgSolutions[Math.min(pageTg, total - 1)] : null;
-            const circle = (v: number, key: string, interactive: boolean, onClick?: () => void) => (
+            const circle = (v: number, key: string, interactive: boolean, cell: number, onClick?: () => void) => (
               <button
                 key={key}
                 type="button"
                 onClick={onClick}
                 disabled={!interactive}
                 aria-label={v === 1 ? "orange circle" : v === 2 ? "blue circle" : "empty cell"}
-                className="flex h-10 w-10 items-center justify-center rounded border bg-background disabled:cursor-default"
+                className="flex items-center justify-center rounded border bg-background disabled:cursor-default"
+                style={{ height: cell, width: cell }}
               >
                 {v !== 0 && (
                   <span
-                    className={`block h-7 w-7 rounded-full border-2 ${
+                    className={`block rounded-full border-2 ${
                       v === 1
                         ? "border-orange-700 bg-orange-500"
                         : "border-blue-800 bg-blue-500"
                     }`}
+                    style={{ height: Math.round(cell * 0.7), width: Math.round(cell * 0.7) }}
                   />
                 )}
               </button>
@@ -5661,8 +5663,11 @@ function Index() {
             const board = (
               grid: number[][],
               interactive: boolean,
+              cell = 40,
+              gap = 16,
             ) => (
-              <div className="inline-grid items-center justify-items-center" style={{ gridTemplateColumns: template }}>
+              <div className="inline-grid items-center justify-items-center" style={{ gridTemplateColumns: templateFor(cell, gap) }}>
+
                 {Array.from({ length: 2 * N - 1 }).map((_, gr) =>
                   Array.from({ length: 2 * N - 1 }).map((__, gc) => {
                     const rowIsCell = gr % 2 === 0;
