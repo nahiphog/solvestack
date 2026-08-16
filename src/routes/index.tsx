@@ -5679,6 +5679,7 @@ function Index() {
                         grid[r][c],
                         `c-${gr}-${gc}`,
                         interactive,
+                        cell,
                         interactive ? () => toggleTgCell(r, c) : undefined,
                       );
                     }
@@ -5691,7 +5692,8 @@ function Index() {
                           type="button"
                           disabled={!interactive}
                           onClick={interactive ? () => toggleTgH(r, c) : undefined}
-                          className="flex h-10 w-4 items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          className="flex items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          style={{ height: cell, width: gap }}
                           aria-label={`horizontal relation row ${r + 1} column ${c + 1}`}
                         >
                           {relLabel(tgH[r][c])}
@@ -5707,14 +5709,16 @@ function Index() {
                           type="button"
                           disabled={!interactive}
                           onClick={interactive ? () => toggleTgV(r, c) : undefined}
-                          className="flex h-4 w-10 items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          className="flex items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          style={{ height: gap, width: cell }}
                           aria-label={`vertical relation row ${r + 1} column ${c + 1}`}
                         >
                           {relLabel(tgV[r][c])}
                         </button>
                       );
                     }
-                    return <div key={`x-${gr}-${gc}`} className="h-4 w-4" />;
+                    return <div key={`x-${gr}-${gc}`} style={{ height: gap, width: gap }} />;
+
                   }),
                 )}
               </div>
