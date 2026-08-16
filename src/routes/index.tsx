@@ -5741,9 +5741,13 @@ function Index() {
                 {sol && (
                   <div className="space-y-3 rounded-md border p-4">
                     <div className="text-sm font-medium">
-                      Found {total} solution{total === 1 ? "" : "s"}.
+                      {total >= 20
+                        ? "Found at least 20 solutions."
+                        : `Found ${total} solution${total === 1 ? "" : "s"}.`}
                     </div>
-                    <div className="overflow-x-auto">{board(sol, false)}</div>
+                    <div className="text-sm font-medium">Solution #{Math.min(pageTg, total - 1) + 1}:</div>
+                    <div>{board(sol, false, 28, 12)}</div>
+
                     {total > 1 && (
                       <div className="flex flex-wrap items-center gap-2">
                         <Button variant="outline" size="sm" onClick={() => setPageTg(0)} disabled={pageTg === 0}>{"<<"}</Button>
