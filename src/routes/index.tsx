@@ -5385,11 +5385,16 @@ function Index() {
               if (v === 0) return i === total - 1;
               return i === v - 1;
             };
+            const gridStyle = {
+              gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))`,
+              width: `min(100%, ${N * 56}px)`,
+            } as const;
+            const cellText = N <= 4 ? "text-lg" : N <= 6 ? "text-base" : "text-sm";
             return (
               <div className="space-y-4">
                 <div>
                   <div className="mb-2 text-sm font-medium">Enter starting board (leave one tile blank):</div>
-                  <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
+                  <div className="grid gap-1" style={gridStyle}>
                     {fpBoard.map((v, i) => (
                       <input
                         key={i}
@@ -5399,7 +5404,7 @@ function Index() {
                         maxLength={String(maxTile).length}
                         value={v === 0 ? "" : String(v)}
                         onChange={(e) => setCell(i, e.target.value)}
-                        className="h-14 w-14 rounded border bg-background text-center text-lg font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className={`aspect-square w-full min-w-0 rounded border bg-background p-0 text-center font-semibold ${cellText} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                       />
                     ))}
                   </div>
@@ -5420,7 +5425,7 @@ function Index() {
                         ? "Already solved."
                         : `Solved in ${totalSteps - 1} moves.`}
                     </div>
-                    <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
+                    <div className="grid gap-1" style={gridStyle}>
                       {displayBoard.map((v, i) => {
                         const justMovedTile = fpStep > 0 ? fpResult.tileMoves[fpStep - 1] : -1;
                         const isMoved = v !== 0 && v === justMovedTile;
@@ -5430,19 +5435,28 @@ function Index() {
                         return (
                           <div
                             key={i}
-                            className={`flex h-14 w-14 items-center justify-center rounded text-lg font-semibold ${borderCls} ${bgCls}`}
+                            className={`flex aspect-square w-full min-w-0 items-center justify-center rounded font-semibold ${cellText} ${borderCls} ${bgCls}`}
                           >
                             {v === 0 ? "" : v}
                           </div>
                         );
                       })}
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Step {fpStep} of {totalSteps - 1}
-                      {fpStep > 0 && (
-                        <> — moved tile: <span className="font-medium">{fpResult.tileMoves[fpStep - 1]}</span></>
-                      )}
+                    <div className="flex items-center justify-between gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.max(0, s - 1))} disabled={fpStep === 0}>Previous move</Button>
+                      <div className="text-center text-sm text-muted-foreground">
+                        <div>Step {fpStep} of {totalSteps - 1}:</div>
+                        <div>
+                          {fpStep > 0 ? (
+                            <>moved tile: <span className="font-medium">{fpResult.tileMoves[fpStep - 1]}</span></>
+                          ) : (
+                            "starting position"
+                          )}
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.min(totalSteps - 1, s + 1))} disabled={fpStep >= totalSteps - 1}>Next move</Button>
                     </div>
+
                     {fpResult.tileMoves.length > 0 && (() => {
                       const perPage = 50;
                       const pages = Math.max(1, Math.ceil(fpResult.tileMoves.length / perPage));
@@ -5495,8 +5509,6 @@ function Index() {
                     })()}
                     <div className="flex flex-wrap gap-2">
                       <Button variant="outline" size="sm" onClick={() => setFpStep(0)} disabled={fpStep === 0}>{"<<"}</Button>
-                      <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.max(0, s - 1))} disabled={fpStep === 0}>Previous move</Button>
-                      <Button variant="outline" size="sm" onClick={() => setFpStep((s) => Math.min(totalSteps - 1, s + 1))} disabled={fpStep >= totalSteps - 1}>Next move</Button>
                       <Button variant="outline" size="sm" onClick={() => setFpStep(totalSteps - 1)} disabled={fpStep >= totalSteps - 1}>{">>"}</Button>
                     </div>
                   </div>
@@ -5620,25 +5632,29 @@ function Index() {
         ) : mode === "tango" ? (
           (() => {
             const N = 6;
-            const template = Array.from({ length: 2 * N - 1 }, (_, i) => (i % 2 === 0 ? "40px" : "16px")).join(" ");
+            const templateFor = (cell: number, gap: number) =>
+              Array.from({ length: 2 * N - 1 }, (_, i) => (i % 2 === 0 ? `${cell}px` : `${gap}px`)).join(" ");
+
             const total = tgSolutions ? tgSolutions.length : 0;
             const sol = tgSolutions ? tgSolutions[Math.min(pageTg, total - 1)] : null;
-            const circle = (v: number, key: string, interactive: boolean, onClick?: () => void) => (
+            const circle = (v: number, key: string, interactive: boolean, cell: number, onClick?: () => void) => (
               <button
                 key={key}
                 type="button"
                 onClick={onClick}
                 disabled={!interactive}
                 aria-label={v === 1 ? "orange circle" : v === 2 ? "blue circle" : "empty cell"}
-                className="flex h-10 w-10 items-center justify-center rounded border bg-background disabled:cursor-default"
+                className="flex items-center justify-center rounded border bg-background disabled:cursor-default"
+                style={{ height: cell, width: cell }}
               >
                 {v !== 0 && (
                   <span
-                    className={`block h-7 w-7 rounded-full border-2 ${
+                    className={`block rounded-full border-2 ${
                       v === 1
                         ? "border-orange-700 bg-orange-500"
                         : "border-blue-800 bg-blue-500"
                     }`}
+                    style={{ height: Math.round(cell * 0.7), width: Math.round(cell * 0.7) }}
                   />
                 )}
               </button>
@@ -5647,8 +5663,11 @@ function Index() {
             const board = (
               grid: number[][],
               interactive: boolean,
+              cell = 40,
+              gap = 16,
             ) => (
-              <div className="inline-grid items-center justify-items-center" style={{ gridTemplateColumns: template }}>
+              <div className="inline-grid items-center justify-items-center" style={{ gridTemplateColumns: templateFor(cell, gap) }}>
+
                 {Array.from({ length: 2 * N - 1 }).map((_, gr) =>
                   Array.from({ length: 2 * N - 1 }).map((__, gc) => {
                     const rowIsCell = gr % 2 === 0;
@@ -5660,6 +5679,7 @@ function Index() {
                         grid[r][c],
                         `c-${gr}-${gc}`,
                         interactive,
+                        cell,
                         interactive ? () => toggleTgCell(r, c) : undefined,
                       );
                     }
@@ -5672,7 +5692,8 @@ function Index() {
                           type="button"
                           disabled={!interactive}
                           onClick={interactive ? () => toggleTgH(r, c) : undefined}
-                          className="flex h-10 w-4 items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          className="flex items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          style={{ height: cell, width: gap }}
                           aria-label={`horizontal relation row ${r + 1} column ${c + 1}`}
                         >
                           {relLabel(tgH[r][c])}
@@ -5688,14 +5709,16 @@ function Index() {
                           type="button"
                           disabled={!interactive}
                           onClick={interactive ? () => toggleTgV(r, c) : undefined}
-                          className="flex h-4 w-10 items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          className="flex items-center justify-center text-sm font-bold text-foreground disabled:cursor-default"
+                          style={{ height: gap, width: cell }}
                           aria-label={`vertical relation row ${r + 1} column ${c + 1}`}
                         >
                           {relLabel(tgV[r][c])}
                         </button>
                       );
                     }
-                    return <div key={`x-${gr}-${gc}`} className="h-4 w-4" />;
+                    return <div key={`x-${gr}-${gc}`} style={{ height: gap, width: gap }} />;
+
                   }),
                 )}
               </div>
@@ -5718,9 +5741,13 @@ function Index() {
                 {sol && (
                   <div className="space-y-3 rounded-md border p-4">
                     <div className="text-sm font-medium">
-                      Found {total} solution{total === 1 ? "" : "s"}.
+                      {total >= 20
+                        ? "Found at least 20 solutions."
+                        : `Found ${total} solution${total === 1 ? "" : "s"}.`}
                     </div>
-                    <div className="overflow-x-auto">{board(sol, false)}</div>
+                    <div className="text-sm font-medium">Solution #{Math.min(pageTg, total - 1) + 1}:</div>
+                    <div>{board(sol, false, 28, 12)}</div>
+
                     {total > 1 && (
                       <div className="flex flex-wrap items-center gap-2">
                         <Button variant="outline" size="sm" onClick={() => setPageTg(0)} disabled={pageTg === 0}>{"<<"}</Button>
