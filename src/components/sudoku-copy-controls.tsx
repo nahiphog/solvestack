@@ -118,7 +118,19 @@ export function SudokuCopyBoard({ board }: { board: Board }) {
       setStatus(`Copied as ${kind.toLowerCase()}`);
       setTimeout(() => setStatus(""), 1500);
       setOpen(false);
-    } catch {
+    } catch (err) {
+      console.error("Copy board failed", err);
+      if (kind === "Image") {
+        try {
+          await downloadImage();
+          setStatus("Copy blocked — downloaded");
+          setTimeout(() => setStatus(""), 2500);
+          setOpen(false);
+          return;
+        } catch (e2) {
+          console.error("Image download failed", e2);
+        }
+      }
       setStatus("Copy failed");
       setTimeout(() => setStatus(""), 1500);
     }
