@@ -649,6 +649,9 @@ function Index() {
   const [sudokuVarBoard, setSudokuVarBoard] = useState<string[][]>(SUDOKU_EMPTY.map((r) => r.slice()));
   const [sudokuVarResults, setSudokuVarResults] = useState<number[][][] | null>(null);
   const [pageSudokuVar, setPageSudokuVar] = useState(0);
+  const [sudokuSelected, setSudokuSelected] = useState<number[]>([]);
+  const [sudokuVarSelected, setSudokuVarSelected] = useState<number[]>([]);
+  const [sudokuImgStatus, setSudokuImgStatus] = useState("");
   const [sudokuVarKing, setSudokuVarKing] = useState(false);
   const [sudokuVarKnight, setSudokuVarKnight] = useState(false);
   const [sudokuVarDiagonal, setSudokuVarDiagonal] = useState(false);
