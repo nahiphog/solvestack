@@ -161,3 +161,97 @@ export function SudokuCopyBoard({ board }: { board: Board }) {
     </div>
   );
 }
+
+function drawBoard(ctx: CanvasRenderingContext2D, board: Board, ox: number, oy: number, cell: number) {
+  ctx.fillStyle = "#111111";
+  ctx.font = `bold ${Math.round(cell * 0.55)}px ui-sans-serif, system-ui, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const v = board[r]?.[c];
+      if (v && String(v).trim() !== "") {
+        ctx.fillText(String(v).trim(), ox + c * cell + cell / 2, oy + r * cell + cell / 2);
+      }
+    }
+  }
+  ctx.strokeStyle = "#9ca3af";
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 9; i++) {
+    ctx.beginPath(); ctx.moveTo(ox + i * cell, oy); ctx.lineTo(ox + i * cell, oy + 9 * cell); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox, oy + i * cell); ctx.lineTo(ox + 9 * cell, oy + i * cell); ctx.stroke();
+  }
+  ctx.strokeStyle = "#000000";
+  ctx.lineWidth = 3;
+  for (let i = 0; i <= 9; i += 3) {
+    ctx.beginPath(); ctx.moveTo(ox + i * cell, oy); ctx.lineTo(ox + i * cell, oy + 9 * cell); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox, oy + i * cell); ctx.lineTo(ox + 9 * cell, oy + i * cell); ctx.stroke();
+  }
+}
+
+async function boardsToImageBlob(boards: Board[], labels: string[]): Promise<Blob> {
+  const cell = 36;
+  const pad = 14;
+  const label = 20;
+  const gridSize = cell * 9;
+  const cols = Math.min(boards.length, 3);
+  const rows = Math.ceil(boards.length / cols);
+  const cw = gridSize + pad * 2;
+  const ch = gridSize + label + pad * 2;
+  const canvas = document.createElement("canvas");
+  canvas.width = cw * cols;
+  canvas.height = ch * rows;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  boards.forEach((b, i) => {
+    const ox = (i % cols) * cw + pad;
+    const oy = Math.floor(i / cols) * ch + pad;
+    ctx.fillStyle = "#374151";
+    ctx.font = "bold 14px ui-sans-serif, system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText(labels[i] ?? "", ox, oy + label / 2);
+    drawBoard(ctx, b, ox, oy + label, cell);
+  });
+  return await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(b => (b ? resolve(b) : reject(new Error("blob failed"))), "image/png");
+  });
+}
+
+/** Copies the given boards as one PNG image; falls back to downloading it. Returns a status message. */
+export async function copyBoardsAsImage(boards: (string | number)[][][], labels: string[]): Promise<string> {
+  const asStr: Board[] = boards.map(b => b.map(row => row.map(v => String(v ?? ""))));
+  const download = async () => {
+    const blob = await boardsToImageBlob(asStr, labels);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sudoku-solutions.png";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  const supported =
+    typeof ClipboardItem !== "undefined" &&
+    typeof navigator !== "undefined" &&
+    !!navigator.clipboard?.write;
+  if (!supported) {
+    await download();
+    return "Image copy unsupported — downloaded";
+  }
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({ "image/png": boardsToImageBlob(asStr, labels) }),
+    ]);
+    return "Copied as image";
+  } catch (err) {
+    console.error("Copy solutions image failed", err);
+    try {
+      await download();
+      return "Copy blocked — downloaded";
+    } catch (e2) {
+      console.error("Image download failed", e2);
+      return "Copy failed";
+    }
+  }
+}
