@@ -83,11 +83,34 @@ export function SudokuCopyBoard({ board }: { board: Board }) {
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
+  const downloadImage = async () => {
+    const blob = await boardToImageBlob(board);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sudoku-board.png";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const copy = async (kind: "String" | "Text" | "Image") => {
     try {
       if (kind === "Image") {
-        const blob = await boardToImageBlob(board);
-        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        const supported =
+          typeof ClipboardItem !== "undefined" &&
+          typeof navigator !== "undefined" &&
+          !!navigator.clipboard?.write;
+        if (!supported) {
+          await downloadImage();
+          setStatus("Image copy unsupported — downloaded");
+          setTimeout(() => setStatus(""), 2500);
+          setOpen(false);
+          return;
+        }
+        // Pass a promise so the write starts inside the click's user activation.
+        await navigator.clipboard.write([
+          new ClipboardItem({ "image/png": boardToImageBlob(board) }),
+        ]);
       } else {
         const text = kind === "String" ? boardToString(board) : boardToText(board);
         await navigator.clipboard.writeText(text);
@@ -95,7 +118,19 @@ export function SudokuCopyBoard({ board }: { board: Board }) {
       setStatus(`Copied as ${kind.toLowerCase()}`);
       setTimeout(() => setStatus(""), 1500);
       setOpen(false);
-    } catch {
+    } catch (err) {
+      console.error("Copy board failed", err);
+      if (kind === "Image") {
+        try {
+          await downloadImage();
+          setStatus("Copy blocked — downloaded");
+          setTimeout(() => setStatus(""), 2500);
+          setOpen(false);
+          return;
+        } catch (e2) {
+          console.error("Image download failed", e2);
+        }
+      }
       setStatus("Copy failed");
       setTimeout(() => setStatus(""), 1500);
     }
