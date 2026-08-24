@@ -8,7 +8,7 @@ import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon, ChevronDown, ChevronUp } from "lucide-react";
-import { SudokuCopyBoard } from "@/components/sudoku-copy-controls";
+import { SudokuCopyBoard, copyBoardsAsImage } from "@/components/sudoku-copy-controls";
 
 const bwAnalysisCache = new Map<string, BlunderwallAnalysis>();
 function getBwAnalysis(words: string[]): BlunderwallAnalysis {
@@ -649,6 +649,9 @@ function Index() {
   const [sudokuVarBoard, setSudokuVarBoard] = useState<string[][]>(SUDOKU_EMPTY.map((r) => r.slice()));
   const [sudokuVarResults, setSudokuVarResults] = useState<number[][][] | null>(null);
   const [pageSudokuVar, setPageSudokuVar] = useState(0);
+  const [sudokuSelected, setSudokuSelected] = useState<number[]>([]);
+  const [sudokuVarSelected, setSudokuVarSelected] = useState<number[]>([]);
+  const [sudokuImgStatus, setSudokuImgStatus] = useState("");
   const [sudokuVarKing, setSudokuVarKing] = useState(false);
   const [sudokuVarKnight, setSudokuVarKnight] = useState(false);
   const [sudokuVarDiagonal, setSudokuVarDiagonal] = useState(false);
@@ -812,8 +815,8 @@ function Index() {
   useEffect(() => { if (flResults) setSortMode("frequency"); }, [flResults]);
   useEffect(() => { setPageWor(0); }, [worResults]);
   useEffect(() => { setPageSd(0); }, [sdResults]);
-  useEffect(() => { setPageSudoku(0); }, [sudokuResults]);
-  useEffect(() => { setPageSudokuVar(0); }, [sudokuVarResults]);
+  useEffect(() => { setPageSudoku(0); setSudokuSelected([]); }, [sudokuResults]);
+  useEffect(() => { setPageSudokuVar(0); setSudokuVarSelected([]); }, [sudokuVarResults]);
   useEffect(() => { setPageSb(0); }, [sbResults]);
 
   const wordLength = MODE_WORD_LENGTH[String(mode)];
@@ -6806,31 +6809,61 @@ function Index() {
             page: number,
             setPage: (n: number) => void,
             colored: boolean,
+            selected: number[],
+            setSelected: React.Dispatch<React.SetStateAction<number[]>>,
           ) => (
             <section className="mt-10">
               <div className="mb-4 flex items-start justify-between gap-3">
                 <h2 className="text-lg font-semibold">
                   {results.length}{results.length === 200 ? "+" : ""} {results.length === 1 ? "solution" : "solutions"}
                 </h2>
-                <button
-                  onClick={() => {
-                    const items = results
-                      .map((sol, i) => `#${i + 1}\n${sol.map((row) => row.join(" ")).join("\n")}`)
-                      .join("\n\n");
-                    copyText(`${items}\n\nSolved via ${window.location.href}.`);
-                  }}
-                  className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-                  aria-label="Copy all solutions"
-                >
-                  {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
-                </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  {sudokuImgStatus && <span className="text-xs text-muted-foreground">{sudokuImgStatus}</span>}
+                  {selected.length > 0 && (
+                    <button
+                      onClick={() => setSelected([])}
+                      className="rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                    >
+                      Clear selection
+                    </button>
+                  )}
+                  <button
+                    onClick={async () => {
+                      if (selected.length > 0) {
+                        const idxs = [...selected].sort((a, b) => a - b);
+                        const msg = await copyBoardsAsImage(
+                          idxs.map((i) => results[i]),
+                          idxs.map((i) => `#${i + 1}`),
+                        );
+                        setSudokuImgStatus(msg);
+                        setTimeout(() => setSudokuImgStatus(""), 2500);
+                        return;
+                      }
+                      const items = results
+                        .map((sol, i) => `#${i + 1}\n${sol.map((row) => row.join(" ")).join("\n")}`)
+                        .join("\n\n");
+                      copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                    }}
+                    className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                    aria-label={selected.length > 0 ? "Copy selected solutions as image" : "Copy all solutions"}
+                  >
+                    {selected.length > 0
+                      ? (<><Copy size={14} /> Copy {selected.length} as image</>)
+                      : copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
+                  </button>
+                </div>
               </div>
               <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {results.slice(page * perPage, page * perPage + perPage).map((sol, idx) => {
                   const i = page * perPage + idx;
+                  const isSel = selected.includes(i);
                   return (
-                    <li key={i} className="rounded-lg border bg-card p-3 text-card-foreground">
-                      <div className="mb-2 text-xs text-muted-foreground">#{i + 1}</div>
+                    <li
+                      key={i}
+                      onClick={() => setSelected((prev) => prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i])}
+                      className={`cursor-pointer rounded-lg border bg-card p-3 text-card-foreground transition ${isSel ? "border-emerald-500 ring-2 ring-emerald-500/50" : "hover:border-foreground/30"}`}
+                    >
+                      <div className="mb-2 text-xs text-muted-foreground">#{i + 1}{isSel ? " — selected" : ""}</div>
                       <div className="relative inline-block border-[3px] border-black dark:border-white">
                         {sol.map((row, r) => (
                           <div key={r} className="flex">
@@ -6876,8 +6909,8 @@ function Index() {
           );
           return (
             <>
-              {sudokuResults && renderSudokuResults(sudokuResults, pageSudoku, setPageSudoku, false)}
-              {sudokuVarResults && renderSudokuResults(sudokuVarResults, pageSudokuVar, setPageSudokuVar, true)}
+              {sudokuResults && renderSudokuResults(sudokuResults, pageSudoku, setPageSudoku, false, sudokuSelected, setSudokuSelected)}
+              {sudokuVarResults && renderSudokuResults(sudokuVarResults, pageSudokuVar, setPageSudokuVar, true, sudokuVarSelected, setSudokuVarSelected)}
             </>
           );
         })()}
