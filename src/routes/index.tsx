@@ -8,7 +8,7 @@ import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon, ChevronDown, ChevronUp } from "lucide-react";
-import { SudokuCopyBoard } from "@/components/sudoku-copy-controls";
+import { SudokuCopyBoard, copyBoardsAsImage } from "@/components/sudoku-copy-controls";
 
 const bwAnalysisCache = new Map<string, BlunderwallAnalysis>();
 function getBwAnalysis(words: string[]): BlunderwallAnalysis {
@@ -6909,8 +6909,8 @@ function Index() {
           );
           return (
             <>
-              {sudokuResults && renderSudokuResults(sudokuResults, pageSudoku, setPageSudoku, false)}
-              {sudokuVarResults && renderSudokuResults(sudokuVarResults, pageSudokuVar, setPageSudokuVar, true)}
+              {sudokuResults && renderSudokuResults(sudokuResults, pageSudoku, setPageSudoku, false, sudokuSelected, setSudokuSelected)}
+              {sudokuVarResults && renderSudokuResults(sudokuVarResults, pageSudokuVar, setPageSudokuVar, true, sudokuVarSelected, setSudokuVarSelected)}
             </>
           );
         })()}
