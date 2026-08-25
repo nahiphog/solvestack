@@ -20,14 +20,15 @@ export function siteUrl(): string {
 }
 
 /** Draws the site URL at the bottom-right of the canvas inside the given footer band. */
-export function drawUrlFooter(ctx: CanvasRenderingContext2D, width: number, baselineY: number, rightPad: number) {
+export function drawUrlFooter(ctx: CanvasRenderingContext2D, width: number, baselineY: number, rightPad: number, prefix = "") {
   const url = siteUrl();
   if (!url) return;
+  const text = prefix ? `${prefix}${url}` : url;
   ctx.fillStyle = "#6b7280";
   ctx.font = "14px ui-sans-serif, system-ui, sans-serif";
   ctx.textAlign = "right";
   ctx.textBaseline = "middle";
-  ctx.fillText(url, width - rightPad, baselineY);
+  ctx.fillText(text, width - rightPad, baselineY);
 }
 
 async function boardToImageBlob(board: Board): Promise<Blob> {
