@@ -772,6 +772,8 @@ function Index() {
   const [tgH, setTgH] = useState<number[][]>(() => TG_DEFAULT_H.map((r) => r.slice()));
   const [tgV, setTgV] = useState<number[][]>(() => TG_DEFAULT_V.map((r) => r.slice()));
   const [tgSolutions, setTgSolutions] = useState<number[][][] | null>(null);
+  const [tgCopyStatus, setTgCopyStatus] = useState("");
+
   const [tgError, setTgError] = useState<string | null>(null);
   const [pageTg, setPageTg] = useState(0);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
