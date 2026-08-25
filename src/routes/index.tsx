@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Sun, Moon, ChevronDown, ChevronUp } from "lucide-react";
 import { SudokuCopyBoard, copyBoardsAsImage } from "@/components/sudoku-copy-controls";
+import { copyTangoSolutionsAsImage } from "@/lib/tango-image";
 
 const bwAnalysisCache = new Map<string, BlunderwallAnalysis>();
 function getBwAnalysis(words: string[]): BlunderwallAnalysis {
@@ -771,6 +772,8 @@ function Index() {
   const [tgH, setTgH] = useState<number[][]>(() => TG_DEFAULT_H.map((r) => r.slice()));
   const [tgV, setTgV] = useState<number[][]>(() => TG_DEFAULT_V.map((r) => r.slice()));
   const [tgSolutions, setTgSolutions] = useState<number[][][] | null>(null);
+  const [tgCopyStatus, setTgCopyStatus] = useState("");
+
   const [tgError, setTgError] = useState<string | null>(null);
   const [pageTg, setPageTg] = useState(0);
   const [selectedMarbless, setSelectedMarbless] = useState<Set<number>>(new Set());
@@ -4909,22 +4912,23 @@ function Index() {
                 {analysis && (
                   <div className="rounded-lg border-2 border-border p-4">
                     <h2 className="mb-2 text-lg font-semibold">Starting word analysis</h2>
-                    <p className="text-sm">
-                      Best first {analysis.best.length === 1 ? "guess" : "guesses"}:
-                    </p>
-                    <ul className="mt-1 space-y-1 text-sm">
-                      {analysis.best.map((w) => {
-                        const s = analysis.starts.find((x) => x.word === w);
-                        return (
-                          <li key={w}>
-                            <span className="font-mono font-semibold text-green-700 dark:text-green-400">{w}</span>
-                            {s && Number.isFinite(s.avg) && (
-                              <> — {s.avg.toFixed(4)} average guesses</>
-                            )}
-                          </li>
-                        );
-                      })}
-                    </ul>
+                    {(() => {
+                      const bestAvg = analysis.starts.find((x) => x.word === analysis.best[0])?.avg;
+                      return (
+                        <p className="text-sm">
+                          Best first {analysis.best.length === 1 ? "guess" : "guesses"}:{" "}
+                          {analysis.best.map((w, i) => (
+                            <Fragment key={w}>
+                              {i > 0 && (i === analysis.best.length - 1 ? " and " : ", ")}
+                              <span className="font-mono font-semibold text-green-700 dark:text-green-400">{w}</span>
+                            </Fragment>
+                          ))}
+                          {bestAvg !== undefined && Number.isFinite(bestAvg) && (
+                            <> — {bestAvg.toFixed(4)} average guesses needed to win the game.</>
+                          )}
+                        </p>
+                      );
+                    })()}
                   </div>
                 )}
 
@@ -5475,7 +5479,7 @@ function Index() {
                               size="sm"
                               onClick={async () => {
                                 try {
-                                  await navigator.clipboard.writeText(fpResult.tileMoves.join(" -> "));
+                                  await navigator.clipboard.writeText(`${fpResult.tileMoves.join(" -> ")}\nSolved via ${window.location.href}`);
                                   setFpCopied(true);
                                   setTimeout(() => setFpCopied(false), 1500);
                                 } catch { /* ignore */ }
@@ -5748,7 +5752,21 @@ function Index() {
                         ? "Found at least 20 solutions."
                         : `Found ${total} solution${total === 1 ? "" : "s"}.`}
                     </div>
-                    <div className="text-sm font-medium">Solution #{Math.min(pageTg, total - 1) + 1}:</div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="text-sm font-medium">Solution #{Math.min(pageTg, total - 1) + 1}:</div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          const msg = await copyTangoSolutionsAsImage(tgSolutions ?? [], tgH, tgV);
+                          setTgCopyStatus(msg);
+                          setTimeout(() => setTgCopyStatus(""), 2000);
+                        }}
+                      >
+                        Copy all
+                      </Button>
+                      {tgCopyStatus && <span className="text-xs text-muted-foreground">{tgCopyStatus}</span>}
+                    </div>
                     <div>{board(sol, false, 28, 12)}</div>
 
                     {total > 1 && (
@@ -6401,7 +6419,7 @@ function Index() {
                   {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> Copy all</>)}
                 </button>
               </div>
-              {requiredLetters.size === 7 && (
+              {requiredLetters.size === 7 && pangrams.length > 0 && (
                 <div className="mb-3 rounded-lg border border-amber-500/60 bg-amber-500/10 p-3 text-sm">
                   <div className="font-semibold text-amber-700 dark:text-amber-300">
                     The {pangrams.length} {pangrams.length === 1 ? "word" : "words"} highlighted in yellow {pangrams.length === 1 ? "uses" : "use"} all 7 letters.

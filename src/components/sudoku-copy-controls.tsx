@@ -11,16 +11,38 @@ function boardToText(board: Board): string {
   return board.map(row => row.map(c => (c && c.trim() !== "" ? c.trim() : "0")).join(" ")).join("\n");
 }
 
+export function siteUrl(): string {
+  try {
+    return typeof window !== "undefined" ? window.location.href : "";
+  } catch {
+    return "";
+  }
+}
+
+/** Draws the site URL at the bottom-right of the canvas inside the given footer band. */
+export function drawUrlFooter(ctx: CanvasRenderingContext2D, width: number, baselineY: number, rightPad: number, prefix = "") {
+  const url = siteUrl();
+  if (!url) return;
+  const text = prefix ? `${prefix}${url}` : url;
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "14px ui-sans-serif, system-ui, sans-serif";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, width - rightPad, baselineY);
+}
+
 async function boardToImageBlob(board: Board): Promise<Blob> {
   const cell = 48;
   const pad = 8;
+  const footer = 26;
   const size = cell * 9 + pad * 2;
   const canvas = document.createElement("canvas");
   canvas.width = size;
-  canvas.height = size;
+  canvas.height = size + footer;
   const ctx = canvas.getContext("2d")!;
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
 
   // Numbers
   ctx.fillStyle = "#111111";
@@ -64,7 +86,10 @@ async function boardToImageBlob(board: Board): Promise<Blob> {
     ctx.stroke();
   }
 
+  drawUrlFooter(ctx, canvas.width, size + footer / 2, pad);
+
   return await new Promise<Blob>((resolve, reject) => {
+
     canvas.toBlob(b => (b ? resolve(b) : reject(new Error("blob failed"))), "image/png");
   });
 }
@@ -198,9 +223,10 @@ async function boardsToImageBlob(boards: Board[], labels: string[]): Promise<Blo
   const rows = Math.ceil(boards.length / cols);
   const cw = gridSize + pad * 2;
   const ch = gridSize + label + pad * 2;
+  const footer = 26;
   const canvas = document.createElement("canvas");
   canvas.width = cw * cols;
-  canvas.height = ch * rows;
+  canvas.height = ch * rows + footer;
   const ctx = canvas.getContext("2d")!;
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -214,7 +240,9 @@ async function boardsToImageBlob(boards: Board[], labels: string[]): Promise<Blo
     ctx.fillText(labels[i] ?? "", ox, oy + label / 2);
     drawBoard(ctx, b, ox, oy + label, cell);
   });
+  drawUrlFooter(ctx, canvas.width, ch * rows + footer / 2, pad);
   return await new Promise<Blob>((resolve, reject) => {
+
     canvas.toBlob(b => (b ? resolve(b) : reject(new Error("blob failed"))), "image/png");
   });
 }
