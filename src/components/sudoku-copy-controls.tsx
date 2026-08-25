@@ -11,16 +11,37 @@ function boardToText(board: Board): string {
   return board.map(row => row.map(c => (c && c.trim() !== "" ? c.trim() : "0")).join(" ")).join("\n");
 }
 
+export function siteUrl(): string {
+  try {
+    return typeof window !== "undefined" ? window.location.href : "";
+  } catch {
+    return "";
+  }
+}
+
+/** Draws the site URL at the bottom-right of the canvas inside the given footer band. */
+export function drawUrlFooter(ctx: CanvasRenderingContext2D, width: number, baselineY: number, rightPad: number) {
+  const url = siteUrl();
+  if (!url) return;
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "14px ui-sans-serif, system-ui, sans-serif";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  ctx.fillText(url, width - rightPad, baselineY);
+}
+
 async function boardToImageBlob(board: Board): Promise<Blob> {
   const cell = 48;
   const pad = 8;
+  const footer = 26;
   const size = cell * 9 + pad * 2;
   const canvas = document.createElement("canvas");
   canvas.width = size;
-  canvas.height = size;
+  canvas.height = size + footer;
   const ctx = canvas.getContext("2d")!;
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
 
   // Numbers
   ctx.fillStyle = "#111111";
