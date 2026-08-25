@@ -222,9 +222,10 @@ async function boardsToImageBlob(boards: Board[], labels: string[]): Promise<Blo
   const rows = Math.ceil(boards.length / cols);
   const cw = gridSize + pad * 2;
   const ch = gridSize + label + pad * 2;
+  const footer = 26;
   const canvas = document.createElement("canvas");
   canvas.width = cw * cols;
-  canvas.height = ch * rows;
+  canvas.height = ch * rows + footer;
   const ctx = canvas.getContext("2d")!;
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -238,7 +239,9 @@ async function boardsToImageBlob(boards: Board[], labels: string[]): Promise<Blo
     ctx.fillText(labels[i] ?? "", ox, oy + label / 2);
     drawBoard(ctx, b, ox, oy + label, cell);
   });
+  drawUrlFooter(ctx, canvas.width, ch * rows + footer / 2, pad);
   return await new Promise<Blob>((resolve, reject) => {
+
     canvas.toBlob(b => (b ? resolve(b) : reject(new Error("blob failed"))), "image/png");
   });
 }
