@@ -83,7 +83,7 @@ async function tangoBlob(grids: Grid[], hRel: number[][], vRel: number[][]): Pro
     ctx.fillText(`Solution #${i + 1}`, ox, oy + label / 2);
     drawTango(ctx, g, hRel, vRel, ox, oy + label, cell, gap);
   });
-  drawUrlFooter(ctx, canvas.width, ch * rows + footer / 2, pad);
+  drawUrlFooter(ctx, canvas.width, ch * rows + footer / 2, pad, "Solved via ");
   return await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("blob failed"))), "image/png");
   });
