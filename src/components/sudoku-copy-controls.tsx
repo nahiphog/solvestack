@@ -85,7 +85,10 @@ async function boardToImageBlob(board: Board): Promise<Blob> {
     ctx.stroke();
   }
 
+  drawUrlFooter(ctx, canvas.width, size + footer / 2, pad);
+
   return await new Promise<Blob>((resolve, reject) => {
+
     canvas.toBlob(b => (b ? resolve(b) : reject(new Error("blob failed"))), "image/png");
   });
 }
