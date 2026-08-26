@@ -293,7 +293,7 @@ function Index() {
   }, [wordleResults, sortMode, mode, _freqLoaded]);
   // per-solver frequency sorting hooks appear after their state declarations below
   const [wordleAcceptAllValid, setWordleAcceptAllValid] = useState(false);
-  const [wordleStartingCount, setWordleStartingCount] = useState<number>(2);
+  const [wordleStartingCount, setWordleStartingCount] = useState<number>(3);
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
   const [wrdlWordMap, setWrdlWordMap] = useState<Record<string, string[]> | null>(null);
