@@ -4208,65 +4208,6 @@ function Index() {
               </select>
               <span>letters.</span>
             </div>
-            {mastermindLen === 5 && (
-              <div className="flex items-center gap-2 text-sm">
-                <span>Optional:</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const n = mastermindAddCount;
-                    const sheet = (wordleStartingWords as Record<string, string[][]>)[String(n)];
-                    if (!sheet || sheet.length === 0) return;
-                    const row = sheet[Math.floor(Math.random() * sheet.length)];
-                    const additions = row.slice(0, n).map((w) => ({ word: w.toUpperCase(), greens: 0, yellows: 0 }));
-                    setMastermindRows((prev) => [...prev.filter((r) => !isEmptyGuessWord(r.word)), ...additions]);
-                    setMastermindResults(null);
-                  }}
-                  className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
-                >
-                  Add
-                </button>
-                <select
-                  className="rounded border border-border bg-background px-2 py-1"
-                  value={mastermindAddCount}
-                  onChange={(e) => setMastermindAddCount(parseInt(e.target.value, 10))}
-                >
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                </select>
-                <span>strategic starting words.</span>
-              </div>
-            )}
-            {mastermindLen === 4 && (
-              <div className="flex items-center gap-2 text-sm">
-                <span>Optional:</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const triplets = [
-                      ["RANK", "SHOW", "TIME"],
-                      ["LEAF", "ROCK", "WIND"],
-                      ["KIND", "LOVE", "STAR"],
-                      ["JUMP", "LIFE", "TASK"],
-                      ["HOPE", "RUNS", "WALK"],
-                      ["FISH", "PLAY", "WORD"],
-                    ];
-                    const pick = triplets[Math.floor(Math.random() * triplets.length)];
-                    const additions = pick.map((w) => ({ word: w, greens: 0, yellows: 0 }));
-                    setMastermindRows((prev) => [...prev.filter((r) => !isEmptyGuessWord(r.word)), ...additions]);
-                    setMastermindResults(null);
-                  }}
-                  className="rounded border border-border bg-background px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
-                >
-                  Add
-                </button>
-                <select className="rounded border border-border bg-background px-2 py-1" value={3} onChange={() => {}}>
-                  <option value="3">3</option>
-                </select>
-                <span>strategic starting words.</span>
-              </div>
-            )}
 
             {mastermindRows.map((row, ri) => (
               <div key={ri} className="flex flex-wrap items-end gap-3 rounded-lg border-2 border-border p-3">
