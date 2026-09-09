@@ -2530,7 +2530,7 @@ function Index() {
               <a href="https://reversle.net/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Reversle</a>
               <a href="https://crosswordle.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">CrossWordle</a>
             </p>
-            <p>Just like the hard mode of Wordle: Fill in the grid with valid 5-letter English words. And, any revealed hints must be used in subsequent guesses.</p>
+            <p>Fill in the grid with valid 5-letter English words. Like a regular Wordle game, each row's feedback narrows down the list of words available for the following rows.</p>
             <div className="flex items-center gap-2">
               <span>Input rows:</span>
               <select
