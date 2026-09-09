@@ -6738,7 +6738,7 @@ function Index() {
                   </li>
                 ))}
               </ol>
-              <Paginator page={pageRecon} setPage={setPageRecon} total={sorted.length} />
+              <Paginator page={pageRecon} setPage={setPageRecon} total={sorted.length} perPage={60} />
             </section>
           );
         })()}
