@@ -301,11 +301,19 @@ function Index() {
   const [reconPatterns, setReconPatterns] = useState<WordleColor[][]>(() =>
     Array.from({ length: 3 }, () => Array(5).fill("GREY") as WordleColor[])
   );
+  const [reconResults, setReconResults] = useState<string[][] | null>(null);
+  const [reconError, setReconError] = useState<string | null>(null);
+  const [reconSolving, setReconSolving] = useState(false);
+  const [pageRecon, setPageRecon] = useState(0);
   const setReconRowCount = (n: number) => {
     setReconRows(n);
     setReconPatterns(Array.from({ length: n - 1 }, () => Array(5).fill("GREY") as WordleColor[]));
+    setReconResults(null);
+    setReconError(null);
   };
   const cycleReconTile = (ri: number, ti: number) => {
+    setReconResults(null);
+    setReconError(null);
     setReconPatterns((prev) =>
       prev.map((row, i) =>
         i === ri
@@ -313,6 +321,38 @@ function Index() {
           : row
       )
     );
+  };
+  const resetReconGrid = () => {
+    setReconWord("");
+    setReconPatterns(Array.from({ length: reconRows - 1 }, () => Array(5).fill("GREY") as WordleColor[]));
+    setReconResults(null);
+    setReconError(null);
+  };
+  const solveReconstruction = async () => {
+    const target = reconWord.replace(/[^A-Za-z]/g, "").toUpperCase();
+    setReconResults(null);
+    setReconError(null);
+    if (target.length !== 5) {
+      setReconError("Enter a 5-letter word in the last (green) row.");
+      return;
+    }
+    setReconSolving(true);
+    try {
+      const { reconstructionSolve, isValid5LetterWord, ensureFrequenciesLoaded } = await import("@/lib/wordLadder");
+      if (!(await isValid5LetterWord(target))) {
+        setReconError(`"${target}" is not a valid 5-letter word.`);
+        return;
+      }
+      await ensureFrequenciesLoaded();
+      const sols = await reconstructionSolve(target, reconPatterns);
+      setPageRecon(0);
+      setSortMode("frequency");
+      setReconResults(sols);
+    } catch {
+      setReconError("Something went wrong while solving.");
+    } finally {
+      setReconSolving(false);
+    }
   };
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
