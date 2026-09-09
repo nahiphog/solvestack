@@ -6715,6 +6715,34 @@ function Index() {
 
 
 
+        {reconResults && (() => {
+          const sorted = sortMode === "frequency"
+            ? [...reconResults]
+                .map((s, i) => ({ s, i, min: Math.min(...s.map((w) => getWordFrequency(w))) }))
+                .sort((a, b) => b.min - a.min || a.i - b.i)
+                .map((x) => x.s)
+            : [...reconResults].sort((a, b) => a.join(" ").localeCompare(b.join(" ")));
+          return (
+            <section className="mt-10">
+              <h2 className="mb-4 text-lg font-semibold">
+                {reconResults.length} {reconResults.length === 1 ? "sequence" : "sequences"}
+              </h2>
+              {reconResults.length > 0 && <SortToggle value={sortMode} onChange={setSortMode} />}
+              <ol className="space-y-3">
+                {sorted.slice(pageRecon * 60, pageRecon * 60 + 60).map((sol, idx) => (
+                  <li key={pageRecon * 60 + idx} className="rounded-lg border border-border bg-card p-3 text-card-foreground">
+                    <div className="mb-1 text-xs text-muted-foreground">#{pageRecon * 60 + idx + 1}</div>
+                    <div className="font-mono text-sm font-semibold tracking-widest">
+                      {sol.join(" → ")}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <Paginator page={pageRecon} setPage={setPageRecon} total={sorted.length} />
+            </section>
+          );
+        })()}
+
         {marblessResults && (() => {
           const sortedMarbless = sortMode === "frequency"
             ? [...marblessResults]
