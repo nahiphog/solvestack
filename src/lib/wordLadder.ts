@@ -1869,31 +1869,17 @@ export function tangoSolve(
   return solutions;
 }
 
-// ---------- Reconstruction (reverse Wordle, hard mode) ----------
-function reconCompliesWithHardMode(
+// ---------- Reconstruction (reverse Wordle) ----------
+// Regular Wordle semantics: after each guessed row, the candidate list is
+// filtered down to words consistent with that row's feedback; the next row's
+// guess must come from that shrinking list.
+function reconConsistent(
   word: string,
-  path: string[],
-  patterns: WordleColor[][],
+  guess: string,
+  pattern: WordleColor[],
 ): boolean {
-  for (let k = 0; k < path.length; k++) {
-    const prev = path[k];
-    const pat = patterns[k];
-    const required: string[] = [];
-    for (let i = 0; i < pat.length; i++) {
-      if (pat[i] === "GREEN") {
-        if (word[i] !== prev[i]) return false;
-        required.push(prev[i]);
-      } else if (pat[i] === "YELLOW") {
-        required.push(prev[i]);
-      }
-    }
-    const pool = word.split("");
-    for (const ch of required) {
-      const idx = pool.indexOf(ch);
-      if (idx === -1) return false;
-      pool[idx] = "";
-    }
-  }
+  const out = wordleOutput(guess, word);
+  for (let i = 0; i < out.length; i++) if (out[i] !== pattern[i]) return false;
   return true;
 }
 
@@ -1904,30 +1890,32 @@ export async function reconstructionSolve(
 ): Promise<string[][]> {
   const words = await getFiveLetterWords();
   const t = target.toUpperCase();
-  const candidates = patterns.map((p) =>
-    words.filter((w) => {
-      const out = wordleOutput(w, t);
-      for (let i = 0; i < out.length; i++) if (out[i] !== p[i]) return false;
-      return true;
-    }),
-  );
   const solutions: string[][] = [];
   const path: string[] = [];
-  const backtrack = (rowIdx: number): void => {
+  const backtrack = (rowIdx: number, pool: string[]): void => {
     if (solutions.length >= maxSolutions) return;
     if (rowIdx === patterns.length) {
       solutions.push([...path, t]);
       return;
     }
-    for (const w of candidates[rowIdx]) {
+    const pat = patterns[rowIdx];
+    for (const w of pool) {
       if (solutions.length >= maxSolutions) return;
-      if (reconCompliesWithHardMode(w, path, patterns.slice(0, rowIdx))) {
-        path.push(w);
-        backtrack(rowIdx + 1);
-        path.pop();
+      const out = wordleOutput(w, t);
+      let matches = true;
+      for (let i = 0; i < out.length; i++) {
+        if (out[i] !== pat[i]) {
+          matches = false;
+          break;
+        }
       }
+      if (!matches) continue;
+      const nextPool = pool.filter((cand) => reconConsistent(cand, w, pat));
+      path.push(w);
+      backtrack(rowIdx + 1, nextPool);
+      path.pop();
     }
   };
-  backtrack(0);
+  backtrack(0, words);
   return solutions;
 }
