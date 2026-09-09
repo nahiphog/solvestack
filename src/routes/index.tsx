@@ -6092,6 +6092,8 @@ function Index() {
                   onFocus={(e) => e.currentTarget.select()}
                   onChange={(e) => {
                     const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                    setReconResults(null);
+                    setReconError(null);
                     setReconWord((prev) => {
                       const arr = prev.padEnd(5, " ").split("");
                       arr[ti] = v ? v.slice(-1) : " ";
@@ -6115,6 +6117,13 @@ function Index() {
                 />
               ))}
             </div>
+            <div className="flex flex-nowrap gap-2 pt-1">
+              <Button onClick={resetReconGrid} variant="outline" size="sm">Reset grid</Button>
+              <Button onClick={solveReconstruction} disabled={reconSolving} size="sm">
+                {reconSolving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+            {reconError && <p className="text-sm text-destructive">{reconError}</p>}
           </div>
 
         ) : mode === "wordiply" ? (
