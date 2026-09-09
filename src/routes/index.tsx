@@ -301,11 +301,19 @@ function Index() {
   const [reconPatterns, setReconPatterns] = useState<WordleColor[][]>(() =>
     Array.from({ length: 3 }, () => Array(5).fill("GREY") as WordleColor[])
   );
+  const [reconResults, setReconResults] = useState<string[][] | null>(null);
+  const [reconError, setReconError] = useState<string | null>(null);
+  const [reconSolving, setReconSolving] = useState(false);
+  const [pageRecon, setPageRecon] = useState(0);
   const setReconRowCount = (n: number) => {
     setReconRows(n);
     setReconPatterns(Array.from({ length: n - 1 }, () => Array(5).fill("GREY") as WordleColor[]));
+    setReconResults(null);
+    setReconError(null);
   };
   const cycleReconTile = (ri: number, ti: number) => {
+    setReconResults(null);
+    setReconError(null);
     setReconPatterns((prev) =>
       prev.map((row, i) =>
         i === ri
@@ -313,6 +321,38 @@ function Index() {
           : row
       )
     );
+  };
+  const resetReconGrid = () => {
+    setReconWord("");
+    setReconPatterns(Array.from({ length: reconRows - 1 }, () => Array(5).fill("GREY") as WordleColor[]));
+    setReconResults(null);
+    setReconError(null);
+  };
+  const solveReconstruction = async () => {
+    const target = reconWord.replace(/[^A-Za-z]/g, "").toUpperCase();
+    setReconResults(null);
+    setReconError(null);
+    if (target.length !== 5) {
+      setReconError("Enter a 5-letter word in the last (green) row.");
+      return;
+    }
+    setReconSolving(true);
+    try {
+      const { reconstructionSolve, isValid5LetterWord, ensureFrequenciesLoaded } = await import("@/lib/wordLadder");
+      if (!(await isValid5LetterWord(target))) {
+        setReconError(`"${target}" is not a valid 5-letter word.`);
+        return;
+      }
+      await ensureFrequenciesLoaded();
+      const sols = await reconstructionSolve(target, reconPatterns);
+      setPageRecon(0);
+      setSortMode("frequency");
+      setReconResults(sols);
+    } catch {
+      setReconError("Something went wrong while solving.");
+    } finally {
+      setReconSolving(false);
+    }
   };
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
@@ -6052,6 +6092,8 @@ function Index() {
                   onFocus={(e) => e.currentTarget.select()}
                   onChange={(e) => {
                     const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                    setReconResults(null);
+                    setReconError(null);
                     setReconWord((prev) => {
                       const arr = prev.padEnd(5, " ").split("");
                       arr[ti] = v ? v.slice(-1) : " ";
@@ -6075,6 +6117,13 @@ function Index() {
                 />
               ))}
             </div>
+            <div className="flex flex-nowrap gap-2 pt-1">
+              <Button onClick={resetReconGrid} variant="outline" size="sm">Reset grid</Button>
+              <Button onClick={solveReconstruction} disabled={reconSolving} size="sm">
+                {reconSolving ? "Solving..." : "Solve"}
+              </Button>
+            </div>
+            {reconError && <p className="text-sm text-destructive">{reconError}</p>}
           </div>
 
         ) : mode === "wordiply" ? (
@@ -6665,6 +6714,34 @@ function Index() {
 
 
 
+
+        {reconResults && (() => {
+          const sorted = sortMode === "frequency"
+            ? [...reconResults]
+                .map((s, i) => ({ s, i, min: Math.min(...s.map((w) => getWordFrequency(w))) }))
+                .sort((a, b) => b.min - a.min || a.i - b.i)
+                .map((x) => x.s)
+            : [...reconResults].sort((a, b) => a.join(" ").localeCompare(b.join(" ")));
+          return (
+            <section className="mt-10">
+              <h2 className="mb-4 text-lg font-semibold">
+                {reconResults.length} {reconResults.length === 1 ? "sequence" : "sequences"}
+              </h2>
+              {reconResults.length > 0 && <SortToggle value={sortMode} onChange={setSortMode} />}
+              <ol className="space-y-3">
+                {sorted.slice(pageRecon * 60, pageRecon * 60 + 60).map((sol, idx) => (
+                  <li key={pageRecon * 60 + idx} className="rounded-lg border border-border bg-card p-3 text-card-foreground">
+                    <div className="mb-1 text-xs text-muted-foreground">#{pageRecon * 60 + idx + 1}</div>
+                    <div className="font-mono text-sm font-semibold tracking-widest">
+                      {sol.join(" → ")}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <Paginator page={pageRecon} setPage={setPageRecon} total={sorted.length} perPage={60} />
+            </section>
+          );
+        })()}
 
         {marblessResults && (() => {
           const sortedMarbless = sortMode === "frequency"
