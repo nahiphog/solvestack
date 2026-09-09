@@ -296,6 +296,24 @@ function Index() {
   // per-solver frequency sorting hooks appear after their state declarations below
   const [wordleAcceptAllValid, setWordleAcceptAllValid] = useState(false);
   const [wordleStartingCount, setWordleStartingCount] = useState<number>(3);
+  const [reconRows, setReconRows] = useState<number>(4);
+  const [reconWord, setReconWord] = useState<string>("");
+  const [reconPatterns, setReconPatterns] = useState<WordleColor[][]>(() =>
+    Array.from({ length: 3 }, () => Array(5).fill("GREY") as WordleColor[])
+  );
+  const setReconRowCount = (n: number) => {
+    setReconRows(n);
+    setReconPatterns(Array.from({ length: n - 1 }, () => Array(5).fill("GREY") as WordleColor[]));
+  };
+  const cycleReconTile = (ri: number, ti: number) => {
+    setReconPatterns((prev) =>
+      prev.map((row, i) =>
+        i === ri
+          ? row.map((c, j) => (j === ti ? (c === "GREY" ? "YELLOW" : c === "YELLOW" ? "GREEN" : "GREY") : c))
+          : row
+      )
+    );
+  };
   const [wrdlResults, setWrdlResults] = useState<[string, string[]][] | null>(null);
   const [pageWrdl, setPageWrdl] = useState(0);
   const [wrdlWordMap, setWrdlWordMap] = useState<Record<string, string[]> | null>(null);
@@ -2466,6 +2484,27 @@ function Index() {
           </div>
         )}
 
+        {mode === "reconstruction" && (
+          <div className="mb-4 text-sm text-muted-foreground space-y-2">
+            <p className="flex flex-wrap gap-3">
+              <a href="https://reversle.net/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Reversle</a>
+              <a href="https://crosswordle.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">CrossWordle</a>
+            </p>
+            <p>Just like the hard mode of Wordle: Fill in the grid with valid 5-letter English words. And, any revealed hints must be used in subsequent guesses.</p>
+            <div className="flex items-center gap-2">
+              <span>Input rows:</span>
+              <select
+                value={reconRows}
+                onChange={(e) => setReconRowCount(Number(e.target.value))}
+                className="rounded border border-border bg-background px-2 py-1 text-sm text-foreground"
+              >
+                {[3, 4, 5, 6, 7, 8].map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
         {mode === "threepeat" && (
           <p className="mb-4 text-sm text-muted-foreground">
             Type the same letters for all three words.
@@ -5978,6 +6017,66 @@ function Index() {
               </section>
             )}
           </div>
+        ) : mode === "reconstruction" ? (
+
+          <div className="space-y-2">
+            {reconPatterns.map((row, ri) => (
+              <div key={ri} className="flex gap-1.5">
+                {row.map((color, ti) => (
+                  <button
+                    key={ti}
+                    type="button"
+                    onClick={() => cycleReconTile(ri, ti)}
+                    aria-label={`Row ${ri + 1} tile ${ti + 1}: ${color}`}
+                    className={`flex h-12 w-12 items-center justify-center rounded border-2 text-center font-mono text-xl font-bold uppercase transition ${
+                      color === "GREEN"
+                        ? "bg-green-600 text-white border-green-600"
+                        : color === "YELLOW"
+                          ? "bg-yellow-500 text-white border-yellow-500"
+                          : "bg-muted text-foreground border-border"
+                    }`}
+                  />
+                ))}
+              </div>
+            ))}
+            <div className="flex gap-1.5">
+              {Array.from({ length: 5 }).map((_, ti) => (
+                <input
+                  key={ti}
+                  id={`recon-tile-${ti}`}
+                  type="text"
+                  inputMode="text"
+                  autoComplete="off"
+                  value={reconWord[ti] ?? ""}
+                  aria-label={`Answer tile ${ti + 1}`}
+                  onFocus={(e) => e.currentTarget.select()}
+                  onChange={(e) => {
+                    const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                    setReconWord((prev) => {
+                      const arr = prev.padEnd(5, " ").split("");
+                      arr[ti] = v ? v.slice(-1) : " ";
+                      return arr.join("").replace(/ +$/, "");
+                    });
+                    if (v) document.getElementById(`recon-tile-${ti + 1}`)?.focus();
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Backspace" && !(reconWord[ti] ?? "").trim() && ti > 0) {
+                      e.preventDefault();
+                      document.getElementById(`recon-tile-${ti - 1}`)?.focus();
+                    } else if (e.key === "ArrowLeft") {
+                      e.preventDefault();
+                      document.getElementById(`recon-tile-${ti - 1}`)?.focus();
+                    } else if (e.key === "ArrowRight") {
+                      e.preventDefault();
+                      document.getElementById(`recon-tile-${ti + 1}`)?.focus();
+                    }
+                  }}
+                  className="flex h-12 w-12 items-center justify-center rounded border-2 border-green-600 bg-green-600 text-center font-mono text-xl font-bold uppercase text-white caret-white outline-none transition focus:ring-2 focus:ring-ring"
+                />
+              ))}
+            </div>
+          </div>
+
         ) : mode === "wordiply" ? (
 
 
