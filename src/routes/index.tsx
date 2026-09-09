@@ -109,6 +109,7 @@ const DEFAULTS: Record<string, { start: string; goal: string }> = {
   blunderwall: { start: "", goal: "" },
   doubledabble: { start: "", goal: "" },
   wrdl: { start: "", goal: "" },
+  reconstruction: { start: "", goal: "" },
   threepeat: { start: "", goal: "" },
   fifteenpuzzle: { start: "", goal: "" },
   sumplete: { start: "", goal: "" },
@@ -222,6 +223,7 @@ const MODE_URL_MAP: Record<string, string> = {
   splitle: "/wordle/Splitle",
   worwordle: "/wordle/Wor_Wordle",
   wrdl: "/wordle/Wrdl",
+  reconstruction: "/wordle/Reconstruction",
   marbless: "/other_word_puzzles/Marbless",
   mastermind: "/other_word_puzzles/Mastermind",
   spellingbee: "/other_word_puzzles/Spelling_Bee",
@@ -1975,7 +1977,7 @@ function Index() {
         <div ref={topPillRef} className="mb-3 grid grid-cols-2 gap-2 rounded-md border border-brown/50 bg-brown p-2">
           {SECTIONS.map((s) => {
             const isMath = mode === "dodeku" || mode === "sheetdoku" || mode === "blunderwall" || mode === "fifteenpuzzle" || mode === "sumplete" || mode === "rotato";
-            const inSearch = mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl";
+            const inSearch = mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "reconstruction";
             const inOther = mode === "spellingbee" || mode === "mastermind" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "threepeat";
             const inLogic = mode === "sudoku" || mode === "sudokuvariation" || mode === "starbattle" || mode === "tango";
             const inMathLogic = isMath || inLogic;
@@ -2006,7 +2008,7 @@ function Index() {
         </div>
 
 
-        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl") && (
+        {(mode === "wordle" || mode === "fibble" || mode === "flippingletters" || mode === "worwordle" || mode === "jeffgoldblum" || mode === "shuntle" || mode === "splitle" || mode === "doubledabble" || mode === "wrdl" || mode === "reconstruction") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
             {([
               { id: "doubledabble", label: "Double Dabble" },
@@ -2014,6 +2016,7 @@ function Index() {
               { id: "jeffgoldblum", label: "Jeff Goldblumle" },
               { id: "fibble", label: "Lies" },
               { id: "wordle", label: "(Original)" },
+              { id: "reconstruction", label: "Reconstruction" },
               { id: "shuntle", label: "Shuntle" },
               { id: "splitle", label: "Splitle" },
               { id: "worwordle", label: "Worwordle" },
