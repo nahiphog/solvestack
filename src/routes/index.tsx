@@ -305,8 +305,12 @@ function Index() {
   const [reconError, setReconError] = useState<string | null>(null);
   const [reconSolving, setReconSolving] = useState(false);
   const [pageRecon, setPageRecon] = useState(0);
+  const [selectedRecon, setSelectedRecon] = useState<Set<number>>(new Set());
+  const [reconView, setReconView] = useState<"line" | "grid">("line");
+  useEffect(() => { setSelectedRecon(new Set()); }, [reconResults]);
   const setReconRowCount = (n: number) => {
     setReconRows(n);
+    setReconWord("");
     setReconPatterns(Array.from({ length: n - 1 }, () => Array(5).fill("GREY") as WordleColor[]));
     setReconResults(null);
     setReconError(null);
