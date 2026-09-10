@@ -2531,7 +2531,7 @@ function Index() {
         {mode === "reconstruction" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-2">
             <p className="flex flex-wrap gap-3">
-              <a href="https://reversle.net/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Reversle</a>
+              
               <a href="https://crosswordle.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">CrossWordle</a>
             </p>
             <p>Fill in the grid with valid 5-letter English words. Like a regular Wordle game, each row's feedback narrows down the list of words available for the following rows.</p>
