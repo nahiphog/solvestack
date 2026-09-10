@@ -305,8 +305,12 @@ function Index() {
   const [reconError, setReconError] = useState<string | null>(null);
   const [reconSolving, setReconSolving] = useState(false);
   const [pageRecon, setPageRecon] = useState(0);
+  const [selectedRecon, setSelectedRecon] = useState<Set<number>>(new Set());
+  const [reconView, setReconView] = useState<"line" | "grid">("line");
+  useEffect(() => { setSelectedRecon(new Set()); }, [reconResults]);
   const setReconRowCount = (n: number) => {
     setReconRows(n);
+    setReconWord("");
     setReconPatterns(Array.from({ length: n - 1 }, () => Array(5).fill("GREY") as WordleColor[]));
     setReconResults(null);
     setReconError(null);
@@ -2527,7 +2531,7 @@ function Index() {
         {mode === "reconstruction" && (
           <div className="mb-4 text-sm text-muted-foreground space-y-2">
             <p className="flex flex-wrap gap-3">
-              <a href="https://reversle.net/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Reversle</a>
+              
               <a href="https://crosswordle.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">CrossWordle</a>
             </p>
             <p>Fill in the grid with valid 5-letter English words. Like a regular Wordle game, each row's feedback narrows down the list of words available for the following rows.</p>
@@ -2538,7 +2542,7 @@ function Index() {
                 onChange={(e) => setReconRowCount(Number(e.target.value))}
                 className="rounded border border-border bg-background px-2 py-1 text-sm text-foreground"
               >
-                {[3, 4, 5, 6, 7, 8].map((n) => (
+                {[2, 3, 4, 5, 6, 7].map((n) => (
                   <option key={n} value={n}>{n}</option>
                 ))}
               </select>
@@ -6718,25 +6722,110 @@ function Index() {
         {reconResults && (() => {
           const sorted = sortMode === "frequency"
             ? [...reconResults]
-                .map((s, i) => ({ s, i, min: Math.min(...s.map((w) => getWordFrequency(w))) }))
-                .sort((a, b) => b.min - a.min || a.i - b.i)
+                .map((s, i) => ({ s, i }))
+                .sort((a, b) => {
+                  const len = Math.max(a.s.length, b.s.length);
+                  for (let k = 0; k < len; k++) {
+                    const fa = a.s[k] ? getWordFrequency(a.s[k]) : -1;
+                    const fb = b.s[k] ? getWordFrequency(b.s[k]) : -1;
+                    if (fa !== fb) return fb - fa;
+                  }
+                  return a.i - b.i;
+                })
                 .map((x) => x.s)
             : [...reconResults].sort((a, b) => a.join(" ").localeCompare(b.join(" ")));
           return (
             <section className="mt-10">
-              <h2 className="mb-4 text-lg font-semibold">
-                {reconResults.length} {reconResults.length === 1 ? "sequence" : "sequences"}
-              </h2>
-              {reconResults.length > 0 && <SortToggle value={sortMode} onChange={setSortMode} />}
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">
+                  {reconResults.length} {reconResults.length === 1 ? "sequence" : "sequences"}
+                </h2>
+                {reconResults.length > 0 && (
+                  <button
+                    onClick={() => {
+                      const indices = selectedRecon.size > 0
+                        ? [...selectedRecon].sort((a, b) => a - b)
+                        : sorted.map((_, i) => i);
+                      const items = indices
+                        .map((i) => `${i + 1}. ${sorted[i].join(" > ")}`)
+                        .join("\n");
+                      copyText(`${items}\n\nSolved via ${window.location.href}.`);
+                    }}
+                    className="flex shrink-0 items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                    aria-label={selectedRecon.size > 0 ? "Copy selected sequences" : "Copy all sequences"}
+                  >
+                    {copied ? (<><Check size={14} /> Copied</>) : (<><Copy size={14} /> {selectedRecon.size > 0 ? "Copy" : "Copy all"}</>)}
+                  </button>
+                )}
+              </div>
+              {reconResults.length > 0 && (
+                <div className="mb-3 flex flex-wrap items-center gap-3">
+                  <SortToggle value={sortMode} onChange={setSortMode} />
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">Display:</span>
+                    <select
+                      value={reconView}
+                      onChange={(e) => setReconView(e.target.value as "line" | "grid")}
+                      className="rounded border border-border bg-background px-2 py-1 text-sm text-foreground"
+                    >
+                      <option value="line">One-line sequence</option>
+                      <option value="grid">Grid</option>
+                    </select>
+                  </div>
+                </div>
+              )}
               <ol className="space-y-3">
-                {sorted.slice(pageRecon * 60, pageRecon * 60 + 60).map((sol, idx) => (
-                  <li key={pageRecon * 60 + idx} className="rounded-lg border border-border bg-card p-3 text-card-foreground">
-                    <div className="mb-1 text-xs text-muted-foreground">#{pageRecon * 60 + idx + 1}</div>
-                    <div className="font-mono text-sm font-semibold tracking-widest">
-                      {sol.join(" → ")}
-                    </div>
-                  </li>
-                ))}
+                {sorted.slice(pageRecon * 60, pageRecon * 60 + 60).map((sol, idx) => {
+                  const i = pageRecon * 60 + idx;
+                  const isSelected = selectedRecon.has(i);
+                  return (
+                    <li
+                      key={i}
+                      onClick={() =>
+                        setSelectedRecon((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(i)) next.delete(i); else next.add(i);
+                          return next;
+                        })
+                      }
+                      className={`cursor-pointer rounded-lg border-2 bg-card p-3 text-card-foreground transition ${isSelected ? "border-yellow-500" : "border-border"}`}
+                    >
+                      <div className="mb-1 text-xs text-muted-foreground">#{i + 1}</div>
+                      {reconView === "line" ? (
+                        <div className="font-mono text-sm font-semibold tracking-widest">
+                          {sol.join(" → ")}
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          {sol.map((word, ri) => {
+                            const pattern = reconPatterns[ri] ?? (Array(5).fill("GREEN") as WordleColor[]);
+                            return (
+                              <div key={ri} className="flex gap-1">
+                                {word.split("").map((ch, ti) => {
+                                  const color = pattern[ti] ?? "GREEN";
+                                  return (
+                                    <span
+                                      key={ti}
+                                      className={`flex h-9 w-9 items-center justify-center rounded font-mono text-base font-bold uppercase ${
+                                        color === "GREEN"
+                                          ? "bg-green-600 text-white"
+                                          : color === "YELLOW"
+                                            ? "bg-yellow-500 text-white"
+                                            : "bg-muted text-foreground"
+                                      }`}
+                                    >
+                                      {ch}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
               </ol>
               <Paginator page={pageRecon} setPage={setPageRecon} total={sorted.length} perPage={60} />
             </section>
