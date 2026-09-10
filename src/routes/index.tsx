@@ -2542,7 +2542,7 @@ function Index() {
                 onChange={(e) => setReconRowCount(Number(e.target.value))}
                 className="rounded border border-border bg-background px-2 py-1 text-sm text-foreground"
               >
-                {[3, 4, 5, 6, 7, 8].map((n) => (
+                {[2, 3, 4, 5, 6, 7].map((n) => (
                   <option key={n} value={n}>{n}</option>
                 ))}
               </select>
