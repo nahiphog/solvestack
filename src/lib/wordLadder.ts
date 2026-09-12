@@ -1897,29 +1897,29 @@ export async function reconstructionSolve(
     const solutions: string[][] = [];
     const path: string[] = [];
     const backtrack = (rowIdx: number, pool: string[]): void => {
-    if (solutions.length >= maxSolutions) return;
-    if (rowIdx === patterns.length) {
-      solutions.push([...path, t]);
-      return;
-    }
-    const pat = patterns[rowIdx];
-    const candidates = rowIdx === 0 ? firstRowCandidates : pool;
-    for (const w of candidates) {
       if (solutions.length >= maxSolutions) return;
-      const out = wordleOutput(w, t);
-      let matches = true;
-      for (let i = 0; i < out.length; i++) {
-        if (out[i] !== pat[i]) {
-          matches = false;
-          break;
-        }
+      if (rowIdx === patterns.length) {
+        solutions.push([...path, t]);
+        return;
       }
-      if (!matches) continue;
-      const nextPool = pool.filter((cand) => reconConsistent(cand, w, pat));
-      path.push(w);
-      backtrack(rowIdx + 1, nextPool);
-      path.pop();
-    }
+      const pat = patterns[rowIdx];
+      const candidates = rowIdx === 0 ? firstRowCandidates : pool;
+      for (const w of candidates) {
+        if (solutions.length >= maxSolutions) return;
+        const out = wordleOutput(w, t);
+        let matches = true;
+        for (let i = 0; i < out.length; i++) {
+          if (out[i] !== pat[i]) {
+            matches = false;
+            break;
+          }
+        }
+        if (!matches) continue;
+        const nextPool = pool.filter((cand) => reconConsistent(cand, w, pat));
+        path.push(w);
+        backtrack(rowIdx + 1, nextPool);
+        path.pop();
+      }
     };
     backtrack(0, words);
     return solutions;
