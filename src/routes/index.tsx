@@ -340,6 +340,27 @@ function Index() {
       setReconError("Enter a 5-letter word in the last (green) row.");
       return;
     }
+    const rowsForValidation = [
+      ...reconPatterns,
+      Array(5).fill("GREEN") as WordleColor[],
+    ];
+    for (let row = 1; row < rowsForValidation.length; row++) {
+      const previous = rowsForValidation[row - 1];
+      const current = rowsForValidation[row];
+      const previousRevealed = previous.filter((tile) => tile !== "GREY").length;
+      const currentRevealed = current.filter((tile) => tile !== "GREY").length;
+      if (currentRevealed < previousRevealed) {
+        setReconError(`Row ${row + 1} must have at least as many green and yellow tiles as row ${row}.`);
+        return;
+      }
+      const lostGreenColumn = previous.findIndex(
+        (tile, column) => tile === "GREEN" && current[column] !== "GREEN",
+      );
+      if (lostGreenColumn !== -1) {
+        setReconError(`Row ${row + 1}, column ${lostGreenColumn + 1} must stay green.`);
+        return;
+      }
+    }
     setReconSolving(true);
     try {
       const { reconstructionSolve, isValid5LetterWord, ensureFrequenciesLoaded } = await import("@/lib/wordLadder");
@@ -936,6 +957,10 @@ function Index() {
     setTgSolutions(null);
     setTgError(null);
     setPageTg(0);
+    setReconResults(null);
+    setReconError(null);
+    setSelectedRecon(new Set());
+    setPageRecon(0);
 
     if (m === "fibble") {
       setWordleGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
@@ -6719,7 +6744,7 @@ function Index() {
 
 
 
-        {reconResults && (() => {
+        {mode === "reconstruction" && reconResults && (() => {
           const sorted = sortMode === "frequency"
             ? [...reconResults]
                 .map((s, i) => ({ s, i }))

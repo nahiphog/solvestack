@@ -5,6 +5,7 @@ import graphSplice from "@/data/wordSplice.json";
 import graphWeaverX from "@/data/wordWeaverX.json";
 import graphPivots from "@/data/wordPivots.json";
 import graphCraftWords from "@/data/wordCraftWords.json";
+import flippableCommonWords from "@/data/flippableCommonWords.json";
 
 
 
@@ -1890,16 +1891,20 @@ export async function reconstructionSolve(
 ): Promise<string[][]> {
   const words = await getFiveLetterWords();
   const t = target.toUpperCase();
-  const solutions: string[][] = [];
-  const path: string[] = [];
-  const backtrack = (rowIdx: number, pool: string[]): void => {
+  const preferred = new Set((flippableCommonWords as string[]).map((word) => word.toUpperCase()));
+
+  const search = (firstRowCandidates: string[]): string[][] => {
+    const solutions: string[][] = [];
+    const path: string[] = [];
+    const backtrack = (rowIdx: number, pool: string[]): void => {
     if (solutions.length >= maxSolutions) return;
     if (rowIdx === patterns.length) {
       solutions.push([...path, t]);
       return;
     }
     const pat = patterns[rowIdx];
-    for (const w of pool) {
+    const candidates = rowIdx === 0 ? firstRowCandidates : pool;
+    for (const w of candidates) {
       if (solutions.length >= maxSolutions) return;
       const out = wordleOutput(w, t);
       let matches = true;
@@ -1915,7 +1920,12 @@ export async function reconstructionSolve(
       backtrack(rowIdx + 1, nextPool);
       path.pop();
     }
+    };
+    backtrack(0, words);
+    return solutions;
   };
-  backtrack(0, words);
-  return solutions;
+
+  const preferredSolutions = search(words.filter((word) => preferred.has(word)));
+  if (preferredSolutions.length > 0) return preferredSolutions;
+  return search(words);
 }
