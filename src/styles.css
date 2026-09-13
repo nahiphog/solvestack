@@ -153,8 +153,4 @@
   [role="button"]:not(.rounded-full) {
     border-radius: 0;
   }
-
-  button:not(:disabled):active {
-    transform: translate(2px, 2px);
-  }
 }
