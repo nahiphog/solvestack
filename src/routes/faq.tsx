@@ -171,17 +171,21 @@ function FaqPage() {
                     vii.{" "}
                     <a className="text-primary underline" href="https://johalloran.dev/lawndle/" target="_blank" rel="noopener noreferrer">Lawndle</a>
                   </li>
+                  <li>
+                    viii.{" "}
+                    <a className="text-primary underline" href="https://www.amountle.dev/" target="_blank" rel="noopener noreferrer">Amountle</a>
+                  </li>
                 </ol>
               </div>
               <div>
                 <p className="font-medium">B-tier:</p>
                 <ol className="mt-1 list-none space-y-1">
                   <li>
-                    viii.{" "}
+                    ix.{" "}
                     <a className="text-primary underline" href="https://apps.apple.com/app/id1489118195" target="_blank" rel="noopener noreferrer">Good Sudoku</a>
                   </li>
                   <li>
-                    ix.{" "}
+                    x.{" "}
                     <a className="text-primary underline" href="https://www.dailykillersudoku.com/" target="_blank" rel="noopener noreferrer">Daily Killer Sudoku</a>
                   </li>
                 </ol>
