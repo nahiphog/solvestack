@@ -2125,18 +2125,9 @@ function Index() {
         )}
 
 
-        {(mode === "spellingbee" || mode === "marbless" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind" || mode === "threepeat") && (
+        {(mode === "spellingbee" || mode === "wordiply" || mode === "wordpeaks" || mode === "mastermind" || mode === "threepeat") && (
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-md border bg-muted p-1">
-            <button
-              onClick={() => switchMode("marbless")}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                mode === "marbless"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Marbless
-            </button>
+            {/* Marbless temporarily hidden */}
             <button
               onClick={() => switchMode("mastermind")}
               className={`rounded px-3 py-1.5 text-xs font-medium transition ${

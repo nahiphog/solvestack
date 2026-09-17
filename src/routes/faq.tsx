@@ -171,6 +171,10 @@ function FaqPage() {
                     vii.{" "}
                     <a className="text-primary underline" href="https://johalloran.dev/lawndle/" target="_blank" rel="noopener noreferrer">Lawndle</a>
                   </li>
+                  <li>
+                    viii.{" "}
+                    <a className="text-primary underline" href="https://www.amountle.dev/" target="_blank" rel="noopener noreferrer">Amountle</a>
+                  </li>
                 </ol>
               </div>
               <div>
