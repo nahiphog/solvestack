@@ -785,12 +785,24 @@ export function findAllShortestPaths(
   start: string,
   goal: string,
   mode: Mode,
+  excluded: string[] = [],
 ): string[][] {
-  const G = GRAPHS[String(mode)];
+  const baseG = GRAPHS[String(mode)];
   const s = start.toUpperCase();
   const g = goal.toUpperCase();
   if (!isValidWord(s, mode) || !isValidWord(g, mode)) return [];
   if (s === g) return [[s]];
+
+  const banned = new Set(
+    excluded.map((w) => w.trim().toUpperCase()).filter((w) => w && w !== s && w !== g),
+  );
+  const G: Record<string, string[]> = banned.size
+    ? Object.fromEntries(
+        Object.entries(baseG)
+          .filter(([k]) => !banned.has(k))
+          .map(([k, v]) => [k, (v as string[]).filter((n) => !banned.has(n))]),
+      )
+    : baseG;
 
   const dist = new Map<string, number>();
   const parents = new Map<string, string[]>();

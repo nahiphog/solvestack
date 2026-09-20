@@ -259,6 +259,7 @@ function Index() {
   const [mode, setMode] = useState<Mode>("wordle");
   const [start, setStart] = useState("TOWER");
   const [goal, setGoal] = useState("");
+  const [excludeWords, setExcludeWords] = useState("");
   const [paths, setPaths] = useState<string[][] | null>(null);
   const [wordiplyResults, setWordiplyResults] = useState<[number, string[]][] | null>(null);
   const [wordleGuesses, setWordleGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
