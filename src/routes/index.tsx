@@ -259,6 +259,7 @@ function Index() {
   const [mode, setMode] = useState<Mode>("wordle");
   const [start, setStart] = useState("TOWER");
   const [goal, setGoal] = useState("");
+  const [excludeWords, setExcludeWords] = useState("");
   const [paths, setPaths] = useState<string[][] | null>(null);
   const [wordiplyResults, setWordiplyResults] = useState<[number, string[]][] | null>(null);
   const [wordleGuesses, setWordleGuesses] = useState<{ word: string; pattern: WordleColor[] }[]>([
@@ -1997,8 +1998,11 @@ function Index() {
     if (!isValidWord(g, mode)) return setError(`"${g}" is not in the dictionary.`);
     setSolving(true);
     setTimeout(() => {
-      const result = findAllShortestPaths(s, g, mode);
-      if (result.length === 0) setError(mode === "pivots" ? "No path exists for this starting position." : "No path exists between these words.");
+      const excluded = mode === "pivots"
+        ? []
+        : excludeWords.toUpperCase().split(",").map((w) => w.replace(/[^A-Z]/g, "")).filter(Boolean);
+      const result = findAllShortestPaths(s, g, mode, excluded);
+      if (result.length === 0) setError(mode === "pivots" ? "No path exists for this starting position." : excluded.length ? "No path exists between these words without the excluded words." : "No path exists between these words.");
       else setPaths(result);
       setSolving(false);
     }, 0);
@@ -6202,12 +6206,24 @@ function Index() {
                 />
               </div>
             </div>
+            {mode !== "pivots" && (
+              <div>
+                <label className="mb-1 block text-sm font-medium">Exclude words (optional, comma-separated)</label>
+                <Input
+                  value={excludeWords}
+                  onChange={(e) => setExcludeWords(e.target.value.toUpperCase().replace(/[^A-Z, ]/g, ""))}
+                  placeholder="OUDS, ARSE"
+                  className="font-mono uppercase tracking-widest max-w-md"
+                />
+              </div>
+            )}
             <div className="flex flex-nowrap gap-2">
               <Button onClick={randomize} variant="outline" size="sm">Randomize</Button>
               <Button
                 onClick={() => {
                   setStart("");
                   if (mode !== "pivots") setGoal("");
+                  setExcludeWords("");
                   setPaths(null);
                   setError(null);
                 }}
