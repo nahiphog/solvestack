@@ -1998,8 +1998,11 @@ function Index() {
     if (!isValidWord(g, mode)) return setError(`"${g}" is not in the dictionary.`);
     setSolving(true);
     setTimeout(() => {
-      const result = findAllShortestPaths(s, g, mode);
-      if (result.length === 0) setError(mode === "pivots" ? "No path exists for this starting position." : "No path exists between these words.");
+      const excluded = mode === "pivots"
+        ? []
+        : excludeWords.toUpperCase().split(",").map((w) => w.replace(/[^A-Z]/g, "")).filter(Boolean);
+      const result = findAllShortestPaths(s, g, mode, excluded);
+      if (result.length === 0) setError(mode === "pivots" ? "No path exists for this starting position." : excluded.length ? "No path exists between these words without the excluded words." : "No path exists between these words.");
       else setPaths(result);
       setSolving(false);
     }, 0);
