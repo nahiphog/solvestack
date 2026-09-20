@@ -6206,12 +6206,24 @@ function Index() {
                 />
               </div>
             </div>
+            {mode !== "pivots" && (
+              <div>
+                <label className="mb-1 block text-sm font-medium">Exclude words (optional, comma-separated)</label>
+                <Input
+                  value={excludeWords}
+                  onChange={(e) => setExcludeWords(e.target.value.toUpperCase().replace(/[^A-Z, ]/g, ""))}
+                  placeholder="OUDS, ARSE"
+                  className="font-mono uppercase tracking-widest max-w-md"
+                />
+              </div>
+            )}
             <div className="flex flex-nowrap gap-2">
               <Button onClick={randomize} variant="outline" size="sm">Randomize</Button>
               <Button
                 onClick={() => {
                   setStart("");
                   if (mode !== "pivots") setGoal("");
+                  setExcludeWords("");
                   setPaths(null);
                   setError(null);
                 }}
