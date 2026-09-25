@@ -7,6 +7,7 @@ import wordleStartingWords from "@/data/wordleStartingWords.json";
 import flippableCommonWords from "@/data/flippableCommonWords.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Copy, Check, Sun, Moon, ChevronDown, ChevronUp } from "lucide-react";
 import { SudokuCopyBoard, copyBoardsAsImage } from "@/components/sudoku-copy-controls";
 import { copyTangoSolutionsAsImage } from "@/lib/tango-image";
@@ -501,17 +502,19 @@ function Index() {
     return set;
   };
 
-  const applyFlStartingWords = (count: 0 | 1) => {
+  const applyFlStartingWords = async (count: 0 | 1) => {
     setFlStartingWords(count);
     if (count === 0) {
       setFlGuesses([{ word: "", pattern: ["GREY", "GREY", "GREY", "GREY", "GREY"] }]);
     } else {
       const allowed = flExpandedSet();
-      const eligible = FL_POTENTIAL_WORDS.filter((w) => {
+      const allowedByLetters = FL_POTENTIAL_WORDS.filter((w) => {
         const upper = w.toUpperCase();
         for (const ch of upper) if (!allowed.has(ch)) return false;
         return true;
       });
+      const validity = await Promise.all(allowedByLetters.map((word) => isValid5LetterWord(word)));
+      const eligible = allowedByLetters.filter((_, index) => validity[index]);
       const pool = [...eligible];
       for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -3460,6 +3463,26 @@ function Index() {
                       Part 2: Enter Wordle-style guesses. Feedback colors apply to the keys used.
                       {ddLoadingWords && <span className="ml-2 text-muted-foreground">Loading word list…</span>}
                     </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Optional:</span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setDdGuesses((prev) => [
+                            ...prev.filter((guess) => !isEmptyGuessWord(guess.word)),
+                            { word: "COAST", pattern: Array(5).fill("GREY") as WordleColor[] },
+                            { word: "BRINE", pattern: Array(5).fill("GREY") as WordleColor[] },
+                          ]);
+                          setDdResults(null);
+                          setDdPerRowResults(null);
+                          setDdSolveError(null);
+                        }}
+                      >
+                        Add 2 strategic starting words
+                      </Button>
+                    </div>
                     {ddGuesses.map((g, gi) => (
                       <div key={gi} className="flex flex-wrap items-center gap-3">
                         <div className="flex gap-1.5">
@@ -6209,11 +6232,12 @@ function Index() {
             {mode !== "pivots" && (
               <div>
                 <label className="mb-1 block text-sm font-medium">Exclude words (optional, comma-separated)</label>
-                <Input
+                <Textarea
                   value={excludeWords}
                   onChange={(e) => setExcludeWords(e.target.value.toUpperCase().replace(/[^A-Z, ]/g, ""))}
                   placeholder="OUDS, ARSE"
-                  className="font-mono uppercase tracking-widest max-w-md"
+                  rows={1}
+                  className="field-sizing-content min-h-9 max-h-40 max-w-md resize-y overflow-y-auto font-mono uppercase tracking-widest"
                 />
               </div>
             )}
