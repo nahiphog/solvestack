@@ -203,6 +203,7 @@ export interface SudokuVariations {
   knight?: boolean;
   diagonal?: boolean;
   nonConsecutive?: boolean;
+  antiQueen?: boolean;
   extraRegions?: number[][] | number[][][]; // 0 = no extra region; non-zero values group cells that must each be unique. May be a single grid or an array of grids.
 }
 
@@ -217,7 +218,7 @@ export function sudokuSolve(
   const rowUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const colUsed: Set<number>[] = Array.from({ length: N }, () => new Set());
   const regUsed: Map<number, Set<number>> = new Map();
-  const { king, knight, diagonal, nonConsecutive, extraRegions } = variations;
+  const { king, knight, diagonal, nonConsecutive, antiQueen, extraRegions } = variations;
   // Normalize extraRegions into an array of grids
   const extraLayers: number[][][] = (() => {
     if (!extraRegions) return [];
@@ -259,6 +260,13 @@ export function sudokuSolve(
         if (!inBounds(rr, cc)) continue;
         const adj = b[rr][cc];
         if (adj !== 0 && Math.abs(adj - v) === 1) return false;
+      }
+    }
+    if (antiQueen && v === 9) {
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const rr = r + dr, cc = c + dc;
+        if (inBounds(rr, cc) && b[rr][cc] === 9) return false;
       }
     }
     return true;

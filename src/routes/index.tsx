@@ -749,6 +749,7 @@ function Index() {
   const [sudokuVarWindoku, setSudokuVarWindoku] = useState(false);
   const [sudokuVarIrregular, setSudokuVarIrregular] = useState(false);
   const [sudokuVarDisjoint, setSudokuVarDisjoint] = useState(false);
+  const [sudokuVarAntiQueen, setSudokuVarAntiQueen] = useState(false);
   const [sudokuVarRegions, setSudokuVarRegions] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
   const [sudokuVarPaintColor, setSudokuVarPaintColor] = useState<number>(1);
   const STAR_BATTLE_DEFAULT_9: number[][] = [
@@ -1133,6 +1134,7 @@ function Index() {
         knight: sudokuVarKnight,
         diagonal: sudokuVarDiagonal,
         nonConsecutive: sudokuVarNonConsec,
+        antiQueen: sudokuVarAntiQueen,
         extraRegions: (() => {
           const layers: number[][][] = [];
           if (sudokuVarWindoku) layers.push(WINDOKU_REGIONS);
@@ -3463,26 +3465,6 @@ function Index() {
                       Part 2: Enter Wordle-style guesses. Feedback colors apply to the keys used.
                       {ddLoadingWords && <span className="ml-2 text-muted-foreground">Loading word list…</span>}
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">Optional:</span>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setDdGuesses((prev) => [
-                            ...prev.filter((guess) => !isEmptyGuessWord(guess.word)),
-                            { word: "COAST", pattern: Array(5).fill("GREY") as WordleColor[] },
-                            { word: "BRINE", pattern: Array(5).fill("GREY") as WordleColor[] },
-                          ]);
-                          setDdResults(null);
-                          setDdPerRowResults(null);
-                          setDdSolveError(null);
-                        }}
-                      >
-                        Add 2 strategic starting words
-                      </Button>
-                    </div>
                     {ddGuesses.map((g, gi) => (
                       <div key={gi} className="flex flex-wrap items-center gap-3">
                         <div className="flex gap-1.5">
@@ -5172,6 +5154,7 @@ function Index() {
                       { state: sudokuVarIrregular, set: setSudokuVarIrregular, label: "Irregular", desc: "Each colored region contains each digit from 1-9 exactly once." },
                       { state: sudokuVarNonConsec, set: setSudokuVarNonConsec, label: "Non-consecutive", desc: "Consecutive digits may not be orthogonally adjacent to each other.", beta: true },
                       { state: sudokuVarWindoku, set: setSudokuVarWindoku, label: "Windoku", desc: "In addition to normal Sudoku rules. The digits 1 through 9 must each appear exactly once in each of the four additional boxes." },
+                      { state: sudokuVarAntiQueen, set: setSudokuVarAntiQueen, label: "Anti-queen", desc: "9s cannot see each other along a diagonal." },
                     ].map((opt) => (
                       <label key={opt.label} className="flex items-start gap-2 cursor-pointer">
                         <input
