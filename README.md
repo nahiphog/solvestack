@@ -87,9 +87,15 @@ Use `npm run <script>` or `bun run <script>`:
 | `build:dev` | Build using development mode |
 | `preview` | Preview a build locally |
 | `lint` | Run ESLint |
+| `test` | Run the automated solver tests once |
+| `test:watch` | Rerun solver tests as files change |
 | `format` | Format the repository with Prettier |
 
-There is currently no automated test suite or `test` script.
+### Automated tests
+
+Run `npm test` (or `bun run test`) to execute the Vitest suite. Tests run in Node.js with a separate `vitest.config.ts`; they do not start the app server or require credentials.
+
+The initial suite covers the word ladder solver: all shortest paths, cycles and disconnected words, invalid inputs, case normalization, excluded words, longer alternative routes, and isolation between repeated solves. Integration tests also exercise all seven ladder modes against the bundled dictionaries. Add further solver tests as `src/**/*.test.ts` files.
 
 ## Project structure
 
